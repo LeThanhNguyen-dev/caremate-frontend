@@ -1,6 +1,7 @@
-/* Home Page Styles */
+/* Home Page - MaternalCare Design */
 .home-container {
-    min-height: calc(100vh - 200px);
+    min-height: calc(100vh - 80px);
+    background: #ffffff;
 }
 
 .hero-section {
@@ -17,7 +18,8 @@
     .hero-section {
         grid-template-columns: 1fr;
         text-align: center;
-        gap: 2rem;
+        gap: 2.5rem;
+        padding: 3rem 2rem;
     }
 }
 
@@ -38,10 +40,11 @@
 }
 
 .hero-title {
-    font-size: 3rem;
-    color: #2d3748;
+    font-size: 2.75rem;
+    color: #1a1a1a;
     line-height: 1.2;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
 }
 
 @media (max-width: 600px) {
@@ -51,51 +54,53 @@
 }
 
 .highlight {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #3b82f6;
 }
 
 .hero-subtitle {
-    font-size: 1.2rem;
-    color: #718096;
-    margin-bottom: 2rem;
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 2.5rem;
     line-height: 1.6;
+    font-weight: 400;
 }
 
 .welcome-card {
     background: white;
-    padding: 2rem;
+    padding: 2.5rem;
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     display: inline-block;
     text-align: center;
+    border: 1px solid #e5e7eb;
 }
 
 .welcome-icon {
     font-size: 3rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .welcome-card h2 {
-    color: #2d3748;
-    margin-bottom: 0.5rem;
+    color: #1a1a1a;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
 }
 
 .user-role-badge {
     display: inline-block;
-    padding: 0.4rem 1rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 0.5rem 1.25rem;
+    background: #3b82f6;
     color: white;
     border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 600;
 }
 
 .cta-buttons {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 @media (max-width: 900px) {
@@ -105,32 +110,33 @@
 }
 
 .cta-btn {
-    padding: 1rem 2rem;
-    border-radius: 12px;
+    padding: 0.875rem 2rem;
+    border-radius: 8px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
     text-decoration: none;
     transition: all 0.2s ease;
+    display: inline-block;
 }
 
 .cta-btn.primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #3b82f6;
     color: white;
 }
 
 .cta-btn.primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    background: #2563eb;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .cta-btn.secondary {
     background: white;
-    color: #667eea;
-    border: 2px solid #667eea;
+    color: #3b82f6;
+    border: 1px solid #3b82f6;
 }
 
 .cta-btn.secondary:hover {
-    background: #f0f4ff;
+    background: #f0f9ff;
 }
 
 /* Hero Illustration */
@@ -140,6 +146,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 24px;
 }
 
 @media (max-width: 900px) {
@@ -152,10 +160,11 @@
     position: absolute;
     background: white;
     padding: 1.5rem;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     text-align: center;
     animation: float 3s ease-in-out infinite;
+    border: 1px solid #e5e7eb;
 }
 
 .floating-card span {
@@ -166,8 +175,8 @@
 
 .floating-card p {
     font-weight: 600;
-    color: #4a5568;
-    font-size: 0.9rem;
+    color: #374151;
+    font-size: 0.875rem;
     white-space: nowrap;
 }
 
@@ -203,15 +212,17 @@
 
 /* Features Section */
 .features-section {
-    background: white;
+    background: #f9fafb;
     padding: 4rem 2rem;
+    border-top: 1px solid #e5e7eb;
 }
 
 .section-title {
     text-align: center;
     font-size: 2rem;
-    color: #2d3748;
+    color: #1a1a1a;
     margin-bottom: 3rem;
+    font-weight: 700;
 }
 
 .features-grid {
@@ -223,18 +234,18 @@
 }
 
 .feature-card {
-    background: linear-gradient(180deg, #f8f9ff 0%, #fff 100%);
+    background: white;
     padding: 2rem;
-    border-radius: 16px;
+    border-radius: 12px;
     text-align: center;
     transition: all 0.3s ease;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #e5e7eb;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-    border-color: #667eea;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-color: #3b82f6;
 }
 
 .feature-icon {
@@ -243,13 +254,29 @@
 }
 
 .feature-card h3 {
-    color: #2d3748;
+    color: #1a1a1a;
     margin-bottom: 0.75rem;
-    font-size: 1.2rem;
+    font-size: 1.125rem;
+    font-weight: 700;
 }
 
 .feature-card p {
-    color: #718096;
+    color: #6b7280;
     line-height: 1.5;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    .features-section {
+        padding: 3rem 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .feature-card {
+        padding: 1.5rem;
+    }
 }

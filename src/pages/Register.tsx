@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import './Auth.css';
+import './Register.css';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -92,173 +92,197 @@ const Register = () => {
     return (
         <div className="auth-container">
             <div className="auth-card register-card">
-                <div className="auth-header">
-                    <div className="auth-icon">💜</div>
-                    <h1>Đăng ký</h1>
-                    <p>Tạo tài khoản CareMate của bạn</p>
-                </div>
-
-                <div className="role-selector">
-                    <button
-                        type="button"
-                        className={`role-tab ${formData.role === 'customer' ? 'active' : ''}`}
-                        onClick={() => setFormData((prev) => ({ ...prev, role: 'customer' }))}
-                        disabled={isLoading}
-                    >
-                        Khách hàng
-                    </button>
-                    <button
-                        type="button"
-                        className={`role-tab ${formData.role === 'nurse' ? 'active' : ''}`}
-                        onClick={() => setFormData((prev) => ({ ...prev, role: 'nurse' }))}
-                        disabled={isLoading}
-                    >
-                        Điều dưỡng
-                    </button>
-                </div>
-
-                <form onSubmit={handleSubmit} className="auth-form">
-                    {error && (
-                        <div className="error-message">
-                            <span className="error-icon">⚠️</span>
-                            {error}
+                {/* Left Side - Introduction */}
+                <div className="auth-intro">
+                    <div className="intro-content">
+                        <h2>Tham gia cùng CareMate</h2>
+                        <p>Tạo tài khoản để trải nghiệm dịch vụ chăm sóc sức khỏe chuyên nghiệp và tiện lợi</p>
+                        <div className="intro-features">
+                            <div className="intro-feature">
+                                <div className="intro-feature-icon">✓</div>
+                                <span>Xác thực chuyên nghiệp</span>
+                            </div>
+                            <div className="intro-feature">
+                                <div className="intro-feature-icon">✓</div>
+                                <span>Hỗ trợ 24/7</span>
+                            </div>
+                            <div className="intro-feature">
+                                <div className="intro-feature-icon">✓</div>
+                                <span>Dữ liệu được bảo mật</span>
+                            </div>
                         </div>
-                    )}
+                    </div>
+                </div>
 
-                    <div className="form-group">
-                        <label htmlFor="fullName">Họ và tên *</label>
-                        <input
-                            type="text"
-                            id="fullName"
-                            name="fullName"
-                            value={formData.fullName}
-                            onChange={handleChange}
-                            placeholder="Nhập họ và tên"
-                            required
-                            disabled={isLoading}
-                        />
+                {/* Right Side - Form */}
+                <div className="auth-form-container">
+                    <div className="auth-header">
+                        <h1>Đăng ký</h1>
+                        <p>Tạo tài khoản mới</p>
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="email">Email *</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder="Nhập email của bạn"
-                            required
+                    <div className="role-selector">
+                        <button
+                            type="button"
+                            className={`role-tab ${formData.role === 'customer' ? 'active' : ''}`}
+                            onClick={() => setFormData((prev) => ({ ...prev, role: 'customer' }))}
                             disabled={isLoading}
-                        />
+                        >
+                            Khách hàng
+                        </button>
+                        <button
+                            type="button"
+                            className={`role-tab ${formData.role === 'nurse' ? 'active' : ''}`}
+                            onClick={() => setFormData((prev) => ({ ...prev, role: 'nurse' }))}
+                            disabled={isLoading}
+                        >
+                            Điều dưỡng
+                        </button>
                     </div>
 
-                    <div className="form-group">
-                        <label htmlFor="phone">Số điện thoại</label>
-                        <input
-                            type="tel"
-                            id="phone"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handleChange}
-                            placeholder="Nhập số điện thoại (tùy chọn)"
-                            disabled={isLoading}
-                        />
-                    </div>
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        {error && (
+                            <div className="error-message">
+                                <span className="error-icon">⚠️</span>
+                                {error}
+                            </div>
+                        )}
 
-                    <div className="form-row">
                         <div className="form-group">
-                            <label htmlFor="password">Mật khẩu *</label>
+                            <label htmlFor="fullName">Họ và tên *</label>
                             <input
-                                type="password"
-                                id="password"
-                                name="password"
-                                value={formData.password}
+                                type="text"
+                                id="fullName"
+                                name="fullName"
+                                value={formData.fullName}
                                 onChange={handleChange}
-                                placeholder="Ít nhất 6 ký tự"
+                                placeholder="Nguyễn Văn A"
                                 required
                                 disabled={isLoading}
                             />
                         </div>
 
                         <div className="form-group">
-                            <label htmlFor="confirmPassword">Xác nhận mật khẩu *</label>
+                            <label htmlFor="email">Email *</label>
                             <input
-                                type="password"
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                value={formData.confirmPassword}
+                                type="email"
+                                id="email"
+                                name="email"
+                                value={formData.email}
                                 onChange={handleChange}
-                                placeholder="Nhập lại mật khẩu"
+                                placeholder="name@example.com"
                                 required
                                 disabled={isLoading}
                             />
                         </div>
-                    </div>
 
-                    {formData.role === 'nurse' && (
-                        <>
+                        <div className="form-group">
+                            <label htmlFor="phone">Số điện thoại</label>
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                value={formData.phone}
+                                onChange={handleChange}
+                                placeholder="0123456789"
+                                disabled={isLoading}
+                            />
+                        </div>
+
+                        <div className="form-row">
                             <div className="form-group">
-                                <label htmlFor="bio">Giới thiệu bản thân</label>
+                                <label htmlFor="password">Mật khẩu *</label>
                                 <input
-                                    type="text"
-                                    id="bio"
-                                    name="bio"
-                                    value={formData.bio}
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    value={formData.password}
                                     onChange={handleChange}
-                                    placeholder="Kinh nghiệm, chuyên môn..."
+                                    placeholder="Ít nhất 6 ký tự"
+                                    required
                                     disabled={isLoading}
                                 />
                             </div>
 
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label htmlFor="yearsExperience">Số năm kinh nghiệm</label>
-                                    <input
-                                        type="number"
-                                        id="yearsExperience"
-                                        name="yearsExperience"
-                                        value={formData.yearsExperience}
-                                        onChange={handleChange}
-                                        min={0}
-                                        required
-                                        disabled={isLoading}
-                                    />
-                                </div>
-
-                                <div className="form-group">
-                                    <label htmlFor="serviceRadiusKm">Phạm vi phục vụ (km)</label>
-                                    <input
-                                        type="number"
-                                        id="serviceRadiusKm"
-                                        name="serviceRadiusKm"
-                                        value={formData.serviceRadiusKm}
-                                        onChange={handleChange}
-                                        min={1}
-                                        required
-                                        disabled={isLoading}
-                                    />
-                                </div>
+                            <div className="form-group">
+                                <label htmlFor="confirmPassword">Xác nhận mật khẩu *</label>
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    placeholder="Nhập lại mật khẩu"
+                                    required
+                                    disabled={isLoading}
+                                />
                             </div>
-                        </>
-                    )}
+                        </div>
 
-                    <button type="submit" className="auth-btn" disabled={isLoading}>
-                        {isLoading ? (
+                        {formData.role === 'nurse' && (
                             <>
-                                <span className="btn-spinner"></span>
-                                Đang đăng ký...
-                            </>
-                        ) : (
-                            'Đăng ký'
-                        )}
-                    </button>
-                </form>
+                                <div className="form-group">
+                                    <label htmlFor="bio">Giới thiệu bản thân</label>
+                                    <input
+                                        type="text"
+                                        id="bio"
+                                        name="bio"
+                                        value={formData.bio}
+                                        onChange={handleChange}
+                                        placeholder="Kinh nghiệm, chuyên môn..."
+                                        disabled={isLoading}
+                                    />
+                                </div>
 
-                <div className="auth-footer">
-                    <p>
-                        Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
-                    </p>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="yearsExperience">Số năm kinh nghiệm</label>
+                                        <input
+                                            type="number"
+                                            id="yearsExperience"
+                                            name="yearsExperience"
+                                            value={formData.yearsExperience}
+                                            onChange={handleChange}
+                                            min={0}
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="serviceRadiusKm">Phạm vi phục vụ (km)</label>
+                                        <input
+                                            type="number"
+                                            id="serviceRadiusKm"
+                                            name="serviceRadiusKm"
+                                            value={formData.serviceRadiusKm}
+                                            onChange={handleChange}
+                                            min={1}
+                                            required
+                                            disabled={isLoading}
+                                        />
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        <button type="submit" className="auth-btn" disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                    <span className="btn-spinner"></span>
+                                    Đang đăng ký...
+                                </>
+                            ) : (
+                                'Đăng ký'
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="auth-footer">
+                        <p>
+                            Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
