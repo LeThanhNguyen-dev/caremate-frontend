@@ -1,44 +1,52 @@
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Layout.css';
 
 const Layout = () => {
     const { isAuthenticated, user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
+    const isLoginPage = location.pathname === '/login';
+    const isRegisterPage = location.pathname === '/register';
+
     return (
         <div className="layout">
             <header className="header">
                 <div className="header-container">
                     <Link to="/" className="logo">
-                        <span className="logo-icon">💜</span>
                         <span className="logo-text">CareMate</span>
                     </Link>
 
                     <nav className="nav">
+                        <Link to="/find-nurse" className="nav-link">Tìm điều dưỡng</Link>
+                        <Link to="/services" className="nav-link">Dịch vụ</Link>
+                        <Link to="/about" className="nav-link">Về chúng tôi</Link>
+
                         {isAuthenticated ? (
-                            <>
-                                <Link to="/" className="nav-link">Trang chủ</Link>
-                                <div className="user-menu">
-                                    <span className="user-info">
-                                        Xin chào, <strong>{user?.username}</strong>
-                                        <span className="user-role">({user?.role})</span>
-                                    </span>
-                                    <button onClick={handleLogout} className="btn btn-logout">
-                                        Đăng xuất
-                                    </button>
-                                </div>
-                            </>
+                            
+                            <div className="user-menu">
+                                <span className="user-info">
+                                    Xin chào, <strong>{user?.username}</strong>
+                                </span>
+                                <button onClick={handleLogout} className="btn btn-logout">
+                                    Đăng xuất
+                                </button>
+                            </div>
                         ) : (
-                            <>
-                                <Link to="/login" className="nav-link">Đăng nhập</Link>
-                                <Link to="/register" className="btn btn-primary">Đăng ký</Link>
-                            </>
+                            <div className="auth-buttons">
+                                <Link to="/login" className={`btn btn-auth ${isLoginPage ? 'active' : ''}`}>
+                                    Đăng nhập
+                                </Link>
+                                <Link to="/register" className={`btn btn-auth ${isRegisterPage ? 'active' : ''}`}>
+                                    Đăng ký
+                                </Link>
+                            </div>
                         )}
                     </nav>
                 </div>
@@ -50,7 +58,11 @@ const Layout = () => {
 
             <footer className="footer">
                 <div className="footer-container">
-                    <p>&copy; 2026 CareMate - Chăm sóc mẹ và bé</p>
+                    <span className="footer-copyright">© 2024 CareMate Inc. Dữ liệu được mã hóa an toàn.</span>
+                    <div className="footer-links">
+                        <Link to="/privacy">Chính sách bảo mật</Link>
+                        <Link to="/terms">Điều khoản dịch vụ</Link>
+                    </div>
                 </div>
             </footer>
         </div>

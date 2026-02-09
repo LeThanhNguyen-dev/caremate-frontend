@@ -5,7 +5,26 @@ import { GoogleLogin } from '@react-oauth/google';
 import FacebookLogin from '@greatsumini/react-facebook-login';
 import './Login.css';
 
+// SVG Icons as components
+const EmailIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <polyline points="22,6 12,13 2,6" />
+    </svg>
+);
 
+const LockIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+);
+
+const CheckIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <polyline points="20 6 9 17 4 12" />
+    </svg>
+);
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -47,9 +66,6 @@ const Login = () => {
                 provider: provider,
                 idToken: idToken,
             });
-
-
-
             navigate(from, { replace: true });
         } catch (err: unknown) {
             if (err && typeof err === 'object' && 'response' in err) {
@@ -65,23 +81,44 @@ const Login = () => {
 
     return (
         <div className="auth-container">
-            <div className="auth-card">
+            {/* Main Content */}
+            <div className="auth-main">
                 {/* Left Side - Introduction */}
                 <div className="auth-intro">
                     <div className="intro-content">
-                        <h2>Chào mừng trở lại!</h2>
-                        <p>Đăng nhập để tiếp tục sử dụng dịch vụ chăm sóc sức khỏe chuyên nghiệp của CareMate</p>
+                        <h1>Chào mừng trở lại!</h1>
+                        <p>
+                            Đăng nhập để tiếp tục sử dụng dịch vụ chăm sóc sức khỏe
+                            chuyên nghiệp của CareMate.
+                        </p>
+
+                        {/* Illustration */}
+                        <div className="intro-illustration">
+                            <img
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfbkZThp-UG2BFZ1Xz1a1hOp70YCyogT3-N9_HF1AGkL_WQn5HDpW33KyVeFKO8NmtfKf9gaTmuw2bAIKYgxNfQOpezi6NIygfrUx_Pg4GCSOPm_oB3N0hZQ8ylo0Z-r4o1Ttrf_eu7CNvj3SDgMBqEFpEZgFQ5YT9F9ZZYJeiYfkNduHnUsbmKUmaR3Jm7pbdkA9-oXiqksjpXRXPRdiO3cIiDokWyrJVGx8H8zwaHQzSoDAO6UmPnBLsry7mYFCoGWvMl3AZ9_I"
+                                alt="Nurse holding a baby"
+                                className="nurse-illustration"
+                            />
+                        </div>
+
+                        {/* Feature highlights */}
                         <div className="intro-features">
                             <div className="intro-feature">
-                                <div className="intro-feature-icon">✓</div>
+                                <div className="intro-feature-icon">
+                                    <CheckIcon />
+                                </div>
                                 <span>Kết nối với điều dưỡng chuyên nghiệp</span>
                             </div>
                             <div className="intro-feature">
-                                <div className="intro-feature-icon">✓</div>
+                                <div className="intro-feature-icon">
+                                    <CheckIcon />
+                                </div>
                                 <span>Đặt lịch chăm sóc linh hoạt</span>
                             </div>
                             <div className="intro-feature">
-                                <div className="intro-feature-icon">✓</div>
+                                <div className="intro-feature-icon">
+                                    <CheckIcon />
+                                </div>
                                 <span>Hỗ trợ 24/7</span>
                             </div>
                         </div>
@@ -93,6 +130,64 @@ const Login = () => {
                     <div className="auth-header">
                         <h1>Đăng nhập</h1>
                         <p>Truy cập vào tài khoản của bạn</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        {error && (
+                            <div className="error-message">
+                                <span className="error-icon">⚠️</span>
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="form-group">
+                            <label htmlFor="email">Email</label>
+                            <div className="input-with-icon">
+                                <span className="input-icon"><EmailIcon /></span>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    className="has-icon"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="name@example.com"
+                                    required
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="password">Mật khẩu</label>
+                            <div className="input-with-icon">
+                                <span className="input-icon"><LockIcon /></span>
+                                <input
+                                    type="password"
+                                    id="password"
+                                    className="has-icon"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    placeholder="Nhập mật khẩu"
+                                    required
+                                    disabled={isLoading}
+                                />
+                            </div>
+                        </div>
+
+                        <button type="submit" className="auth-btn" disabled={isLoading}>
+                            {isLoading ? (
+                                <>
+                                    <span className="btn-spinner"></span>
+                                    Đang đăng nhập...
+                                </>
+                            ) : (
+                                'Đăng nhập'
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="divider">
+                        <span>Hoặc tiếp tục với</span>
                     </div>
 
                     <div className="social-login">
@@ -107,6 +202,7 @@ const Login = () => {
                             }}
                             onError={() => setError('Đăng nhập Google thất bại.')}
                             useOneTap={false}
+                            shape="pill"
                         />
 
                         <FacebookLogin
@@ -130,56 +226,6 @@ const Login = () => {
                             )}
                         />
                     </div>
-
-                    <div className="divider">
-                        <span>Hoặc</span>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="auth-form">
-                        {error && (
-                            <div className="error-message">
-                                <span className="error-icon">⚠️</span>
-                                {error}
-                            </div>
-                        )}
-
-                        <div className="form-group">
-                            <label htmlFor="email">Email</label>
-                            <input
-                                type="email"
-                                id="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="name@example.com"
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="password">Mật khẩu</label>
-                            <input
-                                type="password"
-                                id="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="Nhập mật khẩu"
-                                required
-                                disabled={isLoading}
-                            />
-                        </div>
-
-                        <button type="submit" className="auth-btn" disabled={isLoading}>
-                            {isLoading ? (
-                                <>
-                                    <span className="btn-spinner"></span>
-                                    Đang đăng nhập...
-                                </>
-                            ) : (
-                                'Đăng nhập'
-                            )}
-                        </button>
-                    </form>
 
                     <div className="auth-footer">
                         <p>
