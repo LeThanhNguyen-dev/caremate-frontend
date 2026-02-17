@@ -44,8 +44,18 @@ const Login = () => {
         setIsLoading(true);
 
         try {
-            await login({ email, password });
-            navigate(from, { replace: true });
+            const user = await login({ email, password });
+
+            // Role-based redirection
+            if (from !== '/') {
+                navigate(from, { replace: true });
+            } else if (user.role === 'admin') {
+                navigate('/admin/pending-nurses', { replace: true });
+            } else if (user.role === 'nurse_unconfirmed') {
+                navigate('/nurse/profile', { replace: true });
+            } else {
+                navigate('/', { replace: true });
+            }
         } catch (err: unknown) {
             if (err && typeof err === 'object' && 'response' in err) {
                 const axiosError = err as { response?: { data?: { message?: string } } };
@@ -62,11 +72,21 @@ const Login = () => {
         setError('');
         setIsLoading(true);
         try {
-            await loginExternal({
+            const user = await loginExternal({
                 provider: provider,
                 idToken: idToken,
             });
-            navigate(from, { replace: true });
+
+            // Role-based redirection
+            if (from !== '/') {
+                navigate(from, { replace: true });
+            } else if (user.role === 'admin') {
+                navigate('/admin/pending-nurses', { replace: true });
+            } else if (user.role === 'nurse_unconfirmed') {
+                navigate('/nurse/profile', { replace: true });
+            } else {
+                navigate('/', { replace: true });
+            }
         } catch (err: unknown) {
             if (err && typeof err === 'object' && 'response' in err) {
                 const axiosError = err as { response?: { data?: { message?: string } } };

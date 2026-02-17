@@ -3,9 +3,9 @@ import type { User, AuthState, LoginDto, RegisterDto, RegisterNurseDto, TokenRes
 import authApi from '../api/authApi';
 
 interface AuthContextType extends AuthState {
-    login: (data: LoginDto) => Promise<void>;
-    loginExternal: (data: ExternalLoginDto) => Promise<void>;
-    register: (data: RegisterDto | RegisterNurseDto, role: string) => Promise<void>;
+    login: (data: LoginDto) => Promise<User>;
+    loginExternal: (data: ExternalLoginDto) => Promise<User>;
+    register: (data: RegisterDto | RegisterNurseDto, role: string) => Promise<User>;
     logout: () => void;
 }
 
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     }, []);
 
-    const handleAuthResponse = (response: TokenResponse) => {
+    const handleAuthResponse = (response: TokenResponse): User => {
         const user: User = {
             username: response.username,
             email: '', // Backend doesn't return email in token response
@@ -64,16 +64,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             isAuthenticated: true,
             isLoading: false,
         });
+
+        return user;
     };
 
     const login = async (data: LoginDto) => {
         const response = await authApi.login(data);
-        handleAuthResponse(response);
+        return handleAuthResponse(response);
     };
 
     const loginExternal = async (data: ExternalLoginDto) => {
         const response = await authApi.externalLogin(data);
-        handleAuthResponse(response);
+        return handleAuthResponse(response);
     };
 
     const register = async (data: RegisterDto | RegisterNurseDto, role: string) => {
@@ -83,7 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } else {
             response = await authApi.registerCustomer(data as RegisterDto);
         }
-        handleAuthResponse(response);
+        return handleAuthResponse(response);
     };
 
     const logout = () => {

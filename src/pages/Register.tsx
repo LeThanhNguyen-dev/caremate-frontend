@@ -91,8 +91,9 @@ const Register = () => {
         setIsLoading(true);
 
         try {
+            let user;
             if (formData.role === 'nurse') {
-                await register(
+                user = await register(
                     {
                         fullName: formData.fullName,
                         email: formData.email,
@@ -105,7 +106,7 @@ const Register = () => {
                     'nurse'
                 );
             } else {
-                await register(
+                user = await register(
                     {
                         fullName: formData.fullName,
                         email: formData.email,
@@ -117,7 +118,14 @@ const Register = () => {
                 );
             }
 
-            navigate('/');
+            // Role-based redirection after success
+            if (user.role === 'nurse_unconfirmed') {
+                navigate('/nurse/profile', { replace: true });
+            } else if (user.role === 'admin') {
+                navigate('/admin/pending-nurses', { replace: true });
+            } else {
+                navigate('/', { replace: true });
+            }
         } catch (err: unknown) {
             if (err && typeof err === 'object' && 'response' in err) {
                 const axiosError = err as { response?: { data?: { message?: string } } };
