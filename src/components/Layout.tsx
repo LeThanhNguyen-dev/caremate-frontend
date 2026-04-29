@@ -1,67 +1,307 @@
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import './Layout.css';
+﻿import { useState, useEffect } from 'react';
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    HeartIcon, 
+    Bars3Icon, 
+    XMarkIcon, 
+    BellIcon, 
+    
+    ArrowRightOnRectangleIcon,
+    Cog8ToothIcon,
+    CalendarDaysIcon,
+    CreditCardIcon,
+    ChatBubbleLeftEllipsisIcon
+} from '@heroicons/react/24/outline';
+import { useAuth } from '../hooks/useAuth';
 
 const Layout = () => {
-    const { isAuthenticated, user, logout } = useAuth();
+    const { user, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+    const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+    const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Close dropdowns on route change
+    useEffect(() => {
+        setNotifDropdownOpen(false);
+        setProfileDropdownOpen(false);
+        setMobileMenuOpen(false);
+    }, [location.pathname]);
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/');
     };
 
-    const isLoginPage = location.pathname === '/login';
-    const isRegisterPage = location.pathname === '/register';
+    const navigation = [
+        { name: 'Trang chủ', href: '/' },
+        { name: 'Dịch vụ', href: '/services' },
+        { name: 'Cộng đồng', href: '/community' },
+        { name: 'Giới thiệu', href: '/about' },
+    ];
+
+    const notifications = [
+        { id: 1, title: 'Lịch hẹn mới', desc: 'Y tá Nguyễn Thị A đã xác nhận lịch hẹn của bạn.', time: '5 phút trước' },
+        { id: 2, title: 'Khuyến mãi', desc: 'Nhận ngay 20% ưu đãi cho gói chăm sóc mẹ bé.', time: '2 giờ trước' },
+        { id: 3, title: 'Thanh toán thành công', desc: 'Hóa đơn #CM12345 đã được thanh toán.', time: '1 ngày trước' },
+    ];
 
     return (
-        <div className="layout">
-            <header className="header">
-                <div className="header-container">
-                    <Link to="/" className="logo">
-                        <span className="logo-text">CareMate</span>
-                    </Link>
+        <div className="min-h-screen flex flex-col bg-white font-['Plus_Jakarta_Sans']">
+            <header 
+                className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
+                    scrolled ? 'bg-white/80 backdrop-blur-2xl py-4 shadow-xl shadow-slate-200/20' : 'bg-transparent py-8'
+                }`}
+            >
+                <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex items-center justify-between">
+                    <div className="flex items-center gap-12">
+                        <Link to="/" className="flex items-center gap-3 group">
+                            <div className="h-10 w-10 rounded-2xl bg-brand flex items-center justify-center text-white shadow-lg shadow-brand/20 group-hover:scale-110 transition-transform">
+                                <HeartIcon className="h-5 w-5" />
+                            </div>
+                            <span className="text-2xl font-black tracking-tighter uppercase text-slate-900">CareMate</span>
+                        </Link>
 
-                    <nav className="nav">
-                        <Link to="/find-nurse" className="nav-link">Tìm điều dưỡng</Link>
-                        <Link to="/services" className="nav-link">Dịch vụ</Link>
-                        <Link to="/about" className="nav-link">Về chúng tôi</Link>
+                        <div className="hidden lg:flex items-center gap-8">
+                            {navigation.map((item) => (
+                                <Link 
+                                    key={item.name} 
+                                    to={item.href} 
+                                    className={`text-[10px] font-black uppercase tracking-[0.3em] transition-colors ${
+                                        location.pathname === item.href ? 'text-brand' : 'text-slate-500 hover:text-brand'
+                                    }`}
+                                >
+                                    {item.name}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                        <button className="lg:hidden p-2 text-slate-900" onClick={() => setMobileMenuOpen(true)}>
+                            <Bars3Icon className="h-7 w-7" />
+                        </button>
 
                         {isAuthenticated ? (
-                            
-                            <div className="user-menu">
-                                <span className="user-info">
-                                    Xin chào, <strong>{user?.username}</strong>
-                                </span>
-                                <button onClick={handleLogout} className="btn btn-logout">
-                                    Đăng xuất
-                                </button>
+                            <div className="hidden lg:flex items-center gap-4">
+                                {/* Notifications Dropdown */}
+                                <div className="relative">
+                                    <button 
+                                        onClick={() => {
+                                            setNotifDropdownOpen(!notifDropdownOpen);
+                                            setProfileDropdownOpen(false);
+                                        }}
+                                        className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative"
+                                    >
+                                        <BellIcon className="h-6 w-6" />
+                                        <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-brand ring-4 ring-white"></span>
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {notifDropdownOpen && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute right-0 mt-4 w-96 bg-white rounded-[32px] shadow-2xl shadow-slate-900/10 border border-slate-50 p-6 z-[110]"
+                                            >
+                                                <div className="flex items-center justify-between mb-6 px-2">
+                                                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">Thông báo</h4>
+                                                    <span className="text-[10px] font-bold text-brand bg-brand/5 px-2 py-1 rounded-lg">Mới</span>
+                                                </div>
+                                                <div className="space-y-2 mb-6">
+                                                    {notifications.map((notif) => (
+                                                        <div key={notif.id} className="p-4 rounded-2xl hover:bg-slate-50 cursor-pointer transition-colors group">
+                                                            <div className="text-xs font-black text-slate-900 group-hover:text-brand transition-colors">{notif.title}</div>
+                                                            <div className="text-[11px] font-medium text-slate-400 mt-1 line-clamp-1">{notif.desc}</div>
+                                                            <div className="text-[9px] font-bold text-slate-300 mt-2 uppercase">{notif.time}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <Link to="/notifications" className="block w-full py-3 bg-slate-50 text-center rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand hover:bg-brand/5 transition-all">
+                                                    Xem tất cả thông báo
+                                                </Link>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                {/* Profile Dropdown */}
+                                <div className="relative">
+                                    <button 
+                                        onClick={() => {
+                                            setProfileDropdownOpen(!profileDropdownOpen);
+                                            setNotifDropdownOpen(false);
+                                        }}
+                                        className="flex items-center gap-4 pl-4 pr-2 py-2 rounded-2xl bg-slate-50 hover:bg-white hover:shadow-lg transition-all group"
+                                    >
+                                        <div className="text-right hidden xl:block">
+                                            <div className="text-xs font-black text-slate-900 group-hover:text-brand transition-colors">{user?.username}</div>
+                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{user?.role === 'admin' ? 'Quản trị viên' : user?.role === 'nurse' ? 'Điều dưỡng' : 'Khách hàng'}</div>
+                                        </div>
+                                        <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center font-black text-lg">
+                                            {user?.username?.charAt(0)}
+                                        </div>
+                                    </button>
+
+                                    <AnimatePresence>
+                                        {profileDropdownOpen && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute right-0 mt-4 w-72 bg-white rounded-[32px] shadow-2xl shadow-slate-900/10 border border-slate-50 p-6 z-[110]"
+                                            >
+                                                <div className="space-y-1 mb-6">
+                                                    {[
+                                                        { name: 'Cài đặt thông tin', icon: Cog8ToothIcon, href: '/profile' },
+                                                        { name: 'Quản lý dịch vụ', icon: CalendarDaysIcon, href: '/my-bookings' },
+                                                        { name: 'Lịch sử ví & tiền', icon: CreditCardIcon, href: '/wallet' },
+                                                        { name: 'Tin nhắn hỗ trợ', icon: ChatBubbleLeftEllipsisIcon, href: '/chat' },
+                                                    ].map((item) => (
+                                                        <Link 
+                                                            key={item.name} 
+                                                            to={item.href} 
+                                                            className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-all group"
+                                                        >
+                                                            <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand/10 group-hover:text-brand transition-colors">
+                                                                <item.icon className="h-4 w-4" />
+                                                            </div>
+                                                            <span className="text-xs font-black">{item.name}</span>
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                                <button 
+                                                    onClick={handleLogout}
+                                                    className="flex w-full items-center gap-4 p-3 rounded-xl hover:bg-red-50 text-slate-500 hover:text-red-600 transition-all group"
+                                                >
+                                                    <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                                                        <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                                                    </div>
+                                                    <span className="text-xs font-black">Đăng xuất</span>
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
                             </div>
                         ) : (
-                            <div className="auth-buttons">
-                                <Link to="/login" className={`btn btn-auth ${isLoginPage ? 'active' : ''}`}>
-                                    Đăng nhập
-                                </Link>
-                                <Link to="/register" className={`btn btn-auth ${isRegisterPage ? 'active' : ''}`}>
-                                    Đăng ký
-                                </Link>
+                            <div className="hidden lg:flex items-center gap-8">
+                                <Link to="/login" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 hover:text-brand">Đăng nhập</Link>
+                                <Link to="/register" className="btn-primary !px-8 !py-4 !text-[10px] !uppercase !tracking-[0.2em] shadow-xl shadow-slate-900/10">Bắt đầu ngay</Link>
                             </div>
                         )}
-                    </nav>
-                </div>
+                    </div>
+                </nav>
+
+                {/* Mobile Menu */}
+                <AnimatePresence>
+                    {mobileMenuOpen && (
+                        <motion.div 
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed inset-0 z-[150] lg:hidden"
+                        >
+                            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
+                            <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white p-8 shadow-2xl flex flex-col">
+                                <div className="flex items-center justify-between mb-12">
+                                    <Link to="/" className="flex items-center gap-3">
+                                        <div className="h-10 w-10 rounded-2xl bg-brand flex items-center justify-center text-white"><HeartIcon className="h-5 w-5" /></div>
+                                        <span className="text-2xl font-black uppercase tracking-tighter">CareMate</span>
+                                    </Link>
+                                    <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-slate-900"><XMarkIcon className="h-7 w-7" /></button>
+                                </div>
+                                <div className="flex-1 space-y-6">
+                                    {navigation.map((item) => (
+                                        <Link key={item.name} to={item.href} className="block text-3xl font-black text-slate-900 hover:text-brand transition-colors" onClick={() => setMobileMenuOpen(false)}>{item.name}</Link>
+                                    ))}
+                                    <div className="pt-12 border-t border-slate-100 space-y-4">
+                                        {isAuthenticated ? (
+                                            <button onClick={handleLogout} className="w-full text-left text-3xl font-black text-red-600">Đăng xuất</button>
+                                        ) : (
+                                            <>
+                                                <Link to="/login" className="block text-3xl font-black text-slate-900" onClick={() => setMobileMenuOpen(false)}>Đăng nhập</Link>
+                                                <Link to="/register" className="btn-primary w-full py-5 text-lg" onClick={() => setMobileMenuOpen(false)}>Tham gia ngay</Link>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </header>
 
-            <main className="main-content">
+            <main className="flex-grow pt-32">
                 <Outlet />
             </main>
 
-            <footer className="footer">
-                <div className="footer-container">
-                    <span className="footer-copyright">© 2024 CareMate Inc. Dữ liệu được mã hóa an toàn.</span>
-                    <div className="footer-links">
-                        <Link to="/privacy">Chính sách bảo mật</Link>
-                        <Link to="/terms">Điều khoản dịch vụ</Link>
+            <footer className="bg-slate-900 pt-32 pb-12 text-white overflow-hidden relative">
+                <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand/5 blur-[120px] -mr-48 -mb-48 rounded-full"></div>
+                
+                <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
+                        <div className="space-y-8">
+                            <Link to="/" className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-2xl bg-brand flex items-center justify-center text-white shadow-lg shadow-brand/20"><HeartIcon className="h-5 w-5" /></div>
+                                <span className="text-2xl font-black tracking-tighter uppercase">CareMate</span>
+                            </Link>
+                            <p className="text-slate-400 text-sm leading-relaxed font-medium max-w-xs">
+                                Định nghĩa lại tiêu chuẩn chăm sóc gia đình Việt với công nghệ và sự tận tâm từ trái tim.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Điều hướng</h4>
+                            <ul className="space-y-4 text-sm font-bold">
+                                <li><Link to="/" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Trang chủ</Link></li>
+                                <li><Link to="/services" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Dịch vụ</Link></li>
+                                <li><Link to="/community" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Cộng đồng</Link></li>
+                                <li><Link to="/about" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Giới thiệu</Link></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Trung tâm hỗ trợ</h4>
+                            <ul className="space-y-4 text-sm font-bold text-slate-400">
+                                <li><Link to="/" className="hover:text-white transition-colors">Câu hỏi thường gặp</Link></li>
+                                <li><Link to="/" className="hover:text-white transition-colors">Chính sách bảo mật</Link></li>
+                                <li><Link to="/" className="hover:text-white transition-colors">Liên hệ 24/7</Link></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Văn phòng</h4>
+                            <div className="text-sm font-bold space-y-4 text-slate-400">
+                                <p>HCM: Khu Công nghệ cao, Quận 9</p>
+                                <p>Hotline: 1900 6789</p>
+                                <p className="text-brand">support@caremate.vn</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 text-center md:text-left">
+                            &copy; 2026 CareMate. Luxury Care Experience.
+                        </div>
+                        <div className="flex gap-6">
+                            {['FB', 'IG', 'LI', 'YT'].map(social => (
+                                <div key={social} className="h-10 w-10 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group">
+                                    <span className="text-[10px] font-black group-hover:scale-110 transition-transform">{social}</span>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </footer>
@@ -70,3 +310,6 @@ const Layout = () => {
 };
 
 export default Layout;
+
+
+

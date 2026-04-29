@@ -1,242 +1,226 @@
-import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
-import './Home.css';
-
-// SVG Icons
-const ShieldCheckIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        <path d="m9 12 2 2 4-4" />
-    </svg>
-);
-
-const HeartPulseIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-    </svg>
-);
-
-const UserCheckIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <polyline points="16 11 18 13 22 9" />
-    </svg>
-);
-
-const CalendarIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-        <line x1="16" y1="2" x2="16" y2="6" />
-        <line x1="8" y1="2" x2="8" y2="6" />
-        <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-);
-
-const SearchIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
-    </svg>
-);
-
-const StarIcon = () => (
-    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    </svg>
-);
+﻿import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { 
+    HeartIcon, 
+    ShieldCheckIcon, 
+    PlayIcon,
+    SparklesIcon,
+    
+    CheckBadgeIcon,
+    EnvelopeIcon,
+    CursorArrowRaysIcon,
+    UserPlusIcon,
+    CalendarDaysIcon,
+    HandRaisedIcon
+} from '@heroicons/react/24/outline';
+import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 
 const Home = () => {
-    const { user, isAuthenticated } = useAuth();
-
     return (
-        <div className="home-container">
-            {/* Hero Section */}
-            <section className="hero-section">
-                <div className="hero-content">
-                    <h1 className="hero-title">
-                        Chăm sóc <span className="highlight">Mẹ & Bé</span> toàn diện tại nhà
-                    </h1>
-                    <p className="hero-subtitle">
-                        Kết nối với đội ngũ điều dưỡng chuyên nghiệp, tận tâm.
-                        CareMate mang đến sự an tâm tuyệt đối cho hành trình làm mẹ của bạn.
-                    </p>
+        <div className="bg-white">
+            {/* HERO SECTION */}
+            <section className="relative min-h-[90vh] flex flex-col pt-20">
+                <div className="absolute inset-0 z-0">
+                    <img 
+                        src="https://i.pinimg.com/1200x/6a/eb/fb/6aebfbce0394d166834f2ad0c8665df1.jpg" 
+                        alt="Hero" 
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-white/30 backdrop-blur-[1px]"></div>
+                </div>
 
-                    {isAuthenticated ? (
-                        <div className="welcome-container">
-                            <div className="user-avatar">
-                                {user?.username?.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="welcome-info">
-                                <span className="role-tag">
-                                    {user?.role === 'nurse' ? 'Điều dưỡng viên' : 'Khách hàng'}
-                                </span>
-                                <h2>Chào mừng, {user?.username}!</h2>
-                                <Link to="/find-nurse" className="text-link">Xem lịch hẹn của bạn →</Link>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="cta-buttons">
-                            <Link to="/register" className="cta-btn primary">
-                                Tìm điều dưỡng ngay
+                <div className="relative z-10 mx-auto max-w-7xl px-6 lg:px-8 flex-1 flex flex-col justify-center">
+                    <motion.div 
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="max-w-4xl"
+                    >
+                        <div className="text-[10px] font-black uppercase tracking-[0.5em] text-brand mb-6">CareMate • Premium Care System</div>
+                        <h1 className="text-5xl lg:text-7xl font-black text-slate-900 leading-[1.3] mb-8">
+                            Dịch vụ chăm sóc <br /> 
+                            <span className="text-brand">tận tâm</span> cho tổ ấm
+                        </h1>
+                        <p className="text-lg text-slate-600 font-medium leading-relaxed mb-12 max-w-2xl">
+                            Mang tiêu chuẩn y khoa cao cấp nhất đến ngay ngôi nhà của bạn. 
+                            Chúng tôi đồng hành cùng gia đình bạn trong mọi khoảnh khắc quý giá.
+                        </p>
+                        <div className="flex flex-wrap gap-6 items-center">
+                            <Link to="/services" className="btn-primary !px-12 !py-5 text-sm shadow-2xl shadow-brand/20">
+                                Khám phá dịch vụ
                             </Link>
-                            <Link to="/about" className="cta-btn secondary">
-                                Tìm hiểu thêm
-                            </Link>
+                            <button className="flex items-center gap-4 group">
+                                <div className="h-12 w-12 rounded-full border-2 border-brand flex items-center justify-center text-brand group-hover:bg-brand group-hover:text-white transition-all">
+                                    <PlayIcon className="h-5 w-5" />
+                                </div>
+                                <span className="text-xs font-black uppercase tracking-widest text-slate-900">Xem giới thiệu</span>
+                            </button>
                         </div>
-                    )}
+                    </motion.div>
                 </div>
 
-                <div className="hero-illustration">
-                    <div className="illustration-wrapper">
-                        <img
-                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfbkZThp-UG2BFZ1Xz1a1hOp70YCyogT3-N9_HF1AGkL_WQn5HDpW33KyVeFKO8NmtfKf9gaTmuw2bAIKYgxNfQOpezi6NIygfrUx_Pg4GCSOPm_oB3N0hZQ8ylo0Z-r4o1Ttrf_eu7CNvj3SDgMBqEFpEZgFQ5YT9F9ZZYJeiYfkNduHnUsbmKUmaR3Jm7pbdkA9-oXiqksjpXRXPRdiO3cIiDokWyrJVGx8H8zwaHQzSoDAO6UmPnBLsry7mYFCoGWvMl3AZ9_I"
-                            alt="Professional maternal care"
-                            className="nurse-hero-img"
-                        />
-                        <div className="floating-badge badge-1">
-                            <div className="badge-icon"><ShieldCheckIcon /></div>
-                            <span>Xác thực 100%</span>
+                {/* Floating Stats */}
+                <div className="relative z-20 mx-auto max-w-7xl px-6 lg:px-8 -mb-16 mt-12">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {[
+                            { label: 'Khách hàng', value: '1,900+', sub: 'Gia đình tin tưởng' },
+                            { label: 'Y tá chuyên môn', value: '500+', sub: 'Xác minh 100%' },
+                            { label: 'Hài lòng', value: '99%', sub: 'Đánh giá tích cực' },
+                            { label: 'Đánh giá', value: '4.9/5', sub: 'Sao trung bình' },
+                        ].map((stat, i) => (
+                            <motion.div 
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.1 }}
+                                className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl border border-white shadow-xl shadow-slate-200/50"
+                            >
+                                <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{stat.label}</div>
+                                <div className="text-2xl font-black text-slate-900 mb-1">{stat.value}</div>
+                                <div className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">{stat.sub}</div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* HOW IT WORKS SECTION (REPLACED) */}
+            <section className="py-40 bg-white relative overflow-hidden">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="text-center mb-24">
+                        <div className="accent-label mx-auto">Quy trình dịch vụ</div>
+                        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-6">Bắt đầu hành trình <span className="text-brand">an tâm</span></h2>
+                        <p className="text-slate-500 font-medium">Chỉ với 4 bước đơn giản để nhận được sự chăm sóc tốt nhất.</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+                        {[
+                            { step: '01', title: 'Chọn dịch vụ', desc: 'Duyệt qua danh mục dịch vụ chăm sóc đa dạng từ CareMate.', icon: CursorArrowRaysIcon },
+                            { step: '02', title: 'Tìm y tá ưng ý', desc: 'Xem hồ sơ, kinh nghiệm và đánh giá thực tế của y tá.', icon: UserPlusIcon },
+                            { step: '03', title: 'Đặt lịch hẹn', desc: 'Lựa chọn thời gian phù hợp với lịch sinh hoạt của gia đình.', icon: CalendarDaysIcon },
+                            { step: '04', title: 'Tận hưởng chăm sóc', desc: 'Điều dưỡng đến nhà thực hiện quy trình chuyên môn.', icon: HandRaisedIcon },
+                        ].map((item, i) => (
+                            <div key={i} className="relative p-10 rounded-[32px] bg-slate-50 hover:bg-brand-soft transition-colors group">
+                                <div className="absolute top-6 right-8 text-5xl font-black text-slate-900/10 group-hover:text-brand/20 transition-colors">{item.step}</div>
+                                <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-brand mb-8 group-hover:scale-110 transition-transform">
+                                    <item.icon className="h-7 w-7" />
+                                </div>
+                                <h4 className="text-xl font-black text-slate-900 mb-4">{item.title}</h4>
+                                <p className="text-slate-500 text-sm font-medium leading-relaxed">{item.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* REPLACED DOUBLE BANNER SECTION */}
+            <section className="py-20 bg-white">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8 grid md:grid-cols-2 gap-8">
+                    {[
+                        { title: 'Cộng đồng CareMate', desc: 'Tham gia thảo luận và chia sẻ kinh nghiệm cùng hàng ngàn mẹ bỉm.', image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2064&auto=format&fit=crop', link: '/community' },
+                        { title: 'Tiêu chuẩn Y khoa', desc: 'Tìm hiểu về quy trình đào tạo và kiểm soát chất lượng tại CareMate.', image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop', link: '/about' },
+                    ].map((banner, i) => (
+                        <div key={i} className="relative h-[450px] rounded-[40px] overflow-hidden group border-8 border-slate-50">
+                            <img src={banner.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent flex flex-col justify-end p-12">
+                                <h3 className="text-3xl font-black text-white mb-4">{banner.title}</h3>
+                                <p className="text-white/70 text-sm font-medium mb-8 max-w-sm">{banner.desc}</p>
+                                <Link to={banner.link} className="btn-primary !w-fit !bg-white !text-slate-900 hover:!bg-brand hover:!text-white border-none shadow-none">Khám phá ngay</Link>
+                            </div>
                         </div>
-                        <div className="floating-badge badge-2">
-                            <div className="badge-icon"><HeartPulseIcon /></div>
-                            <span>Tận tâm chu đáo</span>
+                    ))}
+                </div>
+            </section>
+
+            {/* WHY CHOOSE US (REFINED PHOTO FIT) */}
+            <section className="py-40 bg-slate-50">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="grid lg:grid-cols-2 gap-20 items-center">
+                        <div className="relative">
+                            <div className="absolute -inset-10 bg-brand/5 blur-[100px] rounded-full"></div>
+                            <div className="relative rounded-[40px] overflow-hidden border-[12px] border-white shadow-2xl aspect-square">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=2070&auto=format&fit=crop" 
+                                    alt="Expert Nurse" 
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="absolute -bottom-8 -right-8 luxury-card !p-6 shadow-2xl border-none hidden md:block">
+                                <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-xl bg-brand text-white flex items-center justify-center">
+                                        <CheckBadgeIcon className="h-6 w-6" />
+                                    </div>
+                                    <div>
+                                        <div className="text-lg font-black text-slate-900">100% Chuyên gia</div>
+                                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đã qua đào tạo khắt khe</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div className="accent-label">Giá trị cốt lõi</div>
+                            <h2 className="text-4xl lg:text-6xl font-black text-slate-900 mb-10 leading-[1.3]">Vì sao hàng ngàn <br /> mẹ tin chọn <span className="text-brand">CareMate?</span></h2>
+                            <div className="space-y-12">
+                                {[
+                                    { title: 'Y tá chuyên nghiệp', desc: '100% điều dưỡng có bằng cấp và chứng chỉ hành nghề chính quy.', icon: ShieldCheckIcon },
+                                    { title: 'Dịch vụ tận tâm', desc: 'Luôn lắng nghe và chăm sóc mẹ bé như người thân trong gia đình.', icon: HeartIcon },
+                                    { title: 'Minh bạch & An toàn', desc: 'Giá cả công khai, hồ sơ y tá được kiểm định nghiêm ngặt.', icon: SparklesIcon }
+                                ].map((item, i) => (
+                                    <div key={i} className="flex gap-6">
+                                        <div className="h-14 w-14 rounded-2xl bg-white shadow-md flex items-center justify-center text-brand flex-none">
+                                            <item.icon className="h-7 w-7" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-xl font-black text-slate-900 mb-2">{item.title}</h4>
+                                            <p className="text-slate-500 text-sm font-medium leading-relaxed">{item.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Stats Section */}
-            <section className="stats-section">
-                <div className="stats-grid">
-                    <div className="stat-item">
-                        <div className="stat-value">1,500+</div>
-                        <div className="stat-label">Điều dưỡng viên</div>
+            {/* TESTIMONIALS SECTION */}
+            <section className="py-40 bg-white">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="text-center mb-24">
+                        <h2 className="text-4xl lg:text-5xl font-black text-slate-900 mb-4">Khách hàng nói gì về chúng tôi</h2>
+                        <p className="text-slate-500 font-medium">"Sự hài lòng của gia đình bạn là sứ mệnh của chúng tôi"</p>
                     </div>
-                    <div className="stat-item">
-                        <div className="stat-value">10,000+</div>
-                        <div className="stat-label">Gia đình tin dùng</div>
-                    </div>
-                    <div className="stat-item">
-                        <div className="stat-value">4.9/5</div>
-                        <div className="stat-label">Đánh giá trung bình</div>
-                    </div>
-                    <div className="stat-item">
-                        <div className="stat-value">24/7</div>
-                        <div className="stat-label">Hỗ trợ y tế</div>
+
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {[1, 2].map(i => (
+                            <div key={i} className="bg-slate-50 p-12 rounded-[40px] flex flex-col md:flex-row gap-8 items-start hover:bg-white hover:shadow-2xl transition-all duration-500">
+                                <img src={i === 1 ? "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop" : "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop"} className="h-24 w-24 rounded-3xl object-cover flex-none shadow-lg" />
+                                <div>
+                                    <div className="flex text-yellow-400 mb-6"><StarSolid className="h-4 w-4" /><StarSolid className="h-4 w-4" /><StarSolid className="h-4 w-4" /><StarSolid className="h-4 w-4" /><StarSolid className="h-4 w-4" /></div>
+                                    <p className="text-slate-600 font-medium leading-relaxed mb-8 italic">"Dịch vụ của CareMate thực sự chuyên nghiệp. Y tá rất tận tâm, tay nghề cao. Gia đình mình rất an tâm khi sử dụng dịch vụ tại đây."</p>
+                                    <div className="font-black text-slate-900 text-sm">Chị Phương Thảo</div>
+                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mẹ bé Bắp - Quận 2</div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            {/* Features Section */}
-            <section className="features-section">
-                <div className="section-header">
-                    <span className="section-label">Dịch vụ vượt trội</span>
-                    <h2 className="section-title">Tại sao chọn CareMate?</h2>
-                </div>
-
-                <div className="features-grid">
-                    <div className="feature-card">
-                        <div className="f-icon-box">
-                            <UserCheckIcon />
+            {/* NEWSLETTER SECTION */}
+            <section className="py-40 bg-white">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="bg-slate-900 rounded-[60px] p-12 lg:p-24 relative overflow-hidden text-center">
+                        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand/10 blur-[120px] -mr-64 -mt-64 rounded-full"></div>
+                        <div className="relative z-10 max-w-2xl mx-auto">
+                            <div className="h-20 w-20 rounded-3xl bg-brand/10 border border-brand/20 flex items-center justify-center mx-auto mb-10">
+                                <EnvelopeIcon className="h-10 w-10 text-brand" />
+                            </div>
+                            <h2 className="text-4xl lg:text-6xl font-black text-white mb-10 leading-tight">Nhận kiến thức hữu ích từ chuyên gia</h2>
+                            <form className="flex flex-col sm:flex-row gap-4 p-2 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-xl">
+                                <input type="email" placeholder="Nhập email của bạn..." className="flex-1 bg-transparent border-none rounded-2xl px-6 py-4 text-white font-bold outline-none placeholder:text-white/30" />
+                                <button className="btn-primary !px-12 !rounded-2xl">Đăng ký ngay</button>
+                            </form>
                         </div>
-                        <h3>Điều dưỡng chuyên nghiệp</h3>
-                        <p>Đội ngũ y tá, điều dưỡng có bằng cấp và được đào tạo chuyên sâu về chăm sóc mẹ và bé.</p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="f-icon-box">
-                            <ShieldCheckIcon />
-                        </div>
-                        <h3>An toàn & Tin cậy</h3>
-                        <p>Mọi quy trình đều tuân thủ chuẩn y khoa, đảm bảo an toàn tuyệt đối cho sức khỏe của bạn.</p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="f-icon-box">
-                            <CalendarIcon />
-                        </div>
-                        <h3>Đặt lịch linh hoạt</h3>
-                        <p>Chủ động thời gian, lựa chọn người chăm sóc phù hợp chỉ với vài thao tác đơn giản.</p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="f-icon-box">
-                            <HeartPulseIcon />
-                        </div>
-                        <h3>Chăm sóc toàn diện</h3>
-                        <p>Từ theo dõi thai kỳ đến chăm sóc trẻ sơ sinh, chúng tôi luôn đồng hành cùng gia đình bạn.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* How It Works Section */}
-            <section className="how-it-works">
-                <div className="section-header">
-                    <span className="section-label">Quy trình đơn giản</span>
-                    <h2 className="section-title">Bắt đầu chỉ với 3 bước</h2>
-                </div>
-
-                <div className="steps-grid">
-                    <div className="step-card">
-                        <div className="step-number">01</div>
-                        <div className="step-icon"><SearchIcon /></div>
-                        <h3>Tìm kiếm điều dưỡng</h3>
-                        <p>Lựa chọn điều dưỡng dựa trên kinh nghiệm, đánh giá và vị trí của bạn.</p>
-                    </div>
-                    <div className="step-card">
-                        <div className="step-number">02</div>
-                        <div className="step-icon"><CalendarIcon /></div>
-                        <h3>Đặt lịch & Thanh toán</h3>
-                        <p>Chọn thời gian phù hợp và thanh toán an toàn qua nền tảng CareMate.</p>
-                    </div>
-                    <div className="step-card">
-                        <div className="step-number">03</div>
-                        <div className="step-icon"><HeartPulseIcon /></div>
-                        <h3>Tận hưởng dịch vụ</h3>
-                        <p>Điều dưỡng sẽ đến tận nhà để chăm sóc bạn và bé một cách chu đáo nhất.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* Testimonials Section */}
-            <section className="testimonials">
-                <div className="section-header">
-                    <span className="section-label">Phản hồi khách hàng</span>
-                    <h2 className="section-title">Các gia đình nói gì về CareMate?</h2>
-                </div>
-
-                <div className="testimonial-grid">
-                    <div className="testimonial-card">
-                        <div className="rating">
-                            {[...Array(5)].map((_, i) => <StarIcon key={i} />)}
-                        </div>
-                        <p>"Dịch vụ rất chuyên nghiệp. Chị điều dưỡng chăm sóc bé rất mát tay, hướng dẫn mình cách tắm bé rất chi tiết."</p>
-                        <div className="user-profile">
-                            <div className="user-name">Chị Thu Thảo</div>
-                            <div className="user-info">Quận 7, TP.HCM</div>
-                        </div>
-                    </div>
-                    <div className="testimonial-card">
-                        <div className="rating">
-                            {[...Array(5)].map((_, i) => <StarIcon key={i} />)}
-                        </div>
-                        <p>"Mình rất an tâm khi đặt lịch qua CareMate. Quy trình minh bạch, điều dưỡng y đức và nhiệt tình."</p>
-                        <div className="user-profile">
-                            <div className="user-name">Chị Mai Phương</div>
-                            <div className="user-info">Quận Tân Bình, TP.HCM</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Final CTA Section */}
-            <section className="final-cta">
-                <div className="cta-box">
-                    <h2>Sẵn sàng bắt đầu hành trình của bạn?</h2>
-                    <p>Đăng ký ngay hôm nay để nhận được sự chăm sóc tận tâm nhất từ CareMate.</p>
-                    <div className="cta-buttons">
-                        <Link to="/register" className="cta-btn primary inverse">Tạo tài khoản miễn phí</Link>
-                        <Link to="/find-nurse" className="cta-btn secondary outline">Xem danh sách điều dưỡng</Link>
                     </div>
                 </div>
             </section>
@@ -245,3 +229,8 @@ const Home = () => {
 };
 
 export default Home;
+
+
+
+
+

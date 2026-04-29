@@ -3,16 +3,16 @@ import type { NurseProfileDetailDto, UpdateNurseProfileDto, UploadDocumentDto } 
 
 export const nurseApi = {
     getProfile: async (): Promise<NurseProfileDetailDto> => {
-        const response = await axiosInstance.get<NurseProfileDetailDto>('/api/Nurse/profile');
+        const response = await axiosInstance.get<NurseProfileDetailDto>('/api/nurse/profile');
         return response.data;
     },
 
     updateProfile: async (data: UpdateNurseProfileDto): Promise<void> => {
-        await axiosInstance.put('/api/Nurse/profile', data);
+        await axiosInstance.put('/api/nurse/profile', data);
     },
 
     uploadDocument: async (data: UploadDocumentDto): Promise<void> => {
-        await axiosInstance.post('/api/Nurse/documents', data);
+        await axiosInstance.post('/api/nurse/documents', data);
     },
 };
 

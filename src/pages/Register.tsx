@@ -1,356 +1,164 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import './Register.css';
-
-// SVG Icons as components
-const PersonIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-    </svg>
-);
-
-const EmailIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-        <polyline points="22,6 12,13 2,6" />
-    </svg>
-);
-
-const LockIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-);
-
-const PhoneIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-    </svg>
-);
-
-const BriefcaseIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-    </svg>
-);
-
-const CheckIcon = () => (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <polyline points="20 6 9 17 4 12" />
-    </svg>
-);
+import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
+import { motion } from 'framer-motion';
+import { HeartIcon, ArrowRightIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 const Register = () => {
-    const [formData, setFormData] = useState({
+    const { register } = useAuth();
+    const { showToast } = useToast();
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+    const [form, setForm] = useState({
         fullName: '',
         email: '',
         phone: '',
         password: '',
         confirmPassword: '',
-        role: 'customer',
-        bio: '',
-        yearsExperience: 0,
-        serviceRadiusKm: 5,
+        role: 'customer'
     });
-
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const { register } = useAuth();
-    const navigate = useNavigate();
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-
-        if (name === 'yearsExperience' || name === 'serviceRadiusKm') {
-            setFormData((prev) => ({ ...prev, [name]: Number(value) }));
-            return;
-        }
-
-        setFormData((prev) => ({ ...prev, [name]: value }));
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
-
-        if (formData.password !== formData.confirmPassword) {
-            setError('Mật khẩu xác nhận không khớp');
+        if (form.password !== form.confirmPassword) {
+            showToast('Mật khẩu xác nhận không khớp.', 'error');
             return;
         }
-
-        if (formData.password.length < 6) {
-            setError('Mật khẩu phải có ít nhất 6 ký tự');
-            return;
-        }
-
-        setIsLoading(true);
-
+        setLoading(true);
         try {
-            let user;
-            if (formData.role === 'nurse') {
-                user = await register(
-                    {
-                        fullName: formData.fullName,
-                        email: formData.email,
-                        phone: formData.phone || undefined,
-                        password: formData.password,
-                        bio: formData.bio || undefined,
-                        yearsExperience: Number(formData.yearsExperience),
-                        serviceRadiusKm: Number(formData.serviceRadiusKm),
-                    },
-                    'nurse'
-                );
-            } else {
-                user = await register(
-                    {
-                        fullName: formData.fullName,
-                        email: formData.email,
-                        phone: formData.phone || undefined,
-                        password: formData.password,
-                        role: formData.role as 'customer',
-                    },
-                    'customer'
-                );
-            }
-
-            // Role-based redirection after success
-            if (user.role === 'nurse_unconfirmed') {
-                navigate('/nurse/profile', { replace: true });
-            } else if (user.role === 'admin') {
-                navigate('/admin/pending-nurses', { replace: true });
-            } else {
-                navigate('/', { replace: true });
-            }
-        } catch (err: unknown) {
-            if (err && typeof err === 'object' && 'response' in err) {
-                const axiosError = err as { response?: { data?: { message?: string } } };
-                setError(axiosError.response?.data?.message || 'Đăng ký thất bại. Vui lòng thử lại.');
-            } else {
-                setError('Đăng ký thất bại. Vui lòng thử lại.');
-            }
+            const payload = form.role === 'nurse' 
+                ? { 
+                    fullName: form.fullName, 
+                    email: form.email, 
+                    phone: form.phone, 
+                    password: form.password, 
+                    yearsExperience: 0, 
+                    serviceRadiusKm: 10, 
+                    role: 'nurse' 
+                  } 
+                : { 
+                    fullName: form.fullName, 
+                    email: form.email, 
+                    phone: form.phone, 
+                    password: form.password, 
+                    role: 'customer' 
+                  };
+            
+            // @ts-expect-error DTO type mismatch workaround
+            await register(payload, form.role);
+            showToast('Đăng ký thành công! Hãy đăng nhập.', 'success');
+            navigate('/login');
+        } catch {
+            showToast('Email đã tồn tại hoặc có lỗi xảy ra.', 'error');
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
     return (
-        <div className="auth-container">
-            {/* Main Content */}
-            <div className="auth-main">
-                {/* Left Side - Introduction */}
-                <div className="auth-intro">
-                    <div className="intro-content">
-                        <h1>Tạo tài khoản</h1>
-                        <p>
-                            Tham gia cộng đồng phụ huynh và điều dưỡng chuyên nghiệp.
-                            Bắt đầu hành trình chăm sóc sức khỏe của bạn.
-                        </p>
-
-                        {/* Illustration */}
-                        <div className="intro-illustration">
-                            <img
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfbkZThp-UG2BFZ1Xz1a1hOp70YCyogT3-N9_HF1AGkL_WQn5HDpW33KyVeFKO8NmtfKf9gaTmuw2bAIKYgxNfQOpezi6NIygfrUx_Pg4GCSOPm_oB3N0hZQ8ylo0Z-r4o1Ttrf_eu7CNvj3SDgMBqEFpEZgFQ5YT9F9ZZYJeiYfkNduHnUsbmKUmaR3Jm7pbdkA9-oXiqksjpXRXPRdiO3cIiDokWyrJVGx8H8zwaHQzSoDAO6UmPnBLsry7mYFCoGWvMl3AZ9_I"
-                                alt="Nurse holding a baby"
-                                className="nurse-illustration"
-                            />
+        <div className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden">
+            <div className="absolute top-0 right-1/2 translate-x-1/2 w-[1000px] h-[800px] bg-brand/5 rounded-full blur-[120px] -z-10"></div>
+            
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] as any }}
+                className="w-full max-w-[1000px] grid lg:grid-cols-2 luxury-card !p-0 overflow-hidden border-none shadow-2xl"
+            >
+                <div className="hidden lg:flex flex-col justify-between p-16 bg-[#111827] text-white relative">
+                    <div className="absolute inset-0 bg-brand/10 blur-[100px] opacity-30"></div>
+                    <div className="relative z-10">
+                        <Link to="/" className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white">
+                                <HeartIcon className="h-6 w-6" />
+                            </div>
+                            <span className="font-heading text-2xl font-black">CareMate</span>
+                        </Link>
+                        <div className="mt-24">
+                            <h2 className="text-4xl font-black leading-tight">Bắt đầu hành trình <br /> chăm sóc chuyên nghiệp</h2>
+                            <p className="mt-6 text-white/50 font-medium leading-relaxed max-w-sm">
+                                Gia nhập cộng đồng CareMate để trải nghiệm dịch vụ chăm sóc mẹ & bé tận tâm nhất Việt Nam.
+                            </p>
                         </div>
-
-                        {/* Feature highlights */}
-                        <div className="intro-features">
-                            <div className="intro-feature">
-                                <div className="intro-feature-icon">
-                                    <CheckIcon />
-                                </div>
-                                <span>Xác minh lý lịch chuyên nghiệp</span>
-                            </div>
-                            <div className="intro-feature">
-                                <div className="intro-feature-icon">
-                                    <CheckIcon />
-                                </div>
-                                <span>Hỗ trợ 24/7 cho thành viên</span>
-                            </div>
+                    </div>
+                    <div className="relative z-10 flex gap-6">
+                        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40">
+                            <UserGroupIcon className="h-5 w-5 text-brand" /> 10k+ Khách hàng
+                        </div>
+                        <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40">
+                            <ShieldCheckIcon className="h-5 w-5 text-brand" /> Xác minh 100%
                         </div>
                     </div>
                 </div>
 
-                {/* Right Side - Form */}
-                <div className="auth-form-container">
-                    {/* Role Tabs */}
-                    <div className="role-selector">
-                        <button
-                            type="button"
-                            className={`role-tab ${formData.role === 'customer' ? 'active' : ''}`}
-                            onClick={() => setFormData((prev) => ({ ...prev, role: 'customer' }))}
-                            disabled={isLoading}
-                        >
-                            Đăng ký Khách hàng
-                        </button>
-                        <button
-                            type="button"
-                            className={`role-tab ${formData.role === 'nurse' ? 'active' : ''}`}
-                            onClick={() => setFormData((prev) => ({ ...prev, role: 'nurse' }))}
-                            disabled={isLoading}
-                        >
-                            Đăng ký Điều dưỡng
-                        </button>
-                    </div>
-
-                    <form onSubmit={handleSubmit} className="auth-form">
-                        {error && (
-                            <div className="error-message">
-                                <span className="error-icon">⚠️</span>
-                                {error}
-                            </div>
-                        )}
-
-                        {/* Full Name */}
-                        <div className="form-group">
-                            <label htmlFor="fullName">Họ và tên</label>
-                            <div className="input-with-icon">
-                                <span className="input-icon"><PersonIcon /></span>
-                                <input
-                                    type="text"
-                                    id="fullName"
-                                    name="fullName"
-                                    className="has-icon"
-                                    value={formData.fullName}
-                                    onChange={handleChange}
-                                    placeholder="VD: Nguyễn Văn A"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Email */}
-                        <div className="form-group">
-                            <label htmlFor="email">Email</label>
-                            <div className="input-with-icon">
-                                <span className="input-icon"><EmailIcon /></span>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    className="has-icon"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    placeholder="name@example.com"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Password */}
-                        <div className="form-group">
-                            <label htmlFor="password">Mật khẩu</label>
-                            <div className="input-with-icon">
-                                <span className="input-icon"><LockIcon /></span>
-                                <input
-                                    type="password"
-                                    id="password"
-                                    name="password"
-                                    className="has-icon"
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    placeholder="Tối thiểu 6 ký tự"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Phone Number */}
-                        <div className="form-group">
-                            <label htmlFor="phone">Số điện thoại</label>
-                            <div className="input-with-icon">
-                                <span className="input-icon"><PhoneIcon /></span>
-                                <input
-                                    type="tel"
-                                    id="phone"
-                                    name="phone"
-                                    className="has-icon"
-                                    value={formData.phone}
-                                    onChange={handleChange}
-                                    placeholder={formData.role === 'nurse' ? "Số giấy phép hoặc chứng chỉ" : "VD: 0123 456 789"}
-                                    disabled={isLoading}
-                                    required={formData.role === 'nurse'}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Nurse-specific fields */}
-                        {formData.role === 'nurse' && (
-                            <>
-
-                                <div className="form-group">
-                                    <label htmlFor="yearsExperience">Số năm kinh nghiệm</label>
-                                    <div className="input-with-icon">
-                                        <span className="input-icon"><BriefcaseIcon /></span>
-                                        <select
-                                            id="yearsExperience"
-                                            name="yearsExperience"
-                                            className="has-icon"
-                                            value={formData.yearsExperience}
-                                            onChange={handleChange}
-                                            disabled={isLoading}
-                                        >
-                                            <option value={0}>Chọn kinh nghiệm...</option>
-                                            <option value={1}>Dưới 1 năm</option>
-                                            <option value={2}>1-2 năm</option>
-                                            <option value={3}>3-5 năm</option>
-                                            <option value={5}>5-10 năm</option>
-                                            <option value={10}>Trên 10 năm</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </>
-                        )}
-
-                        {/* Confirm Password */}
-                        <div className="form-group">
-                            <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
-                            <div className="input-with-icon">
-                                <span className="input-icon"><LockIcon /></span>
-                                <input
-                                    type="password"
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    className="has-icon"
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    placeholder="Nhập lại mật khẩu"
-                                    required
-                                    disabled={isLoading}
-                                />
-                            </div>
-                        </div>
-
-                        <button type="submit" className="auth-btn" disabled={isLoading}>
-                            {isLoading ? (
-                                <>
-                                    <span className="btn-spinner"></span>
-                                    Đang tạo tài khoản...
-                                </>
-                            ) : (
-                                'Tạo tài khoản'
-                            )}
-                        </button>
-                    </form>
-
-                    {/* Footer Link */}
-                    <div className="auth-footer">
-                        <p>
-                            Đã có tài khoản? <Link to="/login">Đăng nhập</Link>
+                <div className="p-10 sm:p-16 bg-white">
+                    <div className="max-w-sm mx-auto">
+                        <h1 className="text-3xl font-black text-slate-900">Tạo tài khoản</h1>
+                        <p className="mt-3 text-sm font-bold text-slate-500">
+                            Bạn đã có tài khoản?{' '}
+                            <Link to="/login" className="text-brand font-black hover:underline">Đăng nhập</Link>
                         </p>
+
+                        <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+                            <div>
+                                <label className="form-label">Bạn là ai?</label>
+                                <div className="mt-2 grid grid-cols-2 gap-3">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setForm({...form, role: 'customer'})}
+                                        className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'customer' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                                    >
+                                        Khách hàng
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => setForm({...form, role: 'nurse'})}
+                                        className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'nurse' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                                    >
+                                        Y tá / Điều dưỡng
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="form-label">Họ và tên</label>
+                                <input type="text" className="form-input" placeholder="Nguyễn Văn A" value={form.fullName} onChange={e => setForm({...form, fullName: e.target.value})} required />
+                            </div>
+                            
+                            <div>
+                                <label className="form-label">Email</label>
+                                <input type="email" className="form-input" placeholder="your@email.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+                            </div>
+
+                            <div>
+                                <label className="form-label">Số điện thoại</label>
+                                <input type="tel" className="form-input" placeholder="09xx xxx xxx" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} required />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="form-label">Mật khẩu</label>
+                                    <input type="password" className="form-input" placeholder="••••••••" value={form.password} onChange={e => setForm({...form, password: e.target.value})} required />
+                                </div>
+                                <div>
+                                    <label className="form-label">Xác nhận</label>
+                                    <input type="password" className="form-input" placeholder="••••••••" value={form.confirmPassword} onChange={e => setForm({...form, confirmPassword: e.target.value})} required />
+                                </div>
+                            </div>
+
+                            <button 
+                                type="submit" 
+                                disabled={loading}
+                                className="btn-primary w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand/20 flex items-center justify-center gap-3"
+                            >
+                                {loading ? 'Đang xử lý...' : 'Đăng ký ngay'}
+                                {!loading && <ArrowRightIcon className="h-4 w-4" />}
+                            </button>
+                        </form>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

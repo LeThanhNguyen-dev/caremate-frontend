@@ -1,33 +1,82 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light;
-  color: #212529;
-  background-color: #ffffff;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  background: #ffffff;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@layer base {
+  html {
+    color-scheme: light;
+    scroll-behavior: smooth;
   }
+
+  body {
+    @apply antialiased text-slate-600 bg-white;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-slate-900;
+    line-height: 1.1;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-7 py-3.5 text-xs font-black uppercase tracking-widest text-white transition-all duration-300 active:scale-95;
+  }
+  .btn-primary:hover {
+    @apply bg-brand-deep shadow-lg shadow-brand/20;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-brand-soft bg-white px-7 py-3.5 text-xs font-black uppercase tracking-widest text-brand transition-all duration-300 active:scale-95;
+  }
+  .btn-secondary:hover {
+    @apply border-brand bg-brand/5;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-slate-100 bg-white px-7 py-3.5 text-xs font-black uppercase tracking-widest text-slate-900 transition-all duration-300 active:scale-95;
+  }
+  .btn-outline:hover {
+    @apply border-brand text-brand;
+  }
+
+  .luxury-card {
+    @apply rounded-2xl bg-white p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-50 transition-all duration-300;
+  }
+  .luxury-card:hover {
+    @apply shadow-[0_12px_48px_rgba(0,0,0,0.06)] border-brand/10;
+  }
+
+  .accent-label {
+    @apply mb-4 inline-flex items-center gap-2 rounded-full bg-brand-soft px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-brand border border-brand/5;
+  }
+
+  .form-label {
+    @apply mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-400;
+  }
+
+  .form-input {
+    @apply block w-full rounded-xl border-2 border-slate-50 bg-slate-50 px-5 py-3.5 text-sm font-bold text-slate-900 transition-all placeholder:text-slate-300 outline-none;
+  }
+  .form-input:focus {
+    @apply bg-white border-brand/10 ring-4 ring-brand/5;
+  }
+
+  .text-gradient-pink {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand to-brand-deep;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-100 rounded-full hover:bg-slate-200;
 }
