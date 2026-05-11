@@ -1,11 +1,13 @@
 export interface LoginDto {
   email: string;
+  username?: string;
   password: string;
   role?: string;
 }
 
 export interface RegisterDto {
   fullName: string;
+  username?: string;
   phone?: string;
   email: string;
   password: string;
@@ -14,6 +16,7 @@ export interface RegisterDto {
 
 export interface RegisterNurseDto {
   fullName: string;
+  username?: string;
   phone?: string;
   email: string;
   password: string;

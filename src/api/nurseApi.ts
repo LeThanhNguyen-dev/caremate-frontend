@@ -12,8 +12,26 @@ export const nurseApi = {
     },
 
     uploadDocument: async (data: UploadDocumentDto): Promise<void> => {
-        await axiosInstance.post('/api/nurse/documents', data);
+        const formData = new FormData();
+        formData.append('Type', data.type); 
+        formData.append('File', data.file);
+        
+        await axiosInstance.post('/api/nurse/documents', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
     },
+
+    getNurses: async (params?: any) => {
+        const response = await axiosInstance.get('/api/nurses', { params });
+        return response.data;
+    },
+
+    getById: async (id: number): Promise<NurseProfileDetailDto> => {
+        const response = await axiosInstance.get<NurseProfileDetailDto>(`/api/nurses/${id}`);
+        return response.data;
+    }
 };
 
 export default nurseApi;

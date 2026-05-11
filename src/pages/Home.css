@@ -1,9 +1,9 @@
 /* Home Page - MaternalCare Style - Landing Page Expansion */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+/* Montserrat font applied */
 
 .home-container {
     background: #ffffff;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     color: #1a1a2e;
     overflow-x: hidden;
 }

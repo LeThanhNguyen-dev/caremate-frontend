@@ -23,6 +23,7 @@ export type BookingDetailDto = {
   nurseId: number;
   serviceId: number;
   serviceName: string;
+  nurseName?: string;
   status: string;
   totalPrice: number;
   startTime: string;

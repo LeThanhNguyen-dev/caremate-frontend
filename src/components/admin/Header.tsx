@@ -1,5 +1,61 @@
-import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { BellIcon } from '@heroicons/react/24/outline'; const pageMeta: Record<string, { title: string; subtitle: string }> = { '/admin/dashboard': { title: 'Bảng điều hành', subtitle: 'Tổng hợp KPI, trạng thái lịch hẹn, khiếu nại v� tốc độ vận hành hệ thống.', }, '/admin/users': { title: 'Người dùng', subtitle: 'Theo dõi thông tin khách hàng, y tá v� tài khoản cần quan tâm.', }, '/admin/bookings': { title: 'Vận hành lịch hẹn', subtitle: 'Quan sát toàn bộ phễu lịch hẹn v� xu hướng trên hệ thống.', }, '/admin/reports': { title: 'Trung tâm khiếu nại', subtitle: 'Xử lý khiếu nại, thêm ghi chú v� đóng vụ việc nhanh gọn.', }, '/admin/settings': { title: 'Cài đặt hệ thống', subtitle: 'Quản lý tham số vận hành v� cấu hình nội bộ.', },
-}; const Header = () => { const location = useLocation(); const [currentTime, setCurrentTime] = useState(new Date()); const meta = pageMeta[location.pathname] ?? { title: 'Khu vực Admin', subtitle: 'Khu vực quản trị vận hành CareMate.', }; useEffect(() => { const timer = setInterval(() => setCurrentTime(new Date()), 60000); return () => clearInterval(timer); }, []); return ( <header className="sticky top-0 z-40 border-b border-transparent bg-slate-900/[0.01] px-6 py-5 backdrop-blur-3xl lg:px-8"> <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"> <div> <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">CareMate admin</div> <h1 className="mt-2 font-heading text-3xl font-extrabold text-slate-900">{meta.title}</h1> <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{meta.subtitle}</p> </div> <div className="flex flex-wrap items-center gap-3"> <div className="rounded-2xl bg-slate-900/[0.04] px-5 py-3 text-right shadow-sm"> <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Hệ thống</div> <div className="mt-1 text-sm font-bold text-slate-900"> {new Intl.DateTimeFormat('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }).format(currentTime)} </div> </div> <Link to="/notifications" className="btn-secondary bg-slate-900/[0.02] text-admin hover:bg-admin/10 btn-sm font-bold"> <BellIcon className="h-5 w-5" /> Thông báo </Link> <Link to="/admin/reports" className="btn-primary active:scale-95 transition-all btn-sm px-6 font-bold">Mở khiếu nại</Link> </div> </div> </header> );
-}; export default Header; 
+import { useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { BellIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+
+const AdminHeader = () => {
+    const location = useLocation();
+    const { user } = useAuth();
+
+    const getPageTitle = (path: string) => {
+        switch (path) {
+            case '/admin/dashboard': return 'Tổng quan hệ thống';
+            case '/admin/pending-nurses': return 'Phê duyệt hồ sơ';
+            case '/admin/users': return 'Quản lý người dùng';
+            case '/admin/bookings': return 'Quản lý lịch hẹn';
+            case '/admin/reports': return 'Báo cáo & Khiếu nại';
+            case '/admin/settings': return 'Cài đặt hệ thống';
+            default: return 'Quản trị viên';
+        }
+    };
+
+    return (
+        <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-2xl px-8 py-6 border-b border-slate-50">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex-1 max-w-xl">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 text-[#3B82F6] text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
+                        Bảng điều khiển quản trị viên
+                    </div>
+                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">{getPageTitle(location.pathname)}</h1>
+                    <p className="mt-1 text-sm font-medium text-slate-500">Giám sát và điều phối toàn bộ hoạt động của nền tảng CareMate.</p>
+                </div>
+
+                <div className="flex items-center gap-6">
+                    <div className="hidden md:flex items-center relative group">
+                        <MagnifyingGlassIcon className="h-5 w-5 absolute left-4 text-slate-400 group-focus-within:text-[#3B82F6] transition-colors" />
+                        <input 
+                            type="text" 
+                            placeholder="Tìm kiếm người dùng, đơn hàng..." 
+                            className="bg-slate-50 border-none rounded-lg py-3 pl-12 pr-6 text-sm font-medium w-80 focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all outline-none"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button className="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-[#3B82F6] hover:bg-blue-50 transition-all relative group">
+                            <BellIcon className="h-6 w-6" />
+                            <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-[#3B82F6] ring-4 ring-white"></span>
+                        </button>
+                        
+                        <div className="h-10 w-[1px] bg-slate-100 mx-2"></div>
+
+                        <div className="text-right hidden sm:block">
+                            <div className="text-xs font-black text-slate-900 uppercase">{user?.username || 'Admin'}</div>
+                            <div className="text-[9px] font-bold text-[#3B82F6] uppercase tracking-[0.3em]">Administrator</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+};
+
+export default AdminHeader;

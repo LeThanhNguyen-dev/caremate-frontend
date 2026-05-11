@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
 import type { BookingDetailDto } from '../api/frontend-api-contract';
@@ -11,7 +11,8 @@ import {
     ChatBubbleLeftRightIcon,
     ArrowLeftIcon,
     CheckCircleIcon,
-    XCircleIcon
+    XCircleIcon,
+    SparklesIcon
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
@@ -33,13 +34,19 @@ const BookingDetailPage = () => {
 
     useEffect(() => {
         const load = async () => {
-            if (!id) return;
+            if (!id) {
+                console.error('[BookingDetail] No ID found in params');
+                return;
+            }
             try {
+                console.log(`[BookingDetail] Fetching booking ${id}...`);
                 setLoading(true);
                 const data = await caremateApi.getBookingById(Number(id));
+                console.log('[BookingDetail] Data received:', data);
                 setDetail(data);
-            } catch {
-                showToast('Không thể tải chi tiết lịch hẹn.', 'error');
+            } catch (err) {
+                console.error('[BookingDetail] Error loading detail:', err);
+                showToast('Không thể tải chi tiết lịch hẹn. Vui lòng thử lại.', 'error');
                 navigate('/my-bookings');
             } finally {
                 setLoading(false);
@@ -50,10 +57,10 @@ const BookingDetailPage = () => {
 
     if (loading) {
         return (
-            <div className="flex min-h-[60vh] items-center justify-center bg-white">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand border-t-transparent"></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Đang tải chi tiết...</span>
+            <div className="flex min-h-[80vh] items-center justify-center bg-[#FAFAFA]">
+                <div className="flex flex-col items-center gap-6">
+                    <div className="h-16 w-16 animate-spin rounded-full border-[3px] border-brand border-t-transparent shadow-xl"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Đang khởi tạo dữ liệu...</span>
                 </div>
             </div>
         );
@@ -64,101 +71,149 @@ const BookingDetailPage = () => {
     const status = statusConfig[detail.status] || { label: detail.status, color: 'bg-slate-100 text-slate-600', icon: ClockIcon };
 
     return (
-        <div className="max-w-4xl mx-auto py-12 px-6">
-            <button 
-                onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand mb-8 transition-all"
-            >
-                <ArrowLeftIcon className="h-4 w-4" /> Quay lại
-            </button>
+        <div className="min-h-screen bg-[#FAFAFA] py-24 px-6 overflow-hidden relative">
+            {/* Background Decorations */}
+            <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand/5 blur-[150px] rounded-full -mr-96 -mt-96 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-soft/30 blur-[120px] rounded-full -ml-48 -mb-48 pointer-events-none"></div>
 
-            <div className="grid gap-8 lg:grid-cols-[1fr_0.4fr]">
-                <div className="space-y-8">
+            <div className="max-w-6xl mx-auto relative z-10">
+                <button 
+                    onClick={() => navigate(-1)}
+                    className="group flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-brand mb-16 transition-all"
+                >
+                    <div className="h-10 w-10 rounded-full border-2 border-slate-100 flex items-center justify-center group-hover:border-brand group-hover:bg-brand group-hover:text-white transition-all">
+                        <ArrowLeftIcon className="h-4 w-4" />
+                    </div>
+                    Quay lại danh sách
+                </button>
+
+                <div className="grid lg:grid-cols-[1fr_380px] gap-12 items-start">
                     <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="luxury-card p-10 border-none shadow-xl"
+                        className="space-y-12"
                     >
-                        <div className="flex items-start justify-between mb-10">
-                            <div>
-                                <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${status.color}`}>
-                                    <status.icon className="h-4 w-4" />
-                                    {status.label}
-                                </div>
-                                <h1 className="text-3xl font-black text-slate-900 mt-6">{detail.serviceName}</h1>
-                                <p className="text-sm font-bold text-slate-400 mt-2">Mã lịch hẹn: #{detail.id}</p>
-                            </div>
-                            <div className="text-right">
-                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tổng thanh toán</div>
-                                <div className="text-3xl font-black text-brand mt-1">{detail.totalPrice.toLocaleString('vi-VN')}đ</div>
-                            </div>
-                        </div>
-
-                        <div className="grid sm:grid-cols-2 gap-8 py-10 border-y border-slate-50">
-                            <div className="flex items-start gap-4">
-                                <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                    <CalendarIcon className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Ngày phục vụ</div>
-                                    <div className="text-sm font-black text-slate-900 mt-1">{new Date(detail.startTime).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                                </div>
-                            </div>
-                            <div className="flex items-start gap-4">
-                                <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                    <ClockIcon className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Thời gian</div>
-                                    <div className="text-sm font-black text-slate-900 mt-1">
-                                        {new Date(detail.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - {new Date(detail.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                        {/* Main Boarding Pass Card */}
+                        <div className="relative bg-white rounded-xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.06)] border border-slate-50">
+                            {/* Header Section */}
+                            <div className="bg-slate-900 p-12 text-white relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-brand/20 blur-[80px] -mr-32 -mt-32"></div>
+                                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+                                    <div>
+                                        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest backdrop-blur-xl border border-white/10 ${status.color.replace('bg-', 'bg-white/10 !text-').replace('text-', '')}`}>
+                                            <status.icon className="h-4 w-4" />
+                                            {status.label}
+                                        </div>
+                                        <h1 className="text-4xl font-black mt-8 tracking-tight">{detail.serviceName}</h1>
+                                        <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mt-4">Booking ID: <span className="text-white/60">#CM-{detail.id}</span></div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30 mb-2">Phí dịch vụ</div>
+                                        <div className="text-5xl font-black text-brand tracking-tighter">{detail.totalPrice.toLocaleString('vi-VN')}đ</div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="pt-10">
-                            <div className="flex items-start gap-4">
-                                <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400">
-                                    <MapPinIcon className="h-5 w-5" />
+                            {/* Details Grid */}
+                            <div className="p-12">
+                                <div className="grid md:grid-cols-2 gap-16 py-12 border-b border-slate-50">
+                                    <div className="space-y-8">
+                                        <div className="flex items-start gap-6">
+                                            <div className="h-14 w-14 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                                <CalendarIcon className="h-7 w-7" />
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Ngày phục vụ</div>
+                                                <div className="text-lg font-black text-slate-900 capitalize">
+                                                    {new Date(detail.startTime).toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-start gap-6">
+                                            <div className="h-14 w-14 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                                <ClockIcon className="h-7 w-7" />
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Khung giờ vàng</div>
+                                                <div className="text-lg font-black text-slate-900 tracking-tight">
+                                                    {new Date(detail.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} 
+                                                    <span className="mx-3 text-slate-200">/</span>
+                                                    {new Date(detail.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-8">
+                                        <div className="flex items-start gap-6">
+                                            <div className="h-14 w-14 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                                <MapPinIcon className="h-7 w-7" />
+                                            </div>
+                                            <div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Địa điểm chăm sóc</div>
+                                                <div className="text-lg font-black text-slate-900 leading-tight max-w-sm">
+                                                    {detail.address || 'Hồ sơ khách hàng CareMate'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex-1">
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Địa chỉ phục vụ</div>
-                                    <div className="text-sm font-black text-slate-900 mt-1 leading-relaxed">
-                                        {detail.address || 'Địa chỉ đã lưu trong hồ sơ'}
+
+                                {/* Notes Section */}
+                                <div className="mt-12">
+                                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-3">
+                                        <div className="h-px flex-1 bg-slate-50"></div>
+                                        Yêu cầu đặc biệt
+                                        <div className="h-px flex-1 bg-slate-50"></div>
+                                    </div>
+                                    <div className="bg-slate-50/50 rounded-xl p-8 border border-slate-50 italic font-medium text-slate-500 leading-loose text-center">
+                                        "{detail.notes || 'Khách hàng không để lại ghi chú bổ sung.'}"
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </motion.div>
 
-                    <div className="luxury-card p-10 border-none shadow-xl">
-                        <h3 className="text-lg font-black text-slate-900 mb-6">Ghi chú từ khách hàng</h3>
-                        <div className="p-6 rounded-2xl bg-slate-50 text-sm font-medium text-slate-600 leading-relaxed italic">
-                            "{detail.notes || 'Không có ghi chú thêm cho lịch hẹn này.'}"
-                        </div>
-                    </div>
-                </div>
+                    {/* Sidebar Actions */}
+                    <aside className="space-y-8">
+                        <motion.div 
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="bg-white rounded-xl p-10 shadow-2xl shadow-slate-900/5 border border-slate-50 text-center"
+                        >
+                            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 mb-8">Điều dưỡng thực hiện</div>
+                            <div className="relative inline-block mb-6">
+                                <div className="h-32 w-32 rounded-xl bg-brand text-white flex items-center justify-center font-black text-5xl shadow-2xl shadow-pink-500/20">
+                                    {detail.nurseName?.charAt(0) || 'N'}
+                                </div>
+                                <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-lg bg-white border-4 border-white shadow-lg flex items-center justify-center text-brand">
+                                    <CheckCircleIcon className="h-6 w-6" />
+                                </div>
+                            </div>
+                            <h4 className="text-2xl font-black text-slate-900 tracking-tight">{detail.nurseName || 'Y tá CareMate'}</h4>
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand mt-2">Xác minh chuyên nghiệp</p>
+                            
+                            <div className="mt-12 grid gap-4">
+                                <button className="w-full py-5 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-brand transition-all shadow-xl shadow-slate-900/10 active:scale-95">
+                                    <ChatBubbleLeftRightIcon className="h-5 w-5" /> Trò chuyện trực tuyến
+                                </button>
+                                <button className="w-full py-5 rounded-lg bg-white border-2 border-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:border-brand hover:text-brand transition-all active:scale-95">
+                                    <UserIcon className="h-5 w-5" /> Xem hồ sơ y tế
+                                </button>
+                            </div>
+                        </motion.div>
 
-                <aside className="space-y-8">
-                    <div className="luxury-card p-8 border-none shadow-xl text-center">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6">Đối tác thực hiện</div>
-                        <div className="h-20 w-20 rounded-3xl bg-slate-50 mx-auto flex items-center justify-center text-brand font-black text-2xl shadow-inner mb-4">
-                            N
+                        <div className="bg-brand rounded-xl p-10 text-white text-center relative overflow-hidden group cursor-pointer shadow-2xl shadow-pink-500/20">
+                            <div className="absolute inset-0 bg-brand-deep opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div className="relative z-10">
+                                <SparklesIcon className="h-10 w-10 mx-auto mb-6 opacity-50" />
+                                <h5 className="text-sm font-black uppercase tracking-[0.2em] mb-2">Đặc quyền CareMate</h5>
+                                <p className="text-[10px] font-bold text-white/60 leading-relaxed">Nhận bảo hiểm trách nhiệm y khoa lên đến 100tr cho mỗi lịch hẹn.</p>
+                            </div>
                         </div>
-                        <h4 className="text-lg font-black text-slate-900">Y tá CareMate</h4>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-brand mt-1">Điều dưỡng chuyên nghiệp</p>
-                        
-                        <div className="mt-8 flex flex-col gap-3">
-                            <button className="btn-primary w-full py-3.5 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
-                                <ChatBubbleLeftRightIcon className="h-4 w-4" /> Nhắn tin
-                            </button>
-                            <button className="btn-secondary w-full py-3.5 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
-                                <UserIcon className="h-4 w-4" /> Xem hồ sơ
-                            </button>
-                        </div>
-                    </div>
-                </aside>
+                    </aside>
+                </div>
             </div>
         </div>
     );

@@ -12,6 +12,7 @@
   "dependencies": {
     "@greatsumini/react-facebook-login": "^3.4.0",
     "@heroicons/react": "^2.2.0",
+    "@microsoft/signalr": "^10.0.0",
     "@react-oauth/google": "^0.13.4",
     "@tanstack/react-query": "^5.90.20",
     "axios": "^1.13.4",

@@ -1,9 +1,9 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { motion } from 'framer-motion';
-import { HeartIcon, ArrowRightIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 const Register = () => {
     const { register } = useAuth();
@@ -30,15 +30,18 @@ const Register = () => {
             const payload = form.role === 'nurse' 
                 ? { 
                     fullName: form.fullName, 
+                    username: form.email,
                     email: form.email, 
                     phone: form.phone, 
                     password: form.password, 
+                    bio: '',
                     yearsExperience: 0, 
                     serviceRadiusKm: 10, 
                     role: 'nurse' 
                   } 
                 : { 
                     fullName: form.fullName, 
+                    username: form.email,
                     email: form.email, 
                     phone: form.phone, 
                     password: form.password, 
@@ -49,8 +52,9 @@ const Register = () => {
             await register(payload, form.role);
             showToast('Đăng ký thành công! Hãy đăng nhập.', 'success');
             navigate('/login');
-        } catch {
-            showToast('Email đã tồn tại hoặc có lỗi xảy ra.', 'error');
+        } catch (err: any) {
+            const message = err.response?.data?.message || err.response?.data || 'Email đã tồn tại hoặc có lỗi xảy ra.';
+            showToast(typeof message === 'string' ? message : 'Đăng ký thất bại. Vui lòng thử lại.', 'error');
         } finally {
             setLoading(false);
         }
@@ -69,11 +73,8 @@ const Register = () => {
                 <div className="hidden lg:flex flex-col justify-between p-16 bg-[#111827] text-white relative">
                     <div className="absolute inset-0 bg-brand/10 blur-[100px] opacity-30"></div>
                     <div className="relative z-10">
-                        <Link to="/" className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white">
-                                <HeartIcon className="h-6 w-6" />
-                            </div>
-                            <span className="font-heading text-2xl font-black">CareMate</span>
+                        <Link to="/" className="flex items-center gap-3 group">
+                            <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-48 w-auto object-contain transition-transform group-hover:scale-105" />
                         </Link>
                         <div className="mt-24">
                             <h2 className="text-4xl font-black leading-tight">Bắt đầu hành trình <br /> chăm sóc chuyên nghiệp</h2>
@@ -107,14 +108,14 @@ const Register = () => {
                                     <button 
                                         type="button"
                                         onClick={() => setForm({...form, role: 'customer'})}
-                                        className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'customer' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                                        className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'customer' ? 'bg-brand text-white shadow-lg shadow-pink-500/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
                                     >
                                         Khách hàng
                                     </button>
                                     <button 
                                         type="button"
                                         onClick={() => setForm({...form, role: 'nurse'})}
-                                        className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'nurse' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
+                                        className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'nurse' ? 'bg-brand text-white shadow-lg shadow-pink-500/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
                                     >
                                         Y tá / Điều dưỡng
                                     </button>
@@ -150,7 +151,7 @@ const Register = () => {
                             <button 
                                 type="submit" 
                                 disabled={loading}
-                                className="btn-primary w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand/20 flex items-center justify-center gap-3"
+                                className="btn-primary w-full py-4 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20 flex items-center justify-center gap-3"
                             >
                                 {loading ? 'Đang xử lý...' : 'Đăng ký ngay'}
                                 {!loading && <ArrowRightIcon className="h-4 w-4" />}

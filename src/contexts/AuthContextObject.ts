@@ -5,7 +5,7 @@ export interface AuthContextType extends AuthState {
     login: (data: LoginDto) => Promise<User>;
     loginExternal: (data: ExternalLoginDto) => Promise<User>;
     register: (data: RegisterDto | RegisterNurseDto, role: string) => Promise<User>;
-    logout: () => void;
+    logout: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

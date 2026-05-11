@@ -1,3 +1,127 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth'; const NurseSidebar = () => { const location = useLocation(); const navigate = useNavigate(); const { user, logout } = useAuth(); const items = [ { label: 'Tổng quan', path: '/nurse/overview', icon: 'M3 13h8V3H3zm10 8h8V11h-8zM3 21h8v-6H3zm10-10h8V3h-8z' }, { label: 'Lịch làm việc', path: '/nurse/schedule', icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z' }, { label: 'Quản lý lịch hẹn', path: '/nurse/bookings', icon: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2' }, { label: 'Dịch vụ cung cấp', path: '/nurse/services', icon: 'M21 13.255A23.9 23.9 0 0 1 12 15c-3.18 0-6.22-.62-9-1.745M16 6V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2m4 6h.01M5 20h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2z' }, { label: 'Hồ sơ y tá', path: '/nurse/profile', icon: 'M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z' }, ]; return ( <aside className="fixed inset-y-0 left-0 z-50 hidden w-[280px] flex-col border-r border-slate-50 border-transparent -slate-50 bg-slate-50/80 backdrop-blur-3xl lg:flex"> <div className="border-b border-transparent -slate-50 p-6"> <Link to="/nurse/overview" className="group flex items-center gap-3"> <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-nurse/10 text-nurse transition-all duration-500 group-hover:scale-110 group-hover:bg-nurse/20"> <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"> <path d="M22 12h-4l-3 9L9 3l-3 9H2" /> </svg> </div> <div> <div className="font-heading text-xl font-extrabold tracking-tight text-slate-900">CareMate</div> <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Nurse portal</div> </div> </Link> </div> <div className="p-5"> <div className="rounded-[2rem] bg-slate-900/[0.04] p-5 shadow-sm"> <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Trạng thái</div> <div className="mt-3 text-lg font-semibold text-slate-900"> {user?.role === 'nurse_confirmed' ? 'Đã xác minh hồ sơ' : 'Đang chờ duyệt'} </div> <div className="mt-2 text-sm leading-6 text-slate-400"> Sắp xếp lịch, booking, dịch vụ v� hồ sơ trong một giao diện vận hành gọn gàng. </div> </div> </div> <nav className="flex-1 space-y-2 px-5 pb-5"> {items.map((item) => { const active = location.pathname === item.path; return ( <Link key={item.path} to={item.path} className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold transition-all active:scale-95 ${ active ? 'bg-nurse text-white shadow-xl shadow-nurse/30' : 'text-slate-600 hover:bg-nurse/10 hover:text-nurse active:bg-nurse/20' }`} > <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"> <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} /> </svg> {item.label} </Link> ); })} </nav> <div className="border-t border-transparent -slate-50 p-5"> <div className="mb-4 flex items-center gap-3"> <div className="flex h-11 w-11 items-center justify-center rounded-full bg-nurse text-sm font-bold text-white"> {user?.username?.charAt(0).toUpperCase() || 'N'} </div> <div className="min-w-0"> <div className="truncate text-sm font-semibold text-slate-900">{user?.username || 'Nurse account'}</div> <div className="truncate text-xs uppercase tracking-[0.2em] text-slate-400">{user?.role}</div> </div> </div> <button onClick={() => { logout(); navigate('/login'); }} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900/[0.04] px-4 py-3 text-sm font-bold text-nurse transition-all hover:bg-nurse/10 active:scale-95 active:bg-nurse/20" > Đăng xuất </button> </div> </aside> );
-}; export default NurseSidebar; 
+import { useAuth } from '../../hooks/useAuth';
+import { 
+    Squares2X2Icon, 
+    CalendarIcon, 
+    ClipboardDocumentListIcon, 
+    BriefcaseIcon, 
+    UserCircleIcon,
+    ArrowRightOnRectangleIcon,
+    ShieldCheckIcon,
+    LockClosedIcon
+} from '@heroicons/react/24/outline';
+import { motion } from 'framer-motion';
+
+const NurseSidebar = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
+
+    const items = [
+        { label: 'Tổng quan', path: '/nurse/overview', icon: Squares2X2Icon, requiresApproval: true },
+        { label: 'Lịch làm việc', path: '/nurse/schedule', icon: CalendarIcon, requiresApproval: true },
+        { label: 'Quản lý lịch hẹn', path: '/nurse/bookings', icon: ClipboardDocumentListIcon, requiresApproval: true },
+        { label: 'Dịch vụ của tôi', path: '/nurse/services', icon: BriefcaseIcon, requiresApproval: true },
+        { label: 'Hồ sơ cá nhân', path: '/nurse/profile', icon: UserCircleIcon, requiresApproval: false },
+    ];
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login');
+    };
+
+    return (
+        <aside className="fixed inset-y-0 left-0 z-50 hidden w-[300px] flex-col bg-white border-r border-slate-100 lg:flex">
+            {/* Logo Section */}
+            <div className="p-8">
+                <Link to="/nurse/overview" className="flex items-center gap-3 group">
+                    <img src="/assets/images/logo.png" alt="CareMate Nurse" className="h-24 w-auto object-contain" />
+                </Link>
+            </div>
+
+            {/* Status Card */}
+            <div className="px-6 mb-8">
+                <div className="bg-slate-900 rounded-xl p-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[40px] -mr-16 -mt-16"></div>
+                    <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-3">
+                            <ShieldCheckIcon className={`h-4 w-4 ${user?.role === 'nurse_confirmed' ? 'text-[#10B981]' : 'text-amber-400'}`} />
+                            <span className="text-[9px] font-black uppercase tracking-widest text-white/50">Trạng thái hồ sơ</span>
+                        </div>
+                        <div className="text-sm font-bold text-white mb-2">
+                            {user?.role === 'nurse_confirmed' ? 'Đã xác minh chuyên môn' : 'Đang chờ phê duyệt'}
+                        </div>
+                        <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                            <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: user?.role === 'nurse_confirmed' ? '100%' : '60%' }}
+                                className="h-full bg-[#10B981]"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
+                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Danh mục quản lý</div>
+                {items.map((item) => {
+                    const isActive = location.pathname === item.path;
+                    const isRestricted = item.requiresApproval && user?.role !== 'nurse_confirmed';
+                    
+                    if (isRestricted) {
+                        return (
+                            <div 
+                                key={item.path}
+                                className="flex items-center justify-between px-6 py-4 rounded-lg text-slate-300 cursor-not-allowed opacity-60"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <item.icon className="h-5 w-5 text-slate-300" />
+                                    <span className="text-sm font-bold">{item.label}</span>
+                                </div>
+                                <LockClosedIcon className="h-4 w-4" />
+                            </div>
+                        );
+                    }
+
+                    return (
+                        <Link 
+                            key={item.path} 
+                            to={item.path} 
+                            className={`flex items-center gap-4 px-6 py-4 rounded-lg text-sm font-bold transition-all group ${
+                                isActive 
+                                ? 'bg-[#10B981] text-white shadow-xl shadow-emerald-600/20' 
+                                : 'text-slate-500 hover:bg-emerald-50 hover:text-[#10B981]'
+                            }`}
+                        >
+                            <item.icon className={`h-5 w-5 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-[#10B981]'}`} />
+                            {item.label}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            {/* Footer Profile */}
+            <div className="p-6 mt-auto border-t border-slate-50">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-[#10B981] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-emerald-600/10">
+                        {user?.username?.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                        <div className="text-sm font-black text-slate-900 truncate">{user?.username}</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">ID: {user?.role}</div>
+                    </div>
+                </div>
+                <button 
+                    onClick={handleLogout}
+                    className="flex w-full items-center justify-center gap-3 py-4 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 shadow-sm"
+                >
+                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                    Đăng xuất
+                </button>
+            </div>
+        </aside>
+    );
+};
+
+export default NurseSidebar;

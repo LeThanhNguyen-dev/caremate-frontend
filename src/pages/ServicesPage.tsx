@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -105,7 +105,7 @@ const ServicesPage = () => {
 
             {/* Services Grid */}
             <div className="relative z-20 mx-auto max-w-7xl px-6 lg:px-8 -mt-20">
-                <div className="bg-white rounded-[40px] shadow-2xl shadow-slate-200/50 p-8 border border-slate-50">
+                <div className="bg-white rounded-xl shadow-2xl shadow-slate-200/50 p-8 border border-slate-50">
                     <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-6">
                         <div className="flex items-center gap-4">
                             <Squares2X2Icon className="h-6 w-6 text-brand" />
@@ -128,13 +128,13 @@ const ServicesPage = () => {
                             <button 
                                 key={service.id} 
                                 onClick={() => handleServiceSelect(service.id)}
-                                className={`flex flex-col items-center gap-3 p-6 rounded-3xl transition-all duration-500 border-2 ${
+                                className={`flex flex-col items-center gap-3 p-6 rounded-xl transition-all duration-500 border-2 ${
                                     selectedServiceId === service.id 
-                                    ? 'bg-brand/5 border-brand shadow-lg shadow-brand/10' 
+                                    ? 'bg-brand/5 border-brand shadow-lg shadow-pink-500/10' 
                                     : 'bg-white border-slate-50 hover:border-brand/20 hover:bg-slate-50/50'
                                 }`}
                             >
-                                <div className={`h-12 w-12 rounded-2xl flex items-center justify-center transition-colors ${
+                                <div className={`h-12 w-12 rounded-lg flex items-center justify-center transition-colors ${
                                     selectedServiceId === service.id ? 'bg-brand text-white' : 'bg-slate-50 text-slate-400'
                                 }`}>
                                     <SparklesIcon className="h-6 w-6" />
@@ -201,7 +201,7 @@ const ServicesPage = () => {
                                         initial={{ opacity: 0 }} 
                                         animate={{ opacity: 1 }} 
                                         exit={{ opacity: 0 }}
-                                        className="flex flex-col items-center justify-center py-40 bg-slate-50 rounded-[40px]"
+                                        className="flex flex-col items-center justify-center py-40 bg-slate-50 rounded-xl"
                                     >
                                         <AcademicCapIcon className="h-16 w-16 text-slate-300 mb-6" />
                                         <h3 className="text-xl font-black text-slate-900">Không tìm thấy kết quả</h3>
@@ -220,11 +220,11 @@ const ServicesPage = () => {
                                                 initial={{ opacity: 0, y: 20 }} 
                                                 animate={{ opacity: 1, y: 0 }} 
                                                 transition={{ delay: idx * 0.05 }} 
-                                                className="group bg-white rounded-[32px] border border-slate-100 p-8 hover:border-brand/20 hover:shadow-2xl hover:shadow-brand/5 transition-all duration-500"
+                                                className="group bg-white rounded-xl border border-slate-100 p-8 hover:border-brand/20 hover:shadow-2xl hover:shadow-pink-500/5 transition-all duration-500"
                                             >
                                                 <div className="flex items-start justify-between mb-8">
                                                     <div className="relative">
-                                                        <div className="h-24 w-24 overflow-hidden rounded-[24px] border-4 border-slate-50 bg-slate-100">
+                                                        <div className="h-24 w-24 overflow-hidden rounded-xl border-4 border-slate-50 bg-slate-100">
                                                             {nurse.avatar 
                                                                 ? <img src={nurse.avatar} alt={nurse.fullName} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" /> 
                                                                 : <div className="h-full w-full flex items-center justify-center text-3xl font-black text-brand">{nurse.fullName.charAt(0)}</div>
@@ -235,12 +235,12 @@ const ServicesPage = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col items-end text-right">
-                                                        <div className="flex items-center gap-1 rounded-full bg-yellow-50 px-3 py-1.5 text-yellow-600 border border-yellow-100">
+                                                        <div className="flex items-center gap-1 rounded-xl bg-yellow-50 px-3 py-1.5 text-yellow-600 border border-yellow-100">
                                                             <StarSolid className="h-3.5 w-3.5" />
                                                             <span className="text-xs font-black">{nurse.averageRating.toFixed(1)}</span>
                                                         </div>
                                                         <div className="mt-3 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                                            {(idx + 1) * 25}+ Đánh giá
+                                                            Đánh giá tốt
                                                         </div>
                                                     </div>
                                                 </div>
@@ -249,15 +249,15 @@ const ServicesPage = () => {
                                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.1em] mb-8">Điều dưỡng chuyên môn cao</p>
 
                                                 <div className="grid grid-cols-2 gap-4 mb-10">
-                                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
                                                         <ClockIcon className="h-5 w-5 text-brand mb-2" />
                                                         <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Kinh nghiệm</div>
-                                                        <div className="text-sm font-black text-slate-900">5+ Năm</div>
+                                                        <div className="text-sm font-black text-slate-900">{nurse.yearsExperience}+ Năm</div>
                                                     </div>
-                                                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
                                                         <HeartIcon className="h-5 w-5 text-brand mb-2" />
-                                                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Phản hồi</div>
-                                                        <div className="text-sm font-black text-slate-900">Tuyệt vời</div>
+                                                        <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Bán kính</div>
+                                                        <div className="text-sm font-black text-slate-900">{nurse.serviceRadiusKm} km</div>
                                                     </div>
                                                 </div>
 

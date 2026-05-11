@@ -139,8 +139,16 @@ export const caremateApi = {
   getNurseProfile: async (): Promise<NurseProfileDetailDto> => (await axiosInstance.get('/api/nurse/profile')).data,
   updateNurseProfile: async (payload: { bio: string; yearsExperience: number; serviceRadiusKm: number }): Promise<MessageResponse> =>
     (await axiosInstance.put('/api/nurse/profile', payload)).data,
-  uploadNurseDocument: async (payload: { type: string; fileUrl: string }): Promise<MessageResponse> =>
-    (await axiosInstance.post('/api/nurse/documents', payload)).data,
+  uploadNurseDocument: async (payload: { type: string; file: File }): Promise<MessageResponse> => {
+    const formData = new FormData();
+    formData.append('Type', payload.type);
+    formData.append('File', payload.file);
+    return (await axiosInstance.post('/api/nurse/documents', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })).data;
+  },
   createNurseService: async (payload: { serviceId: number; price: number; unit: string }): Promise<NurseServiceDto> =>
     (await axiosInstance.post('/api/nurse/services', payload)).data,
   getNurseServices: async (): Promise<NurseServiceDto[]> => (await axiosInstance.get('/api/nurse/services')).data,
@@ -193,6 +201,27 @@ export const caremateApi = {
       async () => (await axiosInstance.get('/api/users')).data,
     ]);
     return toArray(response).map(normalizeAdminUser);
+  },
+
+  // === User Profile ===
+  /** GET /api/users/me/profile */
+  getMyProfile: async (): Promise<{ fullName: string; email: string; phone: string | null; address: string | null }> =>
+    (await axiosInstance.get('/api/users/me/profile')).data,
+
+  /** PUT /api/users/me/profile */
+  updateMyProfile: async (payload: { fullName?: string; phone?: string; address?: string }): Promise<void> => {
+    await axiosInstance.put('/api/users/me/profile', payload);
+  },
+
+  // === Notification Management ===
+  /** DELETE /api/notifications/{id} */
+  deleteNotification: async (id: number): Promise<void> => {
+    await axiosInstance.delete(`/api/notifications/${id}`);
+  },
+
+  /** DELETE /api/notifications */
+  deleteAllNotifications: async (): Promise<void> => {
+    await axiosInstance.delete('/api/notifications');
   },
 };
 

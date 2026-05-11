@@ -28,7 +28,7 @@ export interface UpdateNurseProfileDto {
 
 export interface UploadDocumentDto {
     type: string;
-    fileUrl: string;
+    file: File;
 }
 
 export interface ReviewNurseProfileDto {

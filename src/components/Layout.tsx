@@ -1,22 +1,22 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-    HeartIcon, 
     Bars3Icon, 
     XMarkIcon, 
     BellIcon, 
-    
     ArrowRightOnRectangleIcon,
     Cog8ToothIcon,
     CalendarDaysIcon,
-    CreditCardIcon,
-    ChatBubbleLeftEllipsisIcon
+    BellAlertIcon,
+    InboxStackIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
+import { useNotifications } from '../contexts/NotificationProvider';
 
 const Layout = () => {
     const { user, logout, isAuthenticated } = useAuth();
+    const { notifications, unreadCount, markAsRead } = useNotifications();
     const navigate = useNavigate();
     const location = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -49,26 +49,19 @@ const Layout = () => {
         { name: 'Giới thiệu', href: '/about' },
     ];
 
-    const notifications = [
-        { id: 1, title: 'Lịch hẹn mới', desc: 'Y tá Nguyễn Thị A đã xác nhận lịch hẹn của bạn.', time: '5 phút trước' },
-        { id: 2, title: 'Khuyến mãi', desc: 'Nhận ngay 20% ưu đãi cho gói chăm sóc mẹ bé.', time: '2 giờ trước' },
-        { id: 3, title: 'Thanh toán thành công', desc: 'Hóa đơn #CM12345 đã được thanh toán.', time: '1 ngày trước' },
-    ];
+    const displayNotifications = notifications.slice(0, 5);
 
     return (
-        <div className="min-h-screen flex flex-col bg-white font-['Plus_Jakarta_Sans']">
+        <div className="min-h-screen flex flex-col bg-white font-sans">
             <header 
                 className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-                    scrolled ? 'bg-white/80 backdrop-blur-2xl py-4 shadow-xl shadow-slate-200/20' : 'bg-transparent py-8'
+                    scrolled ? 'bg-white/80 backdrop-blur-2xl py-2 shadow-xl shadow-slate-200/20' : 'bg-transparent py-6'
                 }`}
             >
                 <nav className="mx-auto max-w-7xl px-6 lg:px-8 flex items-center justify-between">
                     <div className="flex items-center gap-12">
                         <Link to="/" className="flex items-center gap-3 group">
-                            <div className="h-10 w-10 rounded-2xl bg-brand flex items-center justify-center text-white shadow-lg shadow-brand/20 group-hover:scale-110 transition-transform">
-                                <HeartIcon className="h-5 w-5" />
-                            </div>
-                            <span className="text-2xl font-black tracking-tighter uppercase text-slate-900">CareMate</span>
+                            <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-20 w-auto object-contain transition-transform group-hover:scale-105" />
                         </Link>
 
                         <div className="hidden lg:flex items-center gap-8">
@@ -76,7 +69,7 @@ const Layout = () => {
                                 <Link 
                                     key={item.name} 
                                     to={item.href} 
-                                    className={`text-[10px] font-black uppercase tracking-[0.3em] transition-colors ${
+                                    className={`text-[13px] font-black uppercase tracking-[0.2em] transition-colors ${
                                         location.pathname === item.href ? 'text-brand' : 'text-slate-500 hover:text-brand'
                                     }`}
                                 >
@@ -100,35 +93,60 @@ const Layout = () => {
                                             setNotifDropdownOpen(!notifDropdownOpen);
                                             setProfileDropdownOpen(false);
                                         }}
-                                        className="p-3 rounded-2xl bg-slate-50 text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative"
+                                        className="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative group"
                                     >
-                                        <BellIcon className="h-6 w-6" />
-                                        <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-brand ring-4 ring-white"></span>
+                                        <BellIcon className="h-6 w-6 transition-transform group-hover:rotate-12" />
+                                        {unreadCount > 0 && (
+                                            <span className="absolute top-2.5 right-2.5 h-3 w-3 rounded-full bg-brand ring-4 ring-white animate-pulse"></span>
+                                        )}
                                     </button>
 
                                     <AnimatePresence>
                                         {notifDropdownOpen && (
                                             <motion.div 
-                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                initial={{ opacity: 0, y: 15, scale: 0.95 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute right-0 mt-4 w-96 bg-white rounded-[32px] shadow-2xl shadow-slate-900/10 border border-slate-50 p-6 z-[110]"
+                                                exit={{ opacity: 0, y: 15, scale: 0.95 }}
+                                                className="absolute right-0 mt-4 w-[400px] bg-white rounded-xl shadow-2xl shadow-slate-900/10 border border-slate-50 p-8 z-[110]"
                                             >
-                                                <div className="flex items-center justify-between mb-6 px-2">
-                                                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-widest">Thông báo</h4>
-                                                    <span className="text-[10px] font-bold text-brand bg-brand/5 px-2 py-1 rounded-lg">Mới</span>
+                                                <div className="flex items-center justify-between mb-8 px-2">
+                                                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em]">Thông báo</h4>
+                                                    <span className="text-[11px] font-black text-brand bg-brand-soft px-4 py-2 rounded-xl uppercase tracking-widest">{unreadCount} tin mới</span>
                                                 </div>
-                                                <div className="space-y-2 mb-6">
-                                                    {notifications.map((notif) => (
-                                                        <div key={notif.id} className="p-4 rounded-2xl hover:bg-slate-50 cursor-pointer transition-colors group">
-                                                            <div className="text-xs font-black text-slate-900 group-hover:text-brand transition-colors">{notif.title}</div>
-                                                            <div className="text-[11px] font-medium text-slate-400 mt-1 line-clamp-1">{notif.desc}</div>
-                                                            <div className="text-[9px] font-bold text-slate-300 mt-2 uppercase">{notif.time}</div>
+                                                
+                                                <div className="space-y-4 mb-8 max-h-[400px] overflow-y-auto custom-scrollbar px-2">
+                                                    {displayNotifications.length > 0 ? (
+                                                        displayNotifications.map((notif) => (
+                                                            <div 
+                                                                key={notif.id} 
+                                                                onClick={() => markAsRead(notif.id)}
+                                                                className={`p-5 rounded-xl transition-all group cursor-pointer ${
+                                                                    !notif.isRead ? 'bg-brand/5 hover:bg-brand/10 border-brand/5 border' : 'hover:bg-slate-50'
+                                                                }`}
+                                                            >
+                                                                <div className="flex justify-between gap-4">
+                                                                    <div className={`text-xs font-black transition-colors ${!notif.isRead ? 'text-brand' : 'text-slate-900 group-hover:text-brand'}`}>
+                                                                        {notif.title}
+                                                                    </div>
+                                                                    {!notif.isRead && <div className="h-2 w-2 rounded-full bg-brand mt-1 flex-none"></div>}
+                                                                </div>
+                                                                <div className="text-[11px] font-medium text-slate-500 mt-2 line-clamp-2 leading-relaxed">{notif.content}</div>
+                                                                <div className="text-[9px] font-black text-slate-300 mt-3 uppercase tracking-widest">{new Date(notif.createdAt).toLocaleTimeString()}</div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="py-12 text-center">
+                                                            <InboxStackIcon className="h-10 w-10 text-slate-100 mx-auto mb-4" />
+                                                            <p className="text-xs font-bold text-slate-300">Không có thông báo mới</p>
                                                         </div>
-                                                    ))}
+                                                    )}
                                                 </div>
-                                                <Link to="/notifications" className="block w-full py-3 bg-slate-50 text-center rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand hover:bg-brand/5 transition-all">
-                                                    Xem tất cả thông báo
+                                                
+                                                <Link 
+                                                    to="/notifications" 
+                                                    className="flex items-center justify-center w-full py-4 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] hover:bg-brand hover:shadow-xl hover:shadow-pink-500/20 transition-all active:scale-95"
+                                                >
+                                                    Xem tất cả tin nhắn
                                                 </Link>
                                             </motion.div>
                                         )}
@@ -142,11 +160,11 @@ const Layout = () => {
                                             setProfileDropdownOpen(!profileDropdownOpen);
                                             setNotifDropdownOpen(false);
                                         }}
-                                        className="flex items-center gap-4 pl-4 pr-2 py-2 rounded-2xl bg-slate-50 hover:bg-white hover:shadow-lg transition-all group"
+                                        className="flex items-center gap-4 pl-4 pr-2 py-2 rounded-lg bg-slate-50 hover:bg-white hover:shadow-lg transition-all group"
                                     >
                                         <div className="text-right hidden xl:block">
-                                            <div className="text-xs font-black text-slate-900 group-hover:text-brand transition-colors">{user?.username}</div>
-                                            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{user?.role === 'admin' ? 'Quản trị viên' : user?.role === 'nurse' ? 'Điều dưỡng' : 'Khách hàng'}</div>
+                                            <div className="text-sm font-black text-slate-900 group-hover:text-brand transition-colors">{user?.username}</div>
+                                            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{user?.role === 'admin' ? 'Quản trị viên' : user?.role === 'nurse' ? 'Điều dưỡng' : 'Khách hàng'}</div>
                                         </div>
                                         <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center font-black text-lg">
                                             {user?.username?.charAt(0)}
@@ -159,14 +177,13 @@ const Layout = () => {
                                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                                className="absolute right-0 mt-4 w-72 bg-white rounded-[32px] shadow-2xl shadow-slate-900/10 border border-slate-50 p-6 z-[110]"
+                                                className="absolute right-0 mt-4 w-72 bg-white rounded-xl shadow-2xl shadow-slate-900/10 border border-slate-50 p-6 z-[110]"
                                             >
                                                 <div className="space-y-1 mb-6">
                                                     {[
                                                         { name: 'Cài đặt thông tin', icon: Cog8ToothIcon, href: '/profile' },
                                                         { name: 'Quản lý dịch vụ', icon: CalendarDaysIcon, href: '/my-bookings' },
-                                                        { name: 'Lịch sử ví & tiền', icon: CreditCardIcon, href: '/wallet' },
-                                                        { name: 'Tin nhắn hỗ trợ', icon: ChatBubbleLeftEllipsisIcon, href: '/chat' },
+                                                        { name: 'Thông báo của tôi', icon: BellAlertIcon, href: '/notifications' },
                                                     ].map((item) => (
                                                         <Link 
                                                             key={item.name} 
@@ -196,8 +213,8 @@ const Layout = () => {
                             </div>
                         ) : (
                             <div className="hidden lg:flex items-center gap-8">
-                                <Link to="/login" className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-900 hover:text-brand">Đăng nhập</Link>
-                                <Link to="/register" className="btn-primary !px-8 !py-4 !text-[10px] !uppercase !tracking-[0.2em] shadow-xl shadow-slate-900/10">Bắt đầu ngay</Link>
+                                <Link to="/login" className="text-[13px] font-black uppercase tracking-[0.2em] text-slate-900 hover:text-brand">Đăng nhập</Link>
+                                <Link to="/register" className="btn-primary !px-10 !py-5 !text-[12px] !uppercase !tracking-[0.2em] shadow-xl shadow-slate-900/10">Bắt đầu ngay</Link>
                             </div>
                         )}
                     </div>
@@ -216,9 +233,8 @@ const Layout = () => {
                             <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
                             <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white p-8 shadow-2xl flex flex-col">
                                 <div className="flex items-center justify-between mb-12">
-                                    <Link to="/" className="flex items-center gap-3">
-                                        <div className="h-10 w-10 rounded-2xl bg-brand flex items-center justify-center text-white"><HeartIcon className="h-5 w-5" /></div>
-                                        <span className="text-2xl font-black uppercase tracking-tighter">CareMate</span>
+                                    <Link to="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
+                                        <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-20 w-auto object-contain" />
                                     </Link>
                                     <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-slate-900"><XMarkIcon className="h-7 w-7" /></button>
                                 </div>
@@ -253,9 +269,8 @@ const Layout = () => {
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
                         <div className="space-y-8">
-                            <Link to="/" className="flex items-center gap-3">
-                                <div className="h-10 w-10 rounded-2xl bg-brand flex items-center justify-center text-white shadow-lg shadow-brand/20"><HeartIcon className="h-5 w-5" /></div>
-                                <span className="text-2xl font-black tracking-tighter uppercase">CareMate</span>
+                            <Link to="/" className="flex items-center gap-3 group">
+                                <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-24 w-auto object-contain brightness-0 invert" />
                             </Link>
                             <p className="text-slate-400 text-sm leading-relaxed font-medium max-w-xs">
                                 Định nghĩa lại tiêu chuẩn chăm sóc gia đình Việt với công nghệ và sự tận tâm từ trái tim.
@@ -297,7 +312,7 @@ const Layout = () => {
                         </div>
                         <div className="flex gap-6">
                             {['FB', 'IG', 'LI', 'YT'].map(social => (
-                                <div key={social} className="h-10 w-10 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group">
+                                <div key={social} className="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group">
                                     <span className="text-[10px] font-black group-hover:scale-110 transition-transform">{social}</span>
                                 </div>
                             ))}

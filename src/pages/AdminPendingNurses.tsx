@@ -1,1 +1,149 @@
-import { useState, useEffect } from 'react'; import { Link } from 'react-router-dom'; import { adminApi } from '../api/adminApi'; import type { NurseProfileDetailDto } from '../types/nurse'; import './AdminPendingNurses.css'; const UserIcon = () => ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /> </svg> ); const ExternalLinkIcon = () => ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /> <polyline points="15 3 21 3 21 9" /> <line x1="10" y1="14" x2="21" y2="3" /> </svg> ); const AdminPendingNurses = () => { const [pendingNurses, setPendingNurses] = useState<NurseProfileDetailDto[]>([]); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); useEffect(() => { fetchPendingNurses(); }, []); const fetchPendingNurses = async () => { try { setLoading(true); const data = await adminApi.getPendingNurses(); setPendingNurses(data); } catch (err) { setError('Không thể tải danh sách điều dưỡng chờ duyệt.'); console.error(err); } finally { setLoading(false); } }; if (loading) return <div className="admin-loading">Đang tải danh sách chờ duyệt...</div>; return ( <div className="admin-pending-container"> <header className="admin-header"> <div className="header-info"> <h1>Duyệt hồ sơ Điều dưỡng</h1> <p>Có {pendingNurses.length} hồ sơ đang chờ bạn kiểm tra</p> </div> <button className="refresh-btn" onClick={fetchPendingNurses}>Làm mới</button> </header> {error && <div className="admin-error">{error}</div>} <div className="nurse-list"> {pendingNurses.length > 0 ? ( <div className="nurse-cards-grid"> {pendingNurses.map((nurse) => ( <div key={nurse.userId} className="nurse-admin-card"> <div className="nurse-card-header"> <div className="nurse-avatar"> <UserIcon /> </div> <div className="nurse-meta"> <h3>{nurse.fullName}</h3> <p>{nurse.email}</p> </div> </div> <div className="nurse-card-body"> <div className="info-stat"> <span className="label">Kinh nghiệm:</span> <span className="value">{nurse.yearsExperience} năm</span> </div> <div className="info-stat"> <span className="label">Tài liệu:</span> <span className="value">{nurse.documents?.length || 0} bản</span> </div> <p className="nurse-bio-preview"> {nurse.bio ? (nurse.bio.length > 100 ? nurse.bio.substring(0, 100) + '...' : nurse.bio) : 'Chưa có tiểu sử.'} </p> </div> <div className="nurse-card-footer"> <Link to={`/admin/nurses/${nurse.userId}`} className="review-link"> Xem chi tiết <ExternalLinkIcon /> </Link> </div> </div> ))} </div> ) : ( <div className="empty-state"> <div className="empty-icon">🎉</div> <h3>Mọi việc đã xong!</h3> <p>Hiện không có hồ sơ nào đang chờ duyệt.</p> </div> )} </div> </div> ); }; export default AdminPendingNurses; 
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import caremateApi from '../api/caremateApi';
+import type { NurseProfileDetailDto } from '../api/frontend-api-contract';
+import { 
+    ArrowTopRightOnSquareIcon, 
+    ArrowPathIcon,
+    ShieldCheckIcon,
+    DocumentTextIcon,
+    AcademicCapIcon
+} from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '../hooks/useToast';
+
+const AdminPendingNurses = () => {
+    const { showToast } = useToast();
+    const [pendingNurses, setPendingNurses] = useState<NurseProfileDetailDto[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const fetchPendingNurses = async () => {
+        try {
+            setLoading(true);
+            const data = await caremateApi.getPendingNurses();
+            setPendingNurses(data);
+        } catch (err) {
+            showToast('Không thể tải danh sách điều dưỡng chờ duyệt.', 'error');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        void fetchPendingNurses();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex min-h-[60vh] items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-6">
+                    <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-[#3B82F6] border-t-transparent"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Đang quét hồ sơ điều dưỡng...</span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-12 pb-20">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50 text-[#3B82F6] text-[9px] font-black uppercase tracking-[0.2em] mb-4 shadow-sm">
+                        <ShieldCheckIcon className="h-3 w-3" />
+                        Trung tâm xác minh
+                    </div>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">
+                        Duyệt <span className="text-[#3B82F6]">Điều dưỡng</span> mới
+                    </h1>
+                    <p className="text-slate-500 font-medium text-lg">
+                        Bạn có <span className="text-[#3B82F6] font-black">{pendingNurses.length}</span> hồ sơ mới đang chờ phê duyệt gia nhập hệ thống.
+                    </p>
+                </div>
+                
+                <button 
+                    onClick={fetchPendingNurses}
+                    className="flex items-center gap-2 px-8 py-4 rounded-lg bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-[#3B82F6] hover:text-[#3B82F6] transition-all shadow-sm active:scale-95"
+                >
+                    <ArrowPathIcon className="h-4 w-4" />
+                    Làm mới dữ liệu
+                </button>
+            </div>
+
+            {/* List Section */}
+            <AnimatePresence mode="wait">
+                {pendingNurses.length === 0 ? (
+                    <motion.div 
+                        key="empty"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="bg-white rounded-xl p-24 text-center border border-slate-50 shadow-xl shadow-slate-200/20"
+                    >
+                        <div className="h-24 w-24 rounded-xl bg-slate-50 flex items-center justify-center mx-auto mb-8">
+                            <ShieldCheckIcon className="h-10 w-10 text-slate-200" />
+                        </div>
+                        <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Hệ thống đang ổn định!</h3>
+                        <p className="text-slate-400 text-lg font-medium">Hiện tại không có hồ sơ nào đang tồn đọng cần xử lý.</p>
+                    </motion.div>
+                ) : (
+                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        {pendingNurses.map((nurse, idx) => (
+                            <motion.div 
+                                key={nurse.userId}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="group bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-blue-600/5 transition-all duration-500"
+                            >
+                                <div className="flex items-center gap-6 mb-8">
+                                    <div className="h-20 w-20 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-3xl shadow-xl shadow-slate-900/10 transition-transform group-hover:scale-110">
+                                        {nurse.fullName.charAt(0)}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h3 className="text-xl font-black text-slate-900 truncate tracking-tight">{nurse.fullName}</h3>
+                                        <p className="text-sm font-bold text-slate-400 truncate mt-1">{nurse.email}</p>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-8">
+                                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <AcademicCapIcon className="h-3.5 w-3.5 text-[#3B82F6]" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Kinh nghiệm</span>
+                                        </div>
+                                        <div className="text-sm font-black text-slate-900">{nurse.yearsExperience} năm</div>
+                                    </div>
+                                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <DocumentTextIcon className="h-3.5 w-3.5 text-[#3B82F6]" />
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tài liệu</span>
+                                        </div>
+                                        <div className="text-sm font-black text-slate-900">{nurse.documents?.length || 0} bản gửi</div>
+                                    </div>
+                                </div>
+
+                                <div className="mb-8">
+                                    <p className="text-xs font-medium text-slate-500 leading-relaxed line-clamp-3 italic">
+                                        "{nurse.bio || 'Ứng viên này hiện chưa cung cấp giới thiệu bản thân.'}"
+                                    </p>
+                                </div>
+
+                                <Link 
+                                    to={`/admin/nurses/${nurse.userId}`} 
+                                    className="flex items-center justify-center gap-3 w-full py-4 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#3B82F6] transition-all shadow-lg shadow-slate-900/10 active:scale-95"
+                                >
+                                    Kiểm tra hồ sơ
+                                    <ArrowTopRightOnSquareIcon className="h-4 w-4" />
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+export default AdminPendingNurses;

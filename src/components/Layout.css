@@ -38,7 +38,7 @@
 
 .logo-text {
   font-weight: 600;
-  font-family: theme('fontFamily.serif'), serif;
+  font-family: theme('fontFamily.sans');
   font-size: 1.5rem;
   letter-spacing: -0.02em;
 }
@@ -169,7 +169,7 @@
 
 .footer-copyright {
   color: var(--tw-colors-muted, #787774);
-  font-family: theme('fontFamily.mono');
+  font-family: theme('fontFamily.sans');
 }
 
 .footer-links {

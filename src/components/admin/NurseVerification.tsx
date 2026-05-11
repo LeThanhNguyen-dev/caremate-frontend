@@ -38,7 +38,7 @@ const NurseVerification = () => {
                     <h3 className="text-xl font-black text-slate-900">Xác minh Y tá</h3>
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Yêu cầu gia nhập mới nhất</p>
                 </div>
-                <span className="bg-admin/5 text-admin text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest">
+                <span className="bg-admin/5 text-admin text-[10px] font-black px-4 py-1.5 rounded-xl uppercase tracking-widest">
                     {nurses.length} Mới
                 </span>
             </div>
@@ -49,9 +49,9 @@ const NurseVerification = () => {
                         <Link 
                             key={nurse.userId} 
                             to={`/admin/nurses/${nurse.userId}`} 
-                            className="flex items-center gap-4 p-4 rounded-3xl hover:bg-slate-50 transition-all group border border-transparent hover:border-slate-100"
+                            className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-all group border border-transparent hover:border-slate-100"
                         >
-                            <div className="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105">
+                            <div className="w-14 h-14 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105">
                                 <UserOutlineIcon className="w-7 h-7 text-slate-300" />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -68,7 +68,7 @@ const NurseVerification = () => {
                         </Link>
                     ))
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-100">
+                    <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50/50 rounded-xl border-2 border-dashed border-slate-100">
                         <UserOutlineIcon className="h-10 w-10 text-slate-200 mb-4" />
                         <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Không có yêu cầu chờ xử lý</p>
                     </div>
@@ -77,7 +77,7 @@ const NurseVerification = () => {
 
             <Link 
                 to="/admin/pending-nurses" 
-                className="w-full mt-8 py-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 hover:bg-slate-100 hover:text-admin rounded-2xl transition-all"
+                className="w-full mt-8 py-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 hover:bg-slate-100 hover:text-admin rounded-lg transition-all"
             >
                 Xem tất cả yêu cầu
             </Link>

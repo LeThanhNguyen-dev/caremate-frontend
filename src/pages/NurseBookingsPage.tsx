@@ -2,6 +2,241 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
-import type { BookingDetailDto } from '../api/frontend-api-contract'; const statusConfig: Record<string, { label: string; class: string }> = { pending_confirm: { label: 'Chờ xác nhận', class: 'bg-amber-50 text-amber-600 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-widest' }, confirmed: { label: 'Đã xác nhận', class: 'bg-blue-50 text-blue-600 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-widest' }, in_progress: { label: 'Đang thực hiện', class: 'bg-[#FAF5FF] text-[#9333EA] font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-widest' }, completed: { label: 'Hoàn thành', class: 'bg-green-50 text-green-600 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-widest' }, cancelled: { label: 'Đã hủy', class: 'bg-red-50 text-red-600 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-widest' }, rejected: { label: 'Bị từ chối', class: 'bg-red-50 text-red-600 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-widest' },
-}; const NurseBookingsPage = () => { const { showToast } = useToast(); const [bookings, setBookings] = useState<BookingDetailDto[]>([]); const [loading, setLoading] = useState(true); const load = useCallback(async () => { try { setLoading(true); const b = await caremateApi.getMyNurseBookings(); setBookings(b); } catch { showToast('Không thể tải lịch hẹn.', 'error'); } finally { setLoading(false); } }, [showToast]); useEffect(() => { void load(); }, [load]); const updateStatus = async (id: number, status: string) => { try { await caremateApi.updateBookingStatus(id, { status }); showToast(`Đã cập nhật trạng thái lịch hẹn.`, 'success'); await load(); } catch { showToast('Không thể cập nhật trạng thái.', 'error'); } }; if (loading) return ( <div className="flex items-center justify-center min-h-[400px]"> <div className="flex flex-col items-center gap-3"> <div className="spinner"></div> <span className="text-sm text-slate-500">Đang tải lịch hẹn...</span> </div> </div> ); return ( <div className="bg-white rounded-2xl shadow-sm p-6 min-h-full"> <div className="mb-6"> <h2 className="text-xl font-bold text-slate-800">Quản lý lịch hẹn</h2> <p className="text-sm text-slate-500">Theo dõi v� cập nhật trạng thái các lịch hẹn của bạn.</p> </div> <div className="space-y-4"> {bookings.length === 0 ? ( <div className="text-center py-12 bg-slate-50 rounded-xl border-transparent -dashed "> <div className="text-slate-400 mb-2"> <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}> <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> </svg> </div> <h3 className="text-base font-medium text-slate-700">Chưa có lịch hẹn nào</h3> </div> ) : bookings.map((b) => { const st = statusConfig[b.status] || { label: b.status, class: 'bg-slate-50 text-slate-600 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-widest' }; return ( <div key={b.id} className="p-5 rounded-xl hover: hover:shadow-md transition-all bg-white"> <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"> <div className="space-y-2"> <div className="flex items-center gap-3"> <span className="font-bold text-slate-900 text-lg">#{b.id}</span> <span className="font-semibold text-slate-700">{b.serviceName}</span> <span className={`badge ${st.class} ml-2`}>{st.label}</span> </div> <div className="flex items-center gap-2 text-sm text-slate-500"> <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> {new Date(b.startTime).toLocaleString('vi-VN')} — {new Date(b.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} </div> <div className="flex items-center gap-2 text-sm text-slate-500"> <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> {b.address || 'Tại nhà'} </div> </div> <div className="flex gap-2"> <Link to={`/bookings/${b.id}`} className="btn-secondary btn-sm font-semibold flex items-center gap-1 bg-white "> <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg> Chi tiết & Chat </Link> {b.status === 'pending_confirm' && ( <> <button onClick={() => void updateStatus(b.id, 'confirmed')} className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-xl transition-all btn-sm font-semibold shadow-sm">Xác nhận</button> <button onClick={() => void updateStatus(b.id, 'rejected')} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl transition-all btn-sm font-semibold shadow-sm text-white bg-slate-900">Từ chối</button> </> )} {b.status === 'confirmed' && ( <button onClick={() => void updateStatus(b.id, 'in_progress')} className="btn-primary btn-sm font-semibold shadow-sm text-white bg-slate-950">Bắt đầu thực hiện</button> )} {b.status === 'in_progress' && ( <button onClick={() => void updateStatus(b.id, 'completed')} className="btn-primary btn-sm font-semibold shadow-sm text-white bg-slate-950 hover:bg-slate-900">Hoàn thành</button> )} </div> </div> </div> ); })} </div> </div> );
-}; export default NurseBookingsPage; 
+import type { BookingDetailDto } from '../api/frontend-api-contract';
+import { 
+    CalendarDaysIcon, 
+    MapPinIcon, 
+    ClockIcon, 
+    ChevronRightIcon,
+    CheckBadgeIcon,
+    XCircleIcon,
+    PlayIcon,
+    CheckIcon,
+    InboxStackIcon
+} from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../hooks/useAuth';
+import NursePendingApproval from '../components/nurse/NursePendingApproval';
+
+const statusConfig: Record<string, { label: string; class: string; icon: any }> = {
+    pending_confirm: { 
+        label: 'Chờ xác nhận', 
+        class: 'bg-amber-50 text-amber-600 border-amber-100',
+        icon: ClockIcon 
+    },
+    confirmed: { 
+        label: 'Đã xác nhận', 
+        class: 'bg-emerald-50 text-[#10B981] border-emerald-100',
+        icon: CheckBadgeIcon 
+    },
+    in_progress: { 
+        label: 'Đang thực hiện', 
+        class: 'bg-blue-50 text-blue-600 border-blue-100',
+        icon: PlayIcon 
+    },
+    completed: { 
+        label: 'Hoàn thành', 
+        class: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        icon: CheckIcon 
+    },
+    cancelled: { 
+        label: 'Đã hủy', 
+        class: 'bg-red-50 text-red-600 border-red-100',
+        icon: XCircleIcon 
+    },
+    rejected: { 
+        label: 'Bị từ chối', 
+        class: 'bg-slate-50 text-slate-500 border-slate-200',
+        icon: XCircleIcon 
+    },
+};
+
+const NurseBookingsPage = () => {
+    const { user } = useAuth();
+    const { showToast } = useToast();
+
+    if (user?.role !== 'nurse_confirmed') {
+        return <NursePendingApproval />;
+    }
+    const [bookings, setBookings] = useState<BookingDetailDto[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const load = useCallback(async () => {
+        try {
+            setLoading(true);
+            const data = await caremateApi.getMyNurseBookings();
+            setBookings(data);
+        } catch {
+            showToast('Không thể tải danh sách lịch hẹn.', 'error');
+        } finally {
+            setLoading(false);
+        }
+    }, [showToast]);
+
+    useEffect(() => {
+        void load();
+    }, [load]);
+
+    const updateStatus = async (id: number, status: string) => {
+        try {
+            await caremateApi.updateBookingStatus(id, { status });
+            showToast('Cập nhật trạng thái thành công.', 'success');
+            await load();
+        } catch {
+            showToast('Không thể cập nhật trạng thái.', 'error');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex min-h-[60vh] items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-6">
+                    <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-[#10B981] border-t-transparent"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Đang đồng bộ lịch hẹn...</span>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-12 pb-20">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                <div>
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-[#10B981] text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
+                        Quản trị vận hành
+                    </div>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Lịch hẹn điều dưỡng</h1>
+                    <p className="text-slate-500 font-medium text-lg">
+                        Bạn có <span className="text-[#10B981] font-black">{bookings.length}</span> lịch hẹn chăm sóc trong danh sách.
+                    </p>
+                </div>
+                
+                <div className="flex rounded-lg bg-white p-1.5 shadow-sm border border-slate-50">
+                    <button className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">Tất cả</button>
+                    <button className="px-6 py-2.5 rounded-xl text-slate-400 hover:text-[#10B981] transition-all text-[10px] font-black uppercase tracking-widest">Hôm nay</button>
+                </div>
+            </div>
+
+            {/* List */}
+            <div className="space-y-6">
+                <AnimatePresence mode="popLayout">
+                    {bookings.length === 0 ? (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-white rounded-xl p-24 text-center border border-slate-50 shadow-xl shadow-slate-200/20"
+                        >
+                            <InboxStackIcon className="h-16 w-16 mx-auto text-slate-100 mb-8" />
+                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Hộp thư lịch hẹn trống</h3>
+                            <p className="text-slate-400 text-lg font-medium">Bạn hiện không có yêu cầu đặt lịch nào cần xử lý.</p>
+                        </motion.div>
+                    ) : (
+                        bookings.map((booking, idx) => {
+                            const config = statusConfig[booking.status] || statusConfig.rejected;
+                            return (
+                                <motion.div 
+                                    key={booking.id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className="group bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-emerald-600/5 transition-all duration-500 overflow-hidden relative"
+                                >
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[80px] -mr-32 -mt-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                    
+                                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 relative z-10">
+                                        <div className="flex flex-col lg:flex-row lg:items-center gap-8">
+                                            <div className="h-20 w-20 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-3xl shadow-xl shadow-slate-900/10 group-hover:scale-105 transition-transform">
+                                                {booking.id}
+                                            </div>
+                                            
+                                            <div className="space-y-3">
+                                                <div className="flex items-center gap-4">
+                                                    <h3 className="text-2xl font-black text-slate-900 tracking-tight">{booking.serviceName}</h3>
+                                                    <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${config.class} flex items-center gap-2`}>
+                                                        <config.icon className="h-3 w-3" />
+                                                        {config.label}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="flex flex-wrap gap-6 items-center">
+                                                    <div className="flex items-center gap-2.5 text-sm font-bold text-slate-500">
+                                                        <CalendarDaysIcon className="h-5 w-5 text-[#10B981]" />
+                                                        {new Date(booking.startTime).toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                                    </div>
+                                                    <div className="flex items-center gap-2.5 text-sm font-bold text-slate-500">
+                                                        <ClockIcon className="h-5 w-5 text-[#10B981]" />
+                                                        {new Date(booking.startTime).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - {new Date(booking.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                    <div className="flex items-center gap-2.5 text-sm font-bold text-slate-500">
+                                                        <MapPinIcon className="h-5 w-5 text-[#10B981]" />
+                                                        {booking.address || 'Tại địa điểm yêu cầu'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            <Link 
+                                                to={`/bookings/${booking.id}`} 
+                                                className="px-6 py-4 rounded-lg bg-slate-50 text-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-2 border border-slate-100"
+                                            >
+                                                Chi tiết & Chat
+                                                <ChevronRightIcon className="h-4 w-4" />
+                                            </Link>
+
+                                            {booking.status === 'pending_confirm' && (
+                                                <>
+                                                    <button 
+                                                        onClick={() => void updateStatus(booking.id, 'confirmed')}
+                                                        className="bg-[#10B981] text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all"
+                                                    >
+                                                        Chấp nhận
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => void updateStatus(booking.id, 'rejected')}
+                                                        className="px-8 py-4 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm"
+                                                    >
+                                                        Từ chối
+                                                    </button>
+                                                </>
+                                            )}
+
+                                            {booking.status === 'confirmed' && (
+                                                <button 
+                                                    onClick={() => void updateStatus(booking.id, 'in_progress')}
+                                                    className="bg-[#10B981] text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
+                                                >
+                                                    <PlayIcon className="h-4 w-4" />
+                                                    Bắt đầu thực hiện
+                                                </button>
+                                            )}
+
+                                            {booking.status === 'in_progress' && (
+                                                <button 
+                                                    onClick={() => void updateStatus(booking.id, 'completed')}
+                                                    className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
+                                                >
+                                                    <CheckIcon className="h-4 w-4" />
+                                                    Hoàn thành ca
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                    
+                                    {booking.notes && (
+                                        <div className="mt-8 pt-8 border-t border-slate-50 text-xs font-medium text-slate-400 leading-relaxed italic">
+                                            Ghi chú khách hàng: "{booking.notes}"
+                                        </div>
+                                    )}
+                                </motion.div>
+                            );
+                        })
+                    )}
+                </AnimatePresence>
+            </div>
+        </div>
+    );
+};
+
+export default NurseBookingsPage;

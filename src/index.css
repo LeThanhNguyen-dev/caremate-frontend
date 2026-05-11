@@ -1,82 +1,77 @@
-﻿@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap');
+/* Montserrat font is applied via index.html and tailwind.config.js */
+/* Montserrat font is applied via tailwind.config.js */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-brand: #EC4899;
+  --color-brand-soft: #FDF2F8;
+  --color-brand-deep: #DB2777;
+}
+
+/* Ép theme cho Y tá */
+.theme-nurse {
+  --color-brand: #10B981 !important;
+  --color-brand-soft: #ECFDF5 !important;
+  --color-brand-deep: #059669 !important;
+}
+
+/* Ép theme cho Admin */
+.theme-admin {
+  --color-brand: #3B82F6 !important;
+  --color-brand-soft: #EFF6FF !important;
+  --color-brand-deep: #1D4ED8 !important;
+}
+
+* {
+  font-family: 'Montserrat', sans-serif !important;
+}
+
 @layer base {
-  html {
-    color-scheme: light;
-    scroll-behavior: smooth;
-  }
-
   body {
-    @apply antialiased text-slate-600 bg-white;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    line-height: 1.6;
-  }
-
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-bold tracking-tight text-slate-900;
-    line-height: 1.1;
+    @apply font-sans text-slate-900 antialiased;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-7 py-3.5 text-xs font-black uppercase tracking-widest text-white transition-all duration-300 active:scale-95;
+    @apply bg-brand text-white px-6 py-3 rounded-lg font-black text-[11px] uppercase tracking-widest transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl flex items-center justify-center;
   }
-  .btn-primary:hover {
-    @apply bg-brand-deep shadow-lg shadow-brand/20;
-  }
-
+  
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-brand-soft bg-white px-7 py-3.5 text-xs font-black uppercase tracking-widest text-brand transition-all duration-300 active:scale-95;
-  }
-  .btn-secondary:hover {
-    @apply border-brand bg-brand/5;
+    @apply bg-brand-soft text-brand px-6 py-3 rounded-lg font-black text-[11px] uppercase tracking-widest transition-all duration-300 hover:bg-brand hover:text-white flex items-center justify-center;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border-2 border-slate-100 bg-white px-7 py-3.5 text-xs font-black uppercase tracking-widest text-slate-900 transition-all duration-300 active:scale-95;
-  }
-  .btn-outline:hover {
-    @apply border-brand text-brand;
+    @apply border-2 border-brand text-brand px-6 py-3 rounded-lg font-black text-[11px] uppercase tracking-widest transition-all duration-300 hover:bg-brand hover:text-white flex items-center justify-center;
   }
 
   .luxury-card {
-    @apply rounded-2xl bg-white p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-50 transition-all duration-300;
-  }
-  .luxury-card:hover {
-    @apply shadow-[0_12px_48px_rgba(0,0,0,0.06)] border-brand/10;
+    @apply bg-white border border-slate-100 rounded-lg p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50;
   }
 
   .accent-label {
-    @apply mb-4 inline-flex items-center gap-2 rounded-full bg-brand-soft px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-brand border border-brand/5;
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-soft text-brand text-[9px] font-black uppercase tracking-[0.2em] mb-4;
   }
 
   .form-label {
-    @apply mb-2 block text-[10px] font-black uppercase tracking-widest text-slate-400;
+    @apply block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1;
   }
 
   .form-input {
-    @apply block w-full rounded-xl border-2 border-slate-50 bg-slate-50 px-5 py-3.5 text-sm font-bold text-slate-900 transition-all placeholder:text-slate-300 outline-none;
-  }
-  .form-input:focus {
-    @apply bg-white border-brand/10 ring-4 ring-brand/5;
-  }
-
-  .text-gradient-pink {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand to-brand-deep;
+    @apply w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-brand-soft focus:bg-white transition-all;
   }
 }
 
+/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  @apply bg-transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-slate-100 rounded-full hover:bg-slate-200;
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
 }

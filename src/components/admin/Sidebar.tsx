@@ -1,5 +1,86 @@
-import { ArrowLeftOnRectangleIcon, CalendarDaysIcon, ChartBarIcon, Cog6ToothIcon, Squares2X2Icon, UsersIcon,
-} from '@heroicons/react/24/outline';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth'; const Sidebar = () => { const location = useLocation(); const navigate = useNavigate(); const { user, logout } = useAuth(); const navItems = [ { name: 'Tổng quan', icon: Squares2X2Icon, path: '/admin/dashboard' }, { name: 'Người dùng', icon: UsersIcon, path: '/admin/users' }, { name: 'Lịch hẹn', icon: CalendarDaysIcon, path: '/admin/bookings' }, { name: 'Khiếu nại', icon: ChartBarIcon, path: '/admin/reports' }, { name: 'Cài đặt', icon: Cog6ToothIcon, path: '/admin/settings' }, ]; return ( <aside className="fixed inset-y-0 left-0 z-50 hidden w-[280px] flex-col border-r border-slate-50 border-transparent -slate-50 bg-slate-50/80 backdrop-blur-3xl lg:flex"> <div className="border-b border-transparent -slate-50 p-6"> <Link to="/admin/dashboard" className="group flex items-center gap-3"> <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-admin/10 text-admin transition-colors group-hover:bg-admin/20"> <Squares2X2Icon className="h-6 w-6" /> </div> <div> <div className="font-heading text-xl font-bold text-admin">CareMate</div> <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Admin control</div> </div> </Link> </div> <div className="p-5"> <div className="rounded-[2rem] bg-slate-900/[0.04] p-5 shadow-sm"> <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Hệ thống</div> <div className="mt-3 text-lg font-semibold text-slate-900">Theo dõi vận hành thời gian thực</div> <div className="mt-2 text-sm font-medium leading-6 text-slate-400"> Tổng hợp lịch hẹn, khiếu nại v� tài nguyên điều dưỡng trong một không gian quản lý gọn gàng. </div> </div> </div> <nav className="flex-1 space-y-2 px-5 pb-5"> {navItems.map((item) => { const active = location.pathname === item.path; return ( <Link key={item.path} to={item.path} className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-sm font-semibold transition-all active:scale-95 ${ active ? 'bg-admin text-white shadow-xl shadow-admin/30' : 'text-slate-600 hover:bg-admin/10 hover:text-admin active:bg-admin/20' }`} > <item.icon className="h-5 w-5" /> {item.name} </Link> ); })} </nav> <div className="border-t border-transparent -slate-50 p-5"> <div className="mb-4 flex items-center gap-3"> <div className="flex h-11 w-11 items-center justify-center rounded-full bg-admin text-sm font-bold text-white"> {user?.username?.charAt(0).toUpperCase() || 'A'} </div> <div className="min-w-0"> <div className="truncate text-sm font-semibold text-slate-900">{user?.username || 'Admin user'}</div> <div className="truncate text-xs uppercase tracking-[0.2em] text-slate-400">{user?.role}</div> </div> </div> <button onClick={() => { logout(); navigate('/login'); }} className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900/[0.04] px-4 py-3 text-sm font-bold text-admin transition-all hover:bg-admin/10 active:scale-95 active:bg-admin/20" > <ArrowLeftOnRectangleIcon className="h-5 w-5" /> Đăng xuất </button> </div> </aside> );
-}; export default Sidebar; 
+import { useAuth } from '../../hooks/useAuth';
+import { 
+    Squares2X2Icon, 
+    UserGroupIcon, 
+    ClipboardDocumentCheckIcon, 
+    CalendarIcon,
+    ExclamationTriangleIcon,
+    Cog6ToothIcon,
+    ArrowRightOnRectangleIcon
+} from '@heroicons/react/24/outline';
+
+const AdminSidebar = () => {
+    const location = useLocation();
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
+
+    const menuItems = [
+        { label: 'Tổng quan', path: '/admin/dashboard', icon: Squares2X2Icon },
+        { label: 'Duyệt điều dưỡng', path: '/admin/pending-nurses', icon: ClipboardDocumentCheckIcon },
+        { label: 'Quản lý người dùng', path: '/admin/users', icon: UserGroupIcon },
+        { label: 'Tất cả lịch hẹn', path: '/admin/bookings', icon: CalendarIcon },
+        { label: 'Khiếu nại & Hỗ trợ', path: '/admin/reports', icon: ExclamationTriangleIcon },
+        { label: 'Cài đặt hệ thống', path: '/admin/settings', icon: Cog6ToothIcon },
+    ];
+
+    const handleLogout = async () => {
+        await logout();
+        navigate('/login');
+    };
+
+    return (
+        <aside className="fixed inset-y-0 left-0 z-50 hidden w-[300px] flex-col bg-white border-r border-slate-100 lg:flex">
+            {/* Logo Section */}
+            <div className="p-8">
+                <Link to="/admin/dashboard" className="flex items-center gap-3 group">
+                    <img src="/assets/images/logo.png" alt="CareMate Admin" className="h-24 w-auto object-contain" />
+                </Link>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex-1 px-4 mt-4 space-y-2 overflow-y-auto custom-scrollbar">
+                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Menu hệ thống</div>
+                {menuItems.map((item) => {
+                    const isActive = location.pathname === item.path;
+                    return (
+                        <Link 
+                            key={item.path} 
+                            to={item.path} 
+                            className={`flex items-center gap-4 px-6 py-4 rounded-lg text-sm font-bold transition-all group ${
+                                isActive 
+                                ? 'bg-[#3B82F6] text-white shadow-xl shadow-blue-600/20' 
+                                : 'text-slate-500 hover:bg-blue-50 hover:text-[#3B82F6]'
+                            }`}
+                        >
+                            <item.icon className={`h-5 w-5 transition-transform group-hover:scale-110 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-[#3B82F6]'}`} />
+                            {item.label}
+                        </Link>
+                    );
+                })}
+            </nav>
+
+            {/* Footer Profile */}
+            <div className="p-6 mt-auto border-t border-slate-50">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 mb-4">
+                    <div className="h-12 w-12 rounded-lg bg-[#3B82F6] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-blue-600/10 uppercase">
+                        {user?.username?.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                        <div className="text-sm font-black text-slate-900 truncate">{user?.username || 'System Admin'}</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">Quản trị viên hệ thống</div>
+                    </div>
+                </div>
+                <button 
+                    onClick={handleLogout}
+                    className="flex w-full items-center justify-center gap-3 py-4 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#3B82F6] transition-all active:scale-95 shadow-sm"
+                >
+                    <ArrowRightOnRectangleIcon className="h-4 w-4" />
+                    Đăng xuất hệ thống
+                </button>
+            </div>
+        </aside>
+    );
+};
+
+export default AdminSidebar;

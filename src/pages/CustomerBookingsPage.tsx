@@ -140,7 +140,7 @@ const CustomerBookingsPage = () => {
         <div className="bg-slate-50 min-h-screen py-20 px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <section className="grid gap-8 lg:grid-cols-[1fr_0.4fr] mb-16">
-                    <div className="bg-slate-900 rounded-[48px] p-12 relative overflow-hidden flex flex-col justify-center">
+                    <div className="bg-slate-900 rounded-xl p-12 relative overflow-hidden flex flex-col justify-center">
                         <div className="absolute top-0 right-0 w-96 h-96 bg-brand/10 blur-[120px] -mr-48 -mt-48 rounded-full"></div>
                         <div className="relative z-10">
                             <div className="accent-label !bg-white/10 !text-white border-white/20">Dịch vụ đã đặt</div>
@@ -151,7 +151,7 @@ const CustomerBookingsPage = () => {
                                 Theo dõi tiến độ, thanh toán và gửi phản hồi cho các dịch vụ bạn đã đăng ký một cách dễ dàng.
                             </p>
                             <div className="mt-10">
-                                <Link to="/services" className="btn-primary !px-10 !py-5 shadow-2xl shadow-brand/20 flex items-center gap-3 w-fit">
+                                <Link to="/services" className="btn-primary !px-10 !py-5 shadow-2xl shadow-pink-500/20 flex items-center gap-3 w-fit">
                                     <PlusIcon className="h-5 w-5" />
                                     Đặt dịch vụ mới
                                 </Link>
@@ -166,8 +166,8 @@ const CustomerBookingsPage = () => {
                             { label: 'Đã hoàn thành', value: summary.completed, icon: CheckBadgeIcon, color: 'text-green-600', bg: 'bg-green-50' },
                             { label: 'Khiếu nại', value: summary.disputes, icon: ExclamationTriangleIcon, color: 'text-red-600', bg: 'bg-red-50' },
                         ].map((card) => (
-                            <div key={card.label} className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl shadow-slate-200/20 flex items-center gap-6">
-                                <div className={`h-14 w-14 rounded-2xl ${card.bg} flex items-center justify-center ${card.color}`}>
+                            <div key={card.label} className="bg-white rounded-xl p-8 border border-slate-100 shadow-xl shadow-slate-200/20 flex items-center gap-6">
+                                <div className={`h-14 w-14 rounded-lg ${card.bg} flex items-center justify-center ${card.color}`}>
                                     <card.icon className="h-7 w-7" />
                                 </div>
                                 <div>
@@ -180,12 +180,12 @@ const CustomerBookingsPage = () => {
                 </section>
 
                 <section className="mb-12">
-                    <div className="flex flex-wrap gap-3 p-2 bg-white rounded-3xl border border-slate-100 shadow-lg shadow-slate-200/10 w-fit">
+                    <div className="flex flex-wrap gap-3 p-2 bg-white rounded-xl border border-slate-100 shadow-lg shadow-slate-200/10 w-fit">
                         {[{ key: 'all', label: 'Tất cả' }, ...Object.entries(statusConfig).map(([key, item]) => ({ key, label: item.label }))].map((tab) => (
                             <button 
                                 key={tab.key} 
                                 onClick={() => setFilter(tab.key)} 
-                                className={`rounded-2xl px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                className={`rounded-lg px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
                                     filter === tab.key ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                                 }`}
                             >
@@ -200,9 +200,9 @@ const CustomerBookingsPage = () => {
                         <motion.div 
                             initial={{ opacity: 0, scale: 0.98 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-white rounded-[48px] p-32 text-center border border-slate-100 shadow-xl shadow-slate-200/20"
+                            className="bg-white rounded-xl p-32 text-center border border-slate-100 shadow-xl shadow-slate-200/20"
                         >
-                            <div className="h-24 w-24 rounded-[32px] bg-slate-50 flex items-center justify-center mx-auto mb-8">
+                            <div className="h-24 w-24 rounded-xl bg-slate-50 flex items-center justify-center mx-auto mb-8">
                                 <CalendarDaysIcon className="h-10 w-10 text-slate-200" />
                             </div>
                             <h3 className="text-2xl font-black text-slate-900 mb-2">Chưa có bản ghi nào</h3>
@@ -219,7 +219,7 @@ const CustomerBookingsPage = () => {
                                         layout
                                         initial={{ opacity: 0, y: 20 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="bg-white rounded-[40px] p-8 lg:p-12 border border-slate-100 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-brand/5 transition-all duration-500"
+                                        className="bg-white rounded-xl p-8 lg:p-12 border border-slate-100 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-pink-500/5 transition-all duration-500"
                                     >
                                         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-12">
                                             <div className="flex-1">
@@ -237,24 +237,24 @@ const CustomerBookingsPage = () => {
                                                 </div>
                                                 
                                                 <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
-                                                    <div className="p-6 rounded-[24px] bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
+                                                    <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Mã đơn hàng</div>
                                                         <div className="text-base font-black text-slate-900 group-hover:text-brand transition-colors">#{booking.id}</div>
                                                     </div>
-                                                    <div className="p-6 rounded-[24px] bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
+                                                    <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Thời gian</div>
                                                         <div className="text-base font-black text-slate-900 flex items-center gap-2">
                                                             <ClockIcon className="h-4 w-4 text-brand" />
                                                             {new Date(booking.startTime).toLocaleString('vi-VN')}
                                                         </div>
                                                     </div>
-                                                    <div className="p-6 rounded-[24px] bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
+                                                    <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Địa điểm</div>
                                                         <div className="text-base font-black text-slate-900 truncate" title={booking.address}>
                                                             <MapPinIcon className="h-4 w-4 text-brand mb-1 inline" /> {booking.address}
                                                         </div>
                                                     </div>
-                                                    <div className="p-6 rounded-[24px] bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
+                                                    <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Tổng thanh toán</div>
                                                         <div className="text-base font-black text-slate-900 flex items-center gap-2">
                                                             <BanknotesIcon className="h-4 w-4 text-brand" />
@@ -265,26 +265,26 @@ const CustomerBookingsPage = () => {
                                             </div>
 
                                             <div className="flex flex-col gap-3 lg:w-[220px]">
-                                                <button onClick={() => navigate(`/bookings/${booking.id}`)} className="w-full btn-secondary !rounded-2xl !py-4 text-[10px] font-black uppercase tracking-widest">
+                                                <button onClick={() => navigate(`/bookings/${booking.id}`)} className="w-full btn-secondary !rounded-lg !py-4 text-[10px] font-black uppercase tracking-widest">
                                                     Chi tiết
                                                 </button>
                                                 {booking.status === 'pending_confirm' && (
-                                                    <button onClick={() => void cancelBooking(booking.id)} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
+                                                    <button onClick={() => void cancelBooking(booking.id)} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
                                                         Hủy lịch
                                                     </button>
                                                 )}
                                                 {booking.status === 'confirmed' && (
-                                                    <button onClick={() => void payBooking(booking.id, booking.totalPrice)} className="w-full btn-primary !rounded-2xl !py-4 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-brand/20">
+                                                    <button onClick={() => void payBooking(booking.id, booking.totalPrice)} className="w-full btn-primary !rounded-lg !py-4 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20">
                                                         Thanh toán ngay
                                                     </button>
                                                 )}
                                                 {booking.status === 'completed' && (
                                                     <>
-                                                        <button onClick={() => setReviewModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-brand/5 text-brand hover:bg-brand hover:text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
+                                                        <button onClick={() => setReviewModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-brand/5 text-brand hover:bg-brand hover:text-white py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
                                                             Gửi đánh giá
                                                         </button>
                                                         {!dispute && (
-                                                            <button onClick={() => setDisputeModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
+                                                            <button onClick={() => setDisputeModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
                                                                 Khiếu nại
                                                             </button>
                                                         )}
@@ -303,14 +303,14 @@ const CustomerBookingsPage = () => {
                 <AnimatePresence>
                     {reviewModal.isOpen && (
                         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-md">
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-lg rounded-[48px] bg-white p-12 shadow-2xl">
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-lg rounded-xl bg-white p-12 shadow-2xl">
                                 <h3 className="text-3xl font-black text-slate-900 mb-8">Đánh giá dịch vụ</h3>
                                 <div className="space-y-8">
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Mức độ hài lòng</label>
                                         <div className="flex gap-4">
                                             {[1, 2, 3, 4, 5].map((star) => (
-                                                <button key={star} onClick={() => setReviewForm((prev) => ({ ...prev, rating: star }))} className={`h-14 w-14 rounded-2xl flex items-center justify-center text-2xl transition-all ${ star <= reviewForm.rating ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-slate-50 text-slate-300' }`}>
+                                                <button key={star} onClick={() => setReviewForm((prev) => ({ ...prev, rating: star }))} className={`h-14 w-14 rounded-lg flex items-center justify-center text-2xl transition-all ${ star <= reviewForm.rating ? 'bg-brand text-white shadow-lg shadow-pink-500/20' : 'bg-slate-50 text-slate-300' }`}>
                                                     <StarSolid className="h-6 w-6" />
                                                 </button>
                                             ))}
@@ -318,12 +318,12 @@ const CustomerBookingsPage = () => {
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Chia sẻ cảm nhận</label>
-                                        <textarea className="w-full bg-slate-50 border-none rounded-[24px] p-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" rows={4} value={reviewForm.comment} onChange={(event) => setReviewForm((prev) => ({ ...prev, comment: event.target.value }))} placeholder="Bạn thấy điều dưỡng chăm sóc thế nào?" />
+                                        <textarea className="w-full bg-slate-50 border-none rounded-xl p-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" rows={4} value={reviewForm.comment} onChange={(event) => setReviewForm((prev) => ({ ...prev, comment: event.target.value }))} placeholder="Bạn thấy điều dưỡng chăm sóc thế nào?" />
                                     </div>
                                 </div>
                                 <div className="mt-10 flex gap-4">
-                                    <button onClick={() => setReviewModal({ isOpen: false, bookingId: null })} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Đóng</button>
-                                    <button onClick={() => void submitReview()} className="flex-1 btn-primary !rounded-2xl">Gửi đánh giá</button>
+                                    <button onClick={() => setReviewModal({ isOpen: false, bookingId: null })} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Đóng</button>
+                                    <button onClick={() => void submitReview()} className="flex-1 btn-primary !rounded-lg">Gửi đánh giá</button>
                                 </div>
                             </motion.div>
                         </div>
@@ -331,18 +331,18 @@ const CustomerBookingsPage = () => {
 
                     {disputeModal.isOpen && (
                         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-md">
-                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-lg rounded-[48px] bg-white p-12 shadow-2xl">
+                            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-lg rounded-xl bg-white p-12 shadow-2xl">
                                 <h3 className="text-3xl font-black text-slate-900 mb-4 text-red-600">Gửi khiếu nại</h3>
                                 <p className="text-sm font-medium text-slate-400 mb-10">CareMate sẽ tiếp nhận và xử lý sự cố trong vòng 24 giờ làm việc.</p>
                                 <div className="space-y-8">
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Mô tả sự cố</label>
-                                        <textarea className="w-full bg-slate-50 border-none rounded-[24px] p-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-red-500/5 transition-all" rows={6} value={disputeReason} onChange={(event) => setDisputeReason(event.target.value)} placeholder="Vui lòng mô tả chi tiết vấn đề bạn gặp phải..." />
+                                        <textarea className="w-full bg-slate-50 border-none rounded-xl p-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-red-500/5 transition-all" rows={6} value={disputeReason} onChange={(event) => setDisputeReason(event.target.value)} placeholder="Vui lòng mô tả chi tiết vấn đề bạn gặp phải..." />
                                     </div>
                                 </div>
                                 <div className="mt-10 flex gap-4">
-                                    <button onClick={() => setDisputeModal({ isOpen: false, bookingId: null })} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Hủy bỏ</button>
-                                    <button onClick={() => void submitDispute()} className="flex-1 bg-red-600 text-white py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-600/20">Gửi khiếu nại</button>
+                                    <button onClick={() => setDisputeModal({ isOpen: false, bookingId: null })} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Hủy bỏ</button>
+                                    <button onClick={() => void submitDispute()} className="flex-1 bg-red-600 text-white py-4 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-600/20">Gửi khiếu nại</button>
                                 </div>
                             </motion.div>
                         </div>

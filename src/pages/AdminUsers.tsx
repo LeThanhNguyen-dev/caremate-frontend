@@ -1,324 +1,168 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import caremateApi from '../api/caremateApi';
-import type { AdminUserDto, AdminBookingSummaryDto, NurseDiscoveryDto, NurseProfileDetailDto } from '../api/frontend-api-contract';
+import type { AdminUserDto } from '../api/frontend-api-contract';
 import { 
     MagnifyingGlassIcon, 
-    ChevronRightIcon, 
-    EnvelopeIcon, 
-    PhoneIcon, 
-    CalendarDaysIcon,
-    ShieldCheckIcon,
     UserCircleIcon,
-    
-    ChatBubbleLeftRightIcon,
-    NoSymbolIcon
+    ShieldCheckIcon,
+    BriefcaseIcon,
+    EllipsisVerticalIcon,
+    ArrowPathIcon,
+    UserPlusIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '../hooks/useToast';
 
-type DisplayUser = AdminUserDto & {
-    source: 'api' | 'derived';
-};
-
-const roleLabels: Record<string, string> = {
-    admin: 'Quản trị viên',
-    customer: 'Khách hàng',
-    nurse: 'Y tá',
-    nurse_confirmed: 'Y tá đã duyệt',
-    nurse_unconfirmed: 'Y tá chờ duyệt',
-};
-
-const buildDerivedUsers = (bookings: AdminBookingSummaryDto[], nurses: NurseDiscoveryDto[]): DisplayUser[] => {
-    const customerBookingCount = new Map<number, number>();
-    bookings.forEach((booking) => {
-        customerBookingCount.set(booking.customerId, (customerBookingCount.get(booking.customerId) ?? 0) + 1);
-    });
-
-    const customers: DisplayUser[] = Array.from(customerBookingCount.entries()).map(([userId, bookingCount]) => ({
-        userId,
-        fullName: `Khách hàng #${userId}`,
-        email: null,
-        phone: null,
-        role: 'customer',
-        status: null,
-        averageRating: null,
-        yearsExperience: null,
-        isVerified: null,
-        bookingCount,
-        bio: null,
-        source: 'derived',
-    }));
-
-    const nurseUsers: DisplayUser[] = nurses.map((nurse) => ({
-        userId: nurse.userId,
-        fullName: nurse.fullName,
-        email: null,
-        phone: null,
-        role: 'nurse',
-        status: null,
-        averageRating: nurse.averageRating,
-        yearsExperience: nurse.yearsExperience,
-        isVerified: null,
-        bookingCount: bookings.filter((booking) => booking.nurseId === nurse.userId).length,
-        bio: nurse.bio,
-        source: 'derived',
-    }));
-
-    return [...customers, ...nurseUsers];
+const roleLabels: Record<string, { label: string; class: string; icon: any }> = {
+    customer: { label: 'Khách hàng', class: 'bg-blue-50 text-blue-600', icon: UserCircleIcon },
+    nurse: { label: 'Đ.Dưỡng chờ', class: 'bg-amber-50 text-amber-600', icon: BriefcaseIcon },
+    nurse_confirmed: { label: 'Đ.Dưỡng xác minh', class: 'bg-emerald-50 text-emerald-600', icon: ShieldCheckIcon },
+    admin: { label: 'Quản trị viên', class: 'bg-slate-900 text-white', icon: UserCircleIcon },
 };
 
 const AdminUsers = () => {
-    const [users, setUsers] = useState<DisplayUser[]>([]);
-    const [nurseDetails, setNurseDetails] = useState<Record<number, NurseProfileDetailDto>>({});
-    const [selectedUser, setSelectedUser] = useState<DisplayUser | null>(null);
-    const [filter, setFilter] = useState<'all' | 'customer' | 'nurse'>('all');
-    const [searchQuery, setSearchQuery] = useState('');
+    const { showToast } = useToast();
+    const [users, setUsers] = useState<AdminUserDto[]>([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [roleFilter, setRoleFilter] = useState('all');
+
+    const fetchUsers = async () => {
+        try {
+            setLoading(true);
+            const data = await caremateApi.getAdminUsers();
+            setUsers(data);
+        } catch (err) {
+            showToast('Không thể tải danh sách người dùng.', 'error');
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const load = async () => {
-            try {
-                setLoading(true);
-                const [apiUsers, bookings, nurses] = await Promise.all([
-                    caremateApi.getAdminUsers().catch(() => []),
-                    caremateApi.getAdminBookings().catch(() => []),
-                    caremateApi.getNurses().catch(() => []),
-                ]);
-
-                const normalizedApiUsers: DisplayUser[] = apiUsers.map((item) => ({ ...item, source: 'api' }));
-                const data = normalizedApiUsers.length > 0 ? normalizedApiUsers : buildDerivedUsers(bookings, nurses);
-                setUsers(data);
-                setSelectedUser(data[0] ?? null);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        void load();
+        void fetchUsers();
     }, []);
 
-    useEffect(() => {
-        const loadNurseDetail = async () => {
-            if (!selectedUser) return;
-            const isNurseRole = selectedUser.role.includes('nurse');
-            if (!isNurseRole || nurseDetails[selectedUser.userId]) return;
-            try {
-                const detail = await caremateApi.getNurseByUserId(selectedUser.userId);
-                setNurseDetails((prev) => ({ ...prev, [selectedUser.userId]: detail }));
-            } catch {
-                // Keep the view usable
-            }
-        };
-
-        void loadNurseDetail();
-    }, [nurseDetails, selectedUser]);
-
     const filteredUsers = useMemo(() => {
-        return users.filter((u) => {
-            const matchesRole = filter === 'all' || u.role.includes(filter);
-            const matchesSearch = u.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                 (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()));
-            return matchesRole && matchesSearch;
+        return users.filter(user => {
+            const matchesSearch = (user.fullName ?? '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+                                (user.email ?? '').toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+            return matchesSearch && matchesRole;
         });
-    }, [users, filter, searchQuery]);
+    }, [users, searchTerm, roleFilter]);
 
     if (loading) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center bg-white">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="h-10 w-10 animate-spin rounded-full border-4 border-admin border-t-transparent"></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Đang tải dữ liệu nhân sự...</span>
+                <div className="flex flex-col items-center gap-6">
+                    <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-[#3B82F6] border-t-transparent"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Đang đồng bộ dữ liệu người dùng...</span>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-12 pb-20 selection:bg-admin/10">
-            {/* Header Section */}
-            <section className="grid gap-8 lg:grid-cols-[1fr_auto] items-end">
-                <div>
-                    <div className="accent-label">Quản trị tài khoản</div>
-                    <h1 className="text-4xl font-black text-[#111827]">Người dùng Hệ thống</h1>
-                    <p className="mt-4 text-sm font-bold text-[#6B7280]">Tổng cộng {users.length} tài khoản người dùng và đối tác y tá.</p>
-                </div>
-                
-                <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="relative">
-                        <MagnifyingGlassIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
+        <div className="space-y-12 pb-20">
+            {/* Control Bar */}
+            <section className="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
+                <div className="flex flex-col md:flex-row items-center gap-4 flex-1">
+                    <div className="relative flex-1 w-full group">
+                        <MagnifyingGlassIcon className="h-5 w-5 absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#3B82F6] transition-colors" />
                         <input 
                             type="text" 
-                            placeholder="Tìm kiếm theo tên, email..."
-                            className="w-full sm:w-72 rounded-2xl border-none bg-white py-4 pl-14 pr-6 text-sm font-bold text-[#111827] shadow-sm focus:ring-2 focus:ring-admin/20 transition-all"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Tìm kiếm theo tên hoặc email..." 
+                            className="w-full bg-white border border-slate-100 rounded-xl py-4 pl-14 pr-8 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-[#3B82F6] transition-all shadow-sm"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex rounded-2xl bg-white p-1.5 shadow-sm">
-                        {(['all', 'customer', 'nurse'] as const).map((t) => (
+                    
+                    <div className="flex items-center gap-2 bg-white border border-slate-100 rounded-xl p-1.5 shadow-sm">
+                        {['all', 'customer', 'nurse_confirmed', 'admin'].map((role) => (
                             <button
-                                key={t}
-                                onClick={() => setFilter(t)}
+                                key={role}
+                                onClick={() => setRoleFilter(role)}
                                 className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                                    filter === t ? 'bg-[#111827] text-white shadow-lg' : 'text-[#6B7280] hover:text-admin hover:bg-admin/5'
+                                    roleFilter === role 
+                                    ? 'bg-[#3B82F6] text-white shadow-lg shadow-blue-600/20' 
+                                    : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
                                 }`}
                             >
-                                {t === 'all' ? 'Tất cả' : t === 'customer' ? 'Khách' : 'Y tá'}
+                                {role === 'all' ? 'Tất cả' : roleLabels[role]?.label || role}
                             </button>
                         ))}
                     </div>
                 </div>
+
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={fetchUsers}
+                        className="p-4 rounded-lg bg-white border border-slate-100 text-slate-400 hover:text-[#3B82F6] hover:bg-blue-50 transition-all shadow-sm active:scale-95"
+                    >
+                        <ArrowPathIcon className="h-5 w-5" />
+                    </button>
+                    <button className="bg-[#3B82F6] text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/20 flex items-center gap-2 hover:scale-[1.02] transition-all active:scale-95">
+                        <UserPlusIcon className="h-5 w-5" />
+                        Tạo tài khoản mới
+                    </button>
+                </div>
             </section>
 
-            <div className="grid gap-12 lg:grid-cols-[1fr_0.9fr]">
-                {/* User List Table */}
-                <div className="luxury-card p-0 overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left">
-                            <thead className="bg-slate-50/50 border-b border-slate-50">
-                                <tr>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-[#9CA3AF]">Người dùng</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-[#9CA3AF]">Vai trò</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-[#9CA3AF]">Giao dịch</th>
-                                    <th className="px-8 py-6"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {filteredUsers.map((u) => (
-                                    <tr 
-                                        key={u.userId}
-                                        onClick={() => setSelectedUser(u)}
-                                        className={`group cursor-pointer transition-all hover:bg-admin/[0.02] ${selectedUser?.userId === u.userId ? 'bg-admin/[0.04]' : ''}`}
-                                    >
-                                        <td className="px-8 py-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`h-11 w-11 rounded-2xl flex items-center justify-center font-black text-sm transition-transform group-hover:scale-110 ${
-                                                    u.role.includes('nurse') ? 'bg-purple-50 text-purple-600' : 'bg-admin/5 text-admin'
-                                                }`}>
-                                                    {u.fullName.charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <div className="text-sm font-black text-[#111827]">{u.fullName}</div>
-                                                    <div className="text-[11px] font-bold text-[#9CA3AF] mt-1">{u.email || `ID: #${u.userId}`}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                                                u.role === 'admin' ? 'bg-blue-50 text-blue-600' :
-                                                u.role.includes('nurse') ? 'bg-purple-50 text-purple-600' : 'bg-admin/5 text-admin'
-                                            }`}>
-                                                {roleLabels[u.role] || u.role}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-6">
-                                            <div className="flex items-center gap-2 text-xs font-black text-[#111827]">
-                                                <CalendarDaysIcon className="h-4 w-4 text-slate-300" />
-                                                {u.bookingCount || 0} Lịch hẹn
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-6 text-right pr-12">
-                                            <ChevronRightIcon className={`h-5 w-5 text-slate-300 transition-all ${selectedUser?.userId === u.userId ? 'translate-x-2 text-admin' : 'group-hover:translate-x-2'}`} />
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                {/* Details Side Panel */}
-                <aside className="relative">
-                    <AnimatePresence mode="wait">
-                        {selectedUser ? (
-                            <motion.div
-                                key={selectedUser.userId}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="luxury-card p-10 bg-white sticky top-28"
+            {/* User Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+                <AnimatePresence mode='popLayout'>
+                    {filteredUsers.map((user, idx) => {
+                        const config = roleLabels[user.role] || { label: user.role, class: 'bg-slate-100 text-slate-600', icon: UserCircleIcon };
+                        return (
+                            <motion.div 
+                                key={user.userId}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: Math.min(idx * 0.05, 0.5) }}
+                                className="group bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20 hover:shadow-2xl hover:shadow-blue-600/5 transition-all duration-500 relative overflow-hidden"
                             >
-                                <div className="flex flex-col items-center text-center pb-10 border-b border-slate-50">
-                                    <div className="relative mb-6">
-                                        <div className="h-28 w-28 rounded-[2.5rem] bg-gradient-to-tr from-admin to-[#1D4ED8] flex items-center justify-center text-4xl font-black text-white shadow-2xl shadow-admin/20">
-                                            {selectedUser.fullName.charAt(0)}
-                                        </div>
-                                        {selectedUser.isVerified === 'verified' && (
-                                            <div className="absolute -bottom-1 -right-1 h-10 w-10 rounded-2xl bg-white flex items-center justify-center shadow-lg">
-                                                <ShieldCheckIcon className="h-6 w-6 text-green-500" />
-                                            </div>
-                                        )}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[40px] -mr-16 -mt-16 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                
+                                <div className="flex items-center justify-between mb-8 relative z-10">
+                                    <div className="h-16 w-16 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-2xl shadow-xl shadow-slate-900/10 group-hover:scale-110 transition-transform">
+                                        {(user.fullName ?? 'U').charAt(0).toUpperCase()}
                                     </div>
-                                    <h2 className="text-3xl font-black text-[#111827]">{selectedUser.fullName}</h2>
-                                    <div className="mt-3 text-[10px] font-black uppercase tracking-[0.2em] text-admin">
-                                        {roleLabels[selectedUser.role] || selectedUser.role}
+                                    <button className="h-10 w-10 rounded-xl hover:bg-slate-50 flex items-center justify-center text-slate-300 hover:text-slate-900 transition-colors">
+                                        <EllipsisVerticalIcon className="h-6 w-6" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-1 relative z-10">
+                                    <h3 className="text-xl font-black text-slate-900 truncate tracking-tight">{user.fullName}</h3>
+                                    <p className="text-sm font-bold text-slate-400 truncate pb-4 border-b border-slate-50">{user.email ?? 'Chưa có email'}</p>
+                                </div>
+
+                                <div className="mt-6 flex items-center justify-between relative z-10">
+                                    <div className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border border-transparent ${config.class} flex items-center gap-2`}>
+                                        <config.icon className="h-3.5 w-3.5" />
+                                        {config.label}
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/20 animate-pulse"></div>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-300">Online</span>
                                     </div>
                                 </div>
 
-                                <div className="py-10 space-y-8">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="p-5 rounded-3xl bg-slate-50">
-                                            <div className="text-[10px] font-black uppercase tracking-widest text-[#9CA3AF] mb-1">Mã nhân sự</div>
-                                            <div className="text-sm font-black text-[#111827]">#{selectedUser.userId}</div>
-                                        </div>
-                                        <div className="p-5 rounded-3xl bg-slate-50">
-                                            <div className="text-[10px] font-black uppercase tracking-widest text-[#9CA3AF] mb-1">Xác minh</div>
-                                            <div className={`text-sm font-black ${selectedUser.isVerified === 'verified' ? 'text-green-600' : 'text-amber-600'}`}>
-                                                {selectedUser.isVerified === 'verified' ? 'Chính chủ' : 'Chờ xét duyệt'}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-4 text-sm font-bold text-[#6B7280] p-4 bg-slate-50/50 rounded-2xl">
-                                            <EnvelopeIcon className="h-5 w-5 text-slate-300" />
-                                            {selectedUser.email || 'Chưa liên kết email'}
-                                        </div>
-                                        <div className="flex items-center gap-4 text-sm font-bold text-[#6B7280] p-4 bg-slate-50/50 rounded-2xl">
-                                            <PhoneIcon className="h-5 w-5 text-slate-300" />
-                                            {selectedUser.phone || 'Chưa liên kết SĐT'}
-                                        </div>
-                                    </div>
-
-                                    {selectedUser.role.includes('nurse') && (
-                                        <div className="mt-10 pt-10 border-t border-slate-50 space-y-8">
-                                            <div className="accent-label">Hồ sơ chuyên môn</div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="p-5 bg-white border border-slate-100 rounded-3xl shadow-sm">
-                                                    <div className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Kinh nghiệm</div>
-                                                    <div className="text-xl font-black text-[#111827]">{selectedUser.yearsExperience || 0} Năm</div>
-                                                </div>
-                                                <div className="p-5 bg-white border border-slate-100 rounded-3xl shadow-sm">
-                                                    <div className="text-[10px] font-black text-[#9CA3AF] uppercase tracking-widest mb-1">Xếp hạng</div>
-                                                    <div className="text-xl font-black text-[#111827]">{selectedUser.averageRating?.toFixed(1) || '0.0'} ★</div>
-                                                </div>
-                                            </div>
-                                            <div className="p-6 rounded-3xl bg-slate-50 text-[13px] font-medium leading-relaxed text-[#6B7280]">
-                                                {selectedUser.bio || 'Chưa có thông tin giới thiệu chi tiết cho tài khoản này.'}
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="flex gap-4">
-                                    <button className="btn-primary flex-1 py-4 text-[10px] uppercase tracking-widest font-black !bg-admin shadow-lg shadow-admin/20 flex items-center justify-center gap-2">
-                                        <ChatBubbleLeftRightIcon className="h-4 w-4" /> Liên hệ
-                                    </button>
-                                    <button className="btn-secondary flex-1 py-4 text-[10px] uppercase tracking-widest font-black border-slate-100 text-red-500 hover:bg-red-50 hover:border-red-100 flex items-center justify-center gap-2">
-                                        <NoSymbolIcon className="h-4 w-4" /> Vô hiệu hóa
-                                    </button>
+                                <div className="mt-8 grid grid-cols-2 gap-3 relative z-10">
+                                    <button className="py-3 rounded-xl bg-slate-50 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Chi tiết</button>
+                                    <button className="py-3 rounded-xl bg-slate-50 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:text-rose-600 hover:bg-rose-50 transition-all">Khóa thẻ</button>
                                 </div>
                             </motion.div>
-                        ) : (
-                            <div className="luxury-card p-24 text-center flex flex-col items-center justify-center text-[#9CA3AF] bg-slate-50/50 border-2 border-dashed border-slate-100">
-                                <UserCircleIcon className="h-20 w-20 mb-6 opacity-10" />
-                                <p className="text-xs font-black uppercase tracking-[0.2em]">Chọn tài khoản để quản trị</p>
-                            </div>
-                        )}
-                    </AnimatePresence>
-                </aside>
+                        );
+                    })}
+                </AnimatePresence>
             </div>
         </div>
     );
 };
 
 export default AdminUsers;
-

@@ -70,7 +70,7 @@ const AdminBookings = () => {
                             Theo dõi toàn bộ lịch hẹn trên hệ thống, kiểm soát trạng thái giao dịch và tổng hợp doanh thu từ các dịch vụ chăm sóc.
                         </p>
                         <div className="mt-8 flex gap-4">
-                            <button onClick={load} className="btn-primary !bg-admin shadow-lg shadow-admin/20 px-8 text-xs font-black uppercase tracking-widest flex items-center gap-2">
+                            <button onClick={load} className="btn-primary !bg-admin shadow-lg shadow-blue-500/20 px-8 text-xs font-black uppercase tracking-widest flex items-center gap-2">
                                 <ArrowPathIcon className="h-4 w-4" /> Làm mới dữ liệu
                             </button>
                         </div>
@@ -84,7 +84,7 @@ const AdminBookings = () => {
                         { label: 'Chờ xác nhận', value: stats.pending, icon: ClockIcon, color: 'text-amber-600 bg-amber-50' },
                     ].map((item) => (
                         <div key={item.label} className="luxury-card p-6 flex items-center gap-5">
-                            <div className={`h-12 w-12 rounded-2xl flex items-center justify-center ${item.color}`}>
+                            <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${item.color}`}>
                                 <item.icon className="h-6 w-6" />
                             </div>
                             <div>
@@ -154,7 +154,7 @@ const AdminBookings = () => {
                                         </td>
                                         <td className="px-8 py-6 text-sm font-black text-slate-900">{booking.totalPrice.toLocaleString('vi-VN')}đ</td>
                                         <td className="px-8 py-6">
-                                            <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                                            <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
                                                 booking.status === 'completed' ? 'bg-green-50 text-green-600' :
                                                 booking.status === 'pending_confirm' ? 'bg-amber-50 text-amber-600' :
                                                 booking.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'

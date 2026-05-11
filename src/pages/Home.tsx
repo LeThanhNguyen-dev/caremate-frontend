@@ -1,11 +1,10 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-    HeartIcon, 
+    HeartIcon,
     ShieldCheckIcon, 
     PlayIcon,
     SparklesIcon,
-    
     CheckBadgeIcon,
     EnvelopeIcon,
     CursorArrowRaysIcon,
@@ -45,7 +44,7 @@ const Home = () => {
                             Chúng tôi đồng hành cùng gia đình bạn trong mọi khoảnh khắc quý giá.
                         </p>
                         <div className="flex flex-wrap gap-6 items-center">
-                            <Link to="/services" className="btn-primary !px-12 !py-5 text-sm shadow-2xl shadow-brand/20">
+                            <Link to="/services" className="btn-primary !px-12 !py-5 text-sm shadow-2xl shadow-pink-500/20">
                                 Khám phá dịch vụ
                             </Link>
                             <button className="flex items-center gap-4 group">
@@ -72,7 +71,7 @@ const Home = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
-                                className="bg-white/90 backdrop-blur-xl p-6 rounded-2xl border border-white shadow-xl shadow-slate-200/50"
+                                className="bg-white/90 backdrop-blur-xl p-6 rounded-lg border border-white shadow-xl shadow-slate-200/50"
                             >
                                 <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{stat.label}</div>
                                 <div className="text-2xl font-black text-slate-900 mb-1">{stat.value}</div>
@@ -99,9 +98,9 @@ const Home = () => {
                             { step: '03', title: 'Đặt lịch hẹn', desc: 'Lựa chọn thời gian phù hợp với lịch sinh hoạt của gia đình.', icon: CalendarDaysIcon },
                             { step: '04', title: 'Tận hưởng chăm sóc', desc: 'Điều dưỡng đến nhà thực hiện quy trình chuyên môn.', icon: HandRaisedIcon },
                         ].map((item, i) => (
-                            <div key={i} className="relative p-10 rounded-[32px] bg-slate-50 hover:bg-brand-soft transition-colors group">
+                            <div key={i} className="relative p-10 rounded-xl bg-slate-50 hover:bg-brand-soft transition-colors group">
                                 <div className="absolute top-6 right-8 text-5xl font-black text-slate-900/10 group-hover:text-brand/20 transition-colors">{item.step}</div>
-                                <div className="h-14 w-14 rounded-2xl bg-white shadow-sm flex items-center justify-center text-brand mb-8 group-hover:scale-110 transition-transform">
+                                <div className="h-14 w-14 rounded-lg bg-white shadow-sm flex items-center justify-center text-brand mb-8 group-hover:scale-110 transition-transform">
                                     <item.icon className="h-7 w-7" />
                                 </div>
                                 <h4 className="text-xl font-black text-slate-900 mb-4">{item.title}</h4>
@@ -119,7 +118,7 @@ const Home = () => {
                         { title: 'Cộng đồng CareMate', desc: 'Tham gia thảo luận và chia sẻ kinh nghiệm cùng hàng ngàn mẹ bỉm.', image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=2064&auto=format&fit=crop', link: '/community' },
                         { title: 'Tiêu chuẩn Y khoa', desc: 'Tìm hiểu về quy trình đào tạo và kiểm soát chất lượng tại CareMate.', image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=2070&auto=format&fit=crop', link: '/about' },
                     ].map((banner, i) => (
-                        <div key={i} className="relative h-[450px] rounded-[40px] overflow-hidden group border-8 border-slate-50">
+                        <div key={i} className="relative h-[450px] rounded-xl overflow-hidden group border-8 border-slate-50">
                             <img src={banner.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent flex flex-col justify-end p-12">
                                 <h3 className="text-3xl font-black text-white mb-4">{banner.title}</h3>
@@ -137,7 +136,7 @@ const Home = () => {
                     <div className="grid lg:grid-cols-2 gap-20 items-center">
                         <div className="relative">
                             <div className="absolute -inset-10 bg-brand/5 blur-[100px] rounded-full"></div>
-                            <div className="relative rounded-[40px] overflow-hidden border-[12px] border-white shadow-2xl aspect-square">
+                            <div className="relative rounded-xl overflow-hidden border-[12px] border-white shadow-2xl aspect-square">
                                 <img 
                                     src="https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=2070&auto=format&fit=crop" 
                                     alt="Expert Nurse" 
@@ -167,7 +166,7 @@ const Home = () => {
                                     { title: 'Minh bạch & An toàn', desc: 'Giá cả công khai, hồ sơ y tá được kiểm định nghiêm ngặt.', icon: SparklesIcon }
                                 ].map((item, i) => (
                                     <div key={i} className="flex gap-6">
-                                        <div className="h-14 w-14 rounded-2xl bg-white shadow-md flex items-center justify-center text-brand flex-none">
+                                        <div className="h-14 w-14 rounded-lg bg-white shadow-md flex items-center justify-center text-brand flex-none">
                                             <item.icon className="h-7 w-7" />
                                         </div>
                                         <div>
@@ -192,8 +191,8 @@ const Home = () => {
 
                     <div className="grid md:grid-cols-2 gap-8">
                         {[1, 2].map(i => (
-                            <div key={i} className="bg-slate-50 p-12 rounded-[40px] flex flex-col md:flex-row gap-8 items-start hover:bg-white hover:shadow-2xl transition-all duration-500">
-                                <img src={i === 1 ? "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop" : "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop"} className="h-24 w-24 rounded-3xl object-cover flex-none shadow-lg" />
+                            <div key={i} className="bg-slate-50 p-12 rounded-xl flex flex-col md:flex-row gap-8 items-start hover:bg-white hover:shadow-2xl transition-all duration-500">
+                                <img src={i === 1 ? "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1976&auto=format&fit=crop" : "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=2070&auto=format&fit=crop"} className="h-24 w-24 rounded-xl object-cover flex-none shadow-lg" />
                                 <div>
                                     <div className="flex text-yellow-400 mb-6"><StarSolid className="h-4 w-4" /><StarSolid className="h-4 w-4" /><StarSolid className="h-4 w-4" /><StarSolid className="h-4 w-4" /><StarSolid className="h-4 w-4" /></div>
                                     <p className="text-slate-600 font-medium leading-relaxed mb-8 italic">"Dịch vụ của CareMate thực sự chuyên nghiệp. Y tá rất tận tâm, tay nghề cao. Gia đình mình rất an tâm khi sử dụng dịch vụ tại đây."</p>
@@ -209,16 +208,16 @@ const Home = () => {
             {/* NEWSLETTER SECTION */}
             <section className="py-40 bg-white">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="bg-slate-900 rounded-[60px] p-12 lg:p-24 relative overflow-hidden text-center">
+                    <div className="bg-slate-900 rounded-xl p-12 lg:p-24 relative overflow-hidden text-center">
                         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand/10 blur-[120px] -mr-64 -mt-64 rounded-full"></div>
                         <div className="relative z-10 max-w-2xl mx-auto">
-                            <div className="h-20 w-20 rounded-3xl bg-brand/10 border border-brand/20 flex items-center justify-center mx-auto mb-10">
+                            <div className="h-20 w-20 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mx-auto mb-10">
                                 <EnvelopeIcon className="h-10 w-10 text-brand" />
                             </div>
                             <h2 className="text-4xl lg:text-6xl font-black text-white mb-10 leading-tight">Nhận kiến thức hữu ích từ chuyên gia</h2>
-                            <form className="flex flex-col sm:flex-row gap-4 p-2 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-xl">
-                                <input type="email" placeholder="Nhập email của bạn..." className="flex-1 bg-transparent border-none rounded-2xl px-6 py-4 text-white font-bold outline-none placeholder:text-white/30" />
-                                <button className="btn-primary !px-12 !rounded-2xl">Đăng ký ngay</button>
+                            <form className="flex flex-col sm:flex-row gap-4 p-2 bg-white/5 rounded-xl border border-white/10 backdrop-blur-xl">
+                                <input type="email" placeholder="Nhập email của bạn..." className="flex-1 bg-transparent border-none rounded-lg px-6 py-4 text-white font-bold outline-none placeholder:text-white/30" />
+                                <button className="btn-primary !px-12 !rounded-lg">Đăng ký ngay</button>
                             </form>
                         </div>
                     </div>

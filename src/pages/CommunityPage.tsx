@@ -60,7 +60,7 @@ const CommunityPage = () => {
                             <h1 className="mt-4 text-4xl font-black text-slate-900">Chia sẻ & Kết nối</h1>
                             <p className="mt-2 text-sm font-bold text-slate-500">Nơi trao đổi kinh nghiệm và lan tỏa yêu thương giữa các gia đình.</p>
                         </div>
-                        <button className="btn-primary !px-8 !py-4 rounded-xl shadow-xl shadow-brand/20 flex items-center gap-3 w-fit">
+                        <button className="btn-primary !px-8 !py-4 rounded-xl shadow-xl shadow-pink-500/20 flex items-center gap-3 w-fit">
                             <PlusIcon className="h-5 w-5" />
                             <span className="text-[10px] font-black uppercase tracking-widest">Tạo bài viết mới</span>
                         </button>
@@ -97,7 +97,7 @@ const CommunityPage = () => {
                                 </div>
                                 <div className="flex gap-2">
                                     {post.tags.map(tag => (
-                                        <span key={tag} className="px-3 py-1 rounded-full bg-slate-50 text-[9px] font-black text-slate-400 uppercase tracking-tighter">{tag}</span>
+                                        <span key={tag} className="px-3 py-1 rounded-xl bg-slate-50 text-[9px] font-black text-slate-400 uppercase tracking-tighter">{tag}</span>
                                     ))}
                                 </div>
                             </div>
