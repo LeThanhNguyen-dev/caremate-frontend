@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type ComponentType, type SVGProps } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
@@ -18,7 +18,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import NursePendingApproval from '../components/nurse/NursePendingApproval';
 
-const statusConfig: Record<string, { label: string; class: string; icon: any }> = {
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+const statusConfig: Record<string, { label: string; class: string; icon: IconComponent }> = {
     pending_confirm: { 
         label: 'Chờ xác nhận', 
         class: 'bg-amber-50 text-amber-600 border-amber-100',
@@ -55,9 +57,6 @@ const NurseBookingsPage = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
 
-    if (user?.role !== 'nurse_confirmed') {
-        return <NursePendingApproval />;
-    }
     const [bookings, setBookings] = useState<BookingDetailDto[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -86,6 +85,10 @@ const NurseBookingsPage = () => {
             showToast('Không thể cập nhật trạng thái.', 'error');
         }
     };
+
+    if (user?.role !== 'nurse_confirmed') {
+        return <NursePendingApproval />;
+    }
 
     if (loading) {
         return (

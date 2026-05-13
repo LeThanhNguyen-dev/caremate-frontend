@@ -1,21 +1,11 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import * as signalR from '@microsoft/signalr';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { notificationApi } from '../api/notificationApi';
 import type { Notification } from '../types/notification';
-
-interface NotificationContextType {
-  notifications: Notification[];
-  unreadCount: number;
-  markAsRead: (id: number) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
-  deleteNotification: (id: number) => Promise<void>;
-  deleteAllNotifications: () => Promise<void>;
-  refreshNotifications: () => Promise<void>;
-}
-
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+import { NotificationContext } from './NotificationContextObject';
+import type { ToastType } from './ToastContextObject';
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -33,8 +23,30 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [user]);
 
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    let isActive = true;
+
+    const loadNotifications = async () => {
+      if (!user) {
+        setNotifications([]);
+        return;
+      }
+
+      try {
+        const data = await notificationApi.getAll();
+        if (isActive) {
+          setNotifications(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch notifications', error);
+      }
+    };
+
+    void loadNotifications();
+
+    return () => {
+      isActive = false;
+    };
+  }, [user]);
 
   useEffect(() => {
     if (!accessToken || !user) return;
@@ -48,7 +60,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     connection.on('ReceiveNotification', (notification: Notification) => {
       setNotifications((prev) => [notification, ...prev]);
-      showToast(notification.title, notification.type.toLowerCase() as any);
+      const normalizedType = notification.type.toLowerCase();
+      const toastType: ToastType =
+        normalizedType === 'success' || normalizedType === 'error' || normalizedType === 'warning'
+          ? normalizedType
+          : 'info';
+      showToast(notification.title, toastType);
     });
 
     connection.start().catch((err) => console.error('SignalR Connection Error: ', err));
@@ -111,12 +128,4 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       {children}
     </NotificationContext.Provider>
   );
-};
-
-export const useNotifications = () => {
-  const context = useContext(NotificationContext);
-  if (context === undefined) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
-  }
-  return context;
 };

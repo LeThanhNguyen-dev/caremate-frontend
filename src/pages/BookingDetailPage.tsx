@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ComponentType, type SVGProps } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
 import type { BookingDetailDto } from '../api/frontend-api-contract';
@@ -16,7 +16,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
-const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+const statusConfig: Record<string, { label: string; color: string; icon: IconComponent }> = {
     pending_confirm: { label: 'Chờ xác nhận', color: 'bg-amber-50 text-amber-600', icon: ClockIcon },
     confirmed: { label: 'Đã xác nhận', color: 'bg-blue-50 text-blue-600', icon: CheckCircleIcon },
     in_progress: { label: 'Đang thực hiện', color: 'bg-green-50 text-green-600', icon: ClockIcon },

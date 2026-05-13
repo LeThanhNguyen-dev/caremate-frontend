@@ -60,7 +60,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         void bootstrap();
     }, []);
 
-    const handleAuthResponse = async (response: any): Promise<User> => {
+    const handleAuthResponse = async (
+        response: TokenResponse & Partial<{ token: string; fullName: string; email: string }>,
+    ): Promise<User> => {
         // Hỗ trợ cả accessToken và token (tùy backend)
         const accessToken = response.accessToken || response.token;
         const refreshToken = response.refreshToken;

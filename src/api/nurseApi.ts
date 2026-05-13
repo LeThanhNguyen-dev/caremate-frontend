@@ -1,6 +1,8 @@
 import axiosInstance from './axios';
 import type { NurseProfileDetailDto, UpdateNurseProfileDto, UploadDocumentDto, UploadDocumentsDto } from '../types/nurse';
 
+type NurseSearchParams = Record<string, string | number | boolean | undefined>;
+
 export const nurseApi = {
     getProfile: async (): Promise<NurseProfileDetailDto> => {
         const response = await axiosInstance.get<NurseProfileDetailDto>('/api/nurse/profile');
@@ -37,7 +39,7 @@ export const nurseApi = {
         await axiosInstance.post('/api/nurse/verification/submit');
     },
 
-    getNurses: async (params?: any) => {
+    getNurses: async (params?: NurseSearchParams) => {
         const response = await axiosInstance.get('/api/nurses', { params });
         return response.data;
     },

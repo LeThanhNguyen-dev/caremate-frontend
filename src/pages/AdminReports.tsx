@@ -1,5 +1,5 @@
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import caremateApi from '../api/caremateApi';
 import type { Dispute } from '../api/frontend-api-contract';
@@ -21,7 +21,7 @@ const AdminReports = () => {
     const [adminNote, setAdminNote] = useState<Record<number, string>>({});
     const [loading, setLoading] = useState(true);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         try {
             setLoading(true);
             const data = await caremateApi.getAdminDisputes();
@@ -31,11 +31,11 @@ const AdminReports = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [showToast]);
 
     useEffect(() => {
         void load();
-    }, []);
+    }, [load]);
 
     const disputeStats = useMemo(() => {
         const map = new Map<string, number>();

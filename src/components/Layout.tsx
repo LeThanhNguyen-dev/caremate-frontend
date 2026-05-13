@@ -1,27 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Bars3Icon, 
-    XMarkIcon, 
-    BellIcon, 
+import {
+    Bars3Icon,
+    XMarkIcon,
     ArrowRightOnRectangleIcon,
     Cog8ToothIcon,
     CalendarDaysIcon,
     BellAlertIcon,
-    InboxStackIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
-import { useNotifications } from '../contexts/NotificationProvider';
+import NotificationDropdown from './NotificationDropdown';
 
 const Layout = () => {
     const { user, logout, isAuthenticated } = useAuth();
-    const { notifications, unreadCount, markAsRead } = useNotifications();
     const navigate = useNavigate();
     const location = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
     useEffect(() => {
@@ -29,13 +25,6 @@ const Layout = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-
-    // Close dropdowns on route change
-    useEffect(() => {
-        setNotifDropdownOpen(false);
-        setProfileDropdownOpen(false);
-        setMobileMenuOpen(false);
-    }, [location.pathname]);
 
     const handleLogout = async () => {
         await logout();
@@ -49,11 +38,9 @@ const Layout = () => {
         { name: 'Giới thiệu', href: '/about' },
     ];
 
-    const displayNotifications = notifications.slice(0, 5);
-
     return (
         <div className="min-h-screen flex flex-col bg-white font-sans">
-            <header 
+            <header
                 className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
                     scrolled ? 'bg-white/80 backdrop-blur-2xl py-2 shadow-xl shadow-slate-200/20' : 'bg-transparent py-6'
                 }`}
@@ -66,9 +53,9 @@ const Layout = () => {
 
                         <div className="hidden lg:flex items-center gap-8">
                             {navigation.map((item) => (
-                                <Link 
-                                    key={item.name} 
-                                    to={item.href} 
+                                <Link
+                                    key={item.name}
+                                    to={item.href}
                                     className={`text-[13px] font-black uppercase tracking-[0.2em] transition-colors ${
                                         location.pathname === item.href ? 'text-brand' : 'text-slate-500 hover:text-brand'
                                     }`}
@@ -86,85 +73,23 @@ const Layout = () => {
 
                         {isAuthenticated ? (
                             <div className="hidden lg:flex items-center gap-4">
-                                {/* Notifications Dropdown */}
-                                <div className="relative">
-                                    <button 
-                                        onClick={() => {
-                                            setNotifDropdownOpen(!notifDropdownOpen);
-                                            setProfileDropdownOpen(false);
-                                        }}
-                                        className="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative group"
-                                    >
-                                        <BellIcon className="h-6 w-6 transition-transform group-hover:rotate-12" />
-                                        {unreadCount > 0 && (
-                                            <span className="absolute top-2.5 right-2.5 h-3 w-3 rounded-full bg-brand ring-4 ring-white animate-pulse"></span>
-                                        )}
-                                    </button>
+                                <NotificationDropdown
+                                    key={location.pathname}
+                                    accentClassName="bg-brand/5 text-brand"
+                                    badgeClassName="bg-brand animate-pulse"
+                                    buttonClassName="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative group"
+                                />
 
-                                    <AnimatePresence>
-                                        {notifDropdownOpen && (
-                                            <motion.div 
-                                                initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                                exit={{ opacity: 0, y: 15, scale: 0.95 }}
-                                                className="absolute right-0 mt-4 w-[400px] bg-white rounded-xl shadow-2xl shadow-slate-900/10 border border-slate-50 p-8 z-[110]"
-                                            >
-                                                <div className="flex items-center justify-between mb-8 px-2">
-                                                    <h4 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em]">Thông báo</h4>
-                                                    <span className="text-[11px] font-black text-brand bg-brand-soft px-4 py-2 rounded-xl uppercase tracking-widest">{unreadCount} tin mới</span>
-                                                </div>
-                                                
-                                                <div className="space-y-4 mb-8 max-h-[400px] overflow-y-auto custom-scrollbar px-2">
-                                                    {displayNotifications.length > 0 ? (
-                                                        displayNotifications.map((notif) => (
-                                                            <div 
-                                                                key={notif.id} 
-                                                                onClick={() => markAsRead(notif.id)}
-                                                                className={`p-5 rounded-xl transition-all group cursor-pointer ${
-                                                                    !notif.isRead ? 'bg-brand/5 hover:bg-brand/10 border-brand/5 border' : 'hover:bg-slate-50'
-                                                                }`}
-                                                            >
-                                                                <div className="flex justify-between gap-4">
-                                                                    <div className={`text-xs font-black transition-colors ${!notif.isRead ? 'text-brand' : 'text-slate-900 group-hover:text-brand'}`}>
-                                                                        {notif.title}
-                                                                    </div>
-                                                                    {!notif.isRead && <div className="h-2 w-2 rounded-full bg-brand mt-1 flex-none"></div>}
-                                                                </div>
-                                                                <div className="text-[11px] font-medium text-slate-500 mt-2 line-clamp-2 leading-relaxed">{notif.content}</div>
-                                                                <div className="text-[9px] font-black text-slate-300 mt-3 uppercase tracking-widest">{new Date(notif.createdAt).toLocaleTimeString()}</div>
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <div className="py-12 text-center">
-                                                            <InboxStackIcon className="h-10 w-10 text-slate-100 mx-auto mb-4" />
-                                                            <p className="text-xs font-bold text-slate-300">Không có thông báo mới</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                
-                                                <Link 
-                                                    to="/notifications" 
-                                                    className="flex items-center justify-center w-full py-4 bg-slate-900 text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] hover:bg-brand hover:shadow-xl hover:shadow-pink-500/20 transition-all active:scale-95"
-                                                >
-                                                    Xem tất cả tin nhắn
-                                                </Link>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-
-                                {/* Profile Dropdown */}
                                 <div className="relative">
-                                    <button 
-                                        onClick={() => {
-                                            setProfileDropdownOpen(!profileDropdownOpen);
-                                            setNotifDropdownOpen(false);
-                                        }}
+                                    <button
+                                        onClick={() => setProfileDropdownOpen((prev) => !prev)}
                                         className="flex items-center gap-4 pl-4 pr-2 py-2 rounded-lg bg-slate-50 hover:bg-white hover:shadow-lg transition-all group"
                                     >
                                         <div className="text-right hidden xl:block">
                                             <div className="text-sm font-black text-slate-900 group-hover:text-brand transition-colors">{user?.username}</div>
-                                            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">{user?.role === 'admin' ? 'Quản trị viên' : user?.role === 'nurse' ? 'Điều dưỡng' : 'Khách hàng'}</div>
+                                            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                                                {user?.role === 'admin' ? 'Quản trị viên' : user?.role?.startsWith('nurse') ? 'Điều dưỡng' : 'Khách hàng'}
+                                            </div>
                                         </div>
                                         <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center font-black text-lg">
                                             {user?.username?.charAt(0)}
@@ -173,7 +98,7 @@ const Layout = () => {
 
                                     <AnimatePresence>
                                         {profileDropdownOpen && (
-                                            <motion.div 
+                                            <motion.div
                                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -185,9 +110,10 @@ const Layout = () => {
                                                         { name: 'Quản lý dịch vụ', icon: CalendarDaysIcon, href: '/my-bookings' },
                                                         { name: 'Thông báo của tôi', icon: BellAlertIcon, href: '/notifications' },
                                                     ].map((item) => (
-                                                        <Link 
-                                                            key={item.name} 
-                                                            to={item.href} 
+                                                        <Link
+                                                            key={item.name}
+                                                            to={item.href}
+                                                            onClick={() => setProfileDropdownOpen(false)}
                                                             className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-all group"
                                                         >
                                                             <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand/10 group-hover:text-brand transition-colors">
@@ -197,8 +123,8 @@ const Layout = () => {
                                                         </Link>
                                                     ))}
                                                 </div>
-                                                <button 
-                                                    onClick={handleLogout}
+                                                <button
+                                                    onClick={() => void handleLogout()}
                                                     className="flex w-full items-center gap-4 p-3 rounded-xl hover:bg-red-50 text-slate-500 hover:text-red-600 transition-all group"
                                                 >
                                                     <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-red-100 transition-colors">
@@ -220,10 +146,9 @@ const Layout = () => {
                     </div>
                 </nav>
 
-                {/* Mobile Menu */}
                 <AnimatePresence>
                     {mobileMenuOpen && (
-                        <motion.div 
+                        <motion.div
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
@@ -244,7 +169,7 @@ const Layout = () => {
                                     ))}
                                     <div className="pt-12 border-t border-slate-100 space-y-4">
                                         {isAuthenticated ? (
-                                            <button onClick={handleLogout} className="w-full text-left text-3xl font-black text-red-600">Đăng xuất</button>
+                                            <button onClick={() => void handleLogout()} className="w-full text-left text-3xl font-black text-red-600">Đăng xuất</button>
                                         ) : (
                                             <>
                                                 <Link to="/login" className="block text-3xl font-black text-slate-900" onClick={() => setMobileMenuOpen(false)}>Đăng nhập</Link>
@@ -265,7 +190,7 @@ const Layout = () => {
 
             <footer className="bg-slate-900 pt-32 pb-12 text-white overflow-hidden relative">
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand/5 blur-[120px] -mr-48 -mb-48 rounded-full"></div>
-                
+
                 <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
                         <div className="space-y-8">
@@ -276,7 +201,7 @@ const Layout = () => {
                                 Định nghĩa lại tiêu chuẩn chăm sóc gia đình Việt với công nghệ và sự tận tâm từ trái tim.
                             </p>
                         </div>
-                        
+
                         <div>
                             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Điều hướng</h4>
                             <ul className="space-y-4 text-sm font-bold">
@@ -305,13 +230,13 @@ const Layout = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
                         <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 text-center md:text-left">
                             &copy; 2026 CareMate. Luxury Care Experience.
                         </div>
                         <div className="flex gap-6">
-                            {['FB', 'IG', 'LI', 'YT'].map(social => (
+                            {['FB', 'IG', 'LI', 'YT'].map((social) => (
                                 <div key={social} className="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group">
                                     <span className="text-[10px] font-black group-hover:scale-110 transition-transform">{social}</span>
                                 </div>
@@ -325,6 +250,3 @@ const Layout = () => {
 };
 
 export default Layout;
-
-
-

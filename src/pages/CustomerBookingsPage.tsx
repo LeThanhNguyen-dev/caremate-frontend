@@ -17,7 +17,7 @@ import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
 import type { BookingDetailDto, Dispute } from '../api/frontend-api-contract';
 
-const statusConfig: Record<string, { label: string; className: string; icon: any }> = {
+const statusConfig: Record<string, { label: string; className: string; icon: typeof ClockIcon }> = {
     pending_confirm: { label: 'Chờ xác nhận', className: 'bg-amber-50 text-amber-600 border-amber-100', icon: ClockIcon },
     confirmed: { label: 'Đã xác nhận', className: 'bg-blue-50 text-blue-600 border-blue-100', icon: CheckBadgeIcon },
     in_progress: { label: 'Đang thực hiện', className: 'bg-brand/5 text-brand border-brand/10', icon: ArrowPathIcon },

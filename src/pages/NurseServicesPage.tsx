@@ -16,9 +16,6 @@ const NurseServicesPage = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
 
-    if (user?.role !== 'nurse_confirmed') {
-        return <NursePendingApproval />;
-    }
     const [loading, setLoading] = useState(true);
     const [myServices, setMyServices] = useState<NurseServiceDto[]>([]);
     const [allServices, setAllServices] = useState<ServiceDetailDto[]>([]);
@@ -74,6 +71,10 @@ const NurseServicesPage = () => {
             showToast('Không thể xóa dịch vụ.', 'error');
         }
     };
+
+    if (user?.role !== 'nurse_confirmed') {
+        return <NursePendingApproval />;
+    }
 
     if (loading) {
         return (

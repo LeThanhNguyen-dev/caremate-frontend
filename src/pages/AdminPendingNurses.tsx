@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
 import type { NurseProfileDetailDto } from '../api/frontend-api-contract';
@@ -17,7 +17,7 @@ const AdminPendingNurses = () => {
     const [pendingNurses, setPendingNurses] = useState<NurseProfileDetailDto[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchPendingNurses = async () => {
+    const fetchPendingNurses = useCallback(async () => {
         try {
             setLoading(true);
             const data = await caremateApi.getPendingNurses();
@@ -28,11 +28,11 @@ const AdminPendingNurses = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [showToast]);
 
     useEffect(() => {
         void fetchPendingNurses();
-    }, []);
+    }, [fetchPendingNurses]);
 
     if (loading) {
         return (

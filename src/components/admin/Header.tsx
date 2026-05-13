@@ -1,6 +1,7 @@
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { BellIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import NotificationDropdown from '../NotificationDropdown';
 
 const AdminHeader = () => {
     const location = useLocation();
@@ -40,10 +41,13 @@ const AdminHeader = () => {
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button className="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-[#3B82F6] hover:bg-blue-50 transition-all relative group">
-                            <BellIcon className="h-6 w-6" />
-                            <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-[#3B82F6] ring-4 ring-white"></span>
-                        </button>
+                        <NotificationDropdown
+                            key={location.pathname}
+                            accentClassName="bg-blue-50 text-[#3B82F6]"
+                            badgeClassName="bg-[#3B82F6]"
+                            buttonClassName="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-[#3B82F6] hover:bg-blue-50 transition-all relative group"
+                            emptyIconClassName="text-blue-100"
+                        />
                         
                         <div className="h-10 w-[1px] bg-slate-100 mx-2"></div>
 

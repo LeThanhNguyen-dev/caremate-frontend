@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, type ComponentType, type SVGProps } from 'react';
 import caremateApi from '../api/caremateApi';
 import type { AdminUserDto } from '../api/frontend-api-contract';
 import { 
@@ -13,7 +13,9 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '../hooks/useToast';
 
-const roleLabels: Record<string, { label: string; class: string; icon: any }> = {
+type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+
+const roleLabels: Record<string, { label: string; class: string; icon: IconComponent }> = {
     customer: { label: 'Khách hàng', class: 'bg-blue-50 text-blue-600', icon: UserCircleIcon },
     nurse: { label: 'Đ.Dưỡng chờ', class: 'bg-amber-50 text-amber-600', icon: BriefcaseIcon },
     nurse_confirmed: { label: 'Đ.Dưỡng xác minh', class: 'bg-emerald-50 text-emerald-600', icon: ShieldCheckIcon },
@@ -27,7 +29,7 @@ const AdminUsers = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [roleFilter, setRoleFilter] = useState('all');
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             setLoading(true);
             const data = await caremateApi.getAdminUsers();
@@ -38,11 +40,11 @@ const AdminUsers = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [showToast]);
 
     useEffect(() => {
         void fetchUsers();
-    }, []);
+    }, [fetchUsers]);
 
     const filteredUsers = useMemo(() => {
         return users.filter(user => {

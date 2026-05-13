@@ -48,6 +48,13 @@ const posts = [
     }
 ];
 
+const hotTopics = [
+    { name: 'Chăm sóc sơ sinh', mentions: 28 },
+    { name: 'Dinh dưỡng sau sinh', mentions: 41 },
+    { name: 'Sức khỏe tinh thần', mentions: 19 },
+    { name: 'Review điều dưỡng', mentions: 33 },
+];
+
 const CommunityPage = () => {
     return (
         <div className="bg-[#FDF2F8]/30 min-h-screen pb-20 pt-20">
@@ -131,10 +138,10 @@ const CommunityPage = () => {
                             <h3 className="text-lg font-black text-slate-900">Chủ đề hot</h3>
                         </div>
                         <div className="space-y-4">
-                            {['Chăm sóc sơ sinh', 'Dinh dưỡng sau sinh', 'Sức khỏe tinh thần', 'Review điều dưỡng'].map((topic, i) => (
-                                <div key={i} className="flex items-center justify-between group cursor-pointer">
-                                    <span className="text-sm font-bold text-slate-600 group-hover:text-brand">{topic}</span>
-                                    <span className="text-[10px] font-black text-slate-300">+{Math.floor(Math.random() * 100)}</span>
+                            {hotTopics.map((topic) => (
+                                <div key={topic.name} className="flex items-center justify-between group cursor-pointer">
+                                    <span className="text-sm font-bold text-slate-600 group-hover:text-brand">{topic.name}</span>
+                                    <span className="text-[10px] font-black text-slate-300">+{topic.mentions}</span>
                                 </div>
                             ))}
                         </div>

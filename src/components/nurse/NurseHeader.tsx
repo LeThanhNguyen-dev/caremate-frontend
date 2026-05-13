@@ -1,6 +1,7 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../hooks/useAuth';
-import { BellIcon, PlusIcon } from '@heroicons/react/24/outline';
+import NotificationDropdown from '../NotificationDropdown';
 
 const pageMeta: Record<string, { title: string; subtitle: string }> = {
     '/nurse/overview': {
@@ -45,13 +46,13 @@ const NurseHeader = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Link 
-                        to="/notifications" 
-                        className="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-[#10B981] hover:bg-emerald-50 transition-all relative group"
-                    >
-                        <BellIcon className="h-6 w-6 transition-transform group-hover:rotate-12" />
-                        <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-[#10B981] ring-4 ring-white"></span>
-                    </Link>
+                    <NotificationDropdown
+                        key={location.pathname}
+                        accentClassName="bg-emerald-50 text-[#10B981]"
+                        badgeClassName="bg-[#10B981]"
+                        buttonClassName="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-[#10B981] hover:bg-emerald-50 transition-all relative group"
+                        emptyIconClassName="text-emerald-100"
+                    />
 
                     <button className="bg-[#10B981] text-white px-8 py-3.5 rounded-lg font-black text-[11px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 flex items-center gap-2 hover:scale-[1.02] transition-all active:scale-95">
                         <PlusIcon className="h-4 w-4" />

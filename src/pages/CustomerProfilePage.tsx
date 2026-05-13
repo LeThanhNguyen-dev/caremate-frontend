@@ -195,7 +195,7 @@ const CustomerProfilePage = () => {
                         ].map((tab) => (
                             <button
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id as any)}
+                                onClick={() => setActiveTab(tab.id as 'info' | 'security' | 'activity')}
                                 className={`w-full flex items-center gap-4 p-5 rounded-xl transition-all ${
                                     activeTab === tab.id
                                     ? 'bg-slate-900 text-white shadow-2xl shadow-slate-900/20'

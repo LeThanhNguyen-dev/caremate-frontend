@@ -1,17 +1,18 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useToast } from '../hooks/useToast';
-import { nurseApi } from '../api/nurseApi';
-import type { DocumentDto, NurseProfileDetailDto } from '../types/nurse';
-import { 
-    AcademicCapIcon, 
+import { motion } from 'framer-motion';
+import {
+    AcademicCapIcon,
     IdentificationIcon,
     DocumentTextIcon,
     PlusIcon,
     EnvelopeIcon,
     PhoneIcon,
-    ShieldCheckIcon
+    ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
+import { useToast } from '../hooks/useToast';
+import { nurseApi } from '../api/nurseApi';
+import type { DocumentDto, NurseProfileDetailDto } from '../types/nurse';
+import { getErrorMessage } from '../utils/apiError';
 
 const NurseProfile = () => {
     const { showToast } = useToast();
@@ -61,48 +62,44 @@ const NurseProfile = () => {
     const uploadDocument = async (event: React.FormEvent) => {
         event.preventDefault();
         if (!selectedFiles.length) {
-            showToast('Vui lòng chọn ít nhất một tập tin tài liệu.', 'error');
+            showToast('Vui lòng chọn ít nhất một tài liệu.', 'error');
             return;
         }
+
         try {
             setUploading(true);
             await nurseApi.uploadDocuments({ type: docType, files: selectedFiles });
             setSelectedFiles([]);
             showToast(`Đã gửi ${selectedFiles.length} tài liệu lên hệ thống.`, 'success');
             await loadProfile();
-        } catch (err: any) {
-            console.error('Upload Error Details (Full):', err);
-            if (err.response) {
-                console.error('Response Data:', JSON.stringify(err.response.data, null, 2));
-                console.error('Response Status:', err.response.status);
-                console.error('Response Headers:', err.response.headers);
-            }
-            
-            const status = err.response?.status;
-            const errorBody = err.response?.data;
-            const message = errorBody?.message || errorBody?.Message || (typeof errorBody === 'string' ? errorBody : JSON.stringify(errorBody)) || 'Lỗi không xác định';
-            
-            showToast(`Lỗi ${status || ''}: ${message}`, 'error');
+        } catch (err) {
+            console.error('Upload error:', err);
+            showToast(getErrorMessage(err, 'Không thể tải tài liệu lên hệ thống.'), 'error');
         } finally {
             setUploading(false);
         }
     };
-
-    const profileStatus = profile?.isVerified === 'verified' ? 'Đã xác minh' : profile?.isVerified === 'rejected' ? 'Bị từ chối' : 'Đang chờ duyệt';
-    const hasFront = !!profile?.documents?.some((d) => d.type === 'id_card_front');
-    const hasBack = !!profile?.documents?.some((d) => d.type === 'id_card_back');
-    const hasCertificate = !!profile?.documents?.some((d) => d.type === 'certificate');
-    const canSubmit = hasFront && hasBack && hasCertificate;
 
     const submitVerification = async () => {
         try {
             await nurseApi.submitVerification();
             showToast('Hồ sơ đã được gửi duyệt thành công.', 'success');
             await loadProfile();
-        } catch (err: any) {
-            showToast(err?.response?.data?.message || 'Không thể gửi duyệt hồ sơ.', 'error');
+        } catch (err) {
+            showToast(getErrorMessage(err, 'Không thể gửi duyệt hồ sơ.'), 'error');
         }
     };
+
+    const profileStatus =
+        profile?.isVerified === 'verified'
+            ? 'Đã xác minh'
+            : profile?.isVerified === 'rejected'
+              ? 'Bị từ chối'
+              : 'Đang chờ duyệt';
+    const hasFront = !!profile?.documents?.some((d) => d.type === 'id_card_front');
+    const hasBack = !!profile?.documents?.some((d) => d.type === 'id_card_back');
+    const hasCertificate = !!profile?.documents?.some((d) => d.type === 'certificate');
+    const canSubmit = hasFront && hasBack && hasCertificate;
 
     if (loading) {
         return (
@@ -117,20 +114,17 @@ const NurseProfile = () => {
 
     return (
         <div className="space-y-12 pb-20 selection:bg-emerald-100">
-            {/* Header Profile Hero */}
             <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
                 <div className="luxury-card bg-slate-900 text-white p-12 border-none shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full"></div>
                     <div className="relative z-10">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-4">Hồ sơ chuyên môn chuyên sâu</div>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-4">Hồ sơ chuyên môn</div>
                         <h1 className="text-4xl font-black text-white mt-4 tracking-tight">{profile?.fullName}</h1>
                         <p className="mt-4 max-w-2xl text-lg font-medium text-white/50 leading-relaxed">
-                            Quản lý thông tin nghề nghiệp và tài liệu chuyên môn để duy trì trạng thái xác minh cao nhất trên hệ thống CareMate.
+                            Quản lý thông tin nghề nghiệp và tài liệu chuyên môn để duy trì trạng thái xác minh trên CareMate.
                         </p>
                         <div className="mt-10 flex items-center gap-3">
-                            <span className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${
-                                profile?.isVerified === 'verified' ? 'bg-emerald-500/20 text-[#10B981]' : 'bg-amber-500/20 text-amber-400'
-                            }`}>
+                            <span className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${profile?.isVerified === 'verified' ? 'bg-emerald-500/20 text-[#10B981]' : 'bg-amber-500/20 text-amber-400'}`}>
                                 <ShieldCheckIcon className="h-4 w-4" />
                                 {profileStatus}
                             </span>
@@ -164,7 +158,6 @@ const NurseProfile = () => {
             </section>
 
             <section className="grid gap-12 lg:grid-cols-[1fr_0.9fr]">
-                {/* Form Update */}
                 <div className="luxury-card p-10 border-none shadow-xl bg-white">
                     <div className="mb-10 flex items-center justify-between">
                         <div>
@@ -179,32 +172,16 @@ const NurseProfile = () => {
                     <form onSubmit={updateProfile} className="space-y-8">
                         <div>
                             <label className="form-label">Giới thiệu bản thân chuyên nghiệp</label>
-                            <textarea 
-                                className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all min-h-[160px] resize-none" 
-                                rows={5} 
-                                value={formData.bio} 
-                                onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))} 
-                                placeholder="Chia sẻ về kinh nghiệm, thế mạnh và tâm thế phục vụ của bạn..." 
-                            />
+                            <textarea className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all min-h-[160px] resize-none" rows={5} value={formData.bio} onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))} placeholder="Chia sẻ về kinh nghiệm, thế mạnh và tâm thế phục vụ của bạn..." />
                         </div>
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <label className="form-label">Số năm kinh nghiệm</label>
-                                <input 
-                                    type="number" 
-                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" 
-                                    value={formData.yearsExperience} 
-                                    onChange={(event) => setFormData((prev) => ({ ...prev, yearsExperience: Number(event.target.value) || 0 })) } 
-                                />
+                                <input type="number" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.yearsExperience} onChange={(event) => setFormData((prev) => ({ ...prev, yearsExperience: Number(event.target.value) || 0 }))} />
                             </div>
                             <div>
                                 <label className="form-label">Bán kính phục vụ (km)</label>
-                                <input 
-                                    type="number" 
-                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" 
-                                    value={formData.serviceRadiusKm} 
-                                    onChange={(event) => setFormData((prev) => ({ ...prev, serviceRadiusKm: Number(event.target.value) || 0 })) } 
-                                />
+                                <input type="number" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.serviceRadiusKm} onChange={(event) => setFormData((prev) => ({ ...prev, serviceRadiusKm: Number(event.target.value) || 0 }))} />
                             </div>
                         </div>
                         <button type="submit" className="bg-[#10B981] text-white w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all" disabled={saving}>
@@ -214,7 +191,6 @@ const NurseProfile = () => {
                 </div>
 
                 <div className="space-y-12">
-                    {/* Upload Section */}
                     <div className="luxury-card p-10 border-none shadow-xl bg-white">
                         <div className="mb-10 flex items-center justify-between">
                             <div>
@@ -231,11 +207,7 @@ const NurseProfile = () => {
                             </div>
                             <div>
                                 <label className="form-label">Phân loại tài liệu</label>
-                                <select 
-                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all appearance-none bg-slate-50" 
-                                    value={docType} 
-                                    onChange={(event) => setDocType(event.target.value)}
-                                >
+                                <select className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={docType} onChange={(event) => setDocType(event.target.value)}>
                                     <option value="id_card_front">Căn cước công dân (Mặt trước)</option>
                                     <option value="id_card_back">Căn cước công dân (Mặt sau)</option>
                                     <option value="certificate">Chứng chỉ hành nghề y tế</option>
@@ -244,18 +216,8 @@ const NurseProfile = () => {
                             <div>
                                 <label className="form-label">Chọn tệp tài liệu (JPG/PNG)</label>
                                 <div className="relative group">
-                                    <input 
-                                        type="file" 
-                                        id="doc-upload"
-                                        className="hidden"
-                                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
-                                        multiple
-                                        onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} 
-                                    />
-                                    <label 
-                                        htmlFor="doc-upload"
-                                        className="flex items-center justify-between w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg py-4 px-6 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all group"
-                                    >
+                                    <input type="file" id="doc-upload" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} />
+                                    <label htmlFor="doc-upload" className="flex items-center justify-between w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg py-4 px-6 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all group">
                                         <span className={`text-sm font-bold ${selectedFiles.length ? 'text-slate-900' : 'text-slate-400'}`}>
                                             {selectedFiles.length ? `Đã chọn ${selectedFiles.length} tệp` : 'Nhấn để chọn tệp...'}
                                         </span>
@@ -266,15 +228,14 @@ const NurseProfile = () => {
                             </div>
                             <button type="submit" className="w-full py-4 rounded-xl flex items-center justify-center gap-3 border-2 border-emerald-100 text-[#10B981] font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 transition-all" disabled={uploading}>
                                 <PlusIcon className="h-5 w-5 text-[#10B981]" />
-                                {uploading ? 'Đang gửi...' : (profile?.isVerified === 'rejected' ? 'Gửi lại hồ sơ xác minh' : 'Gửi tài liệu xác minh')}
+                                {uploading ? 'Đang gửi...' : profile?.isVerified === 'rejected' ? 'Gửi lại hồ sơ xác minh' : 'Gửi tài liệu xác minh'}
                             </button>
-                            <button type="button" onClick={submitVerification} disabled={!canSubmit || profile?.verificationSubmissionStatus === 'submitted'} className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-50">
+                            <button type="button" onClick={() => void submitVerification()} disabled={!canSubmit || profile?.verificationSubmissionStatus === 'submitted'} className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-50">
                                 {profile?.verificationSubmissionStatus === 'submitted' ? 'Đã gửi, đang chờ duyệt' : 'Gửi duyệt hồ sơ 1 lần'}
                             </button>
                         </form>
                     </div>
 
-                    {/* History Section */}
                     <div className="luxury-card p-10 border-none shadow-xl bg-white">
                         <div className="mb-10 flex items-center justify-between">
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Danh mục hồ sơ</h3>
@@ -285,13 +246,7 @@ const NurseProfile = () => {
                         <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
                             {profile?.documents?.length ? (
                                 profile.documents.map((doc: DocumentDto, idx: number) => (
-                                    <motion.div 
-                                        key={doc.id} 
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                        className="p-6 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-all border border-transparent hover:border-emerald-500/10"
-                                    >
+                                    <motion.div key={doc.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.1 }} className="p-6 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-all border border-transparent hover:border-emerald-500/10">
                                         <div className="flex items-center justify-between gap-4">
                                             <div className="flex items-center gap-4">
                                                 <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center text-[#10B981] shadow-sm">
@@ -306,10 +261,7 @@ const NurseProfile = () => {
                                                     </a>
                                                 </div>
                                             </div>
-                                            <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${
-                                                doc.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 
-                                                doc.status === 'rejected' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-amber-50 text-amber-600 border-amber-100'
-                                            }`}>
+                                            <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${doc.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : doc.status === 'rejected' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
                                                 {doc.status === 'approved' ? 'Đã duyệt' : doc.status === 'rejected' ? 'Bị từ chối' : 'Chờ duyệt'}
                                             </span>
                                         </div>

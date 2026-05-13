@@ -32,10 +32,6 @@ const NurseWorkspacePage = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
     const [loading, setLoading] = useState(true);
-
-    if (user?.role !== 'nurse_confirmed') {
-        return <NursePendingApproval />;
-    }
     const [bookings, setBookings] = useState<BookingDetailDto[]>([]);
     const [slots, setSlots] = useState<AvailabilitySlotDto[]>([]);
 
@@ -85,6 +81,10 @@ const NurseWorkspacePage = () => {
             .slice(0, 4),
         [bookings],
     );
+
+    if (user?.role !== 'nurse_confirmed') {
+        return <NursePendingApproval />;
+    }
 
     if (loading) {
         return (

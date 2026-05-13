@@ -40,13 +40,11 @@ const NurseSchedulePage = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
 
-    if (user?.role !== 'nurse_confirmed') {
-        return <NursePendingApproval />;
-    }
     const [anchorDate, setAnchorDate] = useState(new Date());
     const [slots, setSlots] = useState<AvailabilitySlotDto[]>([]);
     const [bookings, setBookings] = useState<BookingDetailDto[]>([]);
     const [slotModalOpen, setSlotModalOpen] = useState(false);
+    const [currentTimestamp] = useState(() => Date.now());
     const [slotForm, setSlotForm] = useState({
         date: formatDateValue(new Date()),
         startTime: '08:00',
@@ -67,8 +65,30 @@ const NurseSchedulePage = () => {
     }, [showToast]);
 
     useEffect(() => {
-        void load();
-    }, [load]);
+        let isActive = true;
+
+        const loadSchedule = async () => {
+            try {
+                const [slotData, bookingData] = await Promise.all([
+                    caremateApi.getMyAvailability(),
+                    caremateApi.getMyNurseBookings(),
+                ]);
+
+                if (isActive) {
+                    setSlots(slotData);
+                    setBookings(bookingData);
+                }
+            } catch {
+                showToast('KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u lá»‹ch lÃ m viá»‡c.', 'error');
+            }
+        };
+
+        void loadSchedule();
+
+        return () => {
+            isActive = false;
+        };
+    }, [showToast]);
 
     const weekDays = useMemo(() => {
         const start = getWeekStart(anchorDate);
@@ -136,8 +156,12 @@ const NurseSchedulePage = () => {
     const stats = {
         free: slots.filter((slot) => !slot.isBooked).length,
         booked: slots.filter((slot) => slot.isBooked).length,
-        upcoming: bookings.filter((booking) => new Date(booking.startTime).getTime() >= Date.now()).length,
+        upcoming: bookings.filter((booking) => new Date(booking.startTime).getTime() >= currentTimestamp).length,
     };
+
+    if (user?.role !== 'nurse_confirmed') {
+        return <NursePendingApproval />;
+    }
 
     return (
         <div className="space-y-12 pb-20 selection:bg-emerald-100">
