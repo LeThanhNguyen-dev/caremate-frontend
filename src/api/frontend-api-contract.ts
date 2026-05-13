@@ -56,6 +56,7 @@ export type NurseProfileDetailDto = {
   yearsExperience: number;
   serviceRadiusKm: number;
   isVerified: string;
+  rejectionReason?: string | null;
   documents: NurseDocumentDto[];
 };
 

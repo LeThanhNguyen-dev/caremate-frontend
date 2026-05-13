@@ -17,6 +17,8 @@ export interface NurseProfileDetailDto {
     yearsExperience: number;
     serviceRadiusKm: number;
     isVerified: VerificationStatus;
+    rejectionReason?: string | null;
+    verificationSubmissionStatus?: 'draft' | 'submitted' | 'approved' | 'rejected';
     documents: DocumentDto[];
 }
 
@@ -29,6 +31,11 @@ export interface UpdateNurseProfileDto {
 export interface UploadDocumentDto {
     type: string;
     file: File;
+}
+
+export interface UploadDocumentsDto {
+    type: string;
+    files: File[];
 }
 
 export interface ReviewNurseProfileDto {

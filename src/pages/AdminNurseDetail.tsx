@@ -1,1 +1,167 @@
-import { useState, useEffect, useCallback } from 'react'; import { useParams, useNavigate } from 'react-router-dom'; import { adminApi } from '../api/adminApi'; import type { NurseProfileDetailDto } from '../types/nurse'; import './AdminNurseDetail.css'; const ChevronLeftIcon = () => ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <polyline points="15 18 9 12 15 6" /> </svg> ); const CheckIcon = () => ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <polyline points="20 6 9 17 4 12" /> </svg> ); const XIcon = () => ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"> <line x1="18" y1="6" x2="6" y2="18" /> <line x1="6" y1="6" x2="18" y2="18" /> </svg> ); const FileIcon = () => ( <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="icon-file"> <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /> <polyline points="13 2 13 9 20 9" /> </svg> ); const AdminNurseDetail = () => { const { id } = useParams<{ id: string }>(); const navigate = useNavigate(); const [nurse, setNurse] = useState<NurseProfileDetailDto | null>(null); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const [reviewing, setReviewing] = useState(false); const [comment, setComment] = useState(''); const fetchNurseDetails = useCallback(async () => { try { setLoading(true); const data = await adminApi.getNurseDetails(Number(id)); setNurse(data); } catch (err) { setError('Không thể tải thông tin điều dưỡng.'); console.error(err); } finally { setLoading(false); } }, [id]); useEffect(() => { if (id) { void fetchNurseDetails(); } }, [id, fetchNurseDetails]); const handleReview = async (isApproved: boolean) => { if (!id) return; if (!isApproved && !comment) { alert('Vui lòng nhập lý do từ chối.'); return; } setReviewing(true); try { await adminApi.reviewNurse(Number(id), { isApproved, comment }); alert(isApproved ? 'Hồ sơ đã được duyệt thành công!' : 'Đã từ chối hồ sơ.'); navigate('/admin/pending-nurses'); } catch (err) { setError('Quá trình duyệt hồ sơ thất bại.'); console.error(err); } finally { setReviewing(false); } }; if (loading) return <div className="admin-loading">Đang tải chi tiết hồ sơ...</div>; if (!nurse) return <div className="admin-error">Không tìm thấy thông tin điều dưỡng.</div>; return ( <div className="admin-detail-container"> <button className="back-btn" onClick={() => navigate('/admin/pending-nurses')}> <ChevronLeftIcon /> Quay lại danh sách </button> <header className="detail-header"> <div className="header-main"> <h1>Chi tiết hồ sơ: {nurse.fullName}</h1> <div className="header-meta"> <span className="badge-id">ID: {nurse.userId}</span> <span className={`badge-status ${nurse.isVerified}`}>{nurse.isVerified}</span> </div> </div> </header> <div className="detail-grid"> <div className="detail-col"> <section className="detail-section card"> <h2>Thông tin cá nhân</h2> <div className="info-list"> <div className="info-item"> <span className="label">Họ v� tên</span> <span className="value">{nurse.fullName}</span> </div> <div className="info-item"> <span className="label">Email</span> <span className="value">{nurse.email}</span> </div> <div className="info-item"> <span className="label">Số điện thoại</span> <span className="value">{nurse.phone}</span> </div> <div className="info-item"> <span className="label">Số năm kinh nghiệm</span> <span className="value">{nurse.yearsExperience} năm</span> </div> <div className="info-item"> <span className="label">Bán kính phục vụ</span> <span className="value">{nurse.serviceRadiusKm} km</span> </div> </div> </section> <section className="detail-section card"> <h2>Giới thiệu bản thân</h2> <div className="bio-box"> {nurse.bio || 'Chưa có thông tin giới thiệu.'} </div> </section> </div> <div className="detail-col"> <section className="detail-section card"> <h2>Tài liệu đính kèm ({nurse.documents?.length || 0})</h2> <div className="doc-list-admin"> {nurse.documents && nurse.documents.length > 0 ? ( nurse.documents.map((doc) => ( <div key={doc.id} className="doc-admin-item"> <div className="doc-icon-box"><FileIcon /></div> <div className="doc-details"> <span className="doc-type">{doc.type.replace('_', ' ').toUpperCase()}</span> <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="view-btn">Xem bản chính</a> </div> <span className={`doc-status-tag ${doc.status}`}>{doc.status}</span> </div> )) ) : ( <p className="no-docs">Không có tài liệu nào được cung cấp.</p> )} </div> </section> <section className="detail-section review-card"> <h2>Quyết định phê duyệt</h2> <div className="review-form"> <label>Nhận xét / Lý do (nếu từ chối)</label> <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Nhập nhận xét của bạn về hồ sơ này..." rows={4} /> <div className="review-actions"> <button className="btn-reject" onClick={() => handleReview(false)} disabled={reviewing} > <XIcon /> Từ chối hồ sơ </button> <button className="btn-approve" onClick={() => handleReview(true)} disabled={reviewing} > <CheckIcon /> Phê duyệt ngay </button> </div> </div> </section> </div> </div> {error && <div className="admin-error-banner">{error}</div>} </div> ); }; export default AdminNurseDetail; 
+﻿import { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { adminApi } from '../api/adminApi';
+import type { DocumentDto, NurseProfileDetailDto } from '../types/nurse';
+import './AdminNurseDetail.css';
+
+const ChevronLeftIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="15 18 9 12 15 6" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <polyline points="20 6 9 17 4 12" />
+  </svg>
+);
+
+const XIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+);
+
+const AdminNurseDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+
+  const [nurse, setNurse] = useState<NurseProfileDetailDto | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [reviewing, setReviewing] = useState(false);
+  const [comment, setComment] = useState('');
+  const [previewDoc, setPreviewDoc] = useState<DocumentDto | null>(null);
+
+  const fetchNurseDetails = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await adminApi.getNurseDetails(Number(id));
+      setNurse(data);
+    } catch (err) {
+      setError('Không thể tải thông tin điều dưỡng.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) void fetchNurseDetails();
+  }, [id, fetchNurseDetails]);
+
+  const handleReview = async (isApproved: boolean) => {
+    if (!id) return;
+    if (!isApproved && !comment) {
+      alert('Vui lòng nhập lý do từ chối.');
+      return;
+    }
+
+    setReviewing(true);
+    try {
+      await adminApi.reviewNurse(Number(id), { isApproved, comment });
+      alert(isApproved ? 'Hồ sơ đã được duyệt thành công!' : 'Đã từ chối hồ sơ.');
+      navigate('/admin/pending-nurses');
+    } catch (err) {
+      setError('Quá trình duyệt hồ sơ thất bại.');
+      console.error(err);
+    } finally {
+      setReviewing(false);
+    }
+  };
+
+  if (loading) return <div className="admin-loading">Đang tải chi tiết hồ sơ...</div>;
+  if (!nurse) return <div className="admin-error">Không tìm thấy thông tin điều dưỡng.</div>;
+
+  return (
+    <div className="admin-detail-container">
+      <button className="back-btn" onClick={() => navigate('/admin/pending-nurses')}>
+        <ChevronLeftIcon /> Quay lại danh sách
+      </button>
+
+      <header className="detail-header">
+        <div className="header-main">
+          <h1>Chi tiết hồ sơ: {nurse.fullName}</h1>
+          <div className="header-meta">
+            <span className="badge-id">ID: {nurse.userId}</span>
+            <span className={`badge-status ${nurse.isVerified}`}>{nurse.isVerified}</span>
+          </div>
+        </div>
+      </header>
+
+      <div className="detail-grid">
+        <div className="detail-col">
+          <section className="detail-section card">
+            <h2>Thông tin cá nhân</h2>
+            <div className="info-list">
+              <div className="info-item"><span className="label">Họ và tên</span><span className="value">{nurse.fullName}</span></div>
+              <div className="info-item"><span className="label">Email</span><span className="value">{nurse.email}</span></div>
+              <div className="info-item"><span className="label">Số điện thoại</span><span className="value">{nurse.phone}</span></div>
+              <div className="info-item"><span className="label">Số năm kinh nghiệm</span><span className="value">{nurse.yearsExperience} năm</span></div>
+              <div className="info-item"><span className="label">Bán kính phục vụ</span><span className="value">{nurse.serviceRadiusKm} km</span></div>
+            </div>
+          </section>
+
+          <section className="detail-section card">
+            <h2>Giới thiệu bản thân</h2>
+            <div className="bio-box">{nurse.bio || 'Chưa có thông tin giới thiệu.'}</div>
+          </section>
+        </div>
+
+        <div className="detail-col">
+          <section className="detail-section card">
+            <h2>Tài liệu đính kèm ({nurse.documents?.length || 0})</h2>
+            <div className="doc-list-admin">
+              {nurse.documents && nurse.documents.length > 0 ? nurse.documents.map((doc) => (
+                <div key={doc.id} className="doc-admin-item">
+                  <div className="doc-preview" onClick={() => setPreviewDoc(doc)}>
+                    <img src={doc.fileUrl} alt={doc.type} loading="lazy" />
+                  </div>
+                  <div className="doc-details">
+                    <span className="doc-type">{doc.type.replace(/_/g, ' ').toUpperCase()}</span>
+                    <button className="view-btn" onClick={() => setPreviewDoc(doc)}>Xem chi tiết ảnh</button>
+                  </div>
+                  <span className={`doc-status-tag ${doc.status}`}>{doc.status}</span>
+                </div>
+              )) : <p className="no-docs">Không có tài liệu nào được cung cấp.</p>}
+            </div>
+          </section>
+
+          <section className="detail-section review-card">
+            <h2>Quyết định phê duyệt</h2>
+            {nurse.rejectionReason && (
+              <div className="bio-box" style={{ marginBottom: '12px' }}>
+                <strong>Lý do từ chối gần nhất:</strong> {nurse.rejectionReason}
+              </div>
+            )}
+            <div className="review-form">
+              <label>Nhận xét / Lý do (nếu từ chối)</label>
+              <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Nhập nhận xét của bạn về hồ sơ này..." rows={4} />
+              <div className="review-actions">
+                <button className="btn-reject" onClick={() => handleReview(false)} disabled={reviewing}><XIcon /> Từ chối hồ sơ</button>
+                <button className="btn-approve" onClick={() => handleReview(true)} disabled={reviewing}><CheckIcon /> Phê duyệt ngay</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {previewDoc && (
+        <div className="doc-modal" onClick={() => setPreviewDoc(null)}>
+          <div className="doc-modal-content" onClick={(e) => e.stopPropagation()}>
+            <img src={previewDoc.fileUrl} alt={previewDoc.type} />
+            <div className="doc-modal-actions">
+              <a href={previewDoc.fileUrl} target="_blank" rel="noreferrer">Mở tab mới</a>
+              <button onClick={() => setPreviewDoc(null)}>Đóng</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {error && <div className="admin-error-banner">{error}</div>}
+    </div>
+  );
+};
+
+export default AdminNurseDetail;

@@ -21,7 +21,7 @@ const NurseProfile = () => {
     const [uploading, setUploading] = useState(false);
     const [formData, setFormData] = useState({ bio: '', yearsExperience: 0, serviceRadiusKm: 10 });
     const [docType, setDocType] = useState('id_card_front');
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
     const loadProfile = useCallback(async () => {
         try {
@@ -60,15 +60,15 @@ const NurseProfile = () => {
 
     const uploadDocument = async (event: React.FormEvent) => {
         event.preventDefault();
-        if (!selectedFile) {
-            showToast('Vui lòng chọn một tập tin tài liệu.', 'error');
+        if (!selectedFiles.length) {
+            showToast('Vui lòng chọn ít nhất một tập tin tài liệu.', 'error');
             return;
         }
         try {
             setUploading(true);
-            await nurseApi.uploadDocument({ type: docType, file: selectedFile });
-            setSelectedFile(null);
-            showToast('Tài liệu đã được gửi lên hệ thống.', 'success');
+            await nurseApi.uploadDocuments({ type: docType, files: selectedFiles });
+            setSelectedFiles([]);
+            showToast(`Đã gửi ${selectedFiles.length} tài liệu lên hệ thống.`, 'success');
             await loadProfile();
         } catch (err: any) {
             console.error('Upload Error Details (Full):', err);
@@ -89,6 +89,20 @@ const NurseProfile = () => {
     };
 
     const profileStatus = profile?.isVerified === 'verified' ? 'Đã xác minh' : profile?.isVerified === 'rejected' ? 'Bị từ chối' : 'Đang chờ duyệt';
+    const hasFront = !!profile?.documents?.some((d) => d.type === 'id_card_front');
+    const hasBack = !!profile?.documents?.some((d) => d.type === 'id_card_back');
+    const hasCertificate = !!profile?.documents?.some((d) => d.type === 'certificate');
+    const canSubmit = hasFront && hasBack && hasCertificate;
+
+    const submitVerification = async () => {
+        try {
+            await nurseApi.submitVerification();
+            showToast('Hồ sơ đã được gửi duyệt thành công.', 'success');
+            await loadProfile();
+        } catch (err: any) {
+            showToast(err?.response?.data?.message || 'Không thể gửi duyệt hồ sơ.', 'error');
+        }
+    };
 
     if (loading) {
         return (
@@ -121,6 +135,12 @@ const NurseProfile = () => {
                                 {profileStatus}
                             </span>
                         </div>
+                        {profile?.isVerified === 'rejected' && profile.rejectionReason && (
+                            <div className="mt-4 rounded-xl border border-red-300 bg-red-500/10 p-4 text-sm text-red-100">
+                                <div className="font-black uppercase tracking-wider text-[10px] mb-1">Lý do bị từ chối</div>
+                                <div>{profile.rejectionReason}</div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -206,6 +226,9 @@ const NurseProfile = () => {
                             </div>
                         </div>
                         <form onSubmit={uploadDocument} className="space-y-6">
+                            <div className="rounded-lg bg-slate-50 p-4 text-xs font-semibold text-slate-700">
+                                Checklist hồ sơ: CCCD trước ({hasFront ? 'Đủ' : 'Thiếu'}), CCCD sau ({hasBack ? 'Đủ' : 'Thiếu'}), Chứng chỉ ({hasCertificate ? 'Đủ' : 'Thiếu'})
+                            </div>
                             <div>
                                 <label className="form-label">Phân loại tài liệu</label>
                                 <select 
@@ -216,35 +239,37 @@ const NurseProfile = () => {
                                     <option value="id_card_front">Căn cước công dân (Mặt trước)</option>
                                     <option value="id_card_back">Căn cước công dân (Mặt sau)</option>
                                     <option value="certificate">Chứng chỉ hành nghề y tế</option>
-                                    <option value="degree">Bằng cấp chuyên môn</option>
-                                    <option value="other">Tài liệu bổ trợ khác</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Chọn tệp tài liệu (Ảnh/PDF)</label>
+                                <label className="form-label">Chọn tệp tài liệu (JPG/PNG)</label>
                                 <div className="relative group">
                                     <input 
                                         type="file" 
                                         id="doc-upload"
                                         className="hidden"
-                                        accept="image/*,.pdf"
-                                        onChange={(event) => setSelectedFile(event.target.files?.[0] || null)} 
+                                        accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                                        multiple
+                                        onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} 
                                     />
                                     <label 
                                         htmlFor="doc-upload"
                                         className="flex items-center justify-between w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg py-4 px-6 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all group"
                                     >
-                                        <span className={`text-sm font-bold ${selectedFile ? 'text-slate-900' : 'text-slate-400'}`}>
-                                            {selectedFile ? selectedFile.name : 'Nhấn để chọn tệp...'}
+                                        <span className={`text-sm font-bold ${selectedFiles.length ? 'text-slate-900' : 'text-slate-400'}`}>
+                                            {selectedFiles.length ? `Đã chọn ${selectedFiles.length} tệp` : 'Nhấn để chọn tệp...'}
                                         </span>
                                         <DocumentTextIcon className="h-5 w-5 text-slate-300 group-hover:text-[#10B981]" />
                                     </label>
                                 </div>
-                                <p className="mt-2 text-[10px] font-medium text-slate-400 italic">Hỗ trợ định dạng JPG, PNG, PDF. Dung lượng tối đa 5MB.</p>
+                                <p className="mt-2 text-[10px] font-medium text-slate-400 italic">Hỗ trợ định dạng JPG, PNG. Dung lượng tối đa 5MB.</p>
                             </div>
                             <button type="submit" className="w-full py-4 rounded-xl flex items-center justify-center gap-3 border-2 border-emerald-100 text-[#10B981] font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 transition-all" disabled={uploading}>
                                 <PlusIcon className="h-5 w-5 text-[#10B981]" />
-                                {uploading ? 'Đang gửi...' : 'Gửi tài liệu xác minh'}
+                                {uploading ? 'Đang gửi...' : (profile?.isVerified === 'rejected' ? 'Gửi lại hồ sơ xác minh' : 'Gửi tài liệu xác minh')}
+                            </button>
+                            <button type="button" onClick={submitVerification} disabled={!canSubmit || profile?.verificationSubmissionStatus === 'submitted'} className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-50">
+                                {profile?.verificationSubmissionStatus === 'submitted' ? 'Đã gửi, đang chờ duyệt' : 'Gửi duyệt hồ sơ 1 lần'}
                             </button>
                         </form>
                     </div>

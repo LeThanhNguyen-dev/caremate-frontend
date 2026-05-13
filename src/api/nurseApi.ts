@@ -1,5 +1,5 @@
 import axiosInstance from './axios';
-import type { NurseProfileDetailDto, UpdateNurseProfileDto, UploadDocumentDto } from '../types/nurse';
+import type { NurseProfileDetailDto, UpdateNurseProfileDto, UploadDocumentDto, UploadDocumentsDto } from '../types/nurse';
 
 export const nurseApi = {
     getProfile: async (): Promise<NurseProfileDetailDto> => {
@@ -21,6 +21,20 @@ export const nurseApi = {
                 'Content-Type': 'multipart/form-data'
             }
         });
+    },
+    uploadDocuments: async (data: UploadDocumentsDto): Promise<void> => {
+        const formData = new FormData();
+        formData.append('Type', data.type);
+        data.files.forEach((file) => formData.append('Files', file));
+
+        await axiosInstance.post('/api/nurse/documents/batch', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+    },
+    submitVerification: async (): Promise<void> => {
+        await axiosInstance.post('/api/nurse/verification/submit');
     },
 
     getNurses: async (params?: any) => {
