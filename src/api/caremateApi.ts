@@ -8,6 +8,9 @@ import type {
   ChatMessage,
   Conversation,
   Dispute,
+  HealthAnalysisResponse,
+  HealthCheckInHistoryDto,
+  LatestHealthCheckInDto,
   MeResponse,
   MessageResponse,
   NurseDiscoveryDto,
@@ -212,6 +215,22 @@ export const caremateApi = {
   updateMyProfile: async (payload: { fullName?: string; phone?: string; address?: string }): Promise<void> => {
     await axiosInstance.put('/api/users/me/profile', payload);
   },
+
+  analyzeHealthCheckIn: async (payload: {
+    sleepHours: number;
+    painLevel: number;
+    mood: string;
+    milkStatus: string;
+    babyFeeding: string;
+    babySleep: string;
+    note?: string;
+  }): Promise<HealthAnalysisResponse> => (await axiosInstance.post('/api/health-checkins/analyze', payload)).data,
+
+  getLatestHealthCheckIn: async (): Promise<LatestHealthCheckInDto> =>
+    (await axiosInstance.get('/api/health-checkins/latest')).data,
+
+  getHealthCheckInHistory: async (params?: { page?: number; pageSize?: number }): Promise<HealthCheckInHistoryDto[]> =>
+    (await axiosInstance.get('/api/health-checkins/history', { params })).data,
 
   // === Notification Management ===
   /** DELETE /api/notifications/{id} */

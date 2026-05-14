@@ -17,6 +17,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
 import authApi from '../api/authApi';
+import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 
 const CustomerProfilePage = () => {
     const { user } = useAuth();
@@ -213,6 +214,7 @@ const CustomerProfilePage = () => {
                         {/* Tab: Info */}
                         {activeTab === 'info' && (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
+                                <HealthCheckInsEntryPage />
                                 <h2 className="text-2xl font-black text-slate-900">Chi tiết tài khoản</h2>
 
                                 {profileLoading ? (

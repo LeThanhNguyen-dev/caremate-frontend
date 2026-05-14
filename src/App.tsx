@@ -32,6 +32,7 @@ import NurseWorkspacePage from './pages/NurseWorkspacePage';
 import CustomerProfilePage from './pages/CustomerProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import HealthCheckInsPage from './pages/HealthCheckInsPage';
 
 import { NotificationProvider } from './contexts/NotificationProvider';
 
@@ -70,6 +71,14 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={['customer', 'admin']}>
                       <CustomerBookingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="health-checkins"
+                  element={
+                    <ProtectedRoute allowedRoles={['customer', 'admin']}>
+                      <HealthCheckInsPage />
                     </ProtectedRoute>
                   }
                 />

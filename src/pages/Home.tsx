@@ -13,6 +13,7 @@ import {
     HandRaisedIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 
 const Home = () => {
     return (
@@ -79,6 +80,22 @@ const Home = () => {
                             </motion.div>
                         ))}
                     </div>
+                </div>
+            </section>
+
+            <section className="bg-white py-24">
+                <div className="mx-auto max-w-7xl px-6 lg:px-8">
+                    <div className="mb-10 max-w-3xl">
+                        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-brand">Tính năng mới cho mẹ sau sinh</div>
+                        <h2 className="text-4xl font-black leading-tight text-slate-900">
+                            Một góc riêng để mẹ <span className="text-brand">check-in sức khỏe mỗi ngày</span>
+                        </h2>
+                        <p className="mt-4 text-sm font-medium leading-7 text-slate-500">
+                            CareMate giúp mẹ ghi lại tình trạng của bản thân và em bé, sau đó AI sẽ tóm tắt rủi ro, đưa khuyến nghị và gợi ý dịch vụ hỗ trợ phù hợp.
+                        </p>
+                    </div>
+
+                    <HealthCheckInsEntryPage />
                 </div>
             </section>
 

@@ -88,6 +88,7 @@ export type NurseServiceDto = {
 export type ServiceDetailDto = {
   id: number;
   name: string;
+  category: string;
   description: string | null;
   basePrice: number;
   estimatedDurationMinutes: number;
@@ -188,4 +189,46 @@ export type Payment = {
   refundStatus: string | null;
   createdAt: string;
   refundedAt: string | null;
+};
+
+export type SuggestedServiceDto = {
+  serviceKey: string;
+  serviceName: string;
+  reason: string;
+};
+
+export type HealthAnalysisResponse = {
+  checkInId: string;
+  analysisId: string;
+  summary: string;
+  warningLevel: 'Low' | 'Medium' | 'High' | string;
+  recommendations: string[];
+  suggestedServices: SuggestedServiceDto[];
+  disclaimer: string;
+};
+
+export type HealthCheckInHistoryDto = {
+  checkInId: string;
+  createdAt: string;
+  sleepHours: number;
+  painLevel: number;
+  mood: string;
+  milkStatus: string;
+  babyFeeding: string;
+  babySleep: string;
+  note: string | null;
+  analysis: HealthAnalysisResponse | null;
+};
+
+export type LatestHealthCheckInDto = {
+  checkInId: string;
+  createdAt: string;
+  sleepHours: number;
+  painLevel: number;
+  mood: string;
+  milkStatus: string;
+  babyFeeding: string;
+  babySleep: string;
+  note: string | null;
+  analysis: HealthAnalysisResponse | null;
 };
