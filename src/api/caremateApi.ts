@@ -205,6 +205,15 @@ export const caremateApi = {
     ]);
     return toArray(response).map(normalizeAdminUser);
   },
+  createAdminUser: async (payload: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    password: string;
+    role: 'customer' | 'nurse_unconfirmed';
+  }): Promise<AdminUserDto> => normalizeAdminUser((await axiosInstance.post('/api/admin/users', payload)).data),
+  updateAdminUserStatus: async (id: number, payload: { status: 'active' | 'blocked' }): Promise<AdminUserDto> =>
+    normalizeAdminUser((await axiosInstance.patch(`/api/admin/users/${id}/status`, payload)).data),
 
   // === User Profile ===
   /** GET /api/users/me/profile */

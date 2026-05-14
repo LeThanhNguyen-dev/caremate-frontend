@@ -1,10 +1,23 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
-import type { AdminBookingSummaryDto, AdminUserDto, NurseProfileDetailDto } from '../api/frontend-api-contract';
-import { 
-    UsersIcon, 
-    ClipboardDocumentListIcon, 
+import type { AdminBookingSummaryDto, AdminDashboardDto, AdminUserDto, NurseProfileDetailDto } from '../api/frontend-api-contract';
+import {
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Chart as ChartJS,
+    Filler,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Tooltip
+} from 'chart.js';
+import { Bar, Doughnut, Line } from 'react-chartjs-2';
+import {
+    UsersIcon,
+    ClipboardDocumentListIcon,
     ChartBarIcon,
     ExclamationCircleIcon,
     ArrowRightIcon,
@@ -14,7 +27,63 @@ import {
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
+ChartJS.register(
+    ArcElement,
+    BarElement,
+    CategoryScale,
+    Filler,
+    Legend,
+    LinearScale,
+    LineElement,
+    PointElement,
+    Tooltip
+);
+
+const moneyFormatter = new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0
+});
+
+const dateLabelFormatter = new Intl.DateTimeFormat('vi-VN', {
+    day: '2-digit',
+    month: '2-digit'
+});
+
+const statusLabels: Record<string, string> = {
+    pending_confirm: 'Chờ xác nhận',
+    confirmed: 'Đã xác nhận',
+    in_progress: 'Đang chăm sóc',
+    completed: 'Hoàn thành',
+    cancelled: 'Đã hủy',
+    rejected: 'Từ chối'
+};
+
+const roleLabels: Record<string, string> = {
+    customer: 'Khách hàng',
+    nurse_unconfirmed: 'Điều dưỡng chờ duyệt',
+    nurse_confirmed: 'Điều dưỡng đã duyệt',
+    nurse: 'Điều dưỡng'
+};
+
+const getLastSevenDays = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return Array.from({ length: 7 }, (_, index) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - (6 - index));
+        return date;
+    });
+};
+
+const isSameDay = (left: Date, right: Date) =>
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate();
+
 const AdminDashboard = () => {
+    const [summary, setSummary] = useState<AdminDashboardDto | null>(null);
     const [users, setUsers] = useState<AdminUserDto[]>([]);
     const [pendingNurses, setPendingNurses] = useState<NurseProfileDetailDto[]>([]);
     const [bookings, setBookings] = useState<AdminBookingSummaryDto[]>([]);
@@ -24,11 +93,13 @@ const AdminDashboard = () => {
         const loadData = async () => {
             try {
                 setLoading(true);
-                const [u, n, b] = await Promise.all([
+                const [dashboard, u, n, b] = await Promise.all([
+                    caremateApi.getAdminDashboard(),
                     caremateApi.getAdminUsers(),
                     caremateApi.getPendingNurses(),
                     caremateApi.getAdminBookings()
                 ]);
+                setSummary(dashboard);
                 setUsers(u);
                 setPendingNurses(n);
                 setBookings(b);
@@ -42,11 +113,102 @@ const AdminDashboard = () => {
     }, []);
 
     const stats = useMemo(() => ([
-        { label: 'Tổng người dùng', value: users.length, icon: UsersIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
+        { label: 'Tổng người dùng', value: summary?.totalUsers ?? users.length, icon: UsersIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
         { label: 'Điều dưỡng đã duyệt', value: users.filter(u => u.role === 'nurse_confirmed').length, icon: CheckBadgeIcon, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-        { label: 'Hồ sơ chờ duyệt', value: pendingNurses.length, icon: ClockIcon, color: 'text-amber-600', bg: 'bg-amber-50' },
-        { label: 'Lịch hẹn mới', value: bookings.filter(b => b.status === 'pending_confirm').length, icon: ClipboardDocumentListIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
-    ]), [users, pendingNurses, bookings]);
+        { label: 'Hồ sơ chờ duyệt', value: summary?.pendingNurseApprovals ?? pendingNurses.length, icon: ClockIcon, color: 'text-amber-600', bg: 'bg-amber-50' },
+        { label: 'Lịch hẹn mới', value: summary?.pendingBookings ?? bookings.filter(b => b.status === 'pending_confirm').length, icon: ClipboardDocumentListIcon, color: 'text-indigo-600', bg: 'bg-indigo-50' },
+    ]), [summary, users, pendingNurses, bookings]);
+
+    const chartData = useMemo(() => {
+        const days = getLastSevenDays();
+        const bookingsByDay = days.map(day =>
+            bookings.filter(booking => isSameDay(new Date(booking.startTime), day)).length
+        );
+        const revenueByDay = days.map(day =>
+            bookings
+                .filter(booking => booking.status === 'completed' && isSameDay(new Date(booking.startTime), day))
+                .reduce((sum, booking) => sum + booking.totalPrice, 0)
+        );
+
+        const statuses = Object.entries(
+            bookings.reduce<Record<string, number>>((acc, booking) => {
+                acc[booking.status] = (acc[booking.status] ?? 0) + 1;
+                return acc;
+            }, {})
+        );
+
+        const roles = Object.entries(
+            users.reduce<Record<string, number>>((acc, user) => {
+                acc[user.role] = (acc[user.role] ?? 0) + 1;
+                return acc;
+            }, {})
+        );
+
+        return {
+            dayLabels: days.map(day => dateLabelFormatter.format(day)),
+            bookingsByDay,
+            revenueByDay,
+            statusLabels: statuses.map(([status]) => statusLabels[status] ?? status),
+            statusValues: statuses.map(([, value]) => value),
+            roleLabels: roles.map(([role]) => roleLabels[role] ?? role),
+            roleValues: roles.map(([, value]) => value),
+        };
+    }, [users, bookings]);
+
+    const totalRevenue = useMemo(() =>
+        bookings
+            .filter(booking => booking.status === 'completed')
+            .reduce((sum, booking) => sum + booking.totalPrice, 0),
+        [bookings]
+    );
+
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#0f172a',
+                padding: 12,
+                titleFont: { weight: 800 },
+                bodyFont: { weight: 700 }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: { color: '#94a3b8', font: { weight: 800 } }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: '#f1f5f9' },
+                ticks: { precision: 0, color: '#94a3b8', font: { weight: 800 } }
+            }
+        }
+    } as const;
+
+    const doughnutOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+            legend: {
+                position: 'bottom' as const,
+                labels: {
+                    boxWidth: 10,
+                    boxHeight: 10,
+                    color: '#475569',
+                    font: { weight: 800 }
+                }
+            },
+            tooltip: {
+                backgroundColor: '#0f172a',
+                padding: 12,
+                titleFont: { weight: 800 },
+                bodyFont: { weight: 700 }
+            }
+        }
+    };
 
     if (loading) {
         return (
@@ -60,11 +222,10 @@ const AdminDashboard = () => {
     }
 
     return (
-        <div className="space-y-12">
-            {/* Quick Stats Grid */}
+        <div className="space-y-10">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => (
-                    <motion.div 
+                    <motion.div
                         key={stat.label}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -86,92 +247,193 @@ const AdminDashboard = () => {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-                {/* Main Action Card */}
-                <div className="lg:col-span-2">
-                    <section className="bg-slate-900 rounded-xl p-12 relative overflow-hidden shadow-2xl h-full">
-                        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[120px] -mr-48 -mt-48 rounded-full"></div>
-                        <div className="relative z-10">
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-8">Hành động cần ưu tiên</div>
-                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
-                                <h2 className="text-4xl font-black text-white tracking-tight leading-none">Xét duyệt hồ sơ điều dưỡng</h2>
-                                <Link to="/admin/pending-nurses" className="bg-white text-slate-900 px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all">Xem tất cả</Link>
-                            </div>
-                            
-                            <div className="space-y-4">
-                                {pendingNurses.length === 0 ? (
-                                    <div className="py-20 text-center rounded-xl bg-white/5 border border-white/10">
-                                        <CheckBadgeIcon className="h-12 w-12 mx-auto text-white/20 mb-4" />
-                                        <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Không có hồ sơ nào đang chờ</p>
-                                    </div>
-                                ) : (
-                                    pendingNurses.slice(0, 3).map((nurse) => (
-                                        <div key={nurse.userId} className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 flex items-center justify-between hover:bg-white/10 transition-all">
-                                            <div className="flex items-center gap-6">
-                                                <div className="h-14 w-14 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-xl uppercase">
-                                                    {nurse.fullName.charAt(0)}
-                                                </div>
-                                                <div>
-                                                    <div className="text-lg font-black text-white tracking-tight">{nurse.fullName}</div>
-                                                    <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Đang chờ xác minh danh tính và bằng cấp chuyên môn</div>
-                                                </div>
-                                            </div>
-                                            <Link to={`/admin/nurses/${nurse.userId}`} className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-[#3B82F6] group-hover:text-white transition-all">
-                                                <ArrowRightIcon className="h-5 w-5" />
-                                            </Link>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <section className="xl:col-span-2 bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20">
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+                        <div>
+                            <div className="text-[10px] font-black uppercase tracking-[0.25em] text-blue-500 mb-2">7 ngày gần nhất</div>
+                            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Lịch hẹn theo ngày</h2>
                         </div>
-                    </section>
-                </div>
+                        <div className="rounded-xl bg-slate-50 px-5 py-3 text-right">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Doanh thu hoàn thành</div>
+                            <div className="text-lg font-black text-slate-900">{moneyFormatter.format(totalRevenue)}</div>
+                        </div>
+                    </div>
+                    <div className="h-80">
+                        <Line
+                            options={chartOptions}
+                            data={{
+                                labels: chartData.dayLabels,
+                                datasets: [
+                                    {
+                                        label: 'Lịch hẹn',
+                                        data: chartData.bookingsByDay,
+                                        borderColor: '#2563eb',
+                                        backgroundColor: 'rgba(37, 99, 235, 0.12)',
+                                        fill: true,
+                                        tension: 0.35,
+                                        pointRadius: 4,
+                                        pointHoverRadius: 6,
+                                        pointBackgroundColor: '#2563eb'
+                                    }
+                                ]
+                            }}
+                        />
+                    </div>
+                </section>
 
-                {/* System Alerts Side */}
-                <div className="space-y-8">
-                    <div className="bg-white rounded-xl p-10 border border-slate-50 shadow-xl shadow-slate-200/20">
-                        <div className="flex items-center justify-between mb-10">
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Cảnh báo hệ thống</h3>
-                            <ExclamationCircleIcon className="h-6 w-6 text-rose-500" />
+                <section className="bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20">
+                    <div className="mb-8">
+                        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-500 mb-2">Người dùng</div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Cơ cấu tài khoản</h2>
+                    </div>
+                    <div className="h-80">
+                        <Doughnut
+                            options={doughnutOptions}
+                            data={{
+                                labels: chartData.roleLabels,
+                                datasets: [
+                                    {
+                                        data: chartData.roleValues,
+                                        backgroundColor: ['#2563eb', '#f59e0b', '#10b981', '#64748b'],
+                                        borderWidth: 0
+                                    }
+                                ]
+                            }}
+                        />
+                    </div>
+                </section>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <section className="bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20">
+                    <div className="mb-8">
+                        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-500 mb-2">Lịch hẹn</div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Trạng thái xử lý</h2>
+                    </div>
+                    <div className="h-80">
+                        <Doughnut
+                            options={doughnutOptions}
+                            data={{
+                                labels: chartData.statusLabels,
+                                datasets: [
+                                    {
+                                        data: chartData.statusValues,
+                                        backgroundColor: ['#f59e0b', '#2563eb', '#14b8a6', '#10b981', '#ef4444', '#64748b'],
+                                        borderWidth: 0
+                                    }
+                                ]
+                            }}
+                        />
+                    </div>
+                </section>
+
+                <section className="xl:col-span-2 bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20">
+                    <div className="mb-8">
+                        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-500 mb-2">Doanh thu</div>
+                        <h2 className="text-2xl font-black text-slate-900 tracking-tight">Doanh thu hoàn thành theo ngày</h2>
+                    </div>
+                    <div className="h-80">
+                        <Bar
+                            options={{
+                                ...chartOptions,
+                                plugins: {
+                                    ...chartOptions.plugins,
+                                    tooltip: {
+                                        ...chartOptions.plugins.tooltip,
+                                        callbacks: {
+                                            label: (context) => moneyFormatter.format(Number(context.raw ?? 0))
+                                        }
+                                    }
+                                }
+                            }}
+                            data={{
+                                labels: chartData.dayLabels,
+                                datasets: [
+                                    {
+                                        label: 'Doanh thu',
+                                        data: chartData.revenueByDay,
+                                        backgroundColor: '#10b981',
+                                        borderRadius: 8,
+                                        barThickness: 26
+                                    }
+                                ]
+                            }}
+                        />
+                    </div>
+                </section>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <section className="lg:col-span-2 bg-slate-900 rounded-xl p-10 relative overflow-hidden shadow-2xl">
+                    <div className="relative z-10">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-8">Hành động cần ưu tiên</div>
+                        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
+                            <h2 className="text-4xl font-black text-white tracking-tight leading-none">Xét duyệt hồ sơ điều dưỡng</h2>
+                            <Link to="/admin/pending-nurses" className="bg-white text-slate-900 px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all">Xem tất cả</Link>
                         </div>
-                        
+
                         <div className="space-y-4">
-                            <div className="p-6 rounded-xl bg-rose-50 border border-rose-100">
-                                <div className="flex gap-4">
-                                    <div className="h-12 w-12 rounded-lg bg-rose-500 flex items-center justify-center shrink-0">
-                                        <ExclamationCircleIcon className="h-6 w-6 text-white" />
+                            {pendingNurses.length === 0 ? (
+                                <div className="py-20 text-center rounded-xl bg-white/5 border border-white/10">
+                                    <CheckBadgeIcon className="h-12 w-12 mx-auto text-white/20 mb-4" />
+                                    <p className="text-sm font-bold text-white/40 uppercase tracking-widest">Không có hồ sơ nào đang chờ</p>
+                                </div>
+                            ) : (
+                                pendingNurses.slice(0, 3).map((nurse) => (
+                                    <div key={nurse.userId} className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 flex items-center justify-between hover:bg-white/10 transition-all">
+                                        <div className="flex items-center gap-6">
+                                            <div className="h-14 w-14 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-xl uppercase">
+                                                {nurse.fullName.charAt(0)}
+                                            </div>
+                                            <div>
+                                                <div className="text-lg font-black text-white tracking-tight">{nurse.fullName}</div>
+                                                <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Đang chờ xác minh danh tính và bằng cấp chuyên môn</div>
+                                            </div>
+                                        </div>
+                                        <Link to={`/admin/nurses/${nurse.userId}`} className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-[#3B82F6] group-hover:text-white transition-all">
+                                            <ArrowRightIcon className="h-5 w-5" />
+                                        </Link>
                                     </div>
-                                    <div>
-                                        <div className="text-sm font-black text-rose-900 leading-tight">Khiếu nại chưa xử lý</div>
-                                        <div className="text-[10px] font-medium text-rose-500 mt-1 uppercase tracking-widest">Hiện đang có 1 trường hợp cần giải quyết.</div>
-                                        <Link to="/admin/reports" className="mt-3 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:underline inline-block">Xử lý ngay</Link>
-                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+                <section className="bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20">
+                    <div className="flex items-center justify-between mb-8">
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Cảnh báo hệ thống</h3>
+                        <ExclamationCircleIcon className="h-6 w-6 text-rose-500" />
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="p-6 rounded-xl bg-rose-50 border border-rose-100">
+                            <div className="flex gap-4">
+                                <div className="h-12 w-12 rounded-lg bg-rose-500 flex items-center justify-center shrink-0">
+                                    <ExclamationCircleIcon className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-black text-rose-900 leading-tight">Khiếu nại chưa xử lý</div>
+                                    <div className="text-[10px] font-medium text-rose-500 mt-1 uppercase tracking-widest">Hiện có {summary?.openDisputes ?? 0} trường hợp cần giải quyết.</div>
+                                    <Link to="/admin/reports" className="mt-3 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:underline inline-block">Xử lý ngay</Link>
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 opacity-60">
-                                <div className="flex gap-4">
-                                    <div className="h-12 w-12 rounded-lg bg-slate-300 flex items-center justify-center shrink-0">
-                                        <BanknotesIcon className="h-6 w-6 text-white" />
-                                    </div>
-                                    <div>
-                                        <div className="text-sm font-black text-slate-900 leading-tight">Giao dịch thanh toán</div>
-                                        <div className="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-widest">Tất cả các luồng tiền đều đang vận hành ổn định.</div>
-                                    </div>
+                        <div className="p-6 rounded-xl bg-slate-50 border border-slate-100">
+                            <div className="flex gap-4">
+                                <div className="h-12 w-12 rounded-lg bg-slate-300 flex items-center justify-center shrink-0">
+                                    <BanknotesIcon className="h-6 w-6 text-white" />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-black text-slate-900 leading-tight">Giao dịch thanh toán</div>
+                                    <div className="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-widest">Doanh thu hoàn thành: {moneyFormatter.format(totalRevenue)}.</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div className="bg-slate-50 rounded-xl p-8 border border-slate-100 flex items-center justify-between">
-                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Truy cập nhanh:</div>
-                        <div className="flex gap-2">
-                            <Link to="/admin/users" className="px-4 py-2 rounded-xl bg-white text-[9px] font-black uppercase tracking-widest text-slate-900 shadow-sm">Người dùng</Link>
-                            <Link to="/admin/bookings" className="px-4 py-2 rounded-xl bg-white text-[9px] font-black uppercase tracking-widest text-slate-900 shadow-sm">Lịch hẹn</Link>
-                            <Link to="/admin/settings" className="px-4 py-2 rounded-xl bg-white text-[9px] font-black uppercase tracking-widest text-slate-900 shadow-sm">Cài đặt</Link>
-                        </div>
-                    </div>
-                </div>
+                </section>
             </div>
         </div>
     );

@@ -58,7 +58,20 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       .withAutomaticReconnect()
       .build();
 
-    connection.on('ReceiveNotification', (notification: Notification) => {
+    connection.on('LoadUnreadNotifications', (payload: { notifications?: Notification[] }) => {
+      const unreadNotifications = payload.notifications ?? [];
+      if (unreadNotifications.length === 0) return;
+
+      setNotifications((prev) => {
+        const existingIds = new Set(prev.map((item) => item.id));
+        const newItems = unreadNotifications.filter((item) => !existingIds.has(item.id));
+        return [...newItems, ...prev].sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      });
+    });
+
+    connection.on('NotificationReceived', (notification: Notification) => {
       setNotifications((prev) => [notification, ...prev]);
       const normalizedType = notification.type.toLowerCase();
       const toastType: ToastType =
@@ -66,6 +79,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           ? normalizedType
           : 'info';
       showToast(notification.title, toastType);
+    });
+
+    connection.on('NotificationRead', (notificationId: number) => {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
+      );
+    });
+
+    connection.on('AllNotificationsRead', () => {
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     });
 
     connection.start().catch((err) => console.error('SignalR Connection Error: ', err));
