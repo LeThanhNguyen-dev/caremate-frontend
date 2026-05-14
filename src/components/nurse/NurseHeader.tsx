@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { BellIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { useNotifications } from '../../contexts/NotificationProvider';
+import { BellIcon, InboxStackIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 const pageMeta: Record<string, { title: string; subtitle: string }> = {
     '/nurse/overview': {
@@ -23,15 +25,26 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
         title: 'Hồ sơ chuyên môn',
         subtitle: 'Cập nhật thông tin cá nhân và chứng chỉ hành nghề.',
     },
+    '/nurse/notifications': {
+        title: 'Thông báo',
+        subtitle: 'Theo dõi các cập nhật mới nhất về lịch hẹn, thanh toán và đánh giá.',
+    },
 };
 
 const NurseHeader = () => {
     const location = useLocation();
     const { user } = useAuth();
+    const { notifications, unreadCount, markAsRead } = useNotifications();
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const meta = pageMeta[location.pathname] ?? {
         title: 'Không gian y tế',
         subtitle: 'Chào mừng bạn quay trở lại với công việc chăm sóc tận tâm.',
     };
+    const displayNotifications = notifications.slice(0, 5);
+
+    useEffect(() => {
+        setIsNotificationsOpen(false);
+    }, [location.pathname]);
 
     return (
         <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-2xl px-8 py-6 border-b border-slate-50">
@@ -45,13 +58,69 @@ const NurseHeader = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <Link 
-                        to="/notifications" 
-                        className="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-[#10B981] hover:bg-emerald-50 transition-all relative group"
-                    >
-                        <BellIcon className="h-6 w-6 transition-transform group-hover:rotate-12" />
-                        <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-[#10B981] ring-4 ring-white"></span>
-                    </Link>
+                    <div className="relative">
+                        <button
+                            type="button"
+                            onClick={() => setIsNotificationsOpen((open) => !open)}
+                            className="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-[#10B981] hover:bg-emerald-50 transition-all relative group"
+                            aria-label="Mở thông báo"
+                        >
+                            <BellIcon className="h-6 w-6 transition-transform group-hover:rotate-12" />
+                            {unreadCount > 0 && (
+                                <span className="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-[#10B981] text-white text-[10px] font-black flex items-center justify-center ring-4 ring-white">
+                                    {unreadCount > 99 ? '99+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
+
+                        {isNotificationsOpen && (
+                            <div className="absolute right-0 mt-4 w-[380px] max-w-[calc(100vw-2rem)] rounded-xl border border-slate-100 bg-white p-5 shadow-2xl shadow-slate-900/10">
+                                <div className="mb-4 flex items-center justify-between gap-4">
+                                    <div>
+                                        <h2 className="text-sm font-black uppercase tracking-[0.18em] text-slate-900">Thông báo</h2>
+                                        <p className="mt-1 text-xs font-bold text-slate-400">{unreadCount} thông báo chưa đọc</p>
+                                    </div>
+                                    <Link
+                                        to="/nurse/notifications"
+                                        className="text-[10px] font-black uppercase tracking-widest text-[#10B981] hover:underline"
+                                    >
+                                        Xem tất cả
+                                    </Link>
+                                </div>
+
+                                <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1">
+                                    {displayNotifications.length > 0 ? (
+                                        displayNotifications.map((notification) => (
+                                            <button
+                                                key={notification.id}
+                                                type="button"
+                                                onClick={() => void markAsRead(notification.id)}
+                                                className={`w-full rounded-lg p-4 text-left transition-all ${
+                                                    notification.isRead ? 'bg-white hover:bg-slate-50' : 'bg-emerald-50/70 hover:bg-emerald-50'
+                                                }`}
+                                            >
+                                                <div className="flex items-start justify-between gap-3">
+                                                    <div className="min-w-0">
+                                                        <p className="truncate text-sm font-black text-slate-900">{notification.title}</p>
+                                                        <p className="mt-1 line-clamp-2 text-xs font-medium leading-relaxed text-slate-500">{notification.content}</p>
+                                                        <p className="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-300">
+                                                            {new Date(notification.createdAt).toLocaleString('vi-VN')}
+                                                        </p>
+                                                    </div>
+                                                    {!notification.isRead && <span className="mt-1 h-2.5 w-2.5 flex-none rounded-full bg-[#10B981]" />}
+                                                </div>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="py-10 text-center">
+                                            <InboxStackIcon className="mx-auto mb-3 h-10 w-10 text-slate-200" />
+                                            <p className="text-xs font-bold text-slate-400">Chưa có thông báo nào.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     <button className="bg-[#10B981] text-white px-8 py-3.5 rounded-lg font-black text-[11px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 flex items-center gap-2 hover:scale-[1.02] transition-all active:scale-95">
                         <PlusIcon className="h-4 w-4" />

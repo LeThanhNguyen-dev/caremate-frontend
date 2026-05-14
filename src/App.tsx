@@ -108,6 +108,7 @@ function App() {
                 <Route path="schedule" element={<NurseSchedulePage />} />
                 <Route path="bookings" element={<NurseBookingsPage />} />
                 <Route path="services" element={<NurseServicesPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="*" element={<Navigate to="/nurse/overview" replace />} />
               </Route>
 
@@ -127,6 +128,7 @@ function App() {
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="bookings" element={<AdminBookings />} />
                 <Route path="reports" element={<AdminReports />} />
+                <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
               </Route>

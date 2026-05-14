@@ -12,7 +12,7 @@ export const notificationApi = {
   },
 
   markAllAsRead: async () => {
-    await axiosInstance.post('/api/notifications/read-all');
+    await axiosInstance.patch('/api/notifications/read-all');
   },
 
   /** DELETE /api/notifications/{id} — Xóa 1 thông báo */
