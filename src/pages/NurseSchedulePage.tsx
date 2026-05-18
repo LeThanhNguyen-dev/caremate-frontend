@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
-import type { AvailabilitySlotDto, BookingDetailDto } from '../api/frontend-api-contract';
+import type { AvailabilitySlotDto, BookingDetailDto, PackageSessionDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
 import { 
     CalendarIcon, 
@@ -17,6 +18,39 @@ import NursePendingApproval from '../components/nurse/NursePendingApproval';
 const HOURS = Array.from({ length: 13 }, (_, index) => index + 7);
 const HOUR_HEIGHT = 80;
 const DEFAULT_DURATION_HOURS = 2;
+const PACKAGE_SESSION_DURATION_HOURS = 2;
+
+type SchedulePackageSession = PackageSessionDto & {
+    bookingId: number;
+    serviceName: string;
+    bookingStatus: string;
+    totalSessions: number;
+};
+
+const loadPackageSessions = async (bookings: BookingDetailDto[]): Promise<SchedulePackageSession[]> => {
+    const packageBookings = bookings.filter(
+        (booking) => booking.serviceKind === 'package' || Boolean(booking.packageDays && booking.packageDays > 0),
+    );
+
+    const progresses = await Promise.all(
+        packageBookings.map(async (booking) => {
+            try {
+                const progress = await caremateApi.getPackageProgress(booking.id);
+                return progress.sessions.map((session) => ({
+                    ...session,
+                    bookingId: booking.id,
+                    serviceName: booking.serviceName,
+                    bookingStatus: booking.status,
+                    totalSessions: progress.totalSessions,
+                }));
+            } catch {
+                return [];
+            }
+        }),
+    );
+
+    return progresses.flat();
+};
 
 const getWeekStart = (date: Date) => {
     const copy = new Date(date);
@@ -43,6 +77,7 @@ const NurseSchedulePage = () => {
     const [anchorDate, setAnchorDate] = useState(new Date());
     const [slots, setSlots] = useState<AvailabilitySlotDto[]>([]);
     const [bookings, setBookings] = useState<BookingDetailDto[]>([]);
+    const [packageSessions, setPackageSessions] = useState<SchedulePackageSession[]>([]);
     const [slotModalOpen, setSlotModalOpen] = useState(false);
     const [currentTimestamp] = useState(() => Date.now());
     const [slotForm, setSlotForm] = useState({
@@ -57,8 +92,10 @@ const NurseSchedulePage = () => {
                 caremateApi.getMyAvailability(),
                 caremateApi.getMyNurseBookings(),
             ]);
+            const sessionData = await loadPackageSessions(bookingData);
             setSlots(slotData);
             setBookings(bookingData);
+            setPackageSessions(sessionData);
         } catch {
             showToast('Không thể tải dữ liệu lịch làm việc.', 'error');
         }
@@ -73,10 +110,12 @@ const NurseSchedulePage = () => {
                     caremateApi.getMyAvailability(),
                     caremateApi.getMyNurseBookings(),
                 ]);
+                const sessionData = await loadPackageSessions(bookingData);
 
                 if (isActive) {
                     setSlots(slotData);
                     setBookings(bookingData);
+                    setPackageSessions(sessionData);
                 }
             } catch {
                 showToast('KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u lá»‹ch lÃ m viá»‡c.', 'error');
@@ -142,20 +181,36 @@ const NurseSchedulePage = () => {
         };
     };
 
+    const getPackageSessionStyle = (startTime: string) => {
+        const start = new Date(startTime);
+        const end = new Date(start);
+        end.setHours(end.getHours() + PACKAGE_SESSION_DURATION_HOURS);
+        return getSlotStyle(start.toISOString(), end.toISOString());
+    };
+
     const getEventsForDay = (day: Date) => {
         const dayKey = formatDateValue(day);
         return {
             slots: slots.filter((slot) => formatDateValue(new Date(slot.startTime)) === dayKey),
             bookings: bookings.filter(
                 (booking) =>
-                    formatDateValue(new Date(booking.startTime)) === dayKey && booking.status !== 'cancelled',
+                    booking.serviceKind !== 'package' &&
+                    !booking.packageDays &&
+                    formatDateValue(new Date(booking.startTime)) === dayKey &&
+                    booking.status !== 'cancelled',
+            ),
+            packageSessions: packageSessions.filter(
+                (session) =>
+                    formatDateValue(new Date(session.sessionDate)) === dayKey &&
+                    session.bookingStatus !== 'cancelled' &&
+                    session.bookingStatus !== 'rejected',
             ),
         };
     };
 
     const stats = {
-        free: slots.filter((slot) => !slot.isBooked).length,
-        booked: slots.filter((slot) => slot.isBooked).length,
+        free: slots.filter((slot) => slot.isAvailable).length,
+        booked: slots.filter((slot) => !slot.isAvailable).length,
         upcoming: bookings.filter((booking) => new Date(booking.startTime).getTime() >= currentTimestamp).length,
     };
 
@@ -252,6 +307,28 @@ const NurseSchedulePage = () => {
                                                     <div className="font-black text-[10px] uppercase text-[#10B981] mb-1">Lịch hẹn khách</div>
                                                     <div className="font-black leading-tight">#{booking.id} - {booking.serviceName}</div>
                                                 </div>
+                                            ))}
+                                            {events.packageSessions.map((session) => (
+                                                <Link
+                                                    key={session.id}
+                                                    to={`/bookings/${session.bookingId}`}
+                                                    className={`absolute left-2 right-2 rounded-lg p-4 text-xs text-white shadow-xl z-20 border-l-4 transition hover:scale-[1.01] ${
+                                                        session.status === 'completed'
+                                                            ? 'border-emerald-300 bg-emerald-600'
+                                                            : session.status === 'checked_in'
+                                                                ? 'border-pink-200 bg-[#EC4899]'
+                                                                : 'border-violet-200 bg-violet-600'
+                                                    }`}
+                                                    style={getPackageSessionStyle(session.sessionDate)}
+                                                >
+                                                    <div className="mb-1 text-[10px] font-black uppercase text-white/70">
+                                                        Gói #{session.bookingId} - Buổi {session.sessionNumber}/{session.totalSessions}
+                                                    </div>
+                                                    <div className="font-black leading-tight">{session.title || session.serviceName}</div>
+                                                    <div className="mt-1 text-[10px] font-bold text-white/70">
+                                                        {new Date(session.sessionDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                </Link>
                                             ))}
                                         </div>
                                     );

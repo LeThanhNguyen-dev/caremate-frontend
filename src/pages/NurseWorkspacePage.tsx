@@ -58,7 +58,7 @@ const NurseWorkspacePage = () => {
         const now = new Date();
         const upcoming = bookings.filter((item) => new Date(item.startTime) >= now && item.status !== 'cancelled').length;
         const active = bookings.filter((item) => item.status === 'confirmed' || item.status === 'in_progress').length;
-        const availableSlots = slots.filter((item) => !item.isBooked).length;
+        const availableSlots = slots.filter((item) => item.isAvailable).length;
         const revenue = bookings
             .filter((item) => item.status === 'completed')
             .reduce((acc, curr) => acc + curr.totalPrice, 0);

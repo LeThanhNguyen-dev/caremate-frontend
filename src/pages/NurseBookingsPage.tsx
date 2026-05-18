@@ -137,6 +137,7 @@ const NurseBookingsPage = () => {
                     ) : (
                         bookings.map((booking, idx) => {
                             const config = statusConfig[booking.status] || statusConfig.rejected;
+                            const isPackage = booking.serviceKind === 'package' || Boolean(booking.packageDays && booking.packageDays > 0);
                             return (
                                 <motion.div 
                                     key={booking.id}
@@ -205,7 +206,7 @@ const NurseBookingsPage = () => {
                                                 </>
                                             )}
 
-                                            {booking.status === 'confirmed' && (
+                                            {booking.status === 'confirmed' && !isPackage && (
                                                 <button 
                                                     onClick={() => void updateStatus(booking.id, 'in_progress')}
                                                     className="bg-[#10B981] text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
@@ -215,7 +216,7 @@ const NurseBookingsPage = () => {
                                                 </button>
                                             )}
 
-                                            {booking.status === 'in_progress' && (
+                                            {booking.status === 'in_progress' && !isPackage && (
                                                 <button 
                                                     onClick={() => void updateStatus(booking.id, 'completed')}
                                                     className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
@@ -223,6 +224,15 @@ const NurseBookingsPage = () => {
                                                     <CheckIcon className="h-4 w-4" />
                                                     Hoàn thành ca
                                                 </button>
+                                            )}
+                                            {isPackage && (booking.status === 'confirmed' || booking.status === 'in_progress') && (
+                                                <Link
+                                                    to={`/bookings/${booking.id}`}
+                                                    className="bg-[#10B981] text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
+                                                >
+                                                    <PlayIcon className="h-4 w-4" />
+                                                    Theo dõi từng buổi
+                                                </Link>
                                             )}
                                         </div>
                                     </div>

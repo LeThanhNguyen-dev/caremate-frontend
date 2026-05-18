@@ -15,6 +15,8 @@ import {
     SparklesIcon
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
+import PackageProgressTracker from '../components/PackageProgressTracker';
+import SingleServiceProgressTracker from '../components/SingleServiceProgressTracker';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -56,6 +58,12 @@ const BookingDetailPage = () => {
         };
         void load();
     }, [id, navigate, showToast]);
+
+    const refreshDetail = async () => {
+        if (!id) return;
+        const data = await caremateApi.getBookingById(Number(id));
+        setDetail(data);
+    };
 
     if (loading) {
         return (
@@ -174,6 +182,20 @@ const BookingDetailPage = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {detail.packageDays && detail.packageDays > 0 ? (
+                            <PackageProgressTracker
+                                bookingId={detail.id}
+                                packageDays={detail.packageDays}
+                                bookingStatus={detail.status}
+                                onProgressChanged={() => void refreshDetail()}
+                            />
+                        ) : (
+                            <SingleServiceProgressTracker
+                                booking={detail}
+                                onProgressChanged={() => void refreshDetail()}
+                            />
+                        )}
                     </motion.div>
 
                     {/* Sidebar Actions */}

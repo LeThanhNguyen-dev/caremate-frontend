@@ -10,11 +10,13 @@ import {
     CheckBadgeIcon,
     ClockIcon,
     Squares2X2Icon,
-    SparklesIcon
+    SparklesIcon,
+    CalendarDaysIcon,
+    CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import caremateApi from '../api/caremateApi';
-import type { ServiceDetailDto, NurseDiscoveryDto } from '../api/frontend-api-contract';
+import type { ServiceDetailDto, NurseDiscoveryDto, PackageScheduleEntryDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
 
 const categoryLabels: Record<string, string> = {
@@ -32,6 +34,81 @@ const categoryDescriptions: Record<string, string> = {
     'tu-van-tai-nha': 'Các buổi tư vấn chuyên sâu giúp gia đình hiểu và chăm bé đúng cách hơn.',
     'ho-tro-tinh-than': 'Dịch vụ đồng hành cùng mẹ trong giai đoạn dễ mệt mỏi, căng thẳng và quá tải.',
 };
+
+const includedServiceLabels: Record<string, string> = {
+    'baby-bathing': 'Tắm bé',
+    'mother-health-monitoring': 'Theo dõi mẹ',
+    'baby-health-monitoring': 'Theo dõi bé',
+    'breastfeeding-support': 'Hỗ trợ cho bú',
+    'postpartum-massage': 'Massage sau sinh',
+    'nutrition-consultation': 'Tư vấn dinh dưỡng',
+    'night-care': 'Chăm bé ban đêm',
+    'house-support': 'Hỗ trợ việc nhà',
+    'mental-wellness': 'Hỗ trợ tâm lý',
+    'emergency-consultation': 'Tư vấn khẩn',
+};
+
+const getCategoryLabel = (category: string) => {
+    if (category === 'goi-dich-vu') return 'Gói dịch vụ';
+    if (category === 'ho-tro-gia-dinh') return 'Hỗ trợ gia đình';
+    return categoryLabels[category] ?? category;
+};
+
+const getIncludedServiceLabels = (service: ServiceDetailDto) =>
+    service.includedServiceKeys
+        ?.split(',')
+        .map((key) => includedServiceLabels[key.trim()] ?? key.trim())
+        .filter(Boolean) ?? [];
+
+const getScheduleServiceLabels = (keys?: string | null) =>
+    keys
+        ?.split(',')
+        .map((key) => includedServiceLabels[key.trim()] ?? key.trim())
+        .filter(Boolean) ?? [];
+
+const getPrimaryServiceText = (service: ServiceDetailDto, day: number) => {
+    const labels = getIncludedServiceLabels(service);
+    if (labels.length === 0) return 'Kiểm tra sức khỏe, chăm sóc cơ bản và tư vấn tại nhà.';
+
+    const start = (day - 1) % labels.length;
+    const ordered = [...labels.slice(start), ...labels.slice(0, start)].slice(0, Math.min(3, labels.length));
+    return `Tập trung vào ${ordered.join(', ')} và ghi nhận tình trạng của mẹ/bé trong ngày.`;
+};
+
+const getVisiblePackageSchedule = (service?: ServiceDetailDto | null): PackageScheduleEntryDto[] => {
+    if (!service || service.serviceKind !== 'package') return [];
+    if (service.packageSchedule?.length > 0) return service.packageSchedule;
+
+    const totalDays = service.packageDays ?? 0;
+    if (totalDays <= 0) return [];
+
+    return Array.from({ length: totalDays }, (_, index) => {
+        const day = index + 1;
+        return {
+            day,
+            title: day === 1
+                ? 'Ngày 1: Đánh giá ban đầu'
+                : day === totalDays
+                    ? `Ngày ${day}: Tổng kết liệu trình`
+                    : `Ngày ${day}: Chăm sóc theo kế hoạch`,
+            description: day === 1
+                ? 'Y tá đánh giá tình trạng ban đầu, thống nhất mục tiêu chăm sóc và bắt đầu các hạng mục trong gói.'
+                : day === totalDays
+                    ? 'Hoàn tất các hạng mục còn lại, tổng kết tiến triển và hướng dẫn gia đình tiếp tục chăm sóc sau gói.'
+                    : getPrimaryServiceText(service, day),
+            serviceKeys: service.includedServiceKeys,
+        };
+    });
+};
+
+const getScheduleDescription = (service: ServiceDetailDto, item: PackageScheduleEntryDto) =>
+    item.description || getPrimaryServiceText(service, item.day);
+
+const getScheduleHighlights = (description: string) =>
+    description
+        .split(';')
+        .map((part) => part.trim())
+        .filter(Boolean);
 
 const ServicesPage = () => {
     const navigate = useNavigate();
@@ -88,7 +165,7 @@ const ServicesPage = () => {
             new Set(
                 services
                     .map(service => service.category?.trim())
-                    .filter((category): category is string => Boolean(category) && category in categoryLabels)
+                    .filter((category): category is string => Boolean(category))
             )
         );
         return ['all', ...uniqueCategories];
@@ -107,6 +184,13 @@ const ServicesPage = () => {
     }, [services, searchQuery, selectedCategory]);
 
     const selectedService = useMemo(() => services.find(s => s.id === selectedServiceId), [services, selectedServiceId]);
+    const selectedPackageSchedule = useMemo(() => getVisiblePackageSchedule(selectedService), [selectedService]);
+    const selectedCategoryDescription =
+        selectedCategory === 'goi-dich-vu'
+            ? 'Các gói nhiều ngày kết hợp nhiều dịch vụ, phù hợp khi gia đình cần lịch chăm sóc liên tục.'
+            : selectedCategory === 'ho-tro-gia-dinh'
+                ? 'Hỗ trợ các việc nhẹ quanh không gian chăm sóc để gia đình giảm tải.'
+                : categoryDescriptions[selectedCategory];
 
     if (loading) {
         return (
@@ -166,7 +250,7 @@ const ServicesPage = () => {
                     <div className="mb-8 flex flex-wrap gap-3">
                         {categories.map((category) => {
                             const active = selectedCategory === category;
-                            const label = category === 'all' ? 'Tất cả dịch vụ' : (categoryLabels[category] ?? category);
+                            const label = category === 'all' ? 'Tất cả dịch vụ' : getCategoryLabel(category);
                             return (
                                 <button
                                     key={category}
@@ -184,10 +268,10 @@ const ServicesPage = () => {
                         })}
                     </div>
 
-                    {selectedCategory !== 'all' && categoryLabels[selectedCategory] && categoryDescriptions[selectedCategory] && (
+                    {selectedCategory !== 'all' && selectedCategoryDescription && (
                         <div className="mb-8 rounded-3xl border border-brand/10 bg-brand/5 px-5 py-4 text-sm font-medium leading-7 text-slate-600">
-                            <span className="font-black text-slate-900">{categoryLabels[selectedCategory]}:</span>{' '}
-                            {categoryDescriptions[selectedCategory]}
+                            <span className="font-black text-slate-900">{getCategoryLabel(selectedCategory)}:</span>{' '}
+                            {selectedCategoryDescription}
                         </div>
                     )}
 
@@ -208,9 +292,9 @@ const ServicesPage = () => {
                                     }`}>
                                         <SparklesIcon className="h-6 w-6" />
                                     </div>
-                                    {categoryLabels[service.category] && (
+                                    {service.category && (
                                         <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
-                                            {categoryLabels[service.category]}
+                                            {getCategoryLabel(service.category)}
                                         </span>
                                     )}
                                 </div>
@@ -222,12 +306,122 @@ const ServicesPage = () => {
                                 <p className="mb-4 line-clamp-3 text-sm font-medium leading-6 text-slate-500">
                                     {service.description}
                                 </p>
+                                {service.serviceKind === 'package' && (
+                                    <div className="mb-4 space-y-2">
+                                        {service.packageDays && (
+                                            <div className="text-[11px] font-black uppercase tracking-[0.18em] text-brand">
+                                                {service.packageDays} ngày
+                                            </div>
+                                        )}
+                                        {getVisiblePackageSchedule(service).length > 0 && (
+                                            <div className="text-[10px] font-bold text-slate-400">
+                                                Có lộ trình chi tiết {getVisiblePackageSchedule(service).length} buổi
+                                            </div>
+                                        )}
+                                        <div className="flex flex-wrap gap-2">
+                                            {getIncludedServiceLabels(service).slice(0, 4).map((item) => (
+                                                <span key={item} className="rounded-full bg-brand/5 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                                                    {item}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="text-sm font-black text-slate-900">
                                     Từ {service.basePrice.toLocaleString('vi-VN')}đ
                                 </div>
                             </button>
                         ))}
                     </div>
+
+                    {selectedService?.serviceKind === 'package' && selectedPackageSchedule.length > 0 && (
+                        <div className="mt-10 rounded-[28px] border border-brand/10 bg-slate-50 p-8">
+                            <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                                <div>
+                                    <div className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-brand">
+                                        Lộ trình gói dịch vụ
+                                    </div>
+                                    <h3 className="text-2xl font-black text-slate-900">
+                                        {selectedService.name}
+                                    </h3>
+                                    <p className="mt-2 max-w-3xl text-sm font-medium leading-7 text-slate-500">
+                                        Khách hàng xem trước từng ngày chăm sóc, các dịch vụ được thực hiện và nội dung y tá sẽ theo dõi trong quá trình hoàn thành gói.
+                                    </p>
+                                </div>
+                                <div className="rounded-2xl bg-white px-5 py-3 text-sm font-black text-slate-900 shadow-sm">
+                                    {selectedPackageSchedule.length} buổi chăm sóc
+                                </div>
+                            </div>
+
+                            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                                {selectedPackageSchedule.map((item) => {
+                                    const serviceLabels = getScheduleServiceLabels(item.serviceKeys).slice(0, 3);
+                                    const description = getScheduleDescription(selectedService, item);
+                                    const highlights = getScheduleHighlights(description);
+
+                                    return (
+                                        <div
+                                            key={item.day}
+                                            className="group flex flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand/20 hover:shadow-xl hover:shadow-slate-200/70"
+                                        >
+                                            <div className="mb-4 flex items-start justify-between gap-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-lg font-black text-white shadow-lg shadow-brand/20">
+                                                        {item.day}
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-[10px] font-black uppercase tracking-[0.22em] text-brand">
+                                                            Buổi chăm sóc
+                                                        </div>
+                                                        <div className="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-400">
+                                                            <CalendarDaysIcon className="h-4 w-4" />
+                                                            Ngày {item.day}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {serviceLabels.length > 0 && (
+                                                    <div className="flex max-w-[52%] flex-wrap justify-end gap-1.5">
+                                                        {serviceLabels.map((label) => (
+                                                            <span key={label} className="rounded-full bg-brand-soft px-2.5 py-1 text-[10px] font-bold leading-none text-brand">
+                                                                {label}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="text-base font-black leading-snug text-slate-900">
+                                                {item.title || `Buổi ${item.day}`}
+                                            </div>
+
+                                            {highlights.length > 1 ? (
+                                                <ul className="mt-4 space-y-2">
+                                                    {highlights.slice(0, 2).map((highlight) => (
+                                                        <li key={highlight} className="flex gap-2.5 text-sm font-medium leading-6 text-slate-600">
+                                                            <CheckCircleIcon className="mt-1 h-4 w-4 shrink-0 text-brand" />
+                                                            <span>{highlight}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            ) : (
+                                                <p className="mt-3 line-clamp-2 text-sm font-medium leading-6 text-slate-600">
+                                                    {description}
+                                                </p>
+                                            )}
+                                            <details className="mt-4 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+                                                <summary className="cursor-pointer list-none text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 transition hover:text-brand">
+                                                    Xem nội dung đầy đủ
+                                                </summary>
+                                                <p className="mt-3 text-sm font-medium leading-6 text-slate-600">
+                                                    {description}
+                                                </p>
+                                            </details>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -265,6 +459,35 @@ const ServicesPage = () => {
                                 </p>
                             )}
                         </div>
+                        {selectedService?.serviceKind === 'package' && selectedPackageSchedule.length > 0 && (
+                            <div className="rounded-[28px] border border-slate-100 bg-white p-8 shadow-sm">
+                                <div className="mb-2 text-sm font-black uppercase tracking-widest text-slate-900">
+                                    Lộ trình gói dịch vụ
+                                </div>
+                                <p className="mb-6 text-sm font-medium leading-6 text-slate-500">
+                                    Khách hàng có thể xem từng buổi chăm sóc trước khi chọn y tá và đặt lịch.
+                                </p>
+                                <div className="max-h-[420px] space-y-3 overflow-y-auto pr-2">
+                                    {selectedPackageSchedule.map((item) => (
+                                        <div key={item.day} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                                            <div className="mb-2 flex items-center justify-between gap-3">
+                                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand">
+                                                    Ngày {item.day}
+                                                </div>
+                                                {getScheduleServiceLabels(item.serviceKeys).length > 0 && (
+                                                    <div className="text-[10px] font-bold text-slate-400">
+                                                        {getScheduleServiceLabels(item.serviceKeys).slice(0, 2).join(' + ')}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="line-clamp-2 text-sm font-black leading-5 text-slate-900">
+                                                {item.title || `Buổi ${item.day}`}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </aside>
 
                     <main className="flex-1">

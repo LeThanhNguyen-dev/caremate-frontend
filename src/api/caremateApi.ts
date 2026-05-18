@@ -20,6 +20,8 @@ import type {
   Payment,
   ReviewDto,
   ServiceDetailDto,
+  PackageSessionDto,
+  PackageProgressDto
 } from './frontend-api-contract';
 
 type ApiRecord = Record<string, unknown>;
@@ -240,6 +242,16 @@ export const caremateApi = {
 
   getHealthCheckInHistory: async (params?: { page?: number; pageSize?: number }): Promise<HealthCheckInHistoryDto[]> =>
     (await axiosInstance.get('/api/health-checkins/history', { params })).data,
+
+  // === Package Session Tracking ===
+  getPackageProgress: async (bookingId: number): Promise<PackageProgressDto> =>
+    (await axiosInstance.get(`/api/bookings/${bookingId}/sessions`)).data,
+
+  checkInSession: async (bookingId: number, payload?: { nurseNote?: string }): Promise<PackageSessionDto> =>
+    (await axiosInstance.post(`/api/bookings/${bookingId}/sessions/checkin`, payload || {})).data,
+
+  checkOutSession: async (bookingId: number, payload?: { nurseNote?: string }): Promise<PackageSessionDto> =>
+    (await axiosInstance.post(`/api/bookings/${bookingId}/sessions/checkout`, payload || {})).data,
 
   // === Notification Management ===
   /** DELETE /api/notifications/{id} */

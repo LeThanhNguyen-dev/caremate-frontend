@@ -23,6 +23,7 @@ export type BookingDetailDto = {
   nurseId: number;
   serviceId: number;
   serviceName: string;
+  serviceKind?: 'single' | 'package' | string;
   nurseName?: string;
   status: string;
   totalPrice: number;
@@ -30,6 +31,8 @@ export type BookingDetailDto = {
   endTime: string;
   address: string;
   notes: string | null;
+  packageDays?: number | null;
+  completedSessions?: number;
 };
 
 export type AvailabilitySlotDto = {
@@ -37,7 +40,7 @@ export type AvailabilitySlotDto = {
   nurseProfileId: number;
   startTime: string;
   endTime: string;
-  isBooked: boolean;
+  isAvailable: boolean;
 };
 
 export type NurseDocumentDto = {
@@ -92,7 +95,18 @@ export type ServiceDetailDto = {
   description: string | null;
   basePrice: number;
   estimatedDurationMinutes: number;
+  serviceKind: 'single' | 'package' | string;
+  packageDays: number | null;
+  includedServiceKeys: string | null;
+  packageSchedule: PackageScheduleEntryDto[];
   status: string;
+};
+
+export type PackageScheduleEntryDto = {
+  day: number;
+  title: string | null;
+  description: string | null;
+  serviceKeys: string | null;
 };
 
 export type ReviewDto = {
@@ -231,4 +245,25 @@ export type LatestHealthCheckInDto = {
   babySleep: string;
   note: string | null;
   analysis: HealthAnalysisResponse | null;
+};
+export type PackageSessionDto = {
+  id: number;
+  sessionNumber: number;
+  sessionDate: string;
+  title: string | null;
+  description: string | null;
+  plannedServiceKeys: string | null;
+  status: string;
+  checkInTime: string | null;
+  checkOutTime: string | null;
+  nurseNote: string | null;
+};
+
+export type PackageProgressDto = {
+  bookingId: number;
+  totalSessions: number;
+  completedSessions: number;
+  progressPercent: number;
+  todaySession: PackageSessionDto | null;
+  sessions: PackageSessionDto[];
 };
