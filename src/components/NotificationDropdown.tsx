@@ -23,7 +23,7 @@ const NotificationDropdown = ({
     badgeClassName,
     panelWidthClassName = 'w-[420px]',
     emptyIconClassName = 'text-slate-100',
-    buttonClassName = 'p-3 rounded-lg bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all relative group',
+    buttonClassName = 'p-3 rounded-xl bg-slate-50 text-slate-400 hover:bg-slate-100 transition-all relative group',
     alignClassName = 'right-0',
 }: NotificationDropdownProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -121,7 +121,7 @@ const NotificationDropdown = ({
                                                 <button
                                                     type="button"
                                                     onClick={() => void deleteNotification(notif.id)}
-                                                    className="flex h-10 w-10 flex-none items-center justify-center rounded-lg text-slate-300 transition-all hover:bg-red-50 hover:text-red-500"
+                                                    className="flex h-10 w-10 flex-none items-center justify-center rounded-xl text-slate-300 transition-all hover:bg-red-50 hover:text-red-500"
                                                     title="Xóa thông báo"
                                                 >
                                                     <TrashIcon className="h-4 w-4" />
@@ -135,14 +135,14 @@ const NotificationDropdown = ({
                                     <button
                                         type="button"
                                         onClick={() => void markAllAsRead()}
-                                        className="flex items-center justify-center gap-2 rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-slate-200 hover:bg-white"
+                                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-slate-200 hover:bg-white"
                                     >
                                         <CheckCircleIcon className="h-4 w-4" />
                                         Đọc tất cả
                                     </button>
                                     <Link
                                         to="/notifications"
-                                        className="flex items-center justify-center rounded-lg bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all hover:opacity-90"
+                                        className="flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all hover:opacity-90"
                                     >
                                         Xem chi tiết
                                     </Link>

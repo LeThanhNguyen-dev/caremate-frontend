@@ -78,7 +78,7 @@ const ResetPasswordPage = () => {
                             </Link>
 
                             <div className="flex items-center gap-4 mb-8">
-                                <div className="h-14 w-14 rounded-lg bg-brand/5 flex items-center justify-center">
+                                <div className="h-14 w-14 rounded-xl bg-brand/5 flex items-center justify-center">
                                     <KeyIcon className="h-7 w-7 text-brand" />
                                 </div>
                                 <div>
@@ -97,7 +97,7 @@ const ResetPasswordPage = () => {
                                             onChange={(e) => setForm({ ...form, email: e.target.value })}
                                             placeholder="example@email.com"
                                             required
-                                            className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                            className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                         />
                                     </div>
                                 )}
@@ -110,7 +110,7 @@ const ResetPasswordPage = () => {
                                             onChange={(e) => setForm({ ...form, token: e.target.value })}
                                             placeholder="Nhập mã từ email"
                                             required
-                                            className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                            className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                         />
                                     </div>
                                 )}
@@ -125,7 +125,7 @@ const ResetPasswordPage = () => {
                                             placeholder="Ít nhất 6 ký tự"
                                             required
                                             minLength={6}
-                                            className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                            className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                         />
                                     </div>
                                 </div>
@@ -140,7 +140,7 @@ const ResetPasswordPage = () => {
                                             placeholder="Nhập lại mật khẩu mới"
                                             required
                                             minLength={6}
-                                            className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                            className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                         />
                                     </div>
                                 </div>

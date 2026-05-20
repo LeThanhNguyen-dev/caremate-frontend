@@ -114,8 +114,8 @@ const NurseWorkspacePage = () => {
                             Quản lý lịch trình, theo dõi các ca chăm sóc và kiểm soát thu nhập của bạn một cách khoa học.
                         </p>
                         <div className="mt-10 flex flex-wrap gap-4">
-                            <Link to="/nurse/schedule" className="bg-[#10B981] text-white px-10 py-5 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-emerald-600/30 hover:scale-105 transition-all">Cập nhật lịch rảnh</Link>
-                            <Link to="/nurse/bookings" className="px-10 py-5 rounded-lg bg-white/5 text-white border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Danh sách lịch hẹn</Link>
+                            <Link to="/nurse/schedule" className="bg-[#10B981] text-white px-10 py-5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-emerald-600/30 hover:scale-105 transition-all">Cập nhật lịch rảnh</Link>
+                            <Link to="/nurse/bookings" className="px-10 py-5 rounded-xl bg-white/5 text-white border border-white/10 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-all">Danh sách lịch hẹn</Link>
                         </div>
                     </div>
                     
@@ -145,7 +145,7 @@ const NurseWorkspacePage = () => {
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Thống kê trạng thái</h3>
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Phân bổ ca làm việc của bạn</p>
                         </div>
-                        <div className="h-12 w-12 rounded-lg bg-emerald-50 flex items-center justify-center">
+                        <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center">
                             <ChartPieIcon className="h-6 w-6 text-[#10B981]" />
                         </div>
                     </div>
@@ -204,7 +204,7 @@ const NurseWorkspacePage = () => {
                                 <div key={booking.id} className="group rounded-xl bg-slate-50 p-6 border border-transparent hover:border-emerald-100 hover:bg-white hover:shadow-2xl hover:shadow-emerald-600/5 transition-all duration-500">
                                     <div className="flex items-start justify-between">
                                         <div className="flex items-center gap-6">
-                                            <div className="h-16 w-16 rounded-lg bg-white shadow-sm flex items-center justify-center text-[#10B981]">
+                                            <div className="h-16 w-16 rounded-xl bg-white shadow-sm flex items-center justify-center text-[#10B981]">
                                                 <UserIcon className="h-8 w-8" />
                                             </div>
                                             <div>

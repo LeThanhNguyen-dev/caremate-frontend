@@ -34,16 +34,16 @@ const emptyCreateForm: CreateUserForm = {
 };
 
 const roleLabels: Record<string, { label: string; className: string; icon: IconComponent }> = {
-    customer: { label: 'Khach hang', className: 'bg-blue-50 text-blue-600', icon: UserCircleIcon },
-    nurse: { label: 'Dieu duong cho', className: 'bg-amber-50 text-amber-600', icon: BriefcaseIcon },
-    nurse_unconfirmed: { label: 'Dieu duong cho', className: 'bg-amber-50 text-amber-600', icon: BriefcaseIcon },
-    nurse_confirmed: { label: 'Dieu duong xac minh', className: 'bg-emerald-50 text-emerald-600', icon: ShieldCheckIcon },
-    admin: { label: 'Quan tri vien', className: 'bg-slate-900 text-white', icon: UserCircleIcon },
+    customer: { label: 'Khách hàng', className: 'bg-blue-50 text-blue-600', icon: UserCircleIcon },
+    nurse: { label: 'Điều dưỡng chờ', className: 'bg-amber-50 text-amber-600', icon: BriefcaseIcon },
+    nurse_unconfirmed: { label: 'Điều dưỡng chờ', className: 'bg-amber-50 text-amber-600', icon: BriefcaseIcon },
+    nurse_confirmed: { label: 'Điều dưỡng xác minh', className: 'bg-emerald-50 text-emerald-600', icon: ShieldCheckIcon },
+    admin: { label: 'Quản trị viên', className: 'bg-slate-900 text-white', icon: UserCircleIcon },
 };
 
 const statusLabels: Record<string, { label: string; className: string }> = {
-    active: { label: 'Dang hoat dong', className: 'bg-emerald-50 text-emerald-600' },
-    blocked: { label: 'Da khoa', className: 'bg-rose-50 text-rose-600' },
+    active: { label: 'Đang hoạt động', className: 'bg-emerald-50 text-emerald-600' },
+    blocked: { label: 'Đã khóa', className: 'bg-rose-50 text-rose-600' },
 };
 
 const AdminUsers = () => {
@@ -64,7 +64,7 @@ const AdminUsers = () => {
             const data = await caremateApi.getAdminUsers();
             setUsers(data);
         } catch (error) {
-            showToast('Khong the tai danh sach nguoi dung.', 'error');
+            showToast('Không thể tải danh sách người dùng.', 'error');
             console.error(error);
         } finally {
             setLoading(false);
@@ -102,9 +102,9 @@ const AdminUsers = () => {
             setUsers((prev) => [created, ...prev]);
             setCreateForm(emptyCreateForm);
             setIsCreateOpen(false);
-            showToast('Da tao tai khoan nguoi dung.', 'success');
+            showToast('Đã tạo tài khoản người dùng.', 'success');
         } catch (error) {
-            showToast('Khong the tao tai khoan. Kiem tra email, so dien thoai hoac mat khau.', 'error');
+            showToast('Không thể tạo tài khoản. Kiểm tra email, số điện thoại hoặc mật khẩu.', 'error');
             console.error(error);
         } finally {
             setSavingCreate(false);
@@ -115,8 +115,8 @@ const AdminUsers = () => {
         const nextStatus = user.status === 'blocked' ? 'active' : 'blocked';
         const confirmMessage =
             nextStatus === 'blocked'
-                ? `Khoa tai khoan ${user.fullName}? Nguoi dung se khong dang nhap duoc.`
-                : `Mo khoa tai khoan ${user.fullName}?`;
+                ? `Khóa tài khoản ${user.fullName}? Người dùng sẽ không đăng nhập được.`
+                : `Mở khóa tài khoản ${user.fullName}?`;
 
         if (!window.confirm(confirmMessage)) {
             return;
@@ -127,9 +127,9 @@ const AdminUsers = () => {
             const updated = await caremateApi.updateAdminUserStatus(user.userId, { status: nextStatus });
             setUsers((prev) => prev.map((item) => (item.userId === updated.userId ? updated : item)));
             setSelectedUser((current) => (current?.userId === updated.userId ? updated : current));
-            showToast(nextStatus === 'blocked' ? 'Da khoa tai khoan.' : 'Da mo khoa tai khoan.', 'success');
+            showToast(nextStatus === 'blocked' ? 'Đã khóa tài khoản.' : 'Đã mở khóa tài khoản.', 'success');
         } catch (error) {
-            showToast('Khong the cap nhat trang thai tai khoan.', 'error');
+            showToast('Không thể cập nhật trạng thái tài khoản.', 'error');
             console.error(error);
         } finally {
             setUpdatingUserId(null);
@@ -142,7 +142,7 @@ const AdminUsers = () => {
                 <div className="flex flex-col items-center gap-6">
                     <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-[#3B82F6] border-t-transparent"></div>
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
-                        Dang dong bo du lieu nguoi dung...
+                        Đang đồng bộ dữ liệu người dùng...
                     </span>
                 </div>
             </div>
@@ -157,7 +157,7 @@ const AdminUsers = () => {
                         <MagnifyingGlassIcon className="absolute left-6 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-[#3B82F6]" />
                         <input
                             type="text"
-                            placeholder="Tim kiem theo ten, email hoac so dien thoai..."
+                            placeholder="Tìm kiếm theo tên, email hoặc số điện thoại..."
                             className="w-full rounded-xl border border-slate-100 bg-white py-4 pl-14 pr-8 text-sm font-bold text-slate-900 shadow-sm outline-none transition-all focus:border-[#3B82F6] focus:ring-4 focus:ring-blue-500/5"
                             value={searchTerm}
                             onChange={(event) => setSearchTerm(event.target.value)}
@@ -176,7 +176,7 @@ const AdminUsers = () => {
                                         : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
                                 }`}
                             >
-                                {role === 'all' ? 'Tat ca' : roleLabels[role]?.label || role}
+                                {role === 'all' ? 'Tất cả' : roleLabels[role]?.label || role}
                             </button>
                         ))}
                     </div>
@@ -186,18 +186,18 @@ const AdminUsers = () => {
                     <button
                         type="button"
                         onClick={() => void fetchUsers()}
-                        className="rounded-lg border border-slate-100 bg-white p-4 text-slate-400 shadow-sm transition-all hover:bg-blue-50 hover:text-[#3B82F6] active:scale-95"
-                        title="Tai lai"
+                        className="rounded-xl border border-slate-100 bg-white p-4 text-slate-400 shadow-sm transition-all hover:bg-blue-50 hover:text-[#3B82F6] active:scale-95"
+                        title="Tải lại"
                     >
                         <ArrowPathIcon className="h-5 w-5" />
                     </button>
                     <button
                         type="button"
                         onClick={() => setIsCreateOpen(true)}
-                        className="flex items-center gap-2 rounded-lg bg-[#3B82F6] px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-95"
+                        className="flex items-center gap-2 rounded-xl bg-[#3B82F6] px-8 py-4 text-[10px] font-black uppercase tracking-widest text-white shadow-xl shadow-blue-600/20 transition-all hover:scale-[1.02] active:scale-95"
                     >
                         <UserPlusIcon className="h-5 w-5" />
-                        Tao tai khoan moi
+                        Tạo tài khoản mới
                     </button>
                 </div>
             </section>
@@ -234,9 +234,9 @@ const AdminUsers = () => {
 
                                 <div className="relative z-10 space-y-1">
                                     <h3 className="truncate text-xl font-black tracking-tight text-slate-900">{user.fullName}</h3>
-                                    <p className="truncate text-sm font-bold text-slate-400">{user.email ?? 'Chua co email'}</p>
+                                    <p className="truncate text-sm font-bold text-slate-400">{user.email ?? 'Chưa có email'}</p>
                                     <p className="truncate border-b border-slate-50 pb-4 text-xs font-bold text-slate-300">
-                                        {user.phone ?? 'Chua co so dien thoai'}
+                                        {user.phone ?? 'Chưa có số điện thoại'}
                                     </p>
                                 </div>
 
@@ -246,7 +246,7 @@ const AdminUsers = () => {
                                         {roleConfig.label}
                                     </div>
                                     <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-300">
-                                        {user.bookingCount ?? 0} lich hen
+                                        {user.bookingCount ?? 0} lịch hẹn
                                     </span>
                                 </div>
 
@@ -256,7 +256,7 @@ const AdminUsers = () => {
                                         onClick={() => setSelectedUser(user)}
                                         className="rounded-xl bg-slate-50 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-100"
                                     >
-                                        Chi tiet
+                                        Chi tiết
                                     </button>
                                     <button
                                         type="button"
@@ -268,7 +268,7 @@ const AdminUsers = () => {
                                                 : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
                                         }`}
                                     >
-                                        {isBlocked ? 'Mo khoa' : 'Khoa'}
+                                        {isBlocked ? 'Mở khóa' : 'Khóa'}
                                     </button>
                                 </div>
                             </motion.div>
@@ -279,7 +279,7 @@ const AdminUsers = () => {
 
             {filteredUsers.length === 0 && (
                 <div className="rounded-xl border border-dashed border-slate-200 bg-white p-12 text-center text-sm font-bold text-slate-400">
-                    Khong co tai khoan phu hop.
+                    Không có tài khoản phù hợp.
                 </div>
             )}
 
@@ -293,16 +293,16 @@ const AdminUsers = () => {
                     >
                         <motion.form
                             onSubmit={handleCreateUser}
-                            className="w-full max-w-xl rounded-2xl bg-white p-8 shadow-2xl"
+                            className="w-full max-w-xl rounded-xl bg-white p-8 shadow-2xl"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 20, opacity: 0 }}
                         >
                             <div className="mb-8 flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900">Tao tai khoan</h2>
+                                    <h2 className="text-2xl font-black text-slate-900">Tạo tài khoản</h2>
                                     <p className="mt-1 text-sm font-bold text-slate-400">
-                                        Admin chi tao tai khoan khach hang hoac dieu duong cho duyet.
+                                        Admin chỉ tạo tài khoản khách hàng hoặc điều dưỡng chờ duyệt.
                                     </p>
                                 </div>
                                 <button
@@ -320,7 +320,7 @@ const AdminUsers = () => {
                                     value={createForm.fullName}
                                     onChange={(event) => setCreateForm((prev) => ({ ...prev, fullName: event.target.value }))}
                                     className="rounded-xl border border-slate-100 px-5 py-4 text-sm font-bold outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-blue-500/5"
-                                    placeholder="Ho va ten"
+                                    placeholder="Họ và tên"
                                 />
                                 <input
                                     required
@@ -334,7 +334,7 @@ const AdminUsers = () => {
                                     value={createForm.phone}
                                     onChange={(event) => setCreateForm((prev) => ({ ...prev, phone: event.target.value }))}
                                     className="rounded-xl border border-slate-100 px-5 py-4 text-sm font-bold outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-blue-500/5"
-                                    placeholder="So dien thoai"
+                                    placeholder="Số điện thoại"
                                 />
                                 <input
                                     required
@@ -343,7 +343,7 @@ const AdminUsers = () => {
                                     value={createForm.password}
                                     onChange={(event) => setCreateForm((prev) => ({ ...prev, password: event.target.value }))}
                                     className="rounded-xl border border-slate-100 px-5 py-4 text-sm font-bold outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-blue-500/5"
-                                    placeholder="Mat khau tam thoi"
+                                    placeholder="Mật khẩu tạm thời"
                                 />
                                 <select
                                     value={createForm.role}
@@ -355,8 +355,8 @@ const AdminUsers = () => {
                                     }
                                     className="rounded-xl border border-slate-100 px-5 py-4 text-sm font-bold outline-none focus:border-[#3B82F6] focus:ring-4 focus:ring-blue-500/5"
                                 >
-                                    <option value="customer">Khach hang</option>
-                                    <option value="nurse_unconfirmed">Dieu duong cho duyet</option>
+                                    <option value="customer">Khách hàng</option>
+                                    <option value="nurse_unconfirmed">Điều dưỡng chờ duyệt</option>
                                 </select>
                             </div>
 
@@ -366,14 +366,14 @@ const AdminUsers = () => {
                                     onClick={() => setIsCreateOpen(false)}
                                     className="rounded-xl bg-slate-50 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:bg-slate-100"
                                 >
-                                    Huy
+                                    Hủy
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={savingCreate}
                                     className="rounded-xl bg-[#3B82F6] px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-600/20 disabled:opacity-50"
                                 >
-                                    {savingCreate ? 'Dang tao...' : 'Tao tai khoan'}
+                                    {savingCreate ? 'Đang tạo...' : 'Tạo tài khoản'}
                                 </button>
                             </div>
                         </motion.form>
@@ -388,7 +388,7 @@ const AdminUsers = () => {
                         exit={{ opacity: 0 }}
                     >
                         <motion.div
-                            className="w-full max-w-lg rounded-2xl bg-white p-8 shadow-2xl"
+                            className="w-full max-w-lg rounded-xl bg-white p-8 shadow-2xl"
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             exit={{ y: 20, opacity: 0 }}
@@ -396,7 +396,7 @@ const AdminUsers = () => {
                             <div className="mb-8 flex items-start justify-between">
                                 <div>
                                     <h2 className="text-2xl font-black text-slate-900">{selectedUser.fullName}</h2>
-                                    <p className="mt-1 text-sm font-bold text-slate-400">{selectedUser.email ?? 'Chua co email'}</p>
+                                    <p className="mt-1 text-sm font-bold text-slate-400">{selectedUser.email ?? 'Chưa có email'}</p>
                                 </div>
                                 <button
                                     type="button"
@@ -409,31 +409,31 @@ const AdminUsers = () => {
 
                             <div className="grid grid-cols-1 gap-3 text-sm font-bold">
                                 <div className="flex justify-between rounded-xl bg-slate-50 px-5 py-4">
-                                    <span className="text-slate-400">Vai tro</span>
+                                    <span className="text-slate-400">Vai trò</span>
                                     <span className="text-slate-900">{roleLabels[selectedUser.role]?.label ?? selectedUser.role}</span>
                                 </div>
                                 <div className="flex justify-between rounded-xl bg-slate-50 px-5 py-4">
-                                    <span className="text-slate-400">Trang thai</span>
+                                    <span className="text-slate-400">Trạng thái</span>
                                     <span className="text-slate-900">
                                         {statusLabels[selectedUser.status ?? 'active']?.label ?? selectedUser.status}
                                     </span>
                                 </div>
                                 <div className="flex justify-between rounded-xl bg-slate-50 px-5 py-4">
-                                    <span className="text-slate-400">So dien thoai</span>
-                                    <span className="text-slate-900">{selectedUser.phone ?? 'Chua co'}</span>
+                                    <span className="text-slate-400">Số điện thoại</span>
+                                    <span className="text-slate-900">{selectedUser.phone ?? 'Chưa có'}</span>
                                 </div>
                                 <div className="flex justify-between rounded-xl bg-slate-50 px-5 py-4">
-                                    <span className="text-slate-400">Lich hen</span>
+                                    <span className="text-slate-400">Lịch hẹn</span>
                                     <span className="text-slate-900">{selectedUser.bookingCount ?? 0}</span>
                                 </div>
                                 {selectedUser.role !== 'customer' && (
                                     <>
                                         <div className="flex justify-between rounded-xl bg-slate-50 px-5 py-4">
-                                            <span className="text-slate-400">Kinh nghiem</span>
-                                            <span className="text-slate-900">{selectedUser.yearsExperience ?? 0} nam</span>
+                                            <span className="text-slate-400">Kinh nghiệm</span>
+                                            <span className="text-slate-900">{selectedUser.yearsExperience ?? 0} năm</span>
                                         </div>
                                         <div className="flex justify-between rounded-xl bg-slate-50 px-5 py-4">
-                                            <span className="text-slate-400">Danh gia</span>
+                                            <span className="text-slate-400">Đánh giá</span>
                                             <span className="text-slate-900">{selectedUser.averageRating ?? 0}</span>
                                         </div>
                                     </>
@@ -455,7 +455,7 @@ const AdminUsers = () => {
                                 ) : (
                                     <LockClosedIcon className="h-5 w-5" />
                                 )}
-                                {selectedUser.status === 'blocked' ? 'Mo khoa tai khoan' : 'Khoa tai khoan'}
+                                {selectedUser.status === 'blocked' ? 'Mở khóa tài khoản' : 'Khóa tài khoản'}
                             </button>
                         </motion.div>
                     </motion.div>

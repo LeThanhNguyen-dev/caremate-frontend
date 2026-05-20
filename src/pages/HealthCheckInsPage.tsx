@@ -158,7 +158,7 @@ const HealthCheckInsPage = () => {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(15,118,110,0.12),_transparent_32%),linear-gradient(180deg,#f8fafc_0%,#eef6f5_100%)] py-16">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mb-10 rounded-[28px] border border-white/60 bg-white/80 p-8 shadow-xl shadow-slate-200/60 backdrop-blur">
+        <div className="mb-10 rounded-xl border border-white/60 bg-white/80 p-8 shadow-xl shadow-slate-200/60 backdrop-blur">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-3xl">
               <p className="mb-3 text-[11px] font-black uppercase tracking-[0.35em] text-teal-700">AI Health Check-in</p>
@@ -167,16 +167,16 @@ const HealthCheckInsPage = () => {
                 Nhập check-in hằng ngày, lưu lịch sử 7 ngày gần nhất và nhận phân tích, cảnh báo, gợi ý chăm sóc phù hợp từ CareMate.
               </p>
             </div>
-            <div className={`w-fit rounded-2xl border px-5 py-4 text-sm font-bold ${warningTone}`}>
+            <div className={`w-fit rounded-xl border px-5 py-4 text-sm font-bold ${warningTone}`}>
               Mức cảnh báo hiện tại: {toWarningLabel(analysisResult?.warningLevel ?? latestCheckIn?.analysis?.warningLevel) ?? 'Chưa có'}
             </div>
           </div>
         </div>
 
         <div className="grid gap-8 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
-          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] bg-white p-8 shadow-xl shadow-slate-200/60">
+          <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-white p-8 shadow-xl shadow-slate-200/60">
             <div className="mb-8 flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
                 <ClipboardDocumentCheckIcon className="h-7 w-7" />
               </div>
               <div>
@@ -197,7 +197,7 @@ const HealthCheckInsPage = () => {
                       step={0.5}
                       value={form.sleepHours}
                       onChange={(e) => setForm((prev) => ({ ...prev, sleepHours: Number(e.target.value) }))}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-12 pr-4 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-50"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-4 pl-12 pr-4 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-50"
                     />
                   </div>
                 </Field>
@@ -211,7 +211,7 @@ const HealthCheckInsPage = () => {
                       max={10}
                       value={form.painLevel}
                       onChange={(e) => setForm((prev) => ({ ...prev, painLevel: Number(e.target.value) }))}
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-4 pl-12 pr-4 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-50"
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-4 pl-12 pr-4 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-50"
                     />
                   </div>
                 </Field>
@@ -240,12 +240,12 @@ const HealthCheckInsPage = () => {
                   rows={5}
                   maxLength={1000}
                   placeholder="Ví dụ: Mẹ mệt, bé bú ít, vết mổ hơi đau..."
-                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-50"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-50"
                 />
                 <div className="mt-2 text-right text-xs font-bold text-slate-400">{form.note.length}/1000</div>
               </Field>
 
-              <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-100 bg-amber-50 px-5 py-4">
+              <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-amber-100 bg-amber-50 px-5 py-4">
                 <div className="flex items-start gap-3">
                   <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
                   <p className="max-w-2xl text-xs font-semibold leading-6 text-amber-800">
@@ -255,7 +255,7 @@ const HealthCheckInsPage = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-2xl bg-slate-900 px-6 py-4 text-sm font-black text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl bg-slate-900 px-6 py-4 text-sm font-black text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {submitting ? 'Đang phân tích...' : 'Phân tích check-in'}
                 </button>
@@ -264,9 +264,9 @@ const HealthCheckInsPage = () => {
           </motion.section>
 
           <div className="space-y-8">
-            <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] bg-slate-900 p-8 text-white shadow-xl shadow-slate-300/50">
+            <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-slate-900 p-8 text-white shadow-xl shadow-slate-300/50">
               <div className="mb-6 flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
                   <SparklesIcon className="h-6 w-6" />
                 </div>
                 <div>
@@ -282,9 +282,9 @@ const HealthCheckInsPage = () => {
               )}
             </motion.section>
 
-            <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] bg-white p-8 shadow-xl shadow-slate-200/60">
+            <motion.section initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl bg-white p-8 shadow-xl shadow-slate-200/60">
               <div className="mb-6 flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-teal-50 text-teal-700">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-teal-700">
                   <ChartBarSquareIcon className="h-6 w-6" />
                 </div>
                 <div>
@@ -302,7 +302,7 @@ const HealthCheckInsPage = () => {
               ) : (
                 <div className="space-y-4">
                   {history.map((item) => (
-                    <article key={item.checkInId} className="rounded-3xl border border-slate-100 bg-slate-50 p-5">
+                    <article key={item.checkInId} className="rounded-xl border border-slate-100 bg-slate-50 p-5">
                       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <div>
                           <div className="text-sm font-black text-slate-900">{new Date(item.createdAt).toLocaleString('vi-VN')}</div>
@@ -322,10 +322,10 @@ const HealthCheckInsPage = () => {
                         <span>Giấc ngủ của bé: <strong className="text-slate-900">{toOptionLabel(item.babySleep, babySleepOptions)}</strong></span>
                       </div>
 
-                      {item.note && <p className="mt-4 rounded-2xl bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-600">{item.note}</p>}
+                      {item.note && <p className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-600">{item.note}</p>}
 
                       {item.analysis && (
-                        <div className="mt-4 rounded-2xl bg-white p-4">
+                        <div className="mt-4 rounded-xl bg-white p-4">
                           <p className="text-sm font-semibold leading-6 text-slate-700">{item.analysis.summary}</p>
                           {item.analysis.suggestedServices.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-2">
@@ -346,7 +346,7 @@ const HealthCheckInsPage = () => {
                       type="button"
                       disabled={page === 1}
                       onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                      className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 transition hover:border-teal-300 hover:text-teal-700 disabled:opacity-40"
+                      className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 transition hover:border-teal-300 hover:text-teal-700 disabled:opacity-40"
                     >
                       Trang trước
                     </button>
@@ -355,7 +355,7 @@ const HealthCheckInsPage = () => {
                       type="button"
                       disabled={history.length < 10}
                       onClick={() => setPage((prev) => prev + 1)}
-                      className="rounded-2xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 transition hover:border-teal-300 hover:text-teal-700 disabled:opacity-40"
+                      className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-black text-slate-700 transition hover:border-teal-300 hover:text-teal-700 disabled:opacity-40"
                     >
                       Trang sau
                     </button>
@@ -393,7 +393,7 @@ function Select({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 pr-12 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-50"
+        className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 pr-12 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-300 focus:bg-white focus:ring-4 focus:ring-teal-50"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -422,7 +422,7 @@ function AnalysisCard({ analysis, dark = false }: { analysis: HealthAnalysisResp
         <h3 className={`text-[11px] font-black uppercase tracking-[0.28em] ${dark ? 'text-slate-300' : 'text-slate-400'}`}>Khuyến nghị</h3>
         <ul className="mt-3 space-y-3">
           {analysis.recommendations.map((item) => (
-            <li key={item} className={`rounded-2xl px-4 py-3 text-sm font-medium leading-6 ${dark ? 'bg-white/5 text-slate-100' : 'bg-slate-50 text-slate-700'}`}>
+            <li key={item} className={`rounded-xl px-4 py-3 text-sm font-medium leading-6 ${dark ? 'bg-white/5 text-slate-100' : 'bg-slate-50 text-slate-700'}`}>
               {item}
             </li>
           ))}
@@ -436,7 +436,7 @@ function AnalysisCard({ analysis, dark = false }: { analysis: HealthAnalysisResp
         ) : (
           <div className="mt-3 space-y-3">
             {analysis.suggestedServices.map((service) => (
-              <div key={service.serviceKey} className={`rounded-2xl px-4 py-4 ${dark ? 'bg-white/5' : 'bg-slate-50'}`}>
+              <div key={service.serviceKey} className={`rounded-xl px-4 py-4 ${dark ? 'bg-white/5' : 'bg-slate-50'}`}>
                 <div className={`text-sm font-black ${dark ? 'text-white' : 'text-slate-900'}`}>{service.serviceName}</div>
                 <div className={`mt-1 text-sm font-medium leading-6 ${dark ? 'text-slate-300' : 'text-slate-600'}`}>{service.reason}</div>
               </div>

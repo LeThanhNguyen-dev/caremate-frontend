@@ -3,10 +3,10 @@ import { HeartIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 const HealthCheckInsEntryPage = () => {
   return (
-    <div className="rounded-3xl border border-teal-100 bg-[linear-gradient(135deg,rgba(240,253,250,1),rgba(255,255,255,1))] p-6">
+    <div className="rounded-xl border border-teal-100 bg-[linear-gradient(135deg,rgba(240,253,250,1),rgba(255,255,255,1))] p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-teal-100 text-teal-700">
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-teal-100 text-teal-700">
             <SparklesIcon className="h-7 w-7" />
           </div>
           <div>
@@ -18,7 +18,7 @@ const HealthCheckInsEntryPage = () => {
         </div>
         <Link
           to="/health-checkins"
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-teal-700"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-teal-700"
         >
           <HeartIcon className="h-5 w-5" />
           Mở check-in ngay

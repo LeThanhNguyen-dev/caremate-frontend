@@ -242,7 +242,7 @@ const NurseSchedulePage = () => {
                         { label: 'Booking sắp tới', value: stats.upcoming, icon: CalendarIcon, color: 'text-[#10B981] bg-emerald-50' },
                     ].map((item) => (
                         <div key={item.label} className="luxury-card p-6 flex items-center gap-5 border-none shadow-lg">
-                            <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${item.color}`}>
+                            <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${item.color}`}>
                                 <item.icon className="h-6 w-6" />
                             </div>
                             <div>
@@ -272,7 +272,7 @@ const NurseSchedulePage = () => {
                             {weekDays.map((day) => (
                                 <div key={day.toISOString()} className="flex-1 border-r border-slate-50 px-3 py-6 text-center">
                                     <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{day.toLocaleDateString('vi-VN', { weekday: 'short' })}</div>
-                                    <div className={`mt-3 inline-flex h-12 w-12 items-center justify-center rounded-lg text-lg font-black ${
+                                    <div className={`mt-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-lg font-black ${
                                         formatDateValue(day) === formatDateValue(new Date()) ? 'bg-[#10B981] text-white shadow-lg shadow-emerald-600/20' : 'bg-slate-50 text-slate-900'
                                     }`}>{day.getDate()}</div>
                                 </div>
@@ -295,7 +295,7 @@ const NurseSchedulePage = () => {
                                                 <button key={`${day.toISOString()}-${hour}`} type="button" onClick={() => openSlotModal(day, hour)} className="block w-full border-b border-slate-50/50 hover:bg-emerald-500/[0.03] transition-colors" style={{ height: `${HOUR_HEIGHT}px` }} />
                                             ))}
                                             {events.slots.map((slot) => (
-                                                <div key={slot.id} className="absolute left-2 right-2 rounded-lg p-4 text-xs bg-emerald-50 border border-emerald-100 text-[#10B981] shadow-sm group/slot transition-all hover:shadow-md" style={getSlotStyle(slot.startTime, slot.endTime)}>
+                                                <div key={slot.id} className="absolute left-2 right-2 rounded-xl p-4 text-xs bg-emerald-50 border border-emerald-100 text-[#10B981] shadow-sm group/slot transition-all hover:shadow-md" style={getSlotStyle(slot.startTime, slot.endTime)}>
                                                     <div className="flex items-start justify-between">
                                                         <div className="font-bold">{new Date(slot.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
                                                         <button type="button" onClick={(e) => { e.stopPropagation(); void deleteSlot(slot.id); }} className="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover/slot:opacity-100"><XMarkIcon className="h-4 w-4" /></button>
@@ -303,7 +303,7 @@ const NurseSchedulePage = () => {
                                                 </div>
                                             ))}
                                             {events.bookings.map((booking) => (
-                                                <div key={booking.id} className="absolute left-2 right-2 rounded-lg bg-slate-900 p-4 text-xs text-white shadow-xl z-10 border-l-4 border-[#10B981]" style={getSlotStyle(booking.startTime, booking.endTime)}>
+                                                <div key={booking.id} className="absolute left-2 right-2 rounded-xl bg-slate-900 p-4 text-xs text-white shadow-xl z-10 border-l-4 border-[#10B981]" style={getSlotStyle(booking.startTime, booking.endTime)}>
                                                     <div className="font-black text-[10px] uppercase text-[#10B981] mb-1">Lịch hẹn khách</div>
                                                     <div className="font-black leading-tight">#{booking.id} - {booking.serviceName}</div>
                                                 </div>
@@ -312,7 +312,7 @@ const NurseSchedulePage = () => {
                                                 <Link
                                                     key={session.id}
                                                     to={`/bookings/${session.bookingId}`}
-                                                    className={`absolute left-2 right-2 rounded-lg p-4 text-xs text-white shadow-xl z-20 border-l-4 transition hover:scale-[1.01] ${
+                                                    className={`absolute left-2 right-2 rounded-xl p-4 text-xs text-white shadow-xl z-20 border-l-4 transition hover:scale-[1.01] ${
                                                         session.status === 'completed'
                                                             ? 'border-emerald-300 bg-emerald-600'
                                                             : session.status === 'checked_in'

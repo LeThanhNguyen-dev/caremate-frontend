@@ -17,9 +17,14 @@ const AdminSettings = () => {
     const [editingId, setEditingId] = useState<number | null>(null);
     const [form, setForm] = useState({
         name: '',
+        category: '',
         description: '',
         basePrice: '',
         estimatedDurationMinutes: '',
+        serviceKind: 'single',
+        packageDays: '',
+        includedServiceKeys: '',
+        packageScheduleJson: '',
         status: 'active'
     });
     const [loading, setLoading] = useState(true);
@@ -46,9 +51,14 @@ const AdminSettings = () => {
             setEditingId(id);
             setForm({
                 name: s.name,
+                category: s.category || '',
                 description: s.description || '',
                 basePrice: String(s.basePrice),
                 estimatedDurationMinutes: String(s.estimatedDurationMinutes),
+                serviceKind: s.serviceKind || 'single',
+                packageDays: s.packageDays ? String(s.packageDays) : '',
+                includedServiceKeys: s.includedServiceKeys || '',
+                packageScheduleJson: s.packageSchedule?.length ? JSON.stringify(s.packageSchedule) : '',
                 status: s.status
             });
         } catch {
@@ -62,9 +72,14 @@ const AdminSettings = () => {
         try {
             await caremateApi.updateService(editingId, {
                 name: form.name,
+                category: form.category,
                 description: form.description,
                 basePrice: Number(form.basePrice),
                 estimatedDurationMinutes: Number(form.estimatedDurationMinutes),
+                serviceKind: form.serviceKind,
+                packageDays: form.packageDays ? Number(form.packageDays) : undefined,
+                includedServiceKeys: form.includedServiceKeys || undefined,
+                packageScheduleJson: form.packageScheduleJson || undefined,
                 status: form.status
             });
             setEditingId(null);
@@ -104,7 +119,7 @@ const AdminSettings = () => {
                 </div>
                 <button
                     onClick={load}
-                    className="flex items-center gap-2 px-8 py-4 rounded-lg bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-[#3B82F6] hover:text-[#3B82F6] transition-all shadow-sm active:scale-95"
+                    className="flex items-center gap-2 px-8 py-4 rounded-xl bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-[#3B82F6] hover:text-[#3B82F6] transition-all shadow-sm active:scale-95"
                 >
                     <ArrowPathIcon className="h-4 w-4" />
                     Làm mới
@@ -119,7 +134,7 @@ const AdminSettings = () => {
                         className="bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20 hover:shadow-2xl transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-6"
                     >
                         <div className="flex items-center gap-6">
-                            <div className="h-14 w-14 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                            <div className="h-14 w-14 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                                 <SparklesIcon className="h-7 w-7 text-[#3B82F6]" />
                             </div>
                             <div>
@@ -138,7 +153,7 @@ const AdminSettings = () => {
                             </div>
                         </div>
                         <button
-                            className="bg-slate-50 text-slate-600 px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 hover:text-[#3B82F6] transition-all active:scale-95 flex items-center gap-2 shrink-0"
+                            className="bg-slate-50 text-slate-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-50 hover:text-[#3B82F6] transition-all active:scale-95 flex items-center gap-2 shrink-0"
                             onClick={() => void startEdit(s.id)}
                         >
                             <PencilSquareIcon className="h-4 w-4" />
@@ -156,7 +171,7 @@ const AdminSettings = () => {
                             <h2 className="text-3xl font-black text-slate-900 tracking-tight">Chỉnh sửa dịch vụ #{editingId}</h2>
                             <button
                                 onClick={() => setEditingId(null)}
-                                className="h-10 w-10 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all"
+                                className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all"
                             >
                                 <XMarkIcon className="h-5 w-5" />
                             </button>
@@ -167,7 +182,7 @@ const AdminSettings = () => {
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 block">Tên dịch vụ</label>
                                     <input
-                                        className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
+                                        className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
                                         value={form.name}
                                         onChange={(e) => setForm({ ...form, name: e.target.value })}
                                         required
@@ -176,7 +191,7 @@ const AdminSettings = () => {
                                 <div>
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 block">Trạng thái</label>
                                     <select
-                                        className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
+                                        className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
                                         value={form.status}
                                         onChange={(e) => setForm({ ...form, status: e.target.value })}
                                     >
@@ -188,7 +203,7 @@ const AdminSettings = () => {
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 block">Đơn giá (VNĐ)</label>
                                     <input
                                         type="number"
-                                        className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
+                                        className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
                                         value={form.basePrice}
                                         onChange={(e) => setForm({ ...form, basePrice: e.target.value })}
                                         required
@@ -198,7 +213,7 @@ const AdminSettings = () => {
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 block">Thời gian (Phút)</label>
                                     <input
                                         type="number"
-                                        className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
+                                        className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
                                         value={form.estimatedDurationMinutes}
                                         onChange={(e) => setForm({ ...form, estimatedDurationMinutes: e.target.value })}
                                         required
@@ -207,7 +222,7 @@ const AdminSettings = () => {
                                 <div className="sm:col-span-2">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 block">Mô tả</label>
                                     <textarea
-                                        className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
+                                        className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white transition-all"
                                         value={form.description}
                                         onChange={(e) => setForm({ ...form, description: e.target.value })}
                                         rows={3}
@@ -217,14 +232,14 @@ const AdminSettings = () => {
                             <div className="flex gap-4 pt-4">
                                 <button
                                     type="submit"
-                                    className="bg-[#3B82F6] text-white px-10 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-2"
+                                    className="bg-[#3B82F6] text-white px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/20 hover:scale-[1.02] transition-all active:scale-95 flex items-center gap-2"
                                 >
                                     <CheckIcon className="h-4 w-4" />
                                     Lưu thay đổi
                                 </button>
                                 <button
                                     type="button"
-                                    className="bg-slate-50 text-slate-600 px-10 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
+                                    className="bg-slate-50 text-slate-600 px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-100 transition-all active:scale-95"
                                     onClick={() => setEditingId(null)}
                                 >
                                     Hủy

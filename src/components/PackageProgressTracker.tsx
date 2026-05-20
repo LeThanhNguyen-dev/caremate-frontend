@@ -206,13 +206,13 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, onP
                                         </p>
 
                                         {(session.checkInTime || session.checkOutTime) && (
-                                            <div className="mt-4 flex gap-4 text-xs font-semibold text-slate-400 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                            <div className="mt-4 flex gap-4 text-xs font-semibold text-slate-400 bg-slate-50 p-3 rounded-xl border border-slate-100">
                                                 {session.checkInTime && <div>Check-in: <span className="text-slate-600">{new Date(session.checkInTime).toLocaleTimeString('vi-VN')}</span></div>}
                                                 {session.checkOutTime && <div>Check-out: <span className="text-slate-600">{new Date(session.checkOutTime).toLocaleTimeString('vi-VN')}</span></div>}
                                             </div>
                                         )}
                                         {session.nurseNote && (
-                                            <div className="mt-3 text-sm italic text-slate-500 bg-yellow-50/50 p-3 rounded-lg border border-yellow-100/50">
+                                            <div className="mt-3 text-sm italic text-slate-500 bg-yellow-50/50 p-3 rounded-xl border border-yellow-100/50">
                                                 <span className="font-semibold not-italic text-yellow-700 mr-2">Ghi chú y tá:</span>
                                                 {session.nurseNote}
                                             </div>

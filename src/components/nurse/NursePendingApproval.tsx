@@ -13,12 +13,12 @@ const NursePendingApproval = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="max-w-2xl w-full text-center"
             >
-                <div className="bg-white rounded-2xl p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
+                <div className="bg-white rounded-xl p-12 shadow-2xl shadow-slate-200/50 border border-slate-100 relative overflow-hidden">
                     {/* Background Decoration */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 blur-[80px] -mr-32 -mt-32 rounded-full"></div>
                     
                     <div className="relative z-10">
-                        <div className="h-24 w-24 rounded-2xl bg-amber-50 flex items-center justify-center mx-auto mb-10 shadow-lg shadow-amber-500/10">
+                        <div className="h-24 w-24 rounded-xl bg-amber-50 flex items-center justify-center mx-auto mb-10 shadow-lg shadow-amber-500/10">
                             <ShieldExclamationIcon className="h-12 w-12 text-amber-500" />
                         </div>
                         

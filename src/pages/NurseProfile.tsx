@@ -152,7 +152,7 @@ const NurseProfile = () => {
                         { label: 'Chứng chỉ hiện có', value: `${profile?.documents?.length ?? 0} Tài liệu`, icon: DocumentTextIcon },
                     ].map((item) => (
                         <div key={item.label} className="luxury-card p-6 flex items-center gap-5 border-none shadow-lg bg-white transition-all hover:translate-x-2">
-                            <div className="h-12 w-12 rounded-lg bg-emerald-50 flex items-center justify-center text-[#10B981]">
+                            <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-[#10B981]">
                                 <item.icon className="h-6 w-6" />
                             </div>
                             <div>
@@ -171,7 +171,7 @@ const NurseProfile = () => {
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Kinh nghiệm chuyên môn</h3>
                             <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Cập nhật năng lực chăm sóc</p>
                         </div>
-                        <div className="h-12 w-12 rounded-lg bg-emerald-50 flex items-center justify-center text-[#10B981]">
+                        <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-[#10B981]">
                             <AcademicCapIcon className="h-6 w-6" />
                         </div>
                     </div>
@@ -179,20 +179,20 @@ const NurseProfile = () => {
                     <form onSubmit={updateProfile} className="space-y-8">
                         <div>
                             <label className="form-label">Giới thiệu bản thân chuyên nghiệp</label>
-                            <textarea className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all min-h-[160px] resize-none" rows={5} value={formData.bio} onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))} placeholder="Chia sẻ về kinh nghiệm, thế mạnh và tâm thế phục vụ của bạn..." />
+                            <textarea className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all min-h-[160px] resize-none" rows={5} value={formData.bio} onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))} placeholder="Chia sẻ về kinh nghiệm, thế mạnh và tâm thế phục vụ của bạn..." />
                         </div>
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <label className="form-label">Số năm kinh nghiệm</label>
-                                <input type="number" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.yearsExperience} onChange={(event) => setFormData((prev) => ({ ...prev, yearsExperience: Number(event.target.value) || 0 }))} />
+                                <input type="number" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.yearsExperience} onChange={(event) => setFormData((prev) => ({ ...prev, yearsExperience: Number(event.target.value) || 0 }))} />
                             </div>
                             <div>
                                 <label className="form-label">Bán kính phục vụ (km)</label>
-                                <input type="number" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.serviceRadiusKm} onChange={(event) => setFormData((prev) => ({ ...prev, serviceRadiusKm: Number(event.target.value) || 0 }))} />
+                                <input type="number" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.serviceRadiusKm} onChange={(event) => setFormData((prev) => ({ ...prev, serviceRadiusKm: Number(event.target.value) || 0 }))} />
                             </div>
                             <div>
                                 <label className="form-label">Ngân hàng nhận tiền</label>
-                                <select className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankBin} onChange={(event) => setFormData((prev) => ({ ...prev, bankBin: event.target.value }))}>
+                                <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankBin} onChange={(event) => setFormData((prev) => ({ ...prev, bankBin: event.target.value }))}>
                                     <option value="">Chọn ngân hàng</option>
                                     {banks.map((bank) => (
                                         <option key={bank.code} value={bank.code}>{bank.shortName || bank.name}</option>
@@ -201,11 +201,11 @@ const NurseProfile = () => {
                             </div>
                             <div>
                                 <label className="form-label">Số tài khoản nhận tiền</label>
-                                <input type="text" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankAccountNumber} onChange={(event) => setFormData((prev) => ({ ...prev, bankAccountNumber: event.target.value }))} />
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankAccountNumber} onChange={(event) => setFormData((prev) => ({ ...prev, bankAccountNumber: event.target.value }))} />
                             </div>
                             <div className="sm:col-span-2">
                                 <label className="form-label">Tên chủ tài khoản</label>
-                                <input type="text" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankAccountName} onChange={(event) => setFormData((prev) => ({ ...prev, bankAccountName: event.target.value }))} />
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankAccountName} onChange={(event) => setFormData((prev) => ({ ...prev, bankAccountName: event.target.value }))} />
                             </div>
                         </div>
                         <button type="submit" className="bg-[#10B981] text-white w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all" disabled={saving}>
@@ -221,17 +221,17 @@ const NurseProfile = () => {
                                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">Xác minh danh tính</h3>
                                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Bổ sung hồ sơ năng lực</p>
                             </div>
-                            <div className="h-12 w-12 rounded-lg bg-emerald-50 flex items-center justify-center text-[#10B981]">
+                            <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-[#10B981]">
                                 <IdentificationIcon className="h-6 w-6" />
                             </div>
                         </div>
                         <form onSubmit={uploadDocument} className="space-y-6">
-                            <div className="rounded-lg bg-slate-50 p-4 text-xs font-semibold text-slate-700">
+                            <div className="rounded-xl bg-slate-50 p-4 text-xs font-semibold text-slate-700">
                                 Checklist hồ sơ: CCCD trước ({hasFront ? 'Đủ' : 'Thiếu'}), CCCD sau ({hasBack ? 'Đủ' : 'Thiếu'}), Chứng chỉ ({hasCertificate ? 'Đủ' : 'Thiếu'})
                             </div>
                             <div>
                                 <label className="form-label">Phân loại tài liệu</label>
-                                <select className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={docType} onChange={(event) => setDocType(event.target.value)}>
+                                <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={docType} onChange={(event) => setDocType(event.target.value)}>
                                     <option value="id_card_front">Căn cước công dân (Mặt trước)</option>
                                     <option value="id_card_back">Căn cước công dân (Mặt sau)</option>
                                     <option value="certificate">Chứng chỉ hành nghề y tế</option>
@@ -241,7 +241,7 @@ const NurseProfile = () => {
                                 <label className="form-label">Chọn tệp tài liệu (JPG/PNG)</label>
                                 <div className="relative group">
                                     <input type="file" id="doc-upload" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} />
-                                    <label htmlFor="doc-upload" className="flex items-center justify-between w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg py-4 px-6 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all group">
+                                    <label htmlFor="doc-upload" className="flex items-center justify-between w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl py-4 px-6 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all group">
                                         <span className={`text-sm font-bold ${selectedFiles.length ? 'text-slate-900' : 'text-slate-400'}`}>
                                             {selectedFiles.length ? `Đã chọn ${selectedFiles.length} tệp` : 'Nhấn để chọn tệp...'}
                                         </span>

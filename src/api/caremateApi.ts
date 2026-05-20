@@ -207,9 +207,9 @@ export const caremateApi = {
 
   getServices: async (): Promise<ServiceDetailDto[]> => (await axiosInstance.get('/api/services')).data,
   getServiceById: async (id: number): Promise<ServiceDetailDto> => (await axiosInstance.get(`/api/services/${id}`)).data,
-  createService: async (payload: { name: string; description?: string; basePrice: number; estimatedDurationMinutes: number; status?: string }): Promise<ServiceDetailDto> =>
+  createService: async (payload: { name: string; category: string; description?: string; basePrice: number; estimatedDurationMinutes: number; serviceKind?: string; packageDays?: number; includedServiceKeys?: string; packageScheduleJson?: string; status?: string }): Promise<ServiceDetailDto> =>
     (await axiosInstance.post('/api/services', payload)).data,
-  updateService: async (id: number, payload: { name: string; description?: string; basePrice: number; estimatedDurationMinutes: number; status?: string }): Promise<void> => {
+  updateService: async (id: number, payload: { name: string; category: string; description?: string; basePrice: number; estimatedDurationMinutes: number; serviceKind?: string; packageDays?: number; includedServiceKeys?: string; packageScheduleJson?: string; status?: string }): Promise<void> => {
     await axiosInstance.put(`/api/services/${id}`, payload);
   },
   deleteService: async (id: number): Promise<void> => {

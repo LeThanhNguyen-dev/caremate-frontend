@@ -276,7 +276,7 @@ const NursePublicDetailPage = () => {
           <div className="space-y-12 lg:col-span-2">
             <section className="luxury-card flex flex-col items-start gap-10 p-10 sm:flex-row">
               <div className="relative shrink-0">
-                <div className="h-40 w-40 overflow-hidden rounded-2xl border-4 border-[#FDF2F8] bg-[#FDF2F8] shadow-2xl">
+                <div className="h-40 w-40 overflow-hidden rounded-xl border-4 border-[#FDF2F8] bg-[#FDF2F8] shadow-2xl">
                   {nurseCard.avatar ? (
                     <img src={nurseCard.avatar} alt={profile.fullName} className="h-full w-full object-cover" />
                   ) : (
@@ -285,7 +285,7 @@ const NursePublicDetailPage = () => {
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#EC4899] text-white shadow-lg">
+                <div className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-xl bg-[#EC4899] text-white shadow-lg">
                   <CheckBadgeIcon className="h-6 w-6" />
                 </div>
               </div>
@@ -335,33 +335,33 @@ const NursePublicDetailPage = () => {
                       min={toDateInputValue(new Date())}
                       value={selectedDate}
                       onChange={(event) => handlePackageStartDate(event.target.value)}
-                      className="w-full rounded-2xl border-2 border-[#F3E8FF] bg-white p-5 text-sm font-black text-[#111827] outline-none focus:border-[#EC4899]"
+                      className="w-full rounded-xl border-2 border-[#F3E8FF] bg-white p-5 text-sm font-black text-[#111827] outline-none focus:border-[#EC4899]"
                     />
                   </div>
                   <div>
                     <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
                       Tiến độ chọn giờ
                     </label>
-                    <div className="rounded-2xl border-2 border-[#F3E8FF] bg-white p-5">
+                    <div className="rounded-xl border-2 border-[#F3E8FF] bg-white p-5">
                       <div className="text-2xl font-black text-[#111827]">
                         {Object.keys(packageSessionStarts).length}/{packageDates.length}
                       </div>
                       <div className="mt-1 text-xs font-bold text-[#6B7280]">ngày đã chọn giờ chăm sóc</div>
                       <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-widest">
-                        <span className="rounded-lg bg-emerald-50 px-3 py-2 text-emerald-600">Có thể chọn</span>
-                        <span className="rounded-lg bg-red-50 px-3 py-2 text-red-500">Y tá bận</span>
-                        <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-400">Không mở slot</span>
+                        <span className="rounded-xl bg-emerald-50 px-3 py-2 text-emerald-600">Có thể chọn</span>
+                        <span className="rounded-xl bg-red-50 px-3 py-2 text-red-500">Y tá bận</span>
+                        <span className="rounded-xl bg-slate-100 px-3 py-2 text-slate-400">Không mở slot</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="sm:col-span-2">
                     {packageDates.length === 0 || packageTimeRows.length === 0 ? (
-                      <div className="rounded-2xl border-2 border-dashed border-[#F3E8FF] bg-white p-8 text-center text-sm font-bold leading-6 text-[#6B7280]">
+                      <div className="rounded-xl border-2 border-dashed border-[#F3E8FF] bg-white p-8 text-center text-sm font-bold leading-6 text-[#6B7280]">
                         Y tá chưa mở slot trong các ngày của gói. Vui lòng chọn ngày bắt đầu khác.
                       </div>
                     ) : (
-                      <div className="custom-scrollbar max-h-[560px] overflow-auto rounded-2xl border border-[#F3E8FF] bg-white shadow-inner shadow-pink-50">
+                      <div className="custom-scrollbar max-h-[560px] overflow-auto rounded-xl border border-[#F3E8FF] bg-white shadow-inner shadow-pink-50">
                         <div
                           className="grid min-w-max"
                           style={{ gridTemplateColumns: `112px repeat(${packageDates.length}, minmax(150px, 1fr))` }}
@@ -431,12 +431,12 @@ const NursePublicDetailPage = () => {
                       </div>
                     )}
                   </div>
-                  <div className="sm:col-span-2 rounded-2xl bg-[#FDF2F8] p-5 text-sm font-bold leading-6 text-[#6B7280]">
+                  <div className="sm:col-span-2 rounded-xl bg-[#FDF2F8] p-5 text-sm font-bold leading-6 text-[#6B7280]">
                     Chọn một ô xanh cho từng ngày trong gói. Ô đỏ là khung giờ y tá đã bận, hệ thống vẫn kiểm tra trùng lịch lần nữa trước khi tạo đặt lịch.
                   </div>
                 </div>
               ) : availableDates.length === 0 || singleTimeRows.length === 0 ? (
-                <div className="rounded-2xl border-2 border-dashed border-[#F3E8FF] py-16 text-center">
+                <div className="rounded-xl border-2 border-dashed border-[#F3E8FF] py-16 text-center">
                   <ClockIcon className="mx-auto mb-4 h-10 w-10 text-[#9CA3AF]" />
                   <p className="text-sm font-bold text-[#6B7280]">Y tá hiện không còn lịch trống cho dịch vụ này.</p>
                 </div>
@@ -446,7 +446,7 @@ const NursePublicDetailPage = () => {
                     <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
                       Lịch đã chọn
                     </label>
-                    <div className="rounded-2xl border-2 border-[#F3E8FF] bg-white p-5">
+                    <div className="rounded-xl border-2 border-[#F3E8FF] bg-white p-5">
                       <div className="text-2xl font-black text-[#111827]">
                         {bookingForm.startTime ? formatDate(new Date(bookingForm.startTime).toLocaleDateString('en-CA')) : 'Chưa chọn'}
                       </div>
@@ -461,21 +461,21 @@ const NursePublicDetailPage = () => {
                     <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
                       Trạng thái slot
                     </label>
-                    <div className="rounded-2xl border-2 border-[#F3E8FF] bg-white p-5">
+                    <div className="rounded-xl border-2 border-[#F3E8FF] bg-white p-5">
                       <div className="text-2xl font-black text-[#111827]">
                         {availableDates.length}
                       </div>
                       <div className="mt-1 text-xs font-bold text-[#6B7280]">ngày còn khung giờ trống</div>
                       <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-widest">
-                        <span className="rounded-lg bg-emerald-50 px-3 py-2 text-emerald-600">Có thể chọn</span>
-                        <span className="rounded-lg bg-red-50 px-3 py-2 text-red-500">Y tá bận</span>
-                        <span className="rounded-lg bg-slate-100 px-3 py-2 text-slate-400">Không mở slot</span>
+                        <span className="rounded-xl bg-emerald-50 px-3 py-2 text-emerald-600">Có thể chọn</span>
+                        <span className="rounded-xl bg-red-50 px-3 py-2 text-red-500">Y tá bận</span>
+                        <span className="rounded-xl bg-slate-100 px-3 py-2 text-slate-400">Không mở slot</span>
                       </div>
                     </div>
                   </div>
 
                   <div className="sm:col-span-2">
-                    <div className="custom-scrollbar max-h-[560px] overflow-auto rounded-2xl border border-[#F3E8FF] bg-white shadow-inner shadow-pink-50">
+                    <div className="custom-scrollbar max-h-[560px] overflow-auto rounded-xl border border-[#F3E8FF] bg-white shadow-inner shadow-pink-50">
                       <div
                         className="grid min-w-max"
                         style={{ gridTemplateColumns: `112px repeat(${availableDates.length}, minmax(150px, 1fr))` }}
@@ -549,7 +549,7 @@ const NursePublicDetailPage = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="sm:col-span-2 rounded-2xl bg-[#FDF2F8] p-5 text-sm font-bold leading-6 text-[#6B7280]">
+                  <div className="sm:col-span-2 rounded-xl bg-[#FDF2F8] p-5 text-sm font-bold leading-6 text-[#6B7280]">
                     Chọn một ô xanh để đặt dịch vụ lẻ. Ô đỏ là khung giờ y tá đã bận, hệ thống vẫn kiểm tra trùng lịch lần nữa trước khi tạo đặt lịch.
                   </div>
                 </div>
@@ -570,10 +570,10 @@ const NursePublicDetailPage = () => {
               ) : (
                 <div className="space-y-6">
                   {reviews.map((review) => (
-                    <div key={review.id} className="rounded-2xl border border-[#F3E8FF] bg-[#FDF2F8]/50 p-8">
+                    <div key={review.id} className="rounded-xl border border-[#F3E8FF] bg-[#FDF2F8]/50 p-8">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-lg font-black text-[#EC4899] shadow-sm">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-lg font-black text-[#EC4899] shadow-sm">
                             {review.customerName?.charAt(0) || 'C'}
                           </div>
                           <div>
@@ -604,14 +604,14 @@ const NursePublicDetailPage = () => {
               </p>
 
               <div className="mt-10 space-y-4">
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-5">
+                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-5">
                   <div className="flex items-center gap-3">
                     <CurrencyDollarIcon className="h-6 w-6 text-[#EC4899]" />
                     <span className="text-xs font-bold uppercase tracking-widest text-white/60">Chi phí dự kiến</span>
                   </div>
                   <span className="text-xl font-black text-[#EC4899]">{(nurseCard.servicePrice ?? service.basePrice).toLocaleString('vi-VN')}đ</span>
                 </div>
-                <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-5">
+                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-5">
                   <div className="flex items-center gap-3">
                     <ClockIcon className="h-6 w-6 text-[#EC4899]" />
                     <span className="text-xs font-bold uppercase tracking-widest text-white/60">{isPackage ? 'Lộ trình' : 'Thời lượng'}</span>
@@ -628,7 +628,7 @@ const NursePublicDetailPage = () => {
                     <input
                       type="text"
                       placeholder="Số nhà, tên đường, quận..."
-                      className="w-full rounded-2xl border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white placeholder:text-white/20 focus:border-[#EC4899] focus:ring-1 focus:ring-[#EC4899]"
+                      className="w-full rounded-xl border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white placeholder:text-white/20 focus:border-[#EC4899] focus:ring-1 focus:ring-[#EC4899]"
                       value={bookingForm.address}
                       onChange={(event) => setBookingForm({ ...bookingForm, address: event.target.value })}
                       required
@@ -642,7 +642,7 @@ const NursePublicDetailPage = () => {
                     <textarea
                       placeholder="Lưu ý đặc biệt nếu có..."
                       rows={3}
-                      className="w-full rounded-2xl border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white placeholder:text-white/20 focus:border-[#EC4899] focus:ring-1 focus:ring-[#EC4899]"
+                      className="w-full rounded-xl border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white placeholder:text-white/20 focus:border-[#EC4899] focus:ring-1 focus:ring-[#EC4899]"
                       value={bookingForm.notes}
                       onChange={(event) => setBookingForm({ ...bookingForm, notes: event.target.value })}
                     />
@@ -650,11 +650,11 @@ const NursePublicDetailPage = () => {
                 </div>
 
                 {!isAuthenticated ? (
-                  <button type="button" onClick={() => navigate('/login')} className="btn-primary w-full rounded-2xl !bg-white py-5 text-xs font-black uppercase tracking-[0.2em] !text-[#111827] shadow-none hover:!bg-[#FDF2F8]">
+                  <button type="button" onClick={() => navigate('/login')} className="btn-primary w-full rounded-xl !bg-white py-5 text-xs font-black uppercase tracking-[0.2em] !text-[#111827] shadow-none hover:!bg-[#FDF2F8]">
                     Đăng nhập để đặt lịch
                   </button>
                 ) : (
-                  <button type="submit" disabled={booking || !canSubmit} className="btn-primary w-full rounded-2xl !bg-[#EC4899] py-5 text-xs font-black uppercase tracking-[0.2em] shadow-2xl shadow-pink-900/40 disabled:opacity-30 disabled:shadow-none">
+                  <button type="submit" disabled={booking || !canSubmit} className="btn-primary w-full rounded-xl !bg-[#EC4899] py-5 text-xs font-black uppercase tracking-[0.2em] shadow-2xl shadow-pink-900/40 disabled:opacity-30 disabled:shadow-none">
                     {booking ? 'Đang xử lý...' : isPackage ? 'Thanh toán rồi đặt gói' : 'Thanh toán rồi đặt lịch'}
                   </button>
                 )}
@@ -666,9 +666,9 @@ const NursePublicDetailPage = () => {
               </div>
             </section>
 
-            <div className="rounded-2xl border border-[#F3E8FF] bg-white p-8 shadow-sm">
+            <div className="rounded-xl border border-[#F3E8FF] bg-white p-8 shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FDF2F8] text-[#EC4899]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#FDF2F8] text-[#EC4899]">
                   <HeartIcon className="h-6 w-6" />
                 </div>
                 <div>

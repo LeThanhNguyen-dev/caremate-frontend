@@ -115,7 +115,7 @@ const NurseBookingsPage = () => {
                     </p>
                 </div>
                 
-                <div className="flex rounded-lg bg-white p-1.5 shadow-sm border border-slate-50">
+                <div className="flex rounded-xl bg-white p-1.5 shadow-sm border border-slate-50">
                     <button className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">Tất cả</button>
                     <button className="px-6 py-2.5 rounded-xl text-slate-400 hover:text-[#10B981] transition-all text-[10px] font-black uppercase tracking-widest">Hôm nay</button>
                 </div>
@@ -183,7 +183,7 @@ const NurseBookingsPage = () => {
                                         <div className="flex flex-wrap items-center gap-3">
                                             <Link 
                                                 to={`/bookings/${booking.id}`} 
-                                                className="px-6 py-4 rounded-lg bg-slate-50 text-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-2 border border-slate-100"
+                                                className="px-6 py-4 rounded-xl bg-slate-50 text-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-2 border border-slate-100"
                                             >
                                                 Chi tiết & Chat
                                                 <ChevronRightIcon className="h-4 w-4" />
@@ -193,13 +193,13 @@ const NurseBookingsPage = () => {
                                                 <>
                                                     <button 
                                                         onClick={() => void updateStatus(booking.id, 'confirmed')}
-                                                        className="bg-[#10B981] text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all"
+                                                        className="bg-[#10B981] text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all"
                                                     >
                                                         Chấp nhận
                                                     </button>
                                                     <button 
                                                         onClick={() => void updateStatus(booking.id, 'rejected')}
-                                                        className="px-8 py-4 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm"
+                                                        className="px-8 py-4 rounded-xl bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm"
                                                     >
                                                         Từ chối
                                                     </button>
@@ -209,7 +209,7 @@ const NurseBookingsPage = () => {
                                             {booking.status === 'confirmed' && !isPackage && (
                                                 <button 
                                                     onClick={() => void updateStatus(booking.id, 'in_progress')}
-                                                    className="bg-[#10B981] text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
+                                                    className="bg-[#10B981] text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
                                                 >
                                                     <PlayIcon className="h-4 w-4" />
                                                     Bắt đầu thực hiện
@@ -219,7 +219,7 @@ const NurseBookingsPage = () => {
                                             {booking.status === 'in_progress' && !isPackage && (
                                                 <button 
                                                     onClick={() => void updateStatus(booking.id, 'completed')}
-                                                    className="bg-emerald-600 text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
+                                                    className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
                                                 >
                                                     <CheckIcon className="h-4 w-4" />
                                                     Hoàn thành ca
@@ -228,7 +228,7 @@ const NurseBookingsPage = () => {
                                             {isPackage && (booking.status === 'confirmed' || booking.status === 'in_progress') && (
                                                 <Link
                                                     to={`/bookings/${booking.id}`}
-                                                    className="bg-[#10B981] text-white px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
+                                                    className="bg-[#10B981] text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
                                                 >
                                                     <PlayIcon className="h-4 w-4" />
                                                     Theo dõi từng buổi

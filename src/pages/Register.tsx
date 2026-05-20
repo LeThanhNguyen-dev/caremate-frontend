@@ -140,7 +140,7 @@ const Register = () => {
                                 </div>
                             </div>
 
-                            <button type="submit" disabled={loading} className="btn-primary w-full py-4 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20 flex items-center justify-center gap-3">
+                            <button type="submit" disabled={loading} className="btn-primary w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20 flex items-center justify-center gap-3">
                                 {loading ? 'Đang xử lý...' : 'Đăng ký ngay'}
                                 {!loading && <ArrowRightIcon className="h-4 w-4" />}
                             </button>

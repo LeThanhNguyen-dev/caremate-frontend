@@ -92,7 +92,7 @@ const AdminBookings = () => {
                         { label: 'Chờ xác nhận', value: stats.pending, icon: ClockIcon, color: 'text-amber-600 bg-amber-50' },
                     ].map((item) => (
                         <div key={item.label} className="luxury-card p-6 flex items-center gap-5">
-                            <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${item.color}`}>
+                            <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${item.color}`}>
                                 <item.icon className="h-6 w-6" />
                             </div>
                             <div>
@@ -144,13 +144,13 @@ const AdminBookings = () => {
                                         <td className="px-8 py-6 text-sm font-black text-slate-900">#{booking.id}</td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500">C</div>
+                                                <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-500">C</div>
                                                 <div className="text-xs font-bold text-slate-700">ID: {booking.customerId}</div>
                                             </div>
                                         </td>
                                         <td className="px-8 py-6">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-8 w-8 rounded-lg bg-admin/5 flex items-center justify-center text-[10px] font-black text-admin">N</div>
+                                                <div className="h-8 w-8 rounded-xl bg-admin/5 flex items-center justify-center text-[10px] font-black text-admin">N</div>
                                                 <div className="text-xs font-bold text-slate-700">ID: {booking.nurseId}</div>
                                             </div>
                                         </td>
@@ -233,7 +233,7 @@ const AdminBookings = () => {
                                         {refund.hasPayment && refund.refundAmount > 0 && refund.refundStatus !== 'completed' && (
                                             <button
                                                 onClick={() => void caremateApi.completeAdminRefund(refund.bookingId).then(load)}
-                                                className="rounded-lg bg-admin px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20"
+                                                className="rounded-xl bg-admin px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20"
                                             >
                                                 Đã hoàn tiền
                                             </button>
@@ -289,7 +289,7 @@ const AdminBookings = () => {
                                         {payout.status !== 'released' && (
                                             <button
                                                 onClick={() => void caremateApi.completeAdminPayout(payout.payoutId).then(load)}
-                                                className="rounded-lg bg-emerald-600 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-500/20"
+                                                className="rounded-xl bg-emerald-600 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-500/20"
                                             >
                                                 Đã chi tiền
                                             </button>

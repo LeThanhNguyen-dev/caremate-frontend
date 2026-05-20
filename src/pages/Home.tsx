@@ -72,7 +72,7 @@ const Home = () => {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: i * 0.1 }}
-                                className="bg-white/90 backdrop-blur-xl p-6 rounded-lg border border-white shadow-xl shadow-slate-200/50"
+                                className="bg-white/90 backdrop-blur-xl p-6 rounded-xl border border-white shadow-xl shadow-slate-200/50"
                             >
                                 <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1">{stat.label}</div>
                                 <div className="text-2xl font-black text-slate-900 mb-1">{stat.value}</div>
@@ -117,7 +117,7 @@ const Home = () => {
                         ].map((item, i) => (
                             <div key={i} className="relative p-10 rounded-xl bg-slate-50 hover:bg-brand-soft transition-colors group">
                                 <div className="absolute top-6 right-8 text-5xl font-black text-slate-900/10 group-hover:text-brand/20 transition-colors">{item.step}</div>
-                                <div className="h-14 w-14 rounded-lg bg-white shadow-sm flex items-center justify-center text-brand mb-8 group-hover:scale-110 transition-transform">
+                                <div className="h-14 w-14 rounded-xl bg-white shadow-sm flex items-center justify-center text-brand mb-8 group-hover:scale-110 transition-transform">
                                     <item.icon className="h-7 w-7" />
                                 </div>
                                 <h4 className="text-xl font-black text-slate-900 mb-4">{item.title}</h4>
@@ -183,7 +183,7 @@ const Home = () => {
                                     { title: 'Minh bạch & An toàn', desc: 'Giá cả công khai, hồ sơ y tá được kiểm định nghiêm ngặt.', icon: SparklesIcon }
                                 ].map((item, i) => (
                                     <div key={i} className="flex gap-6">
-                                        <div className="h-14 w-14 rounded-lg bg-white shadow-md flex items-center justify-center text-brand flex-none">
+                                        <div className="h-14 w-14 rounded-xl bg-white shadow-md flex items-center justify-center text-brand flex-none">
                                             <item.icon className="h-7 w-7" />
                                         </div>
                                         <div>
@@ -233,8 +233,8 @@ const Home = () => {
                             </div>
                             <h2 className="text-4xl lg:text-6xl font-black text-white mb-10 leading-tight">Nhận kiến thức hữu ích từ chuyên gia</h2>
                             <form className="flex flex-col sm:flex-row gap-4 p-2 bg-white/5 rounded-xl border border-white/10 backdrop-blur-xl">
-                                <input type="email" placeholder="Nhập email của bạn..." className="flex-1 bg-transparent border-none rounded-lg px-6 py-4 text-white font-bold outline-none placeholder:text-white/30" />
-                                <button className="btn-primary !px-12 !rounded-lg">Đăng ký ngay</button>
+                                <input type="email" placeholder="Nhập email của bạn..." className="flex-1 bg-transparent border-none rounded-xl px-6 py-4 text-white font-bold outline-none placeholder:text-white/30" />
+                                <button className="btn-primary !px-12 !rounded-xl">Đăng ký ngay</button>
                             </form>
                         </div>
                     </div>

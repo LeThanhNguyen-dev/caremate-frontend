@@ -64,7 +64,7 @@ const AdminPendingNurses = () => {
                 
                 <button 
                     onClick={fetchPendingNurses}
-                    className="flex items-center gap-2 px-8 py-4 rounded-lg bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-[#3B82F6] hover:text-[#3B82F6] transition-all shadow-sm active:scale-95"
+                    className="flex items-center gap-2 px-8 py-4 rounded-xl bg-white border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-[#3B82F6] hover:text-[#3B82F6] transition-all shadow-sm active:scale-95"
                 >
                     <ArrowPathIcon className="h-4 w-4" />
                     Làm mới dữ liệu
@@ -108,14 +108,14 @@ const AdminPendingNurses = () => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4 mb-8">
-                                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                                         <div className="flex items-center gap-2 mb-2">
                                             <AcademicCapIcon className="h-3.5 w-3.5 text-[#3B82F6]" />
                                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Kinh nghiệm</span>
                                         </div>
                                         <div className="text-sm font-black text-slate-900">{nurse.yearsExperience} năm</div>
                                     </div>
-                                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-100">
+                                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
                                         <div className="flex items-center gap-2 mb-2">
                                             <DocumentTextIcon className="h-3.5 w-3.5 text-[#3B82F6]" />
                                             <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Tài liệu</span>
@@ -132,7 +132,7 @@ const AdminPendingNurses = () => {
 
                                 <Link 
                                     to={`/admin/nurses/${nurse.userId}`} 
-                                    className="flex items-center justify-center gap-3 w-full py-4 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#3B82F6] transition-all shadow-lg shadow-slate-900/10 active:scale-95"
+                                    className="flex items-center justify-center gap-3 w-full py-4 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#3B82F6] transition-all shadow-lg shadow-slate-900/10 active:scale-95"
                                 >
                                     Kiểm tra hồ sơ
                                     <ArrowTopRightOnSquareIcon className="h-4 w-4" />

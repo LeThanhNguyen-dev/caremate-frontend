@@ -1,4 +1,4 @@
-﻿import { motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
     MapPinIcon, 
     EnvelopeIcon, 
@@ -62,7 +62,7 @@ const AboutUs = () => {
                             transition={{ delay: idx * 0.1 }}
                             className="luxury-card p-8 flex flex-col items-center text-center border-none shadow-2xl"
                         >
-                            <div className="h-12 w-12 rounded-lg bg-slate-900/5 flex items-center justify-center text-white mb-6">
+                            <div className="h-12 w-12 rounded-xl bg-slate-900/5 flex items-center justify-center text-white mb-6">
                                 <item.icon className="h-6 w-6" />
                             </div>
                             <div className="text-[10px] font-extrabold uppercase tracking-widest text-slate-500 mb-2">{item.label}</div>
@@ -82,7 +82,7 @@ const AboutUs = () => {
                     className="space-y-8"
                 >
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="h-12 w-12 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                        <div className="h-12 w-12 rounded-xl bg-slate-900 text-white flex items-center justify-center">
                             <MapPinIcon className="h-6 w-6" />
                         </div>
                         <div>
@@ -90,7 +90,7 @@ const AboutUs = () => {
                             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Ghé thăm văn phòng CareMate</p>
                         </div>
                     </div>
-                    <div className="aspect-square w-full rounded-lg bg-slate-100 overflow-hidden shadow-inner border-8 border-white relative">
+                    <div className="aspect-square w-full rounded-xl bg-slate-100 overflow-hidden shadow-inner border-8 border-white relative">
                         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
                             <div className="h-20 w-20 rounded-full bg-white shadow-xl flex items-center justify-center mb-6 animate-bounce">
                                 <MapPinIcon className="h-10 w-10 text-white" />
@@ -111,7 +111,7 @@ const AboutUs = () => {
                     className="luxury-card p-10 border-none shadow-2xl bg-white"
                 >
                     <div className="flex items-center gap-4 mb-10">
-                        <div className="h-12 w-12 rounded-lg bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-pink-500/20">
+                        <div className="h-12 w-12 rounded-xl bg-slate-900 text-white flex items-center justify-center shadow-lg shadow-pink-500/20">
                             <ChatBubbleBottomCenterTextIcon className="h-6 w-6" />
                         </div>
                         <div>
@@ -147,7 +147,7 @@ const AboutUs = () => {
                         <button 
                             type="submit" 
                             disabled={sending}
-                            className="btn-primary w-full py-4 rounded-lg text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-3"
+                            className="btn-primary w-full py-4 rounded-xl text-[10px] font-extrabold uppercase tracking-widest flex items-center justify-center gap-3"
                         >
                             {sending ? 'Đang gửi...' : 'Gửi thông điệp ngay'}
                             <SparklesIcon className="h-4 w-4" />
@@ -169,7 +169,7 @@ const AboutUs = () => {
                         { title: 'Minh bạch', desc: 'Giá cả và thông tin y tá luôn rõ ràng, công khai trên hệ thống.', icon: SparklesIcon },
                     ].map((val, i) => (
                         <div key={i} className="text-center">
-                            <div className="h-16 w-16 rounded-lg bg-slate-50 text-[#0F172A] flex items-center justify-center mx-auto mb-6 shadow-sm">
+                            <div className="h-16 w-16 rounded-xl bg-slate-50 text-[#0F172A] flex items-center justify-center mx-auto mb-6 shadow-sm">
                                 <val.icon className="h-8 w-8" />
                             </div>
                             <h4 className="text-lg font-extrabold text-[#0F172A] mb-2">{val.title}</h4>

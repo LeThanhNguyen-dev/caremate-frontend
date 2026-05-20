@@ -58,7 +58,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
                             className={`${colorMap[toast.type]} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 pointer-events-auto`}
                             style={{ minWidth: '300px' }}
                         >
-                            <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center text-sm font-black shrink-0">
+                            <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center text-sm font-black shrink-0">
                                 {icons[toast.type]}
                             </div>
                             <span className="text-sm font-bold leading-snug">{toast.message}</span>

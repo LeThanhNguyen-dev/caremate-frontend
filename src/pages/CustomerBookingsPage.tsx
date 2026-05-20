@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -180,7 +180,7 @@ const CustomerBookingsPage = () => {
                             { label: 'Khiếu nại', value: summary.disputes, icon: ExclamationTriangleIcon, color: 'text-red-600', bg: 'bg-red-50' },
                         ].map((card) => (
                             <div key={card.label} className="bg-white rounded-xl p-8 border border-slate-100 shadow-xl shadow-slate-200/20 flex items-center gap-6">
-                                <div className={`h-14 w-14 rounded-lg ${card.bg} flex items-center justify-center ${card.color}`}>
+                                <div className={`h-14 w-14 rounded-xl ${card.bg} flex items-center justify-center ${card.color}`}>
                                     <card.icon className="h-7 w-7" />
                                 </div>
                                 <div>
@@ -198,7 +198,7 @@ const CustomerBookingsPage = () => {
                             <button 
                                 key={tab.key} 
                                 onClick={() => setFilter(tab.key)} 
-                                className={`rounded-lg px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                className={`rounded-xl px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
                                     filter === tab.key ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
                                 }`}
                             >
@@ -307,26 +307,26 @@ const CustomerBookingsPage = () => {
                                             </div>
 
                                             <div className="flex flex-col gap-3 lg:w-[220px]">
-                                                <button onClick={() => navigate(`/bookings/${booking.id}`)} className="w-full btn-secondary !rounded-lg !py-4 text-[10px] font-black uppercase tracking-widest">
+                                                <button onClick={() => navigate(`/bookings/${booking.id}`)} className="w-full btn-secondary !rounded-xl !py-4 text-[10px] font-black uppercase tracking-widest">
                                                     Chi tiết
                                                 </button>
                                                 {booking.status === 'pending_confirm' && (
-                                                    <button onClick={() => void cancelBooking(booking.id)} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
+                                                    <button onClick={() => void cancelBooking(booking.id)} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
                                                         Hủy lịch
                                                     </button>
                                                 )}
                                                 {booking.status === 'confirmed' && (
-                                                    <button onClick={() => void payBooking(booking.id)} className="w-full btn-primary !rounded-lg !py-4 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20">
+                                                    <button onClick={() => void payBooking(booking.id)} className="w-full btn-primary !rounded-xl !py-4 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20">
                                                         Thanh toán qua payOS
                                                     </button>
                                                 )}
                                                 {booking.status === 'completed' && (
                                                     <>
-                                                        <button onClick={() => setReviewModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-brand/5 text-brand hover:bg-brand hover:text-white py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
+                                                        <button onClick={() => setReviewModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-brand/5 text-brand hover:bg-brand hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
                                                             Gửi đánh giá
                                                         </button>
                                                         {!dispute && (
-                                                            <button onClick={() => setDisputeModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all">
+                                                            <button onClick={() => setDisputeModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
                                                                 Khiếu nại
                                                             </button>
                                                         )}
@@ -352,7 +352,7 @@ const CustomerBookingsPage = () => {
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Mức độ hài lòng</label>
                                         <div className="flex gap-4">
                                             {[1, 2, 3, 4, 5].map((star) => (
-                                                <button key={star} onClick={() => setReviewForm((prev) => ({ ...prev, rating: star }))} className={`h-14 w-14 rounded-lg flex items-center justify-center text-2xl transition-all ${ star <= reviewForm.rating ? 'bg-brand text-white shadow-lg shadow-pink-500/20' : 'bg-slate-50 text-slate-300' }`}>
+                                                <button key={star} onClick={() => setReviewForm((prev) => ({ ...prev, rating: star }))} className={`h-14 w-14 rounded-xl flex items-center justify-center text-2xl transition-all ${ star <= reviewForm.rating ? 'bg-brand text-white shadow-lg shadow-pink-500/20' : 'bg-slate-50 text-slate-300' }`}>
                                                     <StarSolid className="h-6 w-6" />
                                                 </button>
                                             ))}
@@ -364,8 +364,8 @@ const CustomerBookingsPage = () => {
                                     </div>
                                 </div>
                                 <div className="mt-10 flex gap-4">
-                                    <button onClick={() => setReviewModal({ isOpen: false, bookingId: null })} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Đóng</button>
-                                    <button onClick={() => void submitReview()} className="flex-1 btn-primary !rounded-lg">Gửi đánh giá</button>
+                                    <button onClick={() => setReviewModal({ isOpen: false, bookingId: null })} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Đóng</button>
+                                    <button onClick={() => void submitReview()} className="flex-1 btn-primary !rounded-xl">Gửi đánh giá</button>
                                 </div>
                             </motion.div>
                         </div>
@@ -383,8 +383,8 @@ const CustomerBookingsPage = () => {
                                     </div>
                                 </div>
                                 <div className="mt-10 flex gap-4">
-                                    <button onClick={() => setDisputeModal({ isOpen: false, bookingId: null })} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Hủy bỏ</button>
-                                    <button onClick={() => void submitDispute()} className="flex-1 bg-red-600 text-white py-4 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-600/20">Gửi khiếu nại</button>
+                                    <button onClick={() => setDisputeModal({ isOpen: false, bookingId: null })} className="flex-1 py-4 bg-slate-50 text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all">Hủy bỏ</button>
+                                    <button onClick={() => void submitDispute()} className="flex-1 bg-red-600 text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-xl shadow-red-600/20">Gửi khiếu nại</button>
                                 </div>
                             </motion.div>
                         </div>

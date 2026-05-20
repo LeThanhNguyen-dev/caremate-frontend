@@ -77,13 +77,13 @@ const Layout = () => {
                                     key={location.pathname}
                                     accentClassName="bg-brand/5 text-brand"
                                     badgeClassName="bg-brand animate-pulse"
-                                    buttonClassName="p-3 rounded-lg bg-slate-50 text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative group"
+                                    buttonClassName="p-3 rounded-xl bg-slate-50 text-slate-400 hover:text-brand hover:bg-brand/5 transition-all relative group"
                                 />
 
                                 <div className="relative">
                                     <button
                                         onClick={() => setProfileDropdownOpen((prev) => !prev)}
-                                        className="flex items-center gap-4 pl-4 pr-2 py-2 rounded-lg bg-slate-50 hover:bg-white hover:shadow-lg transition-all group"
+                                        className="flex items-center gap-4 pl-4 pr-2 py-2 rounded-xl bg-slate-50 hover:bg-white hover:shadow-lg transition-all group"
                                     >
                                         <div className="text-right hidden xl:block">
                                             <div className="text-sm font-black text-slate-900 group-hover:text-brand transition-colors">{user?.username}</div>
@@ -116,7 +116,7 @@ const Layout = () => {
                                                             onClick={() => setProfileDropdownOpen(false)}
                                                             className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-all group"
                                                         >
-                                                            <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-brand/10 group-hover:text-brand transition-colors">
+                                                            <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-brand/10 group-hover:text-brand transition-colors">
                                                                 <item.icon className="h-4 w-4" />
                                                             </div>
                                                             <span className="text-xs font-black">{item.name}</span>
@@ -127,7 +127,7 @@ const Layout = () => {
                                                     onClick={() => void handleLogout()}
                                                     className="flex w-full items-center gap-4 p-3 rounded-xl hover:bg-red-50 text-slate-500 hover:text-red-600 transition-all group"
                                                 >
-                                                    <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                                                    <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                                                         <ArrowRightOnRectangleIcon className="h-4 w-4" />
                                                     </div>
                                                     <span className="text-xs font-black">Đăng xuất</span>
@@ -237,7 +237,7 @@ const Layout = () => {
                         </div>
                         <div className="flex gap-6">
                             {['FB', 'IG', 'LI', 'YT'].map((social) => (
-                                <div key={social} className="h-10 w-10 rounded-lg bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group">
+                                <div key={social} className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group">
                                     <span className="text-[10px] font-black group-hover:scale-110 transition-transform">{social}</span>
                                 </div>
                             ))}

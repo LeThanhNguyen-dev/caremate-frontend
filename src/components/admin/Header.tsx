@@ -10,21 +10,21 @@ const AdminHeader = () => {
     const getPageTitle = (path: string) => {
         switch (path) {
             case '/admin/dashboard':
-                return 'Tong quan he thong';
+                return 'Tổng quan hệ thống';
             case '/admin/pending-nurses':
-                return 'Phe duyet ho so';
+                return 'Phê duyệt hồ sơ';
             case '/admin/users':
-                return 'Quan ly nguoi dung';
+                return 'Quản lý người dùng';
             case '/admin/bookings':
-                return 'Quan ly lich hen';
+                return 'Quản lý lịch hẹn';
             case '/admin/reports':
-                return 'Bao cao va khieu nai';
+                return 'Báo cáo và khiếu nại';
             case '/admin/settings':
-                return 'Cai dat he thong';
+                return 'Cài đặt hệ thống';
             case '/admin/notifications':
-                return 'Thong bao';
+                return 'Thông báo';
             default:
-                return 'Quan tri vien';
+                return 'Quản trị viên';
         }
     };
 
@@ -33,13 +33,13 @@ const AdminHeader = () => {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-xl flex-1">
                     <div className="mb-2 inline-flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-[#3B82F6] shadow-sm">
-                        Bang dieu khien quan tri vien
+                        Bảng điều khiển quản trị viên
                     </div>
                     <h1 className="text-3xl font-black tracking-tight text-slate-900">
                         {getPageTitle(location.pathname)}
                     </h1>
                     <p className="mt-1 text-sm font-medium text-slate-500">
-                        Giam sat va dieu phoi toan bo hoat dong cua nen tang CareMate.
+                        Giám sát và điều phối toàn bộ hoạt động của nền tảng CareMate.
                     </p>
                 </div>
 
@@ -48,8 +48,8 @@ const AdminHeader = () => {
                         <MagnifyingGlassIcon className="absolute left-4 h-5 w-5 text-slate-400 transition-colors group-focus-within:text-[#3B82F6]" />
                         <input
                             type="text"
-                            placeholder="Tim kiem nguoi dung, don hang..."
-                            className="w-80 rounded-lg border-none bg-slate-50 py-3 pl-12 pr-6 text-sm font-medium outline-none transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/5"
+                            placeholder="Tìm kiếm người dùng, đơn hàng..."
+                            className="w-80 rounded-xl border-none bg-slate-50 py-3 pl-12 pr-6 text-sm font-medium outline-none transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/5"
                         />
                     </div>
 
@@ -58,7 +58,7 @@ const AdminHeader = () => {
                             key={location.pathname}
                             accentClassName="bg-blue-50 text-[#3B82F6]"
                             badgeClassName="bg-[#3B82F6]"
-                            buttonClassName="group relative rounded-lg bg-slate-50 p-3 text-slate-400 transition-all hover:bg-blue-50 hover:text-[#3B82F6]"
+                            buttonClassName="group relative rounded-xl bg-slate-50 p-3 text-slate-400 transition-all hover:bg-blue-50 hover:text-[#3B82F6]"
                             emptyIconClassName="text-blue-100"
                             alignClassName="right-0"
                         />

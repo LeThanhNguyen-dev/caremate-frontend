@@ -172,7 +172,7 @@ const CustomerProfilePage = () => {
                                 <UserIcon className="h-full w-full p-10 text-slate-300" />
                             )}
                         </div>
-                        <button className="absolute -bottom-2 -right-2 h-12 w-12 rounded-lg bg-slate-900 text-white flex items-center justify-center border-4 border-white shadow-xl hover:bg-brand transition-colors">
+                        <button className="absolute -bottom-2 -right-2 h-12 w-12 rounded-xl bg-slate-900 text-white flex items-center justify-center border-4 border-white shadow-xl hover:bg-brand transition-colors">
                             <CameraIcon className="h-5 w-5" />
                         </button>
                     </div>
@@ -248,7 +248,7 @@ const CustomerProfilePage = () => {
                                                         type="text"
                                                         value={profileForm.fullName}
                                                         onChange={(e) => setProfileForm({ ...profileForm, fullName: e.target.value })}
-                                                        className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                        className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -260,7 +260,7 @@ const CustomerProfilePage = () => {
                                                         type="email"
                                                         value={profileForm.email}
                                                         readOnly
-                                                        className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-400 outline-none cursor-not-allowed"
+                                                        className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-400 outline-none cursor-not-allowed"
                                                     />
                                                 </div>
                                             </div>
@@ -273,7 +273,7 @@ const CustomerProfilePage = () => {
                                                         value={profileForm.phone}
                                                         onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
                                                         placeholder="Chưa có số điện thoại"
-                                                        className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                        className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -286,7 +286,7 @@ const CustomerProfilePage = () => {
                                                         value={profileForm.address}
                                                         onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
                                                         placeholder="Chưa có địa chỉ"
-                                                        className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                        className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                     />
                                                 </div>
                                             </div>
@@ -295,7 +295,7 @@ const CustomerProfilePage = () => {
                                                 <select
                                                     value={profileForm.bankBin}
                                                     onChange={(e) => setProfileForm({ ...profileForm, bankBin: e.target.value })}
-                                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                    className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 >
                                                     <option value="">Chọn ngân hàng nhận tiền</option>
                                                     {banks.map((bank) => (
@@ -310,7 +310,7 @@ const CustomerProfilePage = () => {
                                                     value={profileForm.bankAccountNumber}
                                                     onChange={(e) => setProfileForm({ ...profileForm, bankAccountNumber: e.target.value })}
                                                     placeholder="Nhập số tài khoản"
-                                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                    className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
                                             <div className="space-y-4 md:col-span-2">
@@ -320,7 +320,7 @@ const CustomerProfilePage = () => {
                                                     value={profileForm.bankAccountName}
                                                     onChange={(e) => setProfileForm({ ...profileForm, bankAccountName: e.target.value })}
                                                     placeholder="Nhập tên chủ tài khoản để admin đối chiếu"
-                                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                    className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
                                         </div>
@@ -357,7 +357,7 @@ const CustomerProfilePage = () => {
                                                 onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
                                                 placeholder="Nhập mật khẩu hiện tại"
                                                 required
-                                                className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                             />
                                         </div>
                                     </div>
@@ -372,7 +372,7 @@ const CustomerProfilePage = () => {
                                                 placeholder="Ít nhất 6 ký tự"
                                                 required
                                                 minLength={6}
-                                                className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                             />
                                         </div>
                                     </div>
@@ -387,12 +387,12 @@ const CustomerProfilePage = () => {
                                                 placeholder="Nhập lại mật khẩu mới"
                                                 required
                                                 minLength={6}
-                                                className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                             />
                                         </div>
                                     </div>
 
-                                    <div className="p-4 rounded-lg bg-amber-50 border border-amber-100 flex items-start gap-3">
+                                    <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex items-start gap-3">
                                         <ExclamationTriangleIcon className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                                         <div className="text-xs font-medium text-amber-700 leading-relaxed">
                                             Sau khi đổi mật khẩu, bạn sẽ cần đăng nhập lại trên tất cả các thiết bị khác.
@@ -423,7 +423,7 @@ const CustomerProfilePage = () => {
                                     recentBookings.map((booking) => {
                                         const statusCfg = statusLabels[booking.status] || { label: booking.status, class: 'bg-slate-50 text-slate-400' };
                                         return (
-                                            <div key={booking.id} className="flex items-center justify-between p-6 rounded-lg border border-slate-50 hover:bg-slate-50 transition-colors">
+                                            <div key={booking.id} className="flex items-center justify-between p-6 rounded-xl border border-slate-50 hover:bg-slate-50 transition-colors">
                                                 <div className="flex items-center gap-6">
                                                     <div className="h-12 w-12 rounded-xl bg-brand/5 flex items-center justify-center text-brand">
                                                         <CheckCircleIcon className="h-6 w-6" />

@@ -47,7 +47,7 @@ const AdminSidebar = () => {
                         <Link 
                             key={item.path} 
                             to={item.path} 
-                            className={`flex items-center gap-4 px-6 py-4 rounded-lg text-sm font-bold transition-all group ${
+                            className={`flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold transition-all group ${
                                 isActive 
                                 ? 'bg-[#3B82F6] text-white shadow-xl shadow-blue-600/20' 
                                 : 'text-slate-500 hover:bg-blue-50 hover:text-[#3B82F6]'
@@ -63,7 +63,7 @@ const AdminSidebar = () => {
             {/* Footer Profile */}
             <div className="p-6 mt-auto border-t border-slate-50">
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 mb-4">
-                    <div className="h-12 w-12 rounded-lg bg-[#3B82F6] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-blue-600/10 uppercase">
+                    <div className="h-12 w-12 rounded-xl bg-[#3B82F6] text-white flex items-center justify-center font-black text-xl shadow-lg shadow-blue-600/10 uppercase">
                         {user?.username?.charAt(0)}
                     </div>
                     <div className="min-w-0">
@@ -73,7 +73,7 @@ const AdminSidebar = () => {
                 </div>
                 <button 
                     onClick={handleLogout}
-                    className="flex w-full items-center justify-center gap-3 py-4 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#3B82F6] transition-all active:scale-95 shadow-sm"
+                    className="flex w-full items-center justify-center gap-3 py-4 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#3B82F6] transition-all active:scale-95 shadow-sm"
                 >
                     <ArrowRightOnRectangleIcon className="h-4 w-4" />
                     Đăng xuất hệ thống

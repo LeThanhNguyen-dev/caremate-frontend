@@ -89,7 +89,7 @@ const AdminReports = () => {
                             Quản trị viên có thể xem ngay khiếu nại nào đang mở, trạng thái xử lý và cập nhật ghi chú trực tiếp trên từng trường hợp.
                         </p>
                         <div className="mt-8">
-                            <button onClick={load} className="bg-white text-slate-900 px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center gap-2 active:scale-95">
+                            <button onClick={load} className="bg-white text-slate-900 px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all flex items-center gap-2 active:scale-95">
                                 <ArrowPathIcon className="h-4 w-4" />
                                 Làm mới dữ liệu
                             </button>
@@ -104,7 +104,7 @@ const AdminReports = () => {
                         { label: 'Đã xử lý', value: disputes.filter((item) => item.status === 'resolved').length, icon: CheckBadgeIcon, color: 'text-emerald-600', bg: 'bg-emerald-50' },
                     ].map((item) => (
                         <div key={item.label} className="bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20 flex items-center gap-6">
-                            <div className={`h-14 w-14 rounded-lg ${item.bg} flex items-center justify-center`}>
+                            <div className={`h-14 w-14 rounded-xl ${item.bg} flex items-center justify-center`}>
                                 <item.icon className={`h-7 w-7 ${item.color}`} />
                             </div>
                             <div>
@@ -125,7 +125,7 @@ const AdminReports = () => {
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Phân bổ tranh chấp</h3>
                             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Tỷ trọng các trường hợp theo trạng thái</p>
                         </div>
-                        <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center">
                             <ChartPieIcon className="h-6 w-6 text-[#3B82F6]" />
                         </div>
                     </div>
@@ -195,7 +195,7 @@ const AdminReports = () => {
                                     <div className="mt-6 rounded-xl bg-slate-50 p-6 border border-slate-100">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 block">Ghi chú xử lý</label>
                                         <textarea
-                                            className="w-full bg-white border border-slate-100 rounded-lg p-4 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-[#3B82F6] transition-all"
+                                            className="w-full bg-white border border-slate-100 rounded-xl p-4 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-[#3B82F6] transition-all"
                                             rows={3}
                                             value={adminNote[dispute.id] ?? ''}
                                             onChange={(event) => setAdminNote((prev) => ({ ...prev, [dispute.id]: event.target.value }))}
@@ -204,13 +204,13 @@ const AdminReports = () => {
                                         <div className="mt-4 flex flex-wrap gap-3">
                                             <button
                                                 onClick={() => void resolve(dispute.id, 'resolved')}
-                                                className="bg-[#3B82F6] text-white px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition-all active:scale-95"
+                                                className="bg-[#3B82F6] text-white px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:scale-[1.02] transition-all active:scale-95"
                                             >
                                                 Đánh dấu đã giải quyết
                                             </button>
                                             <button
                                                 onClick={() => void resolve(dispute.id, 'rejected')}
-                                                className="bg-slate-100 text-slate-600 px-8 py-3 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
+                                                className="bg-slate-100 text-slate-600 px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
                                             >
                                                 Từ chối yêu cầu
                                             </button>

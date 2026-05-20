@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { adminApi } from '../../api/adminApi';
 import type { NurseProfileDetailDto } from '../../types/nurse';
@@ -51,7 +51,7 @@ const NurseVerification = () => {
                             to={`/admin/nurses/${nurse.userId}`} 
                             className="flex items-center gap-4 p-4 rounded-xl hover:bg-slate-50 transition-all group border border-transparent hover:border-slate-100"
                         >
-                            <div className="w-14 h-14 rounded-lg bg-slate-50 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105">
+                            <div className="w-14 h-14 rounded-xl bg-slate-50 flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105">
                                 <UserOutlineIcon className="w-7 h-7 text-slate-300" />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -77,7 +77,7 @@ const NurseVerification = () => {
 
             <Link 
                 to="/admin/pending-nurses" 
-                className="w-full mt-8 py-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 hover:bg-slate-100 hover:text-admin rounded-lg transition-all"
+                className="w-full mt-8 py-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 hover:bg-slate-100 hover:text-admin rounded-xl transition-all"
             >
                 Xem tất cả yêu cầu
             </Link>

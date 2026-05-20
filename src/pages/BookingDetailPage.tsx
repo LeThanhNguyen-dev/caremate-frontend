@@ -129,7 +129,7 @@ const BookingDetailPage = () => {
                                 <div className="grid md:grid-cols-2 gap-16 py-12 border-b border-slate-50">
                                     <div className="space-y-8">
                                         <div className="flex items-start gap-6">
-                                            <div className="h-14 w-14 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                            <div className="h-14 w-14 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
                                                 <CalendarIcon className="h-7 w-7" />
                                             </div>
                                             <div>
@@ -140,7 +140,7 @@ const BookingDetailPage = () => {
                                             </div>
                                         </div>
                                         <div className="flex items-start gap-6">
-                                            <div className="h-14 w-14 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                            <div className="h-14 w-14 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
                                                 <ClockIcon className="h-7 w-7" />
                                             </div>
                                             <div>
@@ -156,7 +156,7 @@ const BookingDetailPage = () => {
 
                                     <div className="space-y-8">
                                         <div className="flex items-start gap-6">
-                                            <div className="h-14 w-14 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                                            <div className="h-14 w-14 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
                                                 <MapPinIcon className="h-7 w-7" />
                                             </div>
                                             <div>
@@ -211,7 +211,7 @@ const BookingDetailPage = () => {
                                 <div className="h-32 w-32 rounded-xl bg-brand text-white flex items-center justify-center font-black text-5xl shadow-2xl shadow-pink-500/20">
                                     {detail.nurseName?.charAt(0) || 'N'}
                                 </div>
-                                <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-lg bg-white border-4 border-white shadow-lg flex items-center justify-center text-brand">
+                                <div className="absolute -bottom-2 -right-2 h-10 w-10 rounded-xl bg-white border-4 border-white shadow-lg flex items-center justify-center text-brand">
                                     <CheckCircleIcon className="h-6 w-6" />
                                 </div>
                             </div>
@@ -219,10 +219,10 @@ const BookingDetailPage = () => {
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand mt-2">Xác minh chuyên nghiệp</p>
                             
                             <div className="mt-12 grid gap-4">
-                                <button className="w-full py-5 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-brand transition-all shadow-xl shadow-slate-900/10 active:scale-95">
+                                <button className="w-full py-5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-brand transition-all shadow-xl shadow-slate-900/10 active:scale-95">
                                     <ChatBubbleLeftRightIcon className="h-5 w-5" /> Trò chuyện trực tuyến
                                 </button>
-                                <button className="w-full py-5 rounded-lg bg-white border-2 border-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:border-brand hover:text-brand transition-all active:scale-95">
+                                <button className="w-full py-5 rounded-xl bg-white border-2 border-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:border-brand hover:text-brand transition-all active:scale-95">
                                     <UserIcon className="h-5 w-5" /> Xem hồ sơ y tế
                                 </button>
                             </div>

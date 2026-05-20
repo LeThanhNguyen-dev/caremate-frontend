@@ -47,14 +47,14 @@ const NotificationsPage = () => {
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={() => void markAllAsRead()}
-                                className="flex items-center gap-2 px-6 py-3.5 rounded-lg bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-brand hover:text-brand transition-all shadow-sm active:scale-95"
+                                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-brand hover:text-brand transition-all shadow-sm active:scale-95"
                             >
                                 <CheckCircleIcon className="h-4 w-4" />
                                 Đánh dấu tất cả đã đọc
                             </button>
                             <button
                                 onClick={() => void deleteAllNotifications()}
-                                className="flex items-center gap-2 px-6 py-3.5 rounded-lg bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-red-500 hover:border-red-500 hover:bg-red-50 transition-all shadow-sm active:scale-95"
+                                className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-red-500 hover:border-red-500 hover:bg-red-50 transition-all shadow-sm active:scale-95"
                             >
                                 <TrashIcon className="h-4 w-4" />
                                 Xóa tất cả
@@ -66,7 +66,7 @@ const NotificationsPage = () => {
                 <div className="flex p-1.5 bg-white rounded-xl border-2 border-slate-50 shadow-sm mb-10 w-fit">
                     <button
                         onClick={() => setFilter('all')}
-                        className={`px-8 py-3.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                        className={`px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             filter === 'all'
                                 ? 'bg-slate-900 text-white shadow-xl shadow-slate-900/20'
                                 : 'text-slate-400 hover:text-slate-600'
@@ -76,7 +76,7 @@ const NotificationsPage = () => {
                     </button>
                     <button
                         onClick={() => setFilter('unread')}
-                        className={`px-8 py-3.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                        className={`px-8 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             filter === 'unread'
                                 ? 'bg-brand text-white shadow-xl shadow-pink-500/20'
                                 : 'text-slate-400 hover:text-slate-600'
@@ -162,7 +162,7 @@ const NotificationsPage = () => {
                                             {!n.isRead && (
                                                 <button
                                                     onClick={() => void markAsRead(n.id)}
-                                                    className="h-14 w-14 rounded-lg bg-white border-2 border-slate-50 text-brand hover:bg-brand hover:text-white hover:border-brand transition-all duration-300 shadow-sm flex items-center justify-center group/btn"
+                                                    className="h-14 w-14 rounded-xl bg-white border-2 border-slate-50 text-brand hover:bg-brand hover:text-white hover:border-brand transition-all duration-300 shadow-sm flex items-center justify-center group/btn"
                                                     title="Đánh dấu đã đọc"
                                                 >
                                                     <CheckBadgeIcon className="h-7 w-7 transition-transform group-hover/btn:scale-110" />
@@ -170,7 +170,7 @@ const NotificationsPage = () => {
                                             )}
                                             <button
                                                 onClick={() => void deleteNotification(n.id)}
-                                                className="h-14 w-14 rounded-lg bg-white border-2 border-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all duration-300 shadow-sm flex items-center justify-center group/btn"
+                                                className="h-14 w-14 rounded-xl bg-white border-2 border-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all duration-300 shadow-sm flex items-center justify-center group/btn"
                                                 title="Xóa thông báo"
                                             >
                                                 <TrashIcon className="h-6 w-6 transition-transform group-hover/btn:scale-110" />

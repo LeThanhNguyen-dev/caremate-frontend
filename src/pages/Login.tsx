@@ -77,7 +77,7 @@ const Login = () => {
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email tài khoản</label>
                                     <div className="relative group">
                                         <EnvelopeIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300 group-focus-within:text-brand transition-colors" />
-                                        <input type="email" className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" placeholder="your@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+                                        <input type="email" className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" placeholder="your@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
                                     </div>
                                 </div>
                                 <div className="space-y-3">
@@ -87,11 +87,11 @@ const Login = () => {
                                     </div>
                                     <div className="relative group">
                                         <LockClosedIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300 group-focus-within:text-brand transition-colors" />
-                                        <input type="password" className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+                                        <input type="password" className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" disabled={loading} className="btn-primary w-full !py-5 !rounded-lg !text-[11px] !font-black !uppercase !tracking-[0.2em] shadow-2xl shadow-pink-500/20 flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95">
+                            <button type="submit" disabled={loading} className="btn-primary w-full !py-5 !rounded-xl !text-[11px] !font-black !uppercase !tracking-[0.2em] shadow-2xl shadow-pink-500/20 flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95">
                                 {loading ? 'Đang xác thực...' : 'Đăng nhập ngay'}
                                 {!loading && <ArrowRightIcon className="h-4 w-4" />}
                             </button>

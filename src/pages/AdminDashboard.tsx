@@ -233,7 +233,7 @@ const AdminDashboard = () => {
                         className="bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20 hover:shadow-2xl transition-all"
                     >
                         <div className="flex items-center justify-between mb-8">
-                            <div className={`h-14 w-14 rounded-lg ${stat.bg} flex items-center justify-center`}>
+                            <div className={`h-14 w-14 rounded-xl ${stat.bg} flex items-center justify-center`}>
                                 <stat.icon className={`h-7 w-7 ${stat.color}`} />
                             </div>
                             <div className="flex items-center gap-1 text-[10px] font-black text-slate-300">
@@ -370,7 +370,7 @@ const AdminDashboard = () => {
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-8">Hành động cần ưu tiên</div>
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-10">
                             <h2 className="text-4xl font-black text-white tracking-tight leading-none">Xét duyệt hồ sơ điều dưỡng</h2>
-                            <Link to="/admin/pending-nurses" className="bg-white text-slate-900 px-8 py-4 rounded-lg font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all">Xem tất cả</Link>
+                            <Link to="/admin/pending-nurses" className="bg-white text-slate-900 px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-blue-50 transition-all">Xem tất cả</Link>
                         </div>
 
                         <div className="space-y-4">
@@ -383,7 +383,7 @@ const AdminDashboard = () => {
                                 pendingNurses.slice(0, 3).map((nurse) => (
                                     <div key={nurse.userId} className="group bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 flex items-center justify-between hover:bg-white/10 transition-all">
                                         <div className="flex items-center gap-6">
-                                            <div className="h-14 w-14 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-xl uppercase">
+                                            <div className="h-14 w-14 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-black text-xl uppercase">
                                                 {nurse.fullName.charAt(0)}
                                             </div>
                                             <div>
@@ -410,7 +410,7 @@ const AdminDashboard = () => {
                     <div className="space-y-4">
                         <div className="p-6 rounded-xl bg-rose-50 border border-rose-100">
                             <div className="flex gap-4">
-                                <div className="h-12 w-12 rounded-lg bg-rose-500 flex items-center justify-center shrink-0">
+                                <div className="h-12 w-12 rounded-xl bg-rose-500 flex items-center justify-center shrink-0">
                                     <ExclamationCircleIcon className="h-6 w-6 text-white" />
                                 </div>
                                 <div>
@@ -423,7 +423,7 @@ const AdminDashboard = () => {
 
                         <div className="p-6 rounded-xl bg-slate-50 border border-slate-100">
                             <div className="flex gap-4">
-                                <div className="h-12 w-12 rounded-lg bg-slate-300 flex items-center justify-center shrink-0">
+                                <div className="h-12 w-12 rounded-xl bg-slate-300 flex items-center justify-center shrink-0">
                                     <BanknotesIcon className="h-6 w-6 text-white" />
                                 </div>
                                 <div>

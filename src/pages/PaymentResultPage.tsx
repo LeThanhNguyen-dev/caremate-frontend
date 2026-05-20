@@ -47,7 +47,7 @@ const PaymentResultPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-24">
-      <div className="mx-auto max-w-2xl rounded-[28px] border border-slate-100 bg-white p-10 text-center shadow-xl shadow-slate-200/30">
+      <div className="mx-auto max-w-2xl rounded-xl border border-slate-100 bg-white p-10 text-center shadow-xl shadow-slate-200/30">
         <div className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full text-3xl font-black ${isSuccess ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
           {isSuccess ? 'OK' : '...'}
         </div>
@@ -60,17 +60,17 @@ const PaymentResultPage = () => {
             : 'Bạn có thể thử lại thanh toán hoặc quay lại danh sách booking để tiếp tục theo dõi đơn.'}
         </p>
         {message && (
-          <div className="mt-6 rounded-2xl bg-slate-50 px-5 py-4 text-sm font-bold text-slate-600">
+          <div className="mt-6 rounded-xl bg-slate-50 px-5 py-4 text-sm font-bold text-slate-600">
             {message}
           </div>
         )}
         {finalizing && (
-          <div className="mt-6 rounded-2xl bg-brand/5 px-5 py-4 text-sm font-bold text-slate-600">
+          <div className="mt-6 rounded-xl bg-brand/5 px-5 py-4 text-sm font-bold text-slate-600">
             Đang tạo booking và ghi nhận thanh toán...
           </div>
         )}
         {orderCode && (
-          <div className="mt-6 rounded-2xl bg-slate-50 px-5 py-4 text-sm font-bold text-slate-600">
+          <div className="mt-6 rounded-xl bg-slate-50 px-5 py-4 text-sm font-bold text-slate-600">
             Mã giao dịch payOS: {orderCode}
           </div>
         )}
