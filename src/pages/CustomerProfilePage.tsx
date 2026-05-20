@@ -18,11 +18,14 @@ import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
 import authApi from '../api/authApi';
 import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
+import bankApi from '../api/bankApi';
+import type { BankOptionDto } from '../api/frontend-api-contract';
 
 const CustomerProfilePage = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState<'info' | 'security' | 'activity'>('info');
+    const [banks, setBanks] = useState<BankOptionDto[]>([]);
 
     // Profile form state
     const [profileLoading, setProfileLoading] = useState(true);
@@ -32,6 +35,9 @@ const CustomerProfilePage = () => {
         email: '',
         phone: '',
         address: '',
+        bankBin: '',
+        bankAccountNumber: '',
+        bankAccountName: '',
     });
 
     // Password change state
@@ -55,6 +61,9 @@ const CustomerProfilePage = () => {
                 email: data.email || '',
                 phone: data.phone || '',
                 address: data.address || '',
+                bankBin: data.bankBin || '',
+                bankAccountNumber: data.bankAccountNumber || '',
+                bankAccountName: data.bankAccountName || '',
             });
         } catch {
             // Fallback to auth context
@@ -63,6 +72,9 @@ const CustomerProfilePage = () => {
                 email: user?.email || '',
                 phone: '',
                 address: '',
+                bankBin: '',
+                bankAccountNumber: '',
+                bankAccountName: '',
             });
         } finally {
             setProfileLoading(false);
@@ -87,6 +99,7 @@ const CustomerProfilePage = () => {
     useEffect(() => {
         void loadProfile();
         void loadActivity();
+        void bankApi.getBanks().then(setBanks).catch(() => undefined);
     }, [loadProfile, loadActivity]);
 
     // Save profile
@@ -97,6 +110,9 @@ const CustomerProfilePage = () => {
                 fullName: profileForm.fullName,
                 phone: profileForm.phone,
                 address: profileForm.address,
+                bankBin: profileForm.bankBin,
+                bankAccountNumber: profileForm.bankAccountNumber,
+                bankAccountName: profileForm.bankAccountName,
             });
             showToast('Cập nhật thông tin thành công!', 'success');
         } catch {
@@ -273,6 +289,39 @@ const CustomerProfilePage = () => {
                                                         className="w-full bg-slate-50 border-none rounded-lg py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                     />
                                                 </div>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mã ngân hàng / BIN</label>
+                                                <select
+                                                    value={profileForm.bankBin}
+                                                    onChange={(e) => setProfileForm({ ...profileForm, bankBin: e.target.value })}
+                                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                >
+                                                    <option value="">Chọn ngân hàng nhận tiền</option>
+                                                    {banks.map((bank) => (
+                                                        <option key={bank.code} value={bank.code}>{bank.shortName || bank.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Số tài khoản nhận hoàn tiền</label>
+                                                <input
+                                                    type="text"
+                                                    value={profileForm.bankAccountNumber}
+                                                    onChange={(e) => setProfileForm({ ...profileForm, bankAccountNumber: e.target.value })}
+                                                    placeholder="Nhập số tài khoản"
+                                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-4 md:col-span-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Tên chủ tài khoản</label>
+                                                <input
+                                                    type="text"
+                                                    value={profileForm.bankAccountName}
+                                                    onChange={(e) => setProfileForm({ ...profileForm, bankAccountName: e.target.value })}
+                                                    placeholder="Nhập tên chủ tài khoản để admin đối chiếu"
+                                                    className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                />
                                             </div>
                                         </div>
                                         <div className="pt-8 flex justify-end">

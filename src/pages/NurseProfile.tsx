@@ -13,6 +13,8 @@ import { useToast } from '../hooks/useToast';
 import { nurseApi } from '../api/nurseApi';
 import type { DocumentDto, NurseProfileDetailDto } from '../types/nurse';
 import { getErrorMessage } from '../utils/apiError';
+import bankApi from '../api/bankApi';
+import type { BankOptionDto } from '../api/frontend-api-contract';
 
 const NurseProfile = () => {
     const { showToast } = useToast();
@@ -20,9 +22,10 @@ const NurseProfile = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [formData, setFormData] = useState({ bio: '', yearsExperience: 0, serviceRadiusKm: 10 });
+    const [formData, setFormData] = useState({ bio: '', yearsExperience: 0, serviceRadiusKm: 10, bankBin: '', bankAccountNumber: '', bankAccountName: '' });
     const [docType, setDocType] = useState('id_card_front');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [banks, setBanks] = useState<BankOptionDto[]>([]);
 
     const loadProfile = useCallback(async () => {
         try {
@@ -33,6 +36,9 @@ const NurseProfile = () => {
                 bio: data.bio || '',
                 yearsExperience: data.yearsExperience || 0,
                 serviceRadiusKm: data.serviceRadiusKm || 10,
+                bankBin: data.bankBin || '',
+                bankAccountNumber: data.bankAccountNumber || '',
+                bankAccountName: data.bankAccountName || '',
             });
         } catch {
             showToast('Không thể tải hồ sơ điều dưỡng.', 'error');
@@ -43,6 +49,7 @@ const NurseProfile = () => {
 
     useEffect(() => {
         void loadProfile();
+        void bankApi.getBanks().then(setBanks).catch(() => undefined);
     }, [loadProfile]);
 
     const updateProfile = async (event: React.FormEvent) => {
@@ -182,6 +189,23 @@ const NurseProfile = () => {
                             <div>
                                 <label className="form-label">Bán kính phục vụ (km)</label>
                                 <input type="number" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.serviceRadiusKm} onChange={(event) => setFormData((prev) => ({ ...prev, serviceRadiusKm: Number(event.target.value) || 0 }))} />
+                            </div>
+                            <div>
+                                <label className="form-label">Ngân hàng nhận tiền</label>
+                                <select className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankBin} onChange={(event) => setFormData((prev) => ({ ...prev, bankBin: event.target.value }))}>
+                                    <option value="">Chọn ngân hàng</option>
+                                    {banks.map((bank) => (
+                                        <option key={bank.code} value={bank.code}>{bank.shortName || bank.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="form-label">Số tài khoản nhận tiền</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankAccountNumber} onChange={(event) => setFormData((prev) => ({ ...prev, bankAccountNumber: event.target.value }))} />
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label className="form-label">Tên chủ tài khoản</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-lg py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankAccountName} onChange={(event) => setFormData((prev) => ({ ...prev, bankAccountName: event.target.value }))} />
                             </div>
                         </div>
                         <button type="submit" className="bg-[#10B981] text-white w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all" disabled={saving}>

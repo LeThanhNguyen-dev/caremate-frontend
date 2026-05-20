@@ -36,6 +36,7 @@ const formatDate = (value: string) => new Date(`${value}T00:00:00`).toLocaleDate
 const formatTime = (value: string) => new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 const formatTimeKey = (value: string) => new Date(value).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 const fullDayTimeRows = Array.from({ length: 24 }, (_, hour) => `${String(hour).padStart(2, '0')}:00`);
+const pendingBookingStorageKey = 'caremate_pending_booking';
 
 const formatRelativeDate = (value: string | null) => {
   if (!value) return 'Gần đây';
@@ -230,9 +231,15 @@ const NursePublicDetailPage = () => {
         payload.packageSessionStartTimes = packageDates.map((date) => packageSessionStarts[date]);
       }
 
-      await caremateApi.createBooking(payload);
-      showToast('Đặt lịch thành công! Bạn có thể theo dõi trong mục lịch hẹn.', 'success');
-      navigate('/my-bookings');
+      const paymentPayload = {
+        ...payload,
+        returnUrl: `${window.location.origin}/payment/success`,
+        cancelUrl: `${window.location.origin}/payment/cancel`,
+      };
+
+      localStorage.setItem(pendingBookingStorageKey, JSON.stringify(payload));
+      const paymentLink = await caremateApi.createPayOSBookingPaymentLink(paymentPayload);
+      window.location.href = paymentLink.checkoutUrl;
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
       showToast(axiosError.response?.data?.message || 'Không thể đặt lịch. Vui lòng kiểm tra lại thông tin.', 'error');
@@ -648,7 +655,7 @@ const NursePublicDetailPage = () => {
                   </button>
                 ) : (
                   <button type="submit" disabled={booking || !canSubmit} className="btn-primary w-full rounded-2xl !bg-[#EC4899] py-5 text-xs font-black uppercase tracking-[0.2em] shadow-2xl shadow-pink-900/40 disabled:opacity-30 disabled:shadow-none">
-                    {booking ? 'Đang xử lý...' : isPackage ? 'Xác nhận đặt gói' : 'Xác nhận đặt ngay'}
+                    {booking ? 'Đang xử lý...' : isPackage ? 'Thanh toán rồi đặt gói' : 'Thanh toán rồi đặt lịch'}
                   </button>
                 )}
               </form>

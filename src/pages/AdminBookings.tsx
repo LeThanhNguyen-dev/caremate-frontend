@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import caremateApi from '../api/caremateApi';
-import type { AdminBookingSummaryDto } from '../api/frontend-api-contract';
+import type { AdminBookingSummaryDto, AdminRefundDto } from '../api/frontend-api-contract';
 import { 
     CalendarDaysIcon, 
     CurrencyDollarIcon, 
     ClipboardDocumentListIcon,
     ArrowPathIcon,
-    
+    QrCodeIcon,
     ClockIcon
 } from '@heroicons/react/24/outline';
 
@@ -21,13 +21,21 @@ const bookingStatusLabel: Record<string, string> = {
 
 const AdminBookings = () => {
     const [bookings, setBookings] = useState<AdminBookingSummaryDto[]>([]);
+    const [refunds, setRefunds] = useState<AdminRefundDto[]>([]);
+    const [payouts, setPayouts] = useState<import('../api/frontend-api-contract').AdminPayoutDto[]>([]);
     const [loading, setLoading] = useState(true);
 
     const load = async () => {
         try {
             setLoading(true);
-            const data = await caremateApi.getAdminBookings();
+            const [data, refundData, payoutData] = await Promise.all([
+                caremateApi.getAdminBookings(),
+                caremateApi.getAdminRefunds(),
+                caremateApi.getAdminPayouts(),
+            ]);
             setBookings(data);
+            setRefunds(refundData);
+            setPayouts(payoutData);
         } finally {
             setLoading(false);
         }
@@ -167,6 +175,130 @@ const AdminBookings = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <section className="luxury-card p-0 overflow-hidden">
+                <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-xl font-black text-slate-900">Hoàn tiền thủ công</h3>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Hiển thị QR khách hàng để admin chuyển khoản tay</p>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300">
+                        <QrCodeIcon className="h-6 w-6" />
+                    </div>
+                </div>
+
+                <div className="p-8 space-y-6">
+                    {refunds.length === 0 ? (
+                        <div className="rounded-xl bg-slate-50 p-10 text-center text-sm font-bold text-slate-400">
+                            Chưa có yêu cầu hoàn tiền nào cần xử lý.
+                        </div>
+                    ) : (
+                        refunds.map((refund) => (
+                            <div key={refund.bookingId} className="rounded-xl border border-slate-100 p-6">
+                                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                                    <div className="space-y-2">
+                                        <div className="text-lg font-black text-slate-900">Booking #{refund.bookingId} • {refund.serviceName}</div>
+                                        <div className="text-sm font-bold text-slate-500">Khách: {refund.customerName} • Y tá: {refund.nurseName}</div>
+                                        <div className="text-sm font-bold text-slate-500">
+                                            Trạng thái booking: {bookingStatusLabel[refund.bookingStatus] ?? refund.bookingStatus}
+                                        </div>
+                                        <div className="text-sm font-bold text-slate-500">
+                                            Hoàn: {refund.refundAmount.toLocaleString('vi-VN')}đ
+                                        </div>
+                                        <div className="text-sm font-medium text-slate-400">{refund.refundReason || 'Không có ghi chú hoàn tiền.'}</div>
+                                        <div className="text-xs font-black uppercase tracking-widest text-slate-400">
+                                            {refund.refundStatus === 'completed'
+                                                ? 'Đã hoàn tiền'
+                                                : refund.refundStatus === 'not_required'
+                                                    ? 'Không cần hoàn tiền'
+                                                    : 'Chờ hoàn tiền'}
+                                        </div>
+                                        <div className="text-sm font-bold text-slate-600">
+                                            {refund.customerBankAccountName || 'Chưa có tên TK'} • {refund.customerBankAccountNumber || 'Chưa có STK'} • {refund.customerBankBin || 'Chưa có ngân hàng'}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col items-center gap-4">
+                                        {refund.customerQrUrl ? (
+                                            <img src={refund.customerQrUrl} alt={`QR refund booking ${refund.bookingId}`} className="h-48 w-48 rounded-xl border border-slate-100 object-cover" />
+                                        ) : (
+                                            <div className="flex h-48 w-48 items-center justify-center rounded-xl border border-dashed border-slate-200 text-center text-xs font-bold text-slate-400">
+                                                {refund.hasPayment
+                                                    ? 'Khách chưa cập nhật thông tin ngân hàng'
+                                                    : 'Booking này chưa phát sinh thanh toán'}
+                                            </div>
+                                        )}
+                                        {refund.hasPayment && refund.refundAmount > 0 && refund.refundStatus !== 'completed' && (
+                                            <button
+                                                onClick={() => void caremateApi.completeAdminRefund(refund.bookingId).then(load)}
+                                                className="rounded-lg bg-admin px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-blue-500/20"
+                                            >
+                                                Đã hoàn tiền
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </section>
+
+            <section className="luxury-card p-0 overflow-hidden">
+                <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-xl font-black text-slate-900">Chi tiền cho y tá</h3>
+                        <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Hiển thị QR y tá để admin chuyển khoản tay</p>
+                    </div>
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300">
+                        <QrCodeIcon className="h-6 w-6" />
+                    </div>
+                </div>
+
+                <div className="p-8 space-y-6">
+                    {payouts.length === 0 ? (
+                        <div className="rounded-xl bg-slate-50 p-10 text-center text-sm font-bold text-slate-400">
+                            Chưa có khoản chi cho y tá nào cần xử lý.
+                        </div>
+                    ) : (
+                        payouts.map((payout) => (
+                            <div key={payout.payoutId} className="rounded-xl border border-slate-100 p-6">
+                                <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                                    <div className="space-y-2">
+                                        <div className="text-lg font-black text-slate-900">Payout #{payout.payoutId} • Booking #{payout.bookingId}</div>
+                                        <div className="text-sm font-bold text-slate-500">Y tá: {payout.nurseName} • {payout.serviceName}</div>
+                                        <div className="text-sm font-bold text-slate-500">Chi: {payout.amount.toLocaleString('vi-VN')}đ • Phí nền tảng: {payout.platformFee.toLocaleString('vi-VN')}đ</div>
+                                        <div className="text-xs font-black uppercase tracking-widest text-slate-400">
+                                            {payout.status === 'released' ? 'Đã chi tiền' : payout.status}
+                                        </div>
+                                        <div className="text-sm font-bold text-slate-600">
+                                            {payout.nurseBankAccountName || 'Chưa có tên TK'} • {payout.nurseBankAccountNumber || 'Chưa có STK'} • {payout.nurseBankBin || 'Chưa có ngân hàng'}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col items-center gap-4">
+                                        {payout.nurseQrUrl ? (
+                                            <img src={payout.nurseQrUrl} alt={`QR payout ${payout.payoutId}`} className="h-48 w-48 rounded-xl border border-slate-100 object-cover" />
+                                        ) : (
+                                            <div className="flex h-48 w-48 items-center justify-center rounded-xl border border-dashed border-slate-200 text-center text-xs font-bold text-slate-400">
+                                                Y tá chưa cập nhật thông tin ngân hàng
+                                            </div>
+                                        )}
+                                        {payout.status !== 'released' && (
+                                            <button
+                                                onClick={() => void caremateApi.completeAdminPayout(payout.payoutId).then(load)}
+                                                className="rounded-lg bg-emerald-600 px-6 py-3 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-500/20"
+                                            >
+                                                Đã chi tiền
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </section>
         </div>

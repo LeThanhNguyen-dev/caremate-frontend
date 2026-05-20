@@ -33,6 +33,7 @@ import CustomerProfilePage from './pages/CustomerProfilePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import HealthCheckInsPage from './pages/HealthCheckInsPage';
+import PaymentResultPage from './pages/PaymentResultPage';
 
 import { NotificationProvider } from './contexts/NotificationProvider';
 
@@ -55,6 +56,8 @@ function App() {
                 <Route path="services" element={<ServicesPage />} />
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="reset-password" element={<ResetPasswordPage />} />
+                <Route path="payment/success" element={<PaymentResultPage />} />
+                <Route path="payment/cancel" element={<PaymentResultPage />} />
                 <Route path="nurses/:userId" element={<NursePublicDetailPage />} />
 
                 {/* Customer Routes */}

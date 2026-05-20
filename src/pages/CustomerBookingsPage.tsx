@@ -26,6 +26,12 @@ const statusConfig: Record<string, { label: string; className: string; icon: typ
     rejected: { label: 'Bị từ chối', className: 'bg-red-50 text-red-600 border-red-100', icon: ExclamationTriangleIcon },
 };
 
+const refundStatusConfig: Record<string, { label: string; className: string }> = {
+    pending: { label: 'Chờ hoàn tiền', className: 'bg-amber-50 text-amber-700 border-amber-100' },
+    completed: { label: 'Đã hoàn tiền', className: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+    failed: { label: 'Hoàn tiền lỗi', className: 'bg-red-50 text-red-700 border-red-100' },
+};
+
 const CustomerBookingsPage = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
@@ -39,19 +45,27 @@ const CustomerBookingsPage = () => {
     const [disputeReason, setDisputeReason] = useState('');
 
     const load = useCallback(async () => {
-        try {
-            setLoading(true);
-            const [bookingData, disputeData] = await Promise.all([
-                caremateApi.getMyCustomerBookings(),
-                caremateApi.getDisputes(),
-            ]);
-            setBookings(bookingData);
-            setDisputes(disputeData);
-        } catch {
+        setLoading(true);
+
+        const [bookingResult, disputeResult] = await Promise.allSettled([
+            caremateApi.getMyCustomerBookings(),
+            caremateApi.getDisputes(),
+        ]);
+
+        if (bookingResult.status === 'fulfilled') {
+            setBookings(bookingResult.value);
+        } else {
+            setBookings([]);
             showToast('Không thể tải danh sách đặt lịch.', 'error');
-        } finally {
-            setLoading(false);
         }
+
+        if (disputeResult.status === 'fulfilled') {
+            setDisputes(disputeResult.value);
+        } else {
+            setDisputes([]);
+        }
+
+        setLoading(false);
     }, [showToast]);
 
     useEffect(() => {
@@ -86,13 +100,12 @@ const CustomerBookingsPage = () => {
         }
     };
 
-    const payBooking = async (bookingId: number, amount: number) => {
+    const payBooking = async (bookingId: number) => {
         try {
-            await caremateApi.payBooking(bookingId, { amount, method: 'bank_transfer' });
-            showToast('Thanh toán thành công.', 'success');
-            await load();
+            const paymentLink = await caremateApi.createPayOSPaymentLink(bookingId);
+            window.location.href = paymentLink.checkoutUrl;
         } catch {
-            showToast('Thanh toán thất bại.', 'error');
+            showToast('Không thể tạo liên kết thanh toán.', 'error');
         }
     };
 
@@ -212,6 +225,7 @@ const CustomerBookingsPage = () => {
                         <div className="space-y-8">
                             {filteredBookings.map((booking) => {
                                 const status = statusConfig[booking.status] || { label: booking.status, className: 'bg-slate-50 text-slate-600', icon: ClockIcon };
+                                const refundStatus = booking.refundStatus ? refundStatusConfig[booking.refundStatus] : null;
                                 const dispute = disputeByBookingId.get(booking.id);
                                 return (
                                     <motion.div 
@@ -229,6 +243,12 @@ const CustomerBookingsPage = () => {
                                                         <status.icon className="h-4 w-4" />
                                                         {status.label}
                                                     </div>
+                                                    {refundStatus && (
+                                                        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest ${refundStatus.className}`}>
+                                                            <BanknotesIcon className="h-4 w-4" />
+                                                            {refundStatus.label}
+                                                        </div>
+                                                    )}
                                                     {dispute && (
                                                         <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-600 border border-red-100 text-[10px] font-black uppercase tracking-widest animate-pulse">
                                                             Khiếu nại: {dispute.status}
@@ -261,6 +281,28 @@ const CustomerBookingsPage = () => {
                                                             {booking.totalPrice.toLocaleString('vi-VN')}đ
                                                         </div>
                                                     </div>
+                                                    <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all sm:col-span-2 xl:col-span-4">
+                                                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Tình trạng hoàn tiền</div>
+                                                        <div className="flex flex-wrap items-center gap-3">
+                                                            <div className="text-base font-black text-slate-900">
+                                                                {booking.refundStatus === 'completed'
+                                                                    ? 'Đã hoàn tiền'
+                                                                    : booking.refundStatus === 'pending'
+                                                                        ? `Đang chờ hoàn ${booking.refundAmount?.toLocaleString('vi-VN') ?? 0}đ`
+                                                                        : 'Chưa phát sinh hoàn tiền'}
+                                                            </div>
+                                                            {booking.refundedAt && (
+                                                                <div className="text-xs font-bold text-slate-400">
+                                                                    Hoàn lúc: {new Date(booking.refundedAt).toLocaleString('vi-VN')}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {booking.refundReason && (
+                                                            <div className="mt-2 text-sm font-medium text-slate-500">
+                                                                {booking.refundReason}
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
 
@@ -274,8 +316,8 @@ const CustomerBookingsPage = () => {
                                                     </button>
                                                 )}
                                                 {booking.status === 'confirmed' && (
-                                                    <button onClick={() => void payBooking(booking.id, booking.totalPrice)} className="w-full btn-primary !rounded-lg !py-4 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20">
-                                                        Thanh toán ngay
+                                                    <button onClick={() => void payBooking(booking.id)} className="w-full btn-primary !rounded-lg !py-4 text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20">
+                                                        Thanh toán qua payOS
                                                     </button>
                                                 )}
                                                 {booking.status === 'completed' && (

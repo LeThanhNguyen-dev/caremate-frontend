@@ -13,6 +13,9 @@ export interface NurseProfileDetailDto {
     fullName: string;
     email: string;
     phone: string;
+    bankBin?: string | null;
+    bankAccountNumber?: string | null;
+    bankAccountName?: string | null;
     bio: string;
     yearsExperience: number;
     serviceRadiusKm: number;
@@ -26,6 +29,9 @@ export interface UpdateNurseProfileDto {
     bio: string;
     yearsExperience: number;
     serviceRadiusKm: number;
+    bankBin?: string;
+    bankAccountNumber?: string;
+    bankAccountName?: string;
 }
 
 export interface UploadDocumentDto {

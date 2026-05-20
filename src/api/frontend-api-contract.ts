@@ -31,6 +31,11 @@ export type BookingDetailDto = {
   endTime: string;
   address: string;
   notes: string | null;
+  paymentStatus?: string | null;
+  refundAmount?: number | null;
+  refundReason?: string | null;
+  refundStatus?: string | null;
+  refundedAt?: string | null;
   packageDays?: number | null;
   completedSessions?: number;
 };
@@ -137,6 +142,47 @@ export type AdminUserDto = {
   bio: string | null;
 };
 
+export type AdminRefundDto = {
+  bookingId: number;
+  bookingStatus: string;
+  customerId: number;
+  customerName: string;
+  nurseId: number;
+  nurseName: string;
+  serviceName: string;
+  totalPrice: number;
+  refundAmount: number;
+  hasPayment: boolean;
+  refundReason: string | null;
+  refundStatus: string | null;
+  customerBankBin: string | null;
+  customerBankAccountNumber: string | null;
+  customerBankAccountName: string | null;
+  customerQrUrl: string | null;
+};
+
+export type AdminPayoutDto = {
+  payoutId: number;
+  bookingId: number;
+  nurseId: number;
+  nurseName: string;
+  serviceName: string;
+  amount: number;
+  platformFee: number;
+  status: string;
+  nurseBankBin: string | null;
+  nurseBankAccountNumber: string | null;
+  nurseBankAccountName: string | null;
+  nurseQrUrl: string | null;
+};
+
+export type BankOptionDto = {
+  code: string;
+  name: string;
+  shortName?: string | null;
+  bin?: string | null;
+};
+
 export type AdminDashboardDto = {
   totalUsers: number;
   totalNurses: number;
@@ -203,6 +249,13 @@ export type Payment = {
   refundStatus: string | null;
   createdAt: string;
   refundedAt: string | null;
+};
+
+export type PayOSPaymentLink = {
+  bookingId: number;
+  orderCode: number;
+  checkoutUrl: string;
+  paymentLinkId: string | null;
 };
 
 export type SuggestedServiceDto = {

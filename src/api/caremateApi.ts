@@ -3,6 +3,8 @@ import type {
   AdminBookingSummaryDto,
   AdminDashboardDto,
   AdminUserDto,
+  AdminRefundDto,
+  AdminPayoutDto,
   AvailabilitySlotDto,
   BookingDetailDto,
   ChatMessage,
@@ -21,7 +23,8 @@ import type {
   ReviewDto,
   ServiceDetailDto,
   PackageSessionDto,
-  PackageProgressDto
+  PackageProgressDto,
+  PayOSPaymentLink
 } from './frontend-api-contract';
 
 type ApiRecord = Record<string, unknown>;
@@ -106,6 +109,14 @@ export const caremateApi = {
   getAdminDashboard: async (): Promise<AdminDashboardDto> => (await axiosInstance.get('/api/admin/dashboard')).data,
   getAdminBookings: async (): Promise<AdminBookingSummaryDto[]> => (await axiosInstance.get('/api/admin/bookings')).data,
   getAdminDisputes: async (): Promise<Dispute[]> => (await axiosInstance.get('/api/admin/disputes')).data,
+  getAdminRefunds: async (refundStatus?: string): Promise<AdminRefundDto[]> =>
+    (await axiosInstance.get('/api/admin/refunds', { params: { refundStatus } })).data,
+  completeAdminRefund: async (bookingId: number, payload?: { adminNote?: string }): Promise<MessageResponse> =>
+    (await axiosInstance.post(`/api/admin/refunds/${bookingId}/complete`, payload ?? {})).data,
+  getAdminPayouts: async (payoutStatus?: string): Promise<AdminPayoutDto[]> =>
+    (await axiosInstance.get('/api/admin/payouts', { params: { payoutStatus } })).data,
+  completeAdminPayout: async (payoutId: number, payload?: { adminNote?: string }): Promise<MessageResponse> =>
+    (await axiosInstance.post(`/api/admin/payouts/${payoutId}/complete`, payload ?? {})).data,
 
   createBooking: async (payload: Record<string, unknown>): Promise<BookingDetailDto> => (await axiosInstance.post('/api/bookings', payload)).data,
   getMyCustomerBookings: async (): Promise<BookingDetailDto[]> => (await axiosInstance.get('/api/bookings/my/customer')).data,
@@ -174,8 +185,12 @@ export const caremateApi = {
   getNurseAvailabilityByUserId: async (userId: number): Promise<AvailabilitySlotDto[]> =>
     (await axiosInstance.get(`/api/nurses/${userId}/availability`)).data,
 
-  payBooking: async (bookingId: number, payload: { amount: number; method: string }): Promise<Payment> =>
+  payBooking: async (bookingId: number, payload: { amount: number; method: string; status?: string; transactionId?: string }): Promise<Payment> =>
     (await axiosInstance.put(`/api/payments/booking/${bookingId}`, payload)).data,
+  createPayOSPaymentLink: async (bookingId: number, payload?: { returnUrl?: string; cancelUrl?: string }): Promise<PayOSPaymentLink> =>
+    (await axiosInstance.post(`/api/payments/booking/${bookingId}/payos-link`, payload ?? {})).data,
+  createPayOSBookingPaymentLink: async (payload: Record<string, unknown>): Promise<PayOSPaymentLink> =>
+    (await axiosInstance.post('/api/payments/booking/payos-link', payload)).data,
 
   createReview: async (payload: { bookingId: number; rating: number; comment?: string }): Promise<MessageResponse> =>
     (await axiosInstance.post('/api/reviews', payload)).data,
@@ -219,11 +234,11 @@ export const caremateApi = {
 
   // === User Profile ===
   /** GET /api/users/me/profile */
-  getMyProfile: async (): Promise<{ fullName: string; email: string; phone: string | null; address: string | null }> =>
+  getMyProfile: async (): Promise<{ fullName: string; email: string; phone: string | null; address: string | null; bankBin: string | null; bankAccountNumber: string | null; bankAccountName: string | null }> =>
     (await axiosInstance.get('/api/users/me/profile')).data,
 
   /** PUT /api/users/me/profile */
-  updateMyProfile: async (payload: { fullName?: string; phone?: string; address?: string }): Promise<void> => {
+  updateMyProfile: async (payload: { fullName?: string; phone?: string; address?: string; bankBin?: string; bankAccountNumber?: string; bankAccountName?: string }): Promise<void> => {
     await axiosInstance.put('/api/users/me/profile', payload);
   },
 
