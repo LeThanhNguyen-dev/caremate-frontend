@@ -4,17 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import {
     MagnifyingGlassIcon,
     AcademicCapIcon,
-    ShieldCheckIcon,
-    HeartIcon,
-    ArrowRightIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    CheckBadgeIcon,
-    ClockIcon,
     Squares2X2Icon,
     SparklesIcon
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import caremateApi from '../api/caremateApi';
 import type { ServiceDetailDto, NurseDiscoveryDto, PackageScheduleEntryDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
@@ -104,19 +96,18 @@ const getVisiblePackageSchedule = (service?: ServiceDetailDto | null): PackageSc
 const getScheduleDescription = (service: ServiceDetailDto, item: PackageScheduleEntryDto) =>
     item.description || getPrimaryServiceText(service, item.day);
 
-const getScheduleHighlights = (description: string) =>
-    description
-        .split(';')
-        .map((part) => part.trim())
-        .filter(Boolean);
+const getCompactScheduleDescription = (service: ServiceDetailDto, item: PackageScheduleEntryDto) => {
+    const description = getScheduleDescription(service, item).replace(/\s+/g, ' ').trim();
+    if (description.length <= 110) return description;
+    return `${description.slice(0, 107).trim()}...`;
+};
 
-const TIMELINE_PRIMARY = '#E85A8B';
-const TIMELINE_PAGE_SIZE = 7;
+const getScheduleTitle = (item: PackageScheduleEntryDto) => {
+    const title = item.title?.trim();
+    if (!title) return `Buổi ${item.day}`;
 
-const getTimelineStepState = (day: number, total: number): 'completed' | 'current' | 'upcoming' => {
-    if (day < Math.min(3, total)) return 'completed';
-    if (day === Math.min(3, total)) return 'current';
-    return 'upcoming';
+    const segments = title.split(':');
+    return segments.length > 1 ? segments.slice(1).join(':').trim() : title;
 };
 
 const ServicesPage = () => {
@@ -129,7 +120,7 @@ const ServicesPage = () => {
     const [loading, setLoading] = useState(true);
     const [nursesLoading, setNursesLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [timelinePage, setTimelinePage] = useState(0);
+    const [scheduleWeekIndex, setScheduleWeekIndex] = useState(0);
 
     useEffect(() => {
         const init = async () => {
@@ -159,6 +150,7 @@ const ServicesPage = () => {
         if (service.id === selectedServiceId) return;
         setSelectedServiceId(service.id);
         setSelectedCategory(service.category);
+        setScheduleWeekIndex(0);
         try {
             setNursesLoading(true);
             const nurseData = await caremateApi.getNurses({ serviceId: service.id });
@@ -194,11 +186,16 @@ const ServicesPage = () => {
     }, [services, searchQuery, selectedCategory]);
 
     const selectedService = useMemo(() => services.find(s => s.id === selectedServiceId), [services, selectedServiceId]);
+    const featuredNurse = useMemo(() => nurses[0] ?? null, [nurses]);
+    const remainingNurses = useMemo(
+        () => nurses.filter(nurse => nurse.userId !== featuredNurse?.userId),
+        [nurses, featuredNurse]
+    );
     const selectedPackageSchedule = useMemo(() => getVisiblePackageSchedule(selectedService), [selectedService]);
-    const totalTimelinePages = Math.max(1, Math.ceil(selectedPackageSchedule.length / TIMELINE_PAGE_SIZE));
-    const visibleTimelineSteps = useMemo(
-        () => selectedPackageSchedule.slice(timelinePage * TIMELINE_PAGE_SIZE, (timelinePage + 1) * TIMELINE_PAGE_SIZE),
-        [selectedPackageSchedule, timelinePage],
+    const totalScheduleWeeks = Math.max(1, Math.ceil(selectedPackageSchedule.length / 7));
+    const currentWeekSchedule = useMemo(
+        () => selectedPackageSchedule.slice(scheduleWeekIndex * 7, scheduleWeekIndex * 7 + 7),
+        [selectedPackageSchedule, scheduleWeekIndex]
     );
     const selectedCategoryDescription =
         selectedCategory === 'goi-dich-vu'
@@ -208,14 +205,10 @@ const ServicesPage = () => {
                 : categoryDescriptions[selectedCategory];
 
     useEffect(() => {
-        setTimelinePage(0);
-    }, [selectedServiceId]);
-
-    useEffect(() => {
-        if (timelinePage > totalTimelinePages - 1) {
-            setTimelinePage(Math.max(0, totalTimelinePages - 1));
+        if (scheduleWeekIndex > totalScheduleWeeks - 1) {
+            setScheduleWeekIndex(Math.max(0, totalScheduleWeeks - 1));
         }
-    }, [timelinePage, totalTimelinePages]);
+    }, [scheduleWeekIndex, totalScheduleWeeks]);
 
     if (loading) {
         return (
@@ -234,7 +227,7 @@ const ServicesPage = () => {
                 <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-brand/10 blur-[120px] -mr-48 -mt-48"></div>
                 <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-brand/5 blur-[100px] -mb-32 -ml-32"></div>
 
-                <div className="relative z-10 mx-auto max-w-7xl px-6 text-center lg:px-8">
+                <div className="relative z-10 w-full px-4 text-center sm:px-6 lg:px-10 2xl:px-12">
                     <div className="mx-auto max-w-5xl">
                         <div className="mx-auto mb-6 w-fit rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-white/80">
                             Hệ thống dịch vụ CareMate
@@ -251,9 +244,10 @@ const ServicesPage = () => {
                 </div>
             </section>
 
-            <div className="relative z-20 mx-auto -mt-12 max-w-7xl px-6 lg:px-8">
-                <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] md:p-8">
-                    <div className="mb-8 flex flex-col gap-6 border-b border-slate-100 pb-6 xl:flex-row xl:items-end xl:justify-between">
+            <div className="relative z-20 mx-auto -mt-12 w-full max-w-[1680px] px-2 sm:px-4 lg:px-4">
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+                    <div className="rounded-[28px] bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] md:p-8">
+                    <div className="mb-10 flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
                         <div className="flex items-center gap-4">
                             <Squares2X2Icon className="h-6 w-6 text-brand" />
                             <div>
@@ -296,21 +290,21 @@ const ServicesPage = () => {
                     </div>
 
                     {selectedCategory !== 'all' && selectedCategoryDescription && (
-                        <div className="mb-8 rounded-xl border border-brand/10 bg-brand/5 px-5 py-4 text-sm font-medium leading-7 text-slate-600">
+                        <div className="mb-10 rounded-2xl bg-brand/5 px-5 py-4 text-[15px] font-medium leading-7 text-slate-600">
                             <span className="font-black text-slate-900">{getCategoryLabel(selectedCategory)}:</span>{' '}
                             {selectedCategoryDescription}
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                         {filteredServices.map((service) => (
                             <button
                                 key={service.id}
                                 onClick={() => void handleServiceSelect(service)}
-                                className={`rounded-xl border p-6 text-left transition-all duration-300 ${
+                                className={`rounded-[24px] p-6 text-left transition-all duration-300 ${
                                     selectedServiceId === service.id
-                                        ? 'border-brand bg-[#FFF7FA] shadow-[0_12px_30px_rgba(232,90,139,0.10)]'
-                                        : 'border-slate-200 bg-white hover:border-brand/20 hover:bg-slate-50/60'
+                                        ? 'bg-[#FFF7FA] shadow-[0_12px_30px_rgba(232,90,139,0.10)] ring-1 ring-brand/40'
+                                        : 'bg-slate-50/60 hover:bg-slate-50'
                                 }`}
                             >
                                 <div className="mb-4 flex items-center justify-between gap-3">
@@ -362,481 +356,282 @@ const ServicesPage = () => {
                     </div>
 
                     {selectedService?.serviceKind === 'package' && selectedPackageSchedule.length > 0 && (
-                        <div className="mt-10 rounded-xl border border-slate-200 bg-white p-6 md:p-8">
-                            <div className="mb-8 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                        <div className="mt-12 rounded-[24px] bg-white p-6 md:p-8">
+                            <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                                 <div>
-                                    <div className="mb-3 text-[11px] font-black uppercase tracking-[0.28em]" style={{ color: TIMELINE_PRIMARY }}>
-                                        Lộ trình gói dịch vụ
-                                    </div>
-                                    <h3 className="text-[26px] font-black leading-tight text-slate-900">
-                                        2. Hình dung hành trình chăm sóc trước khi đặt
-                                    </h3>
-                                    <p className="mt-3 max-w-3xl text-sm font-medium leading-7 text-slate-500">
-                                        Gói <span className="font-black text-slate-900">{selectedService.name}</span> được chia theo từng buổi để gia đình biết rõ khi nào bắt đầu, khi nào theo dõi và khi nào tổng kết.
+                                    <div className="mb-3 text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">LỊCH TRÌNH GÓI DỊCH VỤ</div>
+                                    <h3 className="text-[30px] font-black leading-tight text-[#111827]">Lộ trình chăm sóc 7 ngày</h3>
+                                    <p className="mt-2 text-[16px] font-normal leading-[1.7] text-[#6B7280]">
+                                        Thiết kế riêng cho mẹ sau sinh để gia đình theo dõi từng bước dễ hơn.
                                     </p>
-                                </div>
-                                <div className="rounded-xl border border-[#E5E7EB] bg-slate-50 px-5 py-3 text-sm font-black text-slate-900">
-                                    {selectedPackageSchedule.length} buổi chăm sóc
-                                </div>
-                            </div>
-
-                            <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-                                <div className="rounded-xl border border-[#E5E7EB] bg-slate-50 p-6">
-                                    <div className="flex items-center justify-between gap-4">
-                                        <div>
-                                            <div className="text-[12px] font-black uppercase tracking-[0.22em] text-slate-400">Progress Overview</div>
-                                            <div className="mt-2 text-lg font-black text-slate-900">Tiến trình gói đang được chia thành 3 chặng rõ ràng</div>
-                                        </div>
-                                        <div className="hidden rounded-xl px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] md:block" style={{ backgroundColor: '#FCE7F3', color: TIMELINE_PRIMARY }}>
-                                            Modern Care Flow
-                                        </div>
-                                    </div>
-                                    <div className="mt-6 h-3 overflow-hidden rounded-full bg-white">
-                                        <div
-                                            className="h-full rounded-full"
-                                            style={{
-                                                width: `${Math.max(22, Math.round((Math.min(3, selectedPackageSchedule.length) / selectedPackageSchedule.length) * 100))}%`,
-                                                background: `linear-gradient(90deg, ${TIMELINE_PRIMARY} 0%, #F59AB8 100%)`,
-                                            }}
-                                        ></div>
-                                    </div>
-                                    <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                                        <div className="rounded-xl bg-white p-4">
-                                            <div className="text-[12px] font-black uppercase tracking-[0.18em] text-slate-400">Khởi động</div>
-                                            <div className="mt-2 text-sm font-black leading-6 text-slate-900">Đánh giá ban đầu và thống nhất mục tiêu chăm sóc</div>
-                                        </div>
-                                        <div className="rounded-xl bg-white p-4">
-                                            <div className="text-[12px] font-black uppercase tracking-[0.18em] text-slate-400">Theo dõi</div>
-                                            <div className="mt-2 text-sm font-black leading-6 text-slate-900">Theo dõi liệu trình và điều chỉnh theo phản hồi thực tế</div>
-                                        </div>
-                                        <div className="rounded-xl bg-white p-4">
-                                            <div className="text-[12px] font-black uppercase tracking-[0.18em] text-slate-400">Hoàn tất</div>
-                                            <div className="mt-2 text-sm font-black leading-6 text-slate-900">Tổng kết tiến triển và bàn giao hướng dẫn chăm sóc tiếp theo</div>
-                                        </div>
+                                    <div className="mt-4 inline-flex rounded-full bg-[#FDF2F8] px-4 py-2 text-[14px] font-bold text-[#DB2777]">
+                                        7 buổi • {selectedService?.estimatedDurationMinutes ?? 90} phút/buổi
                                     </div>
                                 </div>
 
-                                <div className="rounded-xl border border-[#E5E7EB] bg-slate-50 p-6">
-                                    <div className="text-[12px] font-black uppercase tracking-[0.22em]" style={{ color: TIMELINE_PRIMARY }}>Dịch vụ trong gói</div>
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        {getIncludedServiceLabels(selectedService).map((label) => (
-                                            <span key={label} className="rounded-xl border px-3 py-2 text-[12px] font-bold text-slate-700" style={{ borderColor: '#FBCFE8', backgroundColor: '#FFF1F6' }}>
-                                                {label}
-                                            </span>
-                                        ))}
+                                <div className="flex flex-wrap items-center gap-3">
+                                    <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-900">
+                                        Tuần {scheduleWeekIndex + 1}/{totalScheduleWeeks}
+                                    </div>
+                                    <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-900">
+                                        {selectedPackageSchedule.length} buổi chăm sóc
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="mt-8">
-                                <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                                    <div>
-                                        <div className="text-[12px] font-black uppercase tracking-[0.22em] text-slate-400">Timeline Steps</div>
-                                        <div className="mt-2 text-xl font-black text-slate-900">Từng buổi chăm sóc được sắp theo hành trình dễ đọc</div>
-                                    </div>
-                                    {totalTimelinePages > 1 && (
-                                        <div className="flex items-center gap-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => setTimelinePage((prev) => Math.max(0, prev - 1))}
-                                                disabled={timelinePage === 0}
-                                                className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-[12px] font-black uppercase tracking-[0.16em] text-slate-700 transition disabled:cursor-not-allowed disabled:opacity-40"
-                                            >
-                                                <ChevronLeftIcon className="h-4 w-4" />
-                                                Tuần trước
-                                            </button>
-                                            <div className="rounded-xl bg-slate-50 px-4 py-3 text-[12px] font-black uppercase tracking-[0.16em] text-slate-500">
-                                                Tuần {timelinePage + 1}/{totalTimelinePages}
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => setTimelinePage((prev) => Math.min(totalTimelinePages - 1, prev + 1))}
-                                                disabled={timelinePage >= totalTimelinePages - 1}
-                                                className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-[12px] font-black uppercase tracking-[0.16em] text-slate-700 transition disabled:cursor-not-allowed disabled:opacity-40"
-                                            >
-                                                Tuần sau
-                                                <ChevronRightIcon className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    )}
+                            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[18px] bg-slate-50 p-4">
+                                <div className="text-[15px] font-medium leading-[1.7] text-[#6B7280]">
+                                    Đang xem từ ngày {currentWeekSchedule[0]?.day ?? 1} đến ngày {currentWeekSchedule[currentWeekSchedule.length - 1]?.day ?? 1}
                                 </div>
+                                <div className="flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setScheduleWeekIndex((value) => Math.max(0, value - 1))}
+                                        disabled={scheduleWeekIndex === 0}
+                                        className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 transition hover:border-slate-300 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                                    >
+                                        Tuần trước
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setScheduleWeekIndex((value) => Math.min(totalScheduleWeeks - 1, value + 1))}
+                                        disabled={scheduleWeekIndex >= totalScheduleWeeks - 1}
+                                        className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                                    >
+                                        Tuần sau
+                                    </button>
+                                </div>
+                            </div>
 
-                                <div className="relative hidden md:block">
-                                    <div className="absolute bottom-0 left-1/2 top-0 w-px -translate-x-1/2 bg-[#E5E7EB]"></div>
-                                    <div className="space-y-5">
-                                        {visibleTimelineSteps.map((item, index) => {
-                                            const serviceLabels = getScheduleServiceLabels(item.serviceKeys).slice(0, 3);
-                                            const description = getScheduleDescription(selectedService, item);
-                                            const highlights = getScheduleHighlights(description);
-                                            const stepState = getTimelineStepState(item.day, selectedPackageSchedule.length);
-                                            const isCurrent = stepState === 'current';
-                                            const isCompleted = stepState === 'completed';
-                                            const isLeft = index % 2 === 0;
+                            <div className="space-y-4">
+                                {currentWeekSchedule.map((item, index) => {
+                                    const label = getScheduleServiceLabels(item.serviceKeys).slice(0, 1).join('') || 'Chăm sóc';
+                                    const isFirst = index === 0;
+                                    const isLast = index === currentWeekSchedule.length - 1;
+                                    const isAccent = index % 3 === 0;
 
-                                            return (
-                                                <div
-                                                    key={item.day}
-                                                    className={`grid items-center gap-8 ${isLeft ? 'grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)]' : 'grid-cols-[minmax(0,1fr)_64px_minmax(0,1fr)]'}`}
-                                                >
-                                                    <div className={isLeft ? 'col-start-1 text-right' : 'col-start-3 text-left'}>
-                                                        <div
-                                                            className="rounded-xl border bg-white p-6"
-                                                            style={{
-                                                                borderColor: isCurrent ? TIMELINE_PRIMARY : '#E5E7EB',
-                                                                backgroundColor: isCompleted ? '#FFF8FB' : '#FFFFFF',
-                                                                boxShadow: isCurrent ? '0 10px 30px rgba(232, 90, 139, 0.10)' : 'none',
-                                                            }}
-                                                        >
-                                                            <div className={`flex items-center gap-3 ${isLeft ? 'justify-end' : 'justify-start'}`}>
-                                                                <div className="text-[12px] font-black uppercase tracking-[0.16em]" style={{ color: TIMELINE_PRIMARY }}>
-                                                                    Ngày {item.day}
-                                                                </div>
+                                    return (
+                                        <details
+                                            key={`${scheduleWeekIndex}-${item.day}`}
+                                            open={index === 0}
+                                            className={`group rounded-[18px] border border-transparent p-5 transition-all duration-300 ${
+                                                isFirst
+                                                    ? 'bg-white shadow-[0_18px_40px_rgba(236,72,153,0.12)] ring-1 ring-brand/25'
+                                                    : isAccent
+                                                        ? 'bg-[#FFF7FA]'
+                                                        : 'bg-slate-50'
+                                            }`}
+                                        >
+                                            <summary className="flex cursor-pointer list-none gap-4 text-left">
+                                                <div className="relative flex w-14 shrink-0 justify-center">
+                                                    {!isLast && <div className="absolute top-12 h-[calc(100%+1rem)] w-[2px] bg-slate-300" />}
+                                                    <div className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-black transition-all duration-300 ${isFirst ? 'scale-105 bg-brand text-white shadow-[0_10px_24px_rgba(236,72,153,0.28)]' : 'bg-white text-slate-700'}`}>
+                                                        {item.day}
+                                                    </div>
+                                                </div>
+
+                                                <div className="min-w-0 flex-1">
+                                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                                        <div className="min-w-0">
+                                                            <div className="text-[13px] font-medium text-[#9CA3AF]">Ngày {item.day}</div>
+                                                            <div className="mt-1 text-[22px] font-bold leading-tight text-[#111827]">
+                                                                {getScheduleTitle(item)}
                                                             </div>
-
-                                                            <div className="mt-3 text-[17px] font-black leading-7 text-slate-900">
-                                                                {item.title || `Buổi ${item.day}`}
-                                                            </div>
-
-                                                            <div className={`mt-3 inline-flex rounded-xl px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] ${
-                                                                isLeft ? '' : ''
-                                                            }`}
-                                                                style={{
-                                                                    backgroundColor: isCompleted ? '#FCE7F3' : isCurrent ? '#111827' : '#F3F4F6',
-                                                                    color: isCompleted ? TIMELINE_PRIMARY : isCurrent ? '#FFFFFF' : '#6B7280',
-                                                                }}
-                                                            >
-                                                                {isCompleted ? 'Completed' : isCurrent ? 'Current' : 'Upcoming'}
-                                                            </div>
-
-                                                            {serviceLabels.length > 0 && (
-                                                                <div className={`mt-4 flex flex-wrap gap-2 ${isLeft ? 'justify-end' : 'justify-start'}`}>
-                                                                    {serviceLabels.map((label) => (
-                                                                        <span
-                                                                            key={label}
-                                                                            className="rounded-xl px-3 py-1.5 text-[12px] font-bold text-slate-700"
-                                                                            style={{ backgroundColor: '#F9FAFB' }}
-                                                                        >
-                                                                            {label}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            )}
-
-                                                            <div className="mt-5 space-y-3">
-                                                                {highlights.slice(0, 2).map((highlight) => (
-                                                                    <div key={highlight} className={`flex gap-3 text-[14px] font-medium leading-7 text-slate-600 ${isLeft ? 'justify-end' : 'justify-start'}`}>
-                                                                        {!isLeft && <span className="mt-2 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: TIMELINE_PRIMARY }}></span>}
-                                                                        <span>{highlight}</span>
-                                                                        {isLeft && <span className="mt-2 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: TIMELINE_PRIMARY }}></span>}
-                                                                    </div>
-                                                                ))}
-                                                                {highlights.length <= 1 && (
-                                                                    <p className="text-[14px] font-medium leading-7 text-slate-600">{description}</p>
-                                                                )}
-                                                            </div>
-
-                                                            <details className="mt-5 rounded-xl border border-[#E5E7EB] bg-slate-50 px-4 py-3 text-left">
-                                                                <summary className="cursor-pointer list-none text-[12px] font-black uppercase tracking-[0.16em] text-slate-500 transition hover:text-slate-900">
-                                                                    Xem nội dung đầy đủ
-                                                                </summary>
-                                                                <p className="mt-3 text-[14px] font-medium leading-7 text-slate-600">
-                                                                    {description}
-                                                                </p>
-                                                            </details>
+                                                        </div>
+                                                        <div className="shrink-0 rounded-full bg-[#FDF2F8] px-3.5 py-2 text-right text-[12px] font-bold text-[#DB2777]">
+                                                            <div>{label}</div>
+                                                            <div className="mt-0.5 text-[11px] font-semibold text-[#EC4899]">{selectedService?.estimatedDurationMinutes ?? 90} phút</div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="col-start-2 flex justify-center">
-                                                        <div
-                                                            className="relative z-10 flex h-14 w-14 items-center justify-center rounded-full border-4 bg-white text-lg font-black"
-                                                            style={{
-                                                                borderColor: isCurrent ? TIMELINE_PRIMARY : isCompleted ? '#86D3C1' : '#C7D2DA',
-                                                                color: isCompleted ? '#4B9E8A' : isCurrent ? TIMELINE_PRIMARY : '#94A3B8',
-                                                            }}
-                                                        >
-                                                            {item.day}
-                                                        </div>
+                                                    <div className="mt-4 text-[16px] font-normal leading-[1.7] text-[#6B7280]">
+                                                        <span className="group-open:hidden">{getCompactScheduleDescription(selectedService, item)}</span>
+                                                        <span className="hidden group-open:block">{getScheduleDescription(selectedService, item)}</span>
+                                                    </div>
+
+                                                    <div className="mt-3 text-[14px] font-semibold text-brand group-open:hidden">
+                                                        Xem thêm
+                                                    </div>
+                                                    <div className="mt-3 hidden text-[14px] font-semibold text-slate-400 group-open:block">
+                                                        Thu gọn
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-5 md:hidden">
-                                    {visibleTimelineSteps.map((item) => {
-                                        const serviceLabels = getScheduleServiceLabels(item.serviceKeys).slice(0, 2);
-                                        const description = getScheduleDescription(selectedService, item);
-                                        const highlights = getScheduleHighlights(description);
-                                        const stepState = getTimelineStepState(item.day, selectedPackageSchedule.length);
-                                        const isCurrent = stepState === 'current';
-                                        const isCompleted = stepState === 'completed';
-
-                                        return (
-                                            <div key={item.day} className="relative pl-14">
-                                                <div className="absolute bottom-0 left-5 top-0 w-px bg-[#E5E7EB]"></div>
-                                                <div
-                                                    className="absolute left-0 top-1 flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-black"
-                                                    style={{
-                                                        backgroundColor: isCompleted ? '#FCE7F3' : isCurrent ? '#FFF1F6' : '#FFFFFF',
-                                                        borderColor: isCurrent ? TIMELINE_PRIMARY : '#E5E7EB',
-                                                        color: isCompleted || isCurrent ? TIMELINE_PRIMARY : '#94A3B8',
-                                                    }}
-                                                >
-                                                    {item.day}
-                                                </div>
-                                                <div
-                                                    className="rounded-xl border bg-white p-5"
-                                                    style={{
-                                                        borderColor: isCurrent ? TIMELINE_PRIMARY : '#E5E7EB',
-                                                        backgroundColor: isCompleted ? '#FFF8FB' : '#FFFFFF',
-                                                    }}
-                                                >
-                                                    <div className="flex items-center justify-between gap-3">
-                                                        <div className="text-[12px] font-black uppercase tracking-[0.16em] text-slate-400">Ngày {item.day}</div>
-                                                        <span
-                                                            className="rounded-xl px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em]"
-                                                            style={{
-                                                                backgroundColor: isCompleted ? '#FCE7F3' : isCurrent ? '#111827' : '#F3F4F6',
-                                                                color: isCompleted ? TIMELINE_PRIMARY : isCurrent ? '#FFFFFF' : '#6B7280',
-                                                            }}
-                                                        >
-                                                            {isCompleted ? 'Completed' : isCurrent ? 'Current' : 'Upcoming'}
-                                                        </span>
-                                                    </div>
-                                                    <div className="mt-3 text-[18px] font-black leading-7 text-slate-900">
-                                                        {item.title || `Buổi ${item.day}`}
-                                                    </div>
-                                                    {serviceLabels.length > 0 && (
-                                                        <div className="mt-4 flex flex-wrap gap-2">
-                                                            {serviceLabels.map((label) => (
-                                                                <span key={label} className="rounded-xl bg-slate-50 px-3 py-1.5 text-[12px] font-bold text-slate-700">
-                                                                    {label}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                    <div className="mt-4 space-y-3">
-                                                        {highlights.slice(0, 2).map((highlight) => (
-                                                            <div key={highlight} className="flex gap-3 text-[14px] font-medium leading-7 text-slate-600">
-                                                                <span className="mt-2 h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: TIMELINE_PRIMARY }}></span>
-                                                                <span>{highlight}</span>
-                                                            </div>
-                                                        ))}
-                                                        {highlights.length <= 1 && (
-                                                            <p className="text-[14px] font-medium leading-7 text-slate-600">{description}</p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-
-                                {totalTimelinePages > 1 && (
-                                    <div className="mt-6 flex flex-col items-center gap-3 md:hidden">
-                                        <div className="rounded-xl bg-slate-50 px-4 py-3 text-[12px] font-black uppercase tracking-[0.16em] text-slate-500">
-                                            Tuần {timelinePage + 1}/{totalTimelinePages}
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <button
-                                                type="button"
-                                                onClick={() => setTimelinePage((prev) => Math.max(0, prev - 1))}
-                                                disabled={timelinePage === 0}
-                                                className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-[12px] font-black uppercase tracking-[0.16em] text-slate-700 transition disabled:cursor-not-allowed disabled:opacity-40"
-                                            >
-                                                <ChevronLeftIcon className="h-4 w-4" />
-                                                Tuần trước
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setTimelinePage((prev) => Math.min(totalTimelinePages - 1, prev + 1))}
-                                                disabled={timelinePage >= totalTimelinePages - 1}
-                                                className="inline-flex items-center gap-2 rounded-xl border border-[#E5E7EB] bg-white px-4 py-3 text-[12px] font-black uppercase tracking-[0.16em] text-slate-700 transition disabled:cursor-not-allowed disabled:opacity-40"
-                                            >
-                                                Tuần sau
-                                                <ChevronRightIcon className="h-4 w-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                                            </summary>
+                                        </details>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
                 </div>
-            </div>
 
-            <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
-                <div className="grid gap-10 xl:grid-cols-[320px_minmax(0,1fr)]">
-                    <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
-                        <div className="rounded-xl border border-slate-200 bg-white p-7">
-                            <div className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Dịch vụ đang xem</div>
-                            <div className="mt-3 text-2xl font-black leading-tight text-slate-900">{selectedService?.name}</div>
-                            {selectedService?.category && (
-                                <div className="mt-3 inline-flex rounded-xl bg-[#FFF1F6] px-3 py-2 text-[11px] font-black uppercase tracking-[0.16em]" style={{ color: TIMELINE_PRIMARY }}>
-                                    {getCategoryLabel(selectedService.category)}
+                <aside className="rounded-[28px] bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,0.06)] xl:sticky xl:top-24 xl:self-start">
+                    <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Dịch vụ đã chọn</div>
+                    <div className="mt-4 text-[32px] font-black leading-tight text-slate-900">{selectedService?.name}</div>
+                    <div className="mt-4 text-[15px] font-medium leading-7 text-slate-500">
+                        {selectedService?.packageDays ?? 1} buổi • {selectedService?.estimatedDurationMinutes} phút/buổi
+                    </div>
+                    <div className="mt-8 text-[32px] font-black leading-none text-brand">
+                        {selectedService?.basePrice.toLocaleString('vi-VN')}đ
+                    </div>
+                    <div className="mt-4 space-y-2 text-[15px] font-medium leading-6 text-slate-500">
+                        <div>Thanh toán linh hoạt</div>
+                        <div>Hỗ trợ đổi lịch miễn phí</div>
+                    </div>
+
+                    <div className="mt-8 rounded-[24px] bg-slate-50 p-5">
+                        <div className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Y tá đi kèm</div>
+                        {featuredNurse ? (
+                            <div className="mt-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white text-xl font-black text-brand">
+                                        {featuredNurse.avatar ? <img src={featuredNurse.avatar} alt={featuredNurse.fullName} className="h-full w-full object-cover" /> : featuredNurse.fullName.charAt(0)}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <div className="text-[22px] font-black leading-tight text-slate-900">{featuredNurse.fullName}</div>
+                                        <div className="mt-1 text-[14px] font-medium text-slate-500">{featuredNurse.specialization || 'Y tá chăm sóc tại nhà'}</div>
+                                    </div>
                                 </div>
-                            )}
-                            <p className="mt-4 text-sm font-medium leading-7 text-slate-600">{selectedService?.description}</p>
-                        </div>
 
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-7">
-                            <h4 className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Chi phí tham khảo</h4>
-                            <div className="mt-3 text-3xl font-black text-brand">
-                                {selectedService?.basePrice.toLocaleString('vi-VN')}đ
-                            </div>
-                            <div className="mt-2 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
-                                Giá gốc cho 1 buổi • {selectedService?.estimatedDurationMinutes} phút
-                            </div>
-                        </div>
-
-                        <div className="relative overflow-hidden rounded-xl bg-slate-900 p-8 text-white">
-                            <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-brand/10 blur-3xl -mr-16 -mt-16"></div>
-                            <ShieldCheckIcon className="mb-6 h-12 w-12 text-brand" />
-                            <h3 className="mb-3 text-xl font-black">Cam kết chất lượng</h3>
-                            <p className="mb-6 text-sm font-medium leading-7 text-white/55">
-                                Tất cả điều dưỡng trên CareMate đều trải qua quy trình xác minh chặt chẽ trước khi nhận việc.
-                            </p>
-                            <ul className="space-y-4">
-                                {['Bằng cấp chính quy', 'Kinh nghiệm thực tế', 'Lý lịch rõ ràng', 'Kỹ năng giao tiếp tốt'].map((item) => (
-                                    <li key={item} className="flex items-center gap-3 text-xs font-bold">
-                                        <CheckBadgeIcon className="h-4 w-4 text-brand" />
-                                        {item}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {selectedService?.serviceKind === 'package' && selectedPackageSchedule.length > 0 && (
-                            <div className="rounded-xl border border-slate-200 bg-white p-7">
-                                <div className="mb-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">
-                                    Tổng quan nhanh
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600">
+                                        {featuredNurse.yearsExperience}+ năm kinh nghiệm
+                                    </span>
+                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600">
+                                        {featuredNurse.serviceRadiusKm} km hỗ trợ
+                                    </span>
+                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600">
+                                        {featuredNurse.averageRating.toFixed(1)} đánh giá
+                                    </span>
                                 </div>
-                                <p className="mb-5 text-sm font-medium leading-7 text-slate-500">
-                                    Lướt nhanh các buổi chăm sóc trước khi kéo xuống danh sách điều dưỡng.
+
+                                <p className="mt-4 text-[14px] font-medium leading-6 text-slate-500">
+                                    Phù hợp để khách xem nhanh hồ sơ và đặt lịch ngay với gói dịch vụ này.
                                 </p>
-                                <div className="max-h-[360px] space-y-3 overflow-y-auto pr-2">
-                                    {visibleTimelineSteps.map((item) => (
-                                        <div key={item.day} className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                            <div className="mb-2 flex items-center justify-between gap-3">
-                                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand">
-                                                    Ngày {item.day}
-                                                </div>
-                                                {getScheduleServiceLabels(item.serviceKeys).length > 0 && (
-                                                    <div className="text-[10px] font-bold text-slate-400">
-                                                        {getScheduleServiceLabels(item.serviceKeys).slice(0, 2).join(' + ')}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="line-clamp-2 text-sm font-black leading-5 text-slate-900">
-                                                {item.title || `Buổi ${item.day}`}
-                                            </div>
-                                        </div>
-                                    ))}
+
+                                <div className="mt-5 flex flex-wrap gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/nurses/${featuredNurse.userId}?serviceId=${selectedServiceId}`)}
+                                        className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
+                                    >
+                                        Xem hồ sơ
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/nurses/${featuredNurse.userId}?serviceId=${selectedServiceId}`)}
+                                        className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800"
+                                    >
+                                        Đặt lịch
+                                    </button>
                                 </div>
+                            </div>
+                        ) : (
+                            <div className="mt-4 text-[14px] font-medium leading-6 text-slate-500">
+                                Danh sách y tá phù hợp sẽ hiển thị ngay bên dưới khi có dữ liệu.
                             </div>
                         )}
-                    </aside>
-
-                    <main className="min-w-0">
-                        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                            <div>
-                                <div className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Bước 3</div>
-                                <h2 className="mt-2 text-3xl font-black text-slate-900">Chọn điều dưỡng phù hợp</h2>
-                                <p className="mt-2 font-medium leading-7 text-slate-500">
-                                    Tìm thấy {nurses.length} điều dưỡng cho dịch vụ {selectedService?.name}
-                                </p>
-                            </div>
-                            {nursesLoading && (
-                                <div className="h-6 w-6 animate-spin rounded-full border-2 border-brand border-t-transparent"></div>
-                            )}
-                        </div>
-
-                        <div className={`transition-opacity duration-300 ${nursesLoading ? 'opacity-50' : 'opacity-100'}`}>
-                            <AnimatePresence mode="wait">
-                                {nurses.length === 0 ? (
-                                    <motion.div
-                                        key="empty"
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        className="flex flex-col items-center justify-center rounded-xl bg-slate-50 py-40"
-                                    >
-                                        <AcademicCapIcon className="mb-6 h-16 w-16 text-slate-300" />
-                                        <h3 className="text-xl font-black text-slate-900">Chưa tìm thấy điều dưỡng phù hợp</h3>
-                                        <p className="mt-2 text-sm font-medium text-slate-500">Hãy thử chọn nhóm dịch vụ khác hoặc quay lại sau.</p>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div
-                                        key={selectedServiceId}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        className="grid gap-6 md:grid-cols-2"
-                                    >
-                                        {nurses.map((nurse, idx) => (
+                    </div>
+                </aside>
+            </div>
+            <div className="mx-auto w-full max-w-[1680px] px-2 py-10 sm:px-4 lg:px-4">
+                <div className={`transition-opacity duration-300 ${nursesLoading ? 'opacity-50' : 'opacity-100'}`}>
+                        <AnimatePresence mode="wait">
+                            {nurses.length === 0 ? (
+                                <motion.div
+                                    key="empty"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="flex flex-col items-center justify-center rounded-[28px] bg-slate-50 py-40"
+                                >
+                                    <AcademicCapIcon className="mb-6 h-16 w-16 text-slate-300" />
+                                    <h3 className="text-xl font-black text-slate-900">Ch?a t?m th?y y t? ph? h?p</h3>
+                                    <p className="mt-2 text-sm font-medium text-slate-500">H?y th? ch?n nh?m d?ch v? kh?c ho?c quay l?i sau.</p>
+                                </motion.div>
+                            ) : remainingNurses.length === 0 ? (
+                                <motion.div
+                                    key="featured-only"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="rounded-[28px] bg-white px-6 py-8 text-center shadow-[0_8px_24px_rgba(15,23,42,0.04)]"
+                                >
+                                    <h3 className="text-xl font-black text-slate-900">Đã có y tá đi kèm gói dịch vụ này</h3>
+                                    <p className="mt-2 text-[15px] font-medium leading-7 text-slate-500">
+                                        Bạn có thể xem hồ sơ hoặc đặt lịch ngay từ card dịch vụ đã chọn ở bên trên.
+                                    </p>
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key={selectedServiceId}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -10 }}
+                                    className="grid gap-5"
+                                >
+                                    {remainingNurses.map((nurse, idx) => {
+                                        return (
                                             <motion.div
                                                 key={nurse.userId}
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: idx * 0.05 }}
-                                                className="group rounded-xl border border-slate-200 bg-white p-7 transition-all duration-500 hover:border-brand/20 hover:shadow-[0_18px_45px_rgba(232,90,139,0.08)]"
+                                                transition={{ delay: idx * 0.04 }}
+                                                className="rounded-[24px] bg-white px-6 py-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] transition-all duration-300 hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
                                             >
-                                                <div className="mb-8 flex items-start justify-between">
-                                                    <div className="relative">
-                                                        <div className="h-24 w-24 overflow-hidden rounded-xl border-4 border-slate-50 bg-slate-100">
-                                                            {nurse.avatar
-                                                                ? <img src={nurse.avatar} alt={nurse.fullName} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                                                : <div className="flex h-full w-full items-center justify-center text-3xl font-black text-brand">{nurse.fullName.charAt(0)}</div>
-                                                            }
+                                                <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_220px_190px] xl:items-center">
+                                                    <div className="flex min-w-0 gap-4">
+                                                        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-2xl font-black text-brand">
+                                                            {nurse.avatar ? <img src={nurse.avatar} alt={nurse.fullName} className="h-full w-full object-cover" /> : nurse.fullName.charAt(0)}
                                                         </div>
-                                                        <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-4 border-white bg-brand shadow-lg">
-                                                            <CheckBadgeIcon className="h-4 w-4 text-white" />
+                                                        <div className="min-w-0">
+                                                            <h3 className="text-[28px] font-black leading-tight text-slate-900">{nurse.fullName}</h3>
+                                                            <p className="mt-1 text-[15px] font-medium text-slate-500">{nurse.specialization || 'Y tá chăm sóc tại nhà'}</p>
+                                                            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-yellow-50 px-4 py-2 text-sm font-black text-yellow-700">{nurse.averageRating.toFixed(1)} đánh giá</div>
                                                         </div>
                                                     </div>
-                                                    <div className="flex flex-col items-end text-right">
-                                                        <div className="flex items-center gap-1 rounded-xl border border-yellow-100 bg-yellow-50 px-3 py-1.5 text-yellow-600">
-                                                            <StarSolid className="h-3.5 w-3.5" />
-                                                            <span className="text-xs font-black">{nurse.averageRating.toFixed(1)}</span>
-                                                        </div>
-                                                        <div className="mt-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                                                            Đánh giá tốt
-                                                        </div>
+
+                                                    <div>
+                                                        <div className="text-[13px] font-semibold text-slate-400">Thông tin nhanh</div>
+                                                        <div className="mt-2 text-[16px] font-black text-slate-900">{nurse.yearsExperience}+ năm kinh nghiệm</div>
+                                                        <div className="mt-1 text-[16px] font-black text-slate-900">{nurse.serviceRadiusKm} km hỗ trợ</div>
+                                                    </div>
+
+                                                    <div className="xl:text-right">
+                                                        <div className="text-[28px] font-black text-brand">{(nurse.servicePrice ?? selectedService?.basePrice ?? 0).toLocaleString('vi-VN')}đ</div>
+                                                        <div className="mt-1 text-sm font-medium text-slate-400">{nurse.serviceUnit === 'hourly' ? 'Giá theo giờ' : 'Phù hợp với gói bạn đã chọn'}</div>
                                                     </div>
                                                 </div>
 
-                                                <h3 className="mb-2 text-2xl font-black text-slate-900">{nurse.fullName}</h3>
-                                                <p className="mb-8 text-xs font-bold uppercase tracking-[0.1em] text-slate-400">
-                                                    {nurse.specialization || 'Điều dưỡng chuyên môn cao'}
-                                                </p>
-
-                                                <div className="mb-10 grid grid-cols-2 gap-4">
-                                                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                                        <ClockIcon className="mb-2 h-5 w-5 text-brand" />
-                                                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Kinh nghiệm</div>
-                                                        <div className="text-sm font-black text-slate-900">{nurse.yearsExperience}+ năm</div>
+                                                <div className="mt-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                                                    <div className="max-w-[520px]">
+                                                        <div className="text-sm font-black text-slate-900">Phù hợp với gói bạn đã chọn</div>
+                                                        <div className="mt-1 text-[15px] font-medium text-slate-500">Xem nhanh kinh nghiệm, bán kính hỗ trợ và mức giá trước khi đặt lịch.</div>
                                                     </div>
-                                                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-                                                        <HeartIcon className="mb-2 h-5 w-5 text-brand" />
-                                                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Bán kính hỗ trợ</div>
-                                                        <div className="text-sm font-black text-slate-900">{nurse.serviceRadiusKm} km</div>
+                                                    <div className="flex flex-wrap gap-3">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${selectedServiceId}`)}
+                                                            className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                                                        >
+                                                            Xem hồ sơ
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${selectedServiceId}`)}
+                                                            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800"
+                                                        >
+                                                            Đặt lịch
+                                                        </button>
                                                     </div>
                                                 </div>
-
-                                                <button
-                                                    onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${selectedServiceId}`)}
-                                                    className="group/btn w-full btn-primary"
-                                                >
-                                                    Xem hồ sơ và đặt lịch
-                                                    <ArrowRightIcon className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                                                </button>
                                             </motion.div>
-                                        ))}
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    </main>
+                                        );
+                                    })}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
                 </div>
             </div>
         </div>

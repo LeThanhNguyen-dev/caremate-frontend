@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   AcademicCapIcon,
@@ -34,8 +34,6 @@ const addDays = (date: string, offset: number) => {
 
 const formatDate = (value: string) => new Date(`${value}T00:00:00`).toLocaleDateString('vi-VN');
 const formatTime = (value: string) => new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-const formatTimeKey = (value: string) => new Date(value).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-const fullDayTimeRows = Array.from({ length: 24 }, (_, hour) => `${String(hour).padStart(2, '0')}:00`);
 const pendingBookingStorageKey = 'caremate_pending_booking';
 
 const formatRelativeDate = (value: string | null) => {
@@ -144,21 +142,23 @@ const NursePublicDetailPage = () => {
     return Array.from({ length: service.packageDays }, (_, offset) => addDays(selectedDate, offset));
   }, [isPackage, selectedDate, service?.packageDays]);
 
-  const packageTimeRows = useMemo(() => {
-    const times = new Set<string>(fullDayTimeRows);
-    packageDates.forEach((date) => {
-      (slotsByDate[date] || []).forEach((slot) => times.add(formatTimeKey(slot.startTime)));
-    });
-    return Array.from(times).sort();
-  }, [packageDates, slotsByDate]);
+  const packageAvailableSlotsByDate = useMemo(
+    () =>
+      packageDates.map((date) => ({
+        date,
+        slots: (slotsByDate[date] || []).filter((slot) => slot.isAvailable),
+      })),
+    [packageDates, slotsByDate],
+  );
 
-  const singleTimeRows = useMemo(() => {
-    const times = new Set<string>(fullDayTimeRows);
-    availableDates.forEach((date) => {
-      (slotsByDate[date] || []).forEach((slot) => times.add(formatTimeKey(slot.startTime)));
-    });
-    return Array.from(times).sort();
-  }, [availableDates, slotsByDate]);
+  const singleAvailableSlotsByDate = useMemo(
+    () =>
+      availableDates.map((date) => ({
+        date,
+        slots: (slotsByDate[date] || []).filter((slot) => slot.isAvailable),
+      })).filter((item) => item.slots.length > 0),
+    [availableDates, slotsByDate],
+  );
 
   const packageScheduleComplete = packageDates.length > 0 && packageDates.every((date) => Boolean(packageSessionStarts[date]));
   const canSubmit = Boolean(bookingForm.address && (isPackage ? packageScheduleComplete : bookingForm.startTime && selectedSlotId));
@@ -168,9 +168,6 @@ const NursePublicDetailPage = () => {
       setSelectedDate(availableDates[0]);
     }
   }, [availableDates, isPackage, selectedDate]);
-
-  const getSlotForDateTime = (date: string, time: string) =>
-    (slotsByDate[date] || []).find((slot) => formatTimeKey(slot.startTime) === time);
 
   const handleSelectSlot = (slot: AvailabilitySlotDto) => {
     if (!slot.isAvailable) return;
@@ -262,8 +259,8 @@ const NursePublicDetailPage = () => {
   if (!profile || !service || !nurseCard) return null;
 
   return (
-    <div className="min-h-screen bg-[#FDF2F8]/30 pb-32 pt-32 selection:bg-[#EC4899]/10">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FDF2F8]/30 pb-40 pt-32 selection:bg-[#EC4899]/10">
+      <div className="mx-auto max-w-[1280px] px-5 lg:px-6">
         <button
           onClick={() => navigate(-1)}
           className="group mb-12 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-[#6B7280] transition-colors hover:text-[#EC4899]"
@@ -272,8 +269,8 @@ const NursePublicDetailPage = () => {
           Quay lại
         </button>
 
-        <div className="grid items-start gap-12 lg:grid-cols-3">
-          <div className="space-y-12 lg:col-span-2">
+        <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="space-y-10">
             <section className="luxury-card flex flex-col items-start gap-10 p-10 sm:flex-row">
               <div className="relative shrink-0">
                 <div className="h-40 w-40 overflow-hidden rounded-xl border-4 border-[#FDF2F8] bg-[#FDF2F8] shadow-2xl">
@@ -309,248 +306,185 @@ const NursePublicDetailPage = () => {
               </div>
             </section>
 
-            <section className="luxury-card p-10">
-              <div className="mb-10 flex items-center justify-between">
+            <section className="luxury-card p-8">
+              <div className="mb-8 flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-black text-[#111827]">
-                    {isPackage ? 'Chọn lịch cho từng ngày trong gói' : 'Lịch làm việc trống'}
+                  <h2 className="text-[24px] font-black text-[#111827]">
+                    {isPackage ? 'Chọn lịch cho từng ngày trong gói' : 'Chọn lịch phù hợp'}
                   </h2>
-                  <p className="mt-1 text-sm font-bold text-[#6B7280]">
+                  <p className="mt-2 text-[16px] leading-[1.7] text-[#6B7280]">
                     {isPackage
-                      ? 'Sau khi chọn ngày bắt đầu, hãy chọn một khung giờ còn trống cho từng ngày.'
-                      : 'Vui lòng chọn thời gian bạn muốn y tá đến phục vụ.'}
+                      ? 'Chọn ngày bắt đầu rồi chọn một khung giờ khả dụng cho từng ngày.'
+                      : 'Chỉ hiển thị các khung giờ còn nhận lịch để bạn chọn nhanh hơn.'}
                   </p>
                 </div>
                 <CalendarIcon className="h-10 w-10 text-[#EC4899]/30" />
               </div>
 
               {isPackage ? (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
-                      Ngày bắt đầu
-                    </label>
-                    <input
-                      type="date"
-                      min={toDateInputValue(new Date())}
-                      value={selectedDate}
-                      onChange={(event) => handlePackageStartDate(event.target.value)}
-                      className="w-full rounded-xl border-2 border-[#F3E8FF] bg-white p-5 text-sm font-black text-[#111827] outline-none focus:border-[#EC4899]"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
-                      Tiến độ chọn giờ
-                    </label>
-                    <div className="rounded-xl border-2 border-[#F3E8FF] bg-white p-5">
-                      <div className="text-2xl font-black text-[#111827]">
-                        {Object.keys(packageSessionStarts).length}/{packageDates.length}
-                      </div>
-                      <div className="mt-1 text-xs font-bold text-[#6B7280]">ngày đã chọn giờ chăm sóc</div>
-                      <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-widest">
-                        <span className="rounded-xl bg-emerald-50 px-3 py-2 text-emerald-600">Có thể chọn</span>
-                        <span className="rounded-xl bg-red-50 px-3 py-2 text-red-500">Y tá bận</span>
-                        <span className="rounded-xl bg-slate-100 px-3 py-2 text-slate-400">Không mở slot</span>
+                <div className="space-y-8">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
+                        Ngày bắt đầu
+                      </label>
+                      <input
+                        type="date"
+                        min={toDateInputValue(new Date())}
+                        value={selectedDate}
+                        onChange={(event) => handlePackageStartDate(event.target.value)}
+                        className="w-full rounded-2xl border-none bg-[#F9FAFB] p-5 text-[16px] font-semibold text-[#111827] outline-none focus:ring-2 focus:ring-[#EC4899]/20"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
+                        Tiến độ chọn giờ
+                      </label>
+                      <div className="rounded-2xl bg-[#F9FAFB] p-5">
+                        <div className="text-2xl font-black text-[#111827]">
+                          {Object.keys(packageSessionStarts).length}/{packageDates.length}
+                        </div>
+                        <div className="mt-1 text-[15px] leading-[1.7] text-[#6B7280]">ngày đã chọn đủ giờ chăm sóc</div>
+                        <div className="mt-4 inline-flex rounded-full bg-[#FDF2F8] px-3 py-2 text-[12px] font-bold text-[#DB2777]">
+                          Chỉ hiển thị slot khả dụng
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="sm:col-span-2">
-                    {packageDates.length === 0 || packageTimeRows.length === 0 ? (
-                      <div className="rounded-xl border-2 border-dashed border-[#F3E8FF] bg-white p-8 text-center text-sm font-bold leading-6 text-[#6B7280]">
-                        Y tá chưa mở slot trong các ngày của gói. Vui lòng chọn ngày bắt đầu khác.
-                      </div>
-                    ) : (
-                      <div className="custom-scrollbar max-h-[560px] overflow-auto rounded-xl border border-[#F3E8FF] bg-white shadow-inner shadow-pink-50">
-                        <div
-                          className="grid min-w-max"
-                          style={{ gridTemplateColumns: `112px repeat(${packageDates.length}, minmax(150px, 1fr))` }}
-                        >
-                          <div className="sticky left-0 top-0 z-30 border-b border-r border-[#F3E8FF] bg-[#FDF2F8] p-4 text-xs font-black text-[#111827] shadow-sm">
-                            Giờ
-                          </div>
-                          {packageDates.map((date, index) => (
-                            <div key={date} className="sticky top-0 z-20 border-b border-r border-[#F3E8FF] bg-[#FDF2F8] p-4 text-center shadow-sm last:border-r-0">
-                              <div className="text-xs font-black text-[#111827]">Ngày {index + 1}</div>
-                              <div className="mt-1 text-[10px] font-bold text-[#6B7280]">{formatDate(date)}</div>
-                            </div>
-                          ))}
+                  {packageDates.length === 0 || packageAvailableSlotsByDate.every((item) => item.slots.length === 0) ? (
+                    <div className="rounded-2xl bg-[#F9FAFB] p-8 text-center text-[15px] leading-[1.7] text-[#6B7280]">
+                      Y tá chưa mở slot phù hợp trong các ngày của gói. Vui lòng chọn ngày bắt đầu khác.
+                    </div>
+                  ) : (
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {packageAvailableSlotsByDate.map(({ date, slots }, index) => {
+                        if (slots.length === 0) return null;
 
-                          {packageTimeRows.map((time) => (
-                            <div key={time} className="contents">
-                              <div className="sticky left-0 z-10 border-b border-r border-[#F3E8FF] bg-white p-3 text-center text-sm font-black text-[#111827] shadow-sm">
-                                {time}
+                        return (
+                          <div key={date} className="rounded-2xl bg-[#F9FAFB] p-5">
+                            <div className="mb-4 flex items-start justify-between gap-4">
+                              <div>
+                                <div className="text-[13px] font-medium text-[#9CA3AF]">Ngày {index + 1}</div>
+                                <div className="mt-1 text-[20px] font-bold text-[#111827]">{formatDate(date)}</div>
                               </div>
-                              {packageDates.map((date) => {
-                                const slot = getSlotForDateTime(date, time);
-                                const active = slot ? packageSessionStarts[date] === slot.startTime : false;
+                              {packageSessionStarts[date] && (
+                                <div className="rounded-full bg-[#FDF2F8] px-3 py-1.5 text-[12px] font-bold text-[#DB2777]">Đã chọn</div>
+                              )}
+                            </div>
 
-                                if (!slot) {
-                                  return (
-                                    <div key={`${date}-${time}`} className="border-b border-r border-[#F3E8FF] bg-slate-50 p-2 last:border-r-0">
-                                      <div className="rounded-xl bg-slate-100 px-3 py-4 text-center text-xs font-black text-slate-400">
-                                        Không mở
-                                      </div>
-                                    </div>
-                                  );
-                                }
-
-                                if (!slot.isAvailable) {
-                                  return (
-                                    <div key={slot.id} className="border-b border-r border-[#F3E8FF] bg-red-50/40 p-2 last:border-r-0">
-                                      <button
-                                        type="button"
-                                        disabled
-                                        className="w-full cursor-not-allowed rounded-xl border-2 border-red-100 bg-red-50 px-3 py-4 text-center text-xs font-black text-red-500"
-                                      >
-                                        Bận
-                                      </button>
-                                    </div>
-                                  );
-                                }
-
+                            <div className="grid grid-cols-2 gap-3">
+                              {slots.map((slot) => {
+                                const active = packageSessionStarts[date] === slot.startTime;
                                 return (
-                                  <div key={slot.id} className="border-b border-r border-[#F3E8FF] p-2 last:border-r-0">
-                                    <button
-                                      type="button"
-                                      onClick={() => handlePackageSlotSelect(date, slot)}
-                                      className={`w-full rounded-xl border-2 px-3 py-4 text-center text-xs font-black transition ${
-                                        active
-                                          ? 'border-[#EC4899] bg-[#FDF2F8] text-[#EC4899] shadow-md'
-                                          : 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:border-[#EC4899] hover:bg-white hover:text-[#EC4899]'
-                                      }`}
-                                    >
-                                      {active ? 'Đã chọn' : 'Chọn'}
-                                    </button>
-                                  </div>
+                                  <button
+                                    key={slot.id}
+                                    type="button"
+                                    onClick={() => handlePackageSlotSelect(date, slot)}
+                                    className={`rounded-2xl px-4 py-4 text-left transition ${
+                                      active
+                                        ? 'bg-[#EC4899] text-white shadow-[0_12px_24px_rgba(236,72,153,0.25)]'
+                                        : 'bg-white text-[#111827] hover:bg-[#FFF7FA]'
+                                    }`}
+                                  >
+                                    <div className="text-[16px] font-bold">{formatTime(slot.startTime)}</div>
+                                    <div className={`mt-1 text-[13px] ${active ? 'text-white/80' : 'text-[#9CA3AF]'}`}>
+                                      {formatTime(slot.endTime)}
+                                    </div>
+                                  </button>
                                 );
                               })}
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="sm:col-span-2 rounded-xl bg-[#FDF2F8] p-5 text-sm font-bold leading-6 text-[#6B7280]">
-                    Chọn một ô xanh cho từng ngày trong gói. Ô đỏ là khung giờ y tá đã bận, hệ thống vẫn kiểm tra trùng lịch lần nữa trước khi tạo đặt lịch.
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  <div className="rounded-2xl bg-[#FFF7FA] p-5 text-[15px] leading-[1.7] text-[#6B7280]">
+                    Mỗi ngày chỉ cần chọn một khung giờ phù hợp. Hệ thống sẽ giữ đúng lịch bạn chọn cho toàn bộ gói.
                   </div>
                 </div>
-              ) : availableDates.length === 0 || singleTimeRows.length === 0 ? (
-                <div className="rounded-xl border-2 border-dashed border-[#F3E8FF] py-16 text-center">
+              ) : singleAvailableSlotsByDate.length === 0 ? (
+                <div className="rounded-2xl bg-[#F9FAFB] py-16 text-center">
                   <ClockIcon className="mx-auto mb-4 h-10 w-10 text-[#9CA3AF]" />
-                  <p className="text-sm font-bold text-[#6B7280]">Y tá hiện không còn lịch trống cho dịch vụ này.</p>
+                  <p className="text-[15px] leading-[1.7] text-[#6B7280]">Y tá hiện không còn lịch trống cho dịch vụ này.</p>
                 </div>
               ) : (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
-                      Lịch đã chọn
-                    </label>
-                    <div className="rounded-xl border-2 border-[#F3E8FF] bg-white p-5">
-                      <div className="text-2xl font-black text-[#111827]">
-                        {bookingForm.startTime ? formatDate(new Date(bookingForm.startTime).toLocaleDateString('en-CA')) : 'Chưa chọn'}
-                      </div>
-                      <div className="mt-1 text-xs font-bold text-[#6B7280]">
-                        {bookingForm.startTime
-                          ? `${formatTime(bookingForm.startTime)} - ${formatTime(bookingForm.endTime)}`
-                          : 'Chọn một ô xanh trong bảng lịch'}
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
-                      Trạng thái slot
-                    </label>
-                    <div className="rounded-xl border-2 border-[#F3E8FF] bg-white p-5">
-                      <div className="text-2xl font-black text-[#111827]">
-                        {availableDates.length}
-                      </div>
-                      <div className="mt-1 text-xs font-bold text-[#6B7280]">ngày còn khung giờ trống</div>
-                      <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-black uppercase tracking-widest">
-                        <span className="rounded-xl bg-emerald-50 px-3 py-2 text-emerald-600">Có thể chọn</span>
-                        <span className="rounded-xl bg-red-50 px-3 py-2 text-red-500">Y tá bận</span>
-                        <span className="rounded-xl bg-slate-100 px-3 py-2 text-slate-400">Không mở slot</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <div className="custom-scrollbar max-h-[560px] overflow-auto rounded-xl border border-[#F3E8FF] bg-white shadow-inner shadow-pink-50">
-                      <div
-                        className="grid min-w-max"
-                        style={{ gridTemplateColumns: `112px repeat(${availableDates.length}, minmax(150px, 1fr))` }}
-                      >
-                        <div className="sticky left-0 top-0 z-30 border-b border-r border-[#F3E8FF] bg-[#FDF2F8] p-4 text-xs font-black text-[#111827] shadow-sm">
-                          Giờ
+                <div className="space-y-8">
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
+                        Lịch đã chọn
+                      </label>
+                      <div className="rounded-2xl bg-[#F9FAFB] p-5">
+                        <div className="text-2xl font-black text-[#111827]">
+                          {bookingForm.startTime ? formatDate(new Date(bookingForm.startTime).toLocaleDateString('en-CA')) : 'Chưa chọn'}
                         </div>
-                        {availableDates.map((date) => {
-                          const parsed = new Date(`${date}T00:00:00`);
-                          return (
-                            <div key={date} className="sticky top-0 z-20 border-b border-r border-[#F3E8FF] bg-[#FDF2F8] p-4 text-center shadow-sm last:border-r-0">
-                              <div className="text-xs font-black text-[#111827]">
-                                {parsed.toLocaleDateString('vi-VN', { weekday: 'short' })}
-                              </div>
-                              <div className="mt-1 text-[10px] font-bold text-[#6B7280]">{formatDate(date)}</div>
+                        <div className="mt-1 text-[15px] leading-[1.7] text-[#6B7280]">
+                          {bookingForm.startTime
+                            ? `${formatTime(bookingForm.startTime)} - ${formatTime(bookingForm.endTime)}`
+                            : 'Chọn một khung giờ khả dụng bên dưới'}
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
+                        Lịch khả dụng
+                      </label>
+                      <div className="rounded-2xl bg-[#F9FAFB] p-5">
+                        <div className="text-2xl font-black text-[#111827]">
+                          {singleAvailableSlotsByDate.length}
+                        </div>
+                        <div className="mt-1 text-[15px] leading-[1.7] text-[#6B7280]">ngày còn khung giờ trống</div>
+                        <div className="mt-4 inline-flex rounded-full bg-[#FDF2F8] px-3 py-2 text-[12px] font-bold text-[#DB2777]">
+                          Chỉ hiện khung giờ có thể đặt
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {singleAvailableSlotsByDate.map(({ date, slots }) => {
+                      const parsed = new Date(`${date}T00:00:00`);
+                      return (
+                        <div key={date} className="rounded-2xl bg-[#F9FAFB] p-5">
+                          <div className="mb-4">
+                            <div className="text-[13px] font-medium uppercase tracking-[0.08em] text-[#9CA3AF]">
+                              {parsed.toLocaleDateString('vi-VN', { weekday: 'long' })}
                             </div>
-                          );
-                        })}
+                            <div className="mt-1 text-[20px] font-bold text-[#111827]">{formatDate(date)}</div>
+                          </div>
 
-                        {singleTimeRows.map((time) => (
-                          <div key={time} className="contents">
-                            <div className="sticky left-0 z-10 border-b border-r border-[#F3E8FF] bg-white p-3 text-center text-sm font-black text-[#111827] shadow-sm">
-                              {time}
-                            </div>
-                            {availableDates.map((date) => {
-                              const slot = getSlotForDateTime(date, time);
-                              const active = slot ? selectedSlotId === slot.id : false;
-
-                              if (!slot) {
-                                return (
-                                  <div key={`${date}-${time}`} className="border-b border-r border-[#F3E8FF] bg-slate-50 p-2 last:border-r-0">
-                                    <div className="rounded-xl bg-slate-100 px-3 py-4 text-center text-xs font-black text-slate-400">
-                                      Không mở
-                                    </div>
-                                  </div>
-                                );
-                              }
-
-                              if (!slot.isAvailable) {
-                                return (
-                                  <div key={slot.id} className="border-b border-r border-[#F3E8FF] bg-red-50/40 p-2 last:border-r-0">
-                                    <button
-                                      type="button"
-                                      disabled
-                                      className="w-full cursor-not-allowed rounded-xl border-2 border-red-100 bg-red-50 px-3 py-4 text-center text-xs font-black text-red-500"
-                                    >
-                                      Bận
-                                    </button>
-                                  </div>
-                                );
-                              }
-
+                          <div className="grid grid-cols-2 gap-3">
+                            {slots.map((slot) => {
+                              const active = selectedSlotId === slot.id;
                               return (
-                                <div key={slot.id} className="border-b border-r border-[#F3E8FF] p-2 last:border-r-0">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleSelectSlot(slot)}
-                                    className={`w-full rounded-xl border-2 px-3 py-4 text-center text-xs font-black transition ${
+                                <button
+                                  key={slot.id}
+                                  type="button"
+                                  onClick={() => handleSelectSlot(slot)}
+                                  className={`rounded-2xl px-4 py-4 text-left transition ${
                                       active
-                                        ? 'border-[#EC4899] bg-[#FDF2F8] text-[#EC4899] shadow-md'
-                                        : 'border-emerald-100 bg-emerald-50 text-emerald-700 hover:border-[#EC4899] hover:bg-white hover:text-[#EC4899]'
+                                        ? 'bg-[#EC4899] text-white shadow-[0_12px_24px_rgba(236,72,153,0.25)]'
+                                        : 'bg-white text-[#111827] hover:bg-[#FFF7FA]'
                                     }`}
-                                  >
-                                    {active ? 'Đã chọn' : 'Chọn'}
-                                  </button>
-                                </div>
+                                >
+                                  <div className="text-[16px] font-bold">{formatTime(slot.startTime)}</div>
+                                  <div className={`mt-1 text-[13px] ${active ? 'text-white/80' : 'text-[#9CA3AF]'}`}>
+                                    {formatTime(slot.endTime)}
+                                  </div>
+                                </button>
                               );
                             })}
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="sm:col-span-2 rounded-xl bg-[#FDF2F8] p-5 text-sm font-bold leading-6 text-[#6B7280]">
-                    Chọn một ô xanh để đặt dịch vụ lẻ. Ô đỏ là khung giờ y tá đã bận, hệ thống vẫn kiểm tra trùng lịch lần nữa trước khi tạo đặt lịch.
+
+                  <div className="rounded-2xl bg-[#FFF7FA] p-5 text-[15px] leading-[1.7] text-[#6B7280]">
+                    Chỉ còn các khung giờ y tá thật sự có thể nhận lịch, nên bạn không cần lọc thêm các slot không mở.
                   </div>
                 </div>
               )}
@@ -595,40 +529,40 @@ const NursePublicDetailPage = () => {
             </section>
           </div>
 
-          <aside className="space-y-8 lg:sticky lg:top-32">
-            <section className="luxury-card border-none bg-[#111827] p-10 text-white shadow-2xl shadow-pink-100">
-              <div className="accent-label border-white/10 !bg-white/10 !text-white">Thông tin dịch vụ</div>
-              <h2 className="text-2xl font-black text-white">{service.name}</h2>
-              <p className="mt-4 text-sm font-medium leading-relaxed text-white/60">
-                {isPackage ? 'Gói dịch vụ được tính theo toàn bộ lộ trình chăm sóc.' : 'Đơn giá chính thức được tính dựa trên khung giờ bạn lựa chọn.'}
+          <aside className="space-y-6 lg:sticky lg:top-32">
+            <section className="luxury-card border-none bg-white p-8 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
+              <div className="accent-label !bg-[#FDF2F8] !text-[#DB2777]">Thông tin dịch vụ</div>
+              <h2 className="text-[24px] font-black text-[#111827]">{service.name}</h2>
+              <p className="mt-3 text-[15px] leading-[1.7] text-[#6B7280]">
+                {isPackage ? 'Gói dịch vụ được tính theo toàn bộ lộ trình chăm sóc.' : 'Chi phí được tính theo khung giờ bạn chọn.'}
               </p>
 
-              <div className="mt-10 space-y-4">
-                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-5">
+              <div className="mt-8 space-y-3">
+                <div className="flex items-center justify-between rounded-2xl bg-[#F9FAFB] p-5">
                   <div className="flex items-center gap-3">
                     <CurrencyDollarIcon className="h-6 w-6 text-[#EC4899]" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-white/60">Chi phí dự kiến</span>
+                    <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#9CA3AF]">Chi phí dự kiến</span>
                   </div>
-                  <span className="text-xl font-black text-[#EC4899]">{(nurseCard.servicePrice ?? service.basePrice).toLocaleString('vi-VN')}đ</span>
+                  <span className="text-[24px] font-black text-[#EC4899]">{(nurseCard.servicePrice ?? service.basePrice).toLocaleString('vi-VN')}đ</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 p-5">
+                <div className="flex items-center justify-between rounded-2xl bg-[#F9FAFB] p-5">
                   <div className="flex items-center gap-3">
                     <ClockIcon className="h-6 w-6 text-[#EC4899]" />
-                    <span className="text-xs font-bold uppercase tracking-widest text-white/60">{isPackage ? 'Lộ trình' : 'Thời lượng'}</span>
+                    <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#9CA3AF]">{isPackage ? 'Lộ trình' : 'Thời lượng'}</span>
                   </div>
-                  <span className="text-lg font-black text-white">{isPackage ? `${service.packageDays} ngày` : `${service.estimatedDurationMinutes} phút`}</span>
+                  <span className="text-[20px] font-black text-[#111827]">{isPackage ? `${service.packageDays} ngày` : `${service.estimatedDurationMinutes} phút`}</span>
                 </div>
               </div>
 
-              <form onSubmit={submitBooking} className="mt-12 space-y-6">
+              <form onSubmit={submitBooking} className="mt-8 space-y-5">
                 <div>
-                  <label className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Địa chỉ phục vụ</label>
+                  <label className="ml-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Địa chỉ phục vụ</label>
                   <div className="relative mt-2">
-                    <MapPinIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30" />
+                    <MapPinIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                     <input
                       type="text"
                       placeholder="Số nhà, tên đường, quận..."
-                      className="w-full rounded-xl border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white placeholder:text-white/20 focus:border-[#EC4899] focus:ring-1 focus:ring-[#EC4899]"
+                      className="w-full rounded-2xl border-none bg-[#F9FAFB] py-4 pl-12 pr-4 text-[15px] font-medium text-[#111827] placeholder:text-[#9CA3AF] focus:ring-2 focus:ring-[#EC4899]/20"
                       value={bookingForm.address}
                       onChange={(event) => setBookingForm({ ...bookingForm, address: event.target.value })}
                       required
@@ -636,13 +570,13 @@ const NursePublicDetailPage = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="ml-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Ghi chú cho y tá</label>
+                  <label className="ml-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Ghi chú cho y tá</label>
                   <div className="relative mt-2">
-                    <ChatBubbleBottomCenterTextIcon className="absolute left-4 top-4 h-5 w-5 text-white/30" />
+                    <ChatBubbleBottomCenterTextIcon className="absolute left-4 top-4 h-5 w-5 text-[#9CA3AF]" />
                     <textarea
                       placeholder="Lưu ý đặc biệt nếu có..."
                       rows={3}
-                      className="w-full rounded-xl border-white/10 bg-white/5 py-4 pl-12 pr-4 text-sm font-bold text-white placeholder:text-white/20 focus:border-[#EC4899] focus:ring-1 focus:ring-[#EC4899]"
+                      className="w-full rounded-2xl border-none bg-[#F9FAFB] py-4 pl-12 pr-4 text-[15px] font-medium text-[#111827] placeholder:text-[#9CA3AF] focus:ring-2 focus:ring-[#EC4899]/20"
                       value={bookingForm.notes}
                       onChange={(event) => setBookingForm({ ...bookingForm, notes: event.target.value })}
                     />
@@ -650,38 +584,61 @@ const NursePublicDetailPage = () => {
                 </div>
 
                 {!isAuthenticated ? (
-                  <button type="button" onClick={() => navigate('/login')} className="btn-primary w-full rounded-xl !bg-white py-5 text-xs font-black uppercase tracking-[0.2em] !text-[#111827] shadow-none hover:!bg-[#FDF2F8]">
+                  <button type="button" onClick={() => navigate('/login')} className="btn-primary w-full rounded-2xl !bg-[#111827] py-4 text-[14px] font-black !text-white shadow-none hover:!bg-slate-800">
                     Đăng nhập để đặt lịch
                   </button>
                 ) : (
-                  <button type="submit" disabled={booking || !canSubmit} className="btn-primary w-full rounded-xl !bg-[#EC4899] py-5 text-xs font-black uppercase tracking-[0.2em] shadow-2xl shadow-pink-900/40 disabled:opacity-30 disabled:shadow-none">
-                    {booking ? 'Đang xử lý...' : isPackage ? 'Thanh toán rồi đặt gói' : 'Thanh toán rồi đặt lịch'}
+                  <button type="submit" disabled={booking || !canSubmit} className="btn-primary w-full rounded-2xl !bg-[#EC4899] py-4 text-[14px] font-black !text-white shadow-[0_18px_30px_rgba(236,72,153,0.25)] disabled:opacity-30 disabled:shadow-none">
+                    {booking ? 'Đang xử lý...' : 'Tiếp tục đặt lịch'}
                   </button>
                 )}
               </form>
 
-              <div className="mt-10 flex items-center gap-3 border-t border-white/5 pt-8 text-[10px] font-black uppercase tracking-widest text-white/30">
+              <div className="mt-8 flex items-center gap-3 pt-2 text-[11px] font-black uppercase tracking-[0.16em] text-[#9CA3AF]">
                 <ShieldCheckIcon className="h-5 w-5 text-[#EC4899]" />
-                Thanh toán an toàn & bảo mật
+                Thanh toán an toàn và bảo mật
               </div>
             </section>
 
-            <div className="rounded-xl border border-[#F3E8FF] bg-white p-8 shadow-sm">
+            <div className="rounded-2xl bg-white p-6 shadow-sm">
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#FDF2F8] text-[#EC4899]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FDF2F8] text-[#EC4899]">
                   <HeartIcon className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="text-sm font-black text-[#111827]">Chăm sóc 24/7</div>
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280]">Hỗ trợ khẩn cấp</div>
+                  <div className="text-[15px] font-black text-[#111827]">Chăm sóc 24/7</div>
+                  <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-[#6B7280]">Hỗ trợ khẩn cấp</div>
                 </div>
               </div>
             </div>
           </aside>
         </div>
       </div>
+      {isAuthenticated && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/60 bg-white/90 backdrop-blur">
+          <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-5 py-4 lg:px-6">
+            <div className="min-w-0">
+              <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF]">Tiến độ đặt lịch</div>
+              <div className="mt-1 text-[16px] font-bold text-[#111827]">
+                {canSubmit ? 'Bạn đã sẵn sàng để tiếp tục đặt lịch' : 'Chọn lịch và điền địa chỉ để tiếp tục'}
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={!canSubmit || booking}
+              onClick={() => document.querySelector('form')?.requestSubmit()}
+              className="shrink-0 rounded-2xl bg-[#EC4899] px-6 py-4 text-[14px] font-black text-white shadow-[0_18px_30px_rgba(236,72,153,0.22)] transition hover:bg-[#db2777] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+            >
+              {booking ? 'Đang xử lý...' : 'Tiếp tục đặt lịch'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 export default NursePublicDetailPage;
+
+
+
