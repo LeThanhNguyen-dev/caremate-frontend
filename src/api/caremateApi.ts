@@ -8,6 +8,8 @@ import type {
   AvailabilitySlotDto,
   BookingDetailDto,
   ChatMessage,
+  CommunityCommentDto,
+  CommunityPostDto,
   Conversation,
   Dispute,
   HealthAnalysisResponse,
@@ -204,6 +206,26 @@ export const caremateApi = {
       .map(normalizeReview)
       .filter((item) => item.rating > 0);
   },
+
+  getCommunityPosts: async (params?: { search?: string }): Promise<CommunityPostDto[]> =>
+    (await axiosInstance.get('/api/community/posts', { params })).data,
+  createCommunityPost: async (payload: { title: string; content: string; tags: string[]; image?: File | null }): Promise<CommunityPostDto> => {
+    const formData = new FormData();
+    formData.append('Title', payload.title);
+    formData.append('Content', payload.content);
+    payload.tags.forEach((tag) => formData.append('Tags', tag));
+    if (payload.image) formData.append('Image', payload.image);
+
+    return (await axiosInstance.post('/api/community/posts', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })).data;
+  },
+  toggleCommunityPostLike: async (postId: number): Promise<CommunityPostDto> =>
+    (await axiosInstance.post(`/api/community/posts/${postId}/like`)).data,
+  createCommunityComment: async (postId: number, payload: { content: string }): Promise<CommunityCommentDto> =>
+    (await axiosInstance.post(`/api/community/posts/${postId}/comments`, payload)).data,
 
   getServices: async (): Promise<ServiceDetailDto[]> => (await axiosInstance.get('/api/services')).data,
   getServiceById: async (id: number): Promise<ServiceDetailDto> => (await axiosInstance.get(`/api/services/${id}`)).data,

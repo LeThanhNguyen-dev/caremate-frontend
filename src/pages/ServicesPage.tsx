@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
     MagnifyingGlassIcon,
-    AcademicCapIcon,
     Squares2X2Icon,
     SparklesIcon
 } from '@heroicons/react/24/outline';
@@ -118,7 +116,7 @@ const ServicesPage = () => {
     const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
     const [loading, setLoading] = useState(true);
-    const [nursesLoading, setNursesLoading] = useState(false);
+    const [, setNursesLoading] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [scheduleWeekIndex, setScheduleWeekIndex] = useState(0);
 
@@ -187,10 +185,6 @@ const ServicesPage = () => {
 
     const selectedService = useMemo(() => services.find(s => s.id === selectedServiceId), [services, selectedServiceId]);
     const featuredNurse = useMemo(() => nurses[0] ?? null, [nurses]);
-    const remainingNurses = useMemo(
-        () => nurses.filter(nurse => nurse.userId !== featuredNurse?.userId),
-        [nurses, featuredNurse]
-    );
     const selectedPackageSchedule = useMemo(() => getVisiblePackageSchedule(selectedService), [selectedService]);
     const totalScheduleWeeks = Math.max(1, Math.ceil(selectedPackageSchedule.length / 7));
     const currentWeekSchedule = useMemo(
@@ -244,7 +238,7 @@ const ServicesPage = () => {
                 </div>
             </section>
 
-            <div className="relative z-20 mx-auto -mt-12 w-full max-w-[1680px] px-2 sm:px-4 lg:px-4">
+            <div className="relative z-20 mx-auto w-full max-w-[1680px] px-2 pb-14 pt-8 sm:px-4 lg:px-4">
                 <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
                     <div className="rounded-[28px] bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.06)] md:p-8">
                     <div className="mb-10 flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
@@ -534,106 +528,7 @@ const ServicesPage = () => {
                     </div>
                 </aside>
             </div>
-            <div className="mx-auto w-full max-w-[1680px] px-2 py-10 sm:px-4 lg:px-4">
-                <div className={`transition-opacity duration-300 ${nursesLoading ? 'opacity-50' : 'opacity-100'}`}>
-                        <AnimatePresence mode="wait">
-                            {nurses.length === 0 ? (
-                                <motion.div
-                                    key="empty"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="flex flex-col items-center justify-center rounded-[28px] bg-slate-50 py-40"
-                                >
-                                    <AcademicCapIcon className="mb-6 h-16 w-16 text-slate-300" />
-                                    <h3 className="text-xl font-black text-slate-900">Ch?a t?m th?y y t? ph? h?p</h3>
-                                    <p className="mt-2 text-sm font-medium text-slate-500">H?y th? ch?n nh?m d?ch v? kh?c ho?c quay l?i sau.</p>
-                                </motion.div>
-                            ) : remainingNurses.length === 0 ? (
-                                <motion.div
-                                    key="featured-only"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="rounded-[28px] bg-white px-6 py-8 text-center shadow-[0_8px_24px_rgba(15,23,42,0.04)]"
-                                >
-                                    <h3 className="text-xl font-black text-slate-900">Đã có y tá đi kèm gói dịch vụ này</h3>
-                                    <p className="mt-2 text-[15px] font-medium leading-7 text-slate-500">
-                                        Bạn có thể xem hồ sơ hoặc đặt lịch ngay từ card dịch vụ đã chọn ở bên trên.
-                                    </p>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key={selectedServiceId}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -10 }}
-                                    className="grid gap-5"
-                                >
-                                    {remainingNurses.map((nurse, idx) => {
-                                        return (
-                                            <motion.div
-                                                key={nurse.userId}
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                transition={{ delay: idx * 0.04 }}
-                                                className="rounded-[24px] bg-white px-6 py-5 shadow-[0_8px_24px_rgba(15,23,42,0.04)] transition-all duration-300 hover:shadow-[0_12px_28px_rgba(15,23,42,0.06)]"
-                                            >
-                                                <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_220px_190px] xl:items-center">
-                                                    <div className="flex min-w-0 gap-4">
-                                                        <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-100 text-2xl font-black text-brand">
-                                                            {nurse.avatar ? <img src={nurse.avatar} alt={nurse.fullName} className="h-full w-full object-cover" /> : nurse.fullName.charAt(0)}
-                                                        </div>
-                                                        <div className="min-w-0">
-                                                            <h3 className="text-[28px] font-black leading-tight text-slate-900">{nurse.fullName}</h3>
-                                                            <p className="mt-1 text-[15px] font-medium text-slate-500">{nurse.specialization || 'Y tá chăm sóc tại nhà'}</p>
-                                                            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-yellow-50 px-4 py-2 text-sm font-black text-yellow-700">{nurse.averageRating.toFixed(1)} đánh giá</div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div>
-                                                        <div className="text-[13px] font-semibold text-slate-400">Thông tin nhanh</div>
-                                                        <div className="mt-2 text-[16px] font-black text-slate-900">{nurse.yearsExperience}+ năm kinh nghiệm</div>
-                                                        <div className="mt-1 text-[16px] font-black text-slate-900">{nurse.serviceRadiusKm} km hỗ trợ</div>
-                                                    </div>
-
-                                                    <div className="xl:text-right">
-                                                        <div className="text-[28px] font-black text-brand">{(nurse.servicePrice ?? selectedService?.basePrice ?? 0).toLocaleString('vi-VN')}đ</div>
-                                                        <div className="mt-1 text-sm font-medium text-slate-400">{nurse.serviceUnit === 'hourly' ? 'Giá theo giờ' : 'Phù hợp với gói bạn đã chọn'}</div>
-                                                    </div>
-                                                </div>
-
-                                                <div className="mt-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                                                    <div className="max-w-[520px]">
-                                                        <div className="text-sm font-black text-slate-900">Phù hợp với gói bạn đã chọn</div>
-                                                        <div className="mt-1 text-[15px] font-medium text-slate-500">Xem nhanh kinh nghiệm, bán kính hỗ trợ và mức giá trước khi đặt lịch.</div>
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-3">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${selectedServiceId}`)}
-                                                            className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-                                                        >
-                                                            Xem hồ sơ
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${selectedServiceId}`)}
-                                                            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800"
-                                                        >
-                                                            Đặt lịch
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        );
-                                    })}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
-            </div>
+        </div>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   AcademicCapIcon,
@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import caremateApi from '../api/caremateApi';
+import goongApi, { createGoongSessionToken, type GoongPrediction } from '../api/goongApi';
 import type {
   AvailabilitySlotDto,
   NurseDiscoveryDto,
@@ -67,6 +68,10 @@ const NursePublicDetailPage = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
   const [packageSessionStarts, setPackageSessionStarts] = useState<Record<string, string>>({});
+  const [addressSuggestions, setAddressSuggestions] = useState<GoongPrediction[]>([]);
+  const [addressSuggestionsOpen, setAddressSuggestionsOpen] = useState(false);
+  const [addressLookupLoading, setAddressLookupLoading] = useState(false);
+  const goongSessionTokenRef = useRef(createGoongSessionToken());
   const [bookingForm, setBookingForm] = useState({
     serviceId: serviceIdFromUrl || '',
     startTime: '',
@@ -164,6 +169,42 @@ const NursePublicDetailPage = () => {
   const canSubmit = Boolean(bookingForm.address && (isPackage ? packageScheduleComplete : bookingForm.startTime && selectedSlotId));
 
   useEffect(() => {
+    const input = bookingForm.address.trim();
+
+    if (!goongApi.hasApiKey || input.length < 3) {
+      setAddressSuggestions([]);
+      setAddressLookupLoading(false);
+      return;
+    }
+
+    const abortController = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      setAddressLookupLoading(true);
+      void goongApi
+        .autocomplete(input, goongSessionTokenRef.current, abortController.signal)
+        .then((suggestions) => {
+          setAddressSuggestions(suggestions);
+          setAddressSuggestionsOpen(suggestions.length > 0);
+        })
+        .catch((error: unknown) => {
+          if (!(error instanceof DOMException && error.name === 'AbortError')) {
+            setAddressSuggestions([]);
+          }
+        })
+        .finally(() => {
+          if (!abortController.signal.aborted) {
+            setAddressLookupLoading(false);
+          }
+        });
+    }, 350);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      abortController.abort();
+    };
+  }, [bookingForm.address]);
+
+  useEffect(() => {
     if (!isPackage && availableDates.length > 0 && !selectedDate) {
       setSelectedDate(availableDates[0]);
     }
@@ -202,6 +243,30 @@ const NursePublicDetailPage = () => {
       startTime: orderedStarts[0] || '',
       endTime: '',
     }));
+  };
+
+  const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setBookingForm({ ...bookingForm, address: event.target.value });
+    setAddressSuggestionsOpen(true);
+  };
+
+  const handleSelectAddress = async (suggestion: GoongPrediction) => {
+    const fallbackAddress = suggestion.description;
+
+    setBookingForm((prev) => ({ ...prev, address: fallbackAddress }));
+    setAddressSuggestionsOpen(false);
+    setAddressSuggestions([]);
+
+    try {
+      const detail = await goongApi.getPlaceDetail(suggestion.place_id, goongSessionTokenRef.current);
+      setBookingForm((prev) => ({
+        ...prev,
+        address: detail?.formatted_address || fallbackAddress,
+      }));
+      goongSessionTokenRef.current = createGoongSessionToken();
+    } catch {
+      setBookingForm((prev) => ({ ...prev, address: fallbackAddress }));
+    }
   };
 
   const submitBooking = async (event: React.FormEvent) => {
@@ -564,10 +629,45 @@ const NursePublicDetailPage = () => {
                       placeholder="Số nhà, tên đường, quận..."
                       className="w-full rounded-2xl border-none bg-[#F9FAFB] py-4 pl-12 pr-4 text-[15px] font-medium text-[#111827] placeholder:text-[#9CA3AF] focus:ring-2 focus:ring-[#EC4899]/20"
                       value={bookingForm.address}
-                      onChange={(event) => setBookingForm({ ...bookingForm, address: event.target.value })}
+                      onBlur={() => window.setTimeout(() => setAddressSuggestionsOpen(false), 150)}
+                      onChange={handleAddressChange}
+                      onFocus={() => setAddressSuggestionsOpen(addressSuggestions.length > 0)}
                       required
                     />
+                    {addressLookupLoading && (
+                      <div className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-[#EC4899] border-t-transparent" />
+                    )}
+                    {addressSuggestionsOpen && addressSuggestions.length > 0 && (
+                      <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-[#F3E8FF] bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
+                        {addressSuggestions.map((suggestion) => (
+                          <button
+                            key={suggestion.place_id}
+                            type="button"
+                            onMouseDown={(event) => event.preventDefault()}
+                            onClick={() => void handleSelectAddress(suggestion)}
+                            className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-[#FFF7FA]"
+                          >
+                            <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#EC4899]" />
+                            <span className="min-w-0">
+                              <span className="block truncate text-[14px] font-bold text-[#111827]">
+                                {suggestion.structured_formatting?.main_text || suggestion.description}
+                              </span>
+                              {suggestion.structured_formatting?.secondary_text && (
+                                <span className="mt-0.5 block truncate text-[12px] font-medium text-[#6B7280]">
+                                  {suggestion.structured_formatting.secondary_text}
+                                </span>
+                              )}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
+                  {!goongApi.hasApiKey && (
+                    <p className="ml-1 mt-2 text-[12px] font-medium text-[#9CA3AF]">
+                      Thêm VITE_GOONG_API_KEY để bật gợi ý địa chỉ Goong.
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="ml-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Ghi chú cho y tá</label>

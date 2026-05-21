@@ -128,6 +128,31 @@ export type ReviewDto = {
   createdAt: string | null;
 };
 
+export type CommunityCommentDto = {
+  id: number;
+  authorId: number;
+  author: string;
+  avatar: string | null;
+  content: string;
+  createdAt: string;
+};
+
+export type CommunityPostDto = {
+  id: number;
+  authorId: number;
+  author: string;
+  role: string;
+  avatar: string | null;
+  title: string;
+  content: string;
+  tags: string[];
+  imageUrl: string | null;
+  likes: number;
+  likedByMe: boolean;
+  createdAt: string;
+  comments: CommunityCommentDto[];
+};
+
 export type AdminUserDto = {
   userId: number;
   fullName: string;
