@@ -289,12 +289,36 @@ export type SuggestedServiceDto = {
   reason: string;
 };
 
+export type CarePlanItemDto = {
+  timeframe: string;
+  action: string;
+  reason: string;
+};
+
+export type RiskFactorDto = {
+  code: string;
+  label: string;
+  points: number;
+};
+
+export type TrendSignalDto = {
+  metric: string;
+  direction: 'up' | 'down' | 'stable' | string;
+  summary: string;
+};
+
 export type HealthAnalysisResponse = {
   checkInId: string;
   analysisId: string;
   summary: string;
   warningLevel: 'Low' | 'Medium' | 'High' | string;
+  riskScore: number;
+  confidenceScore: number;
+  trendSummary: string;
+  riskFactors: RiskFactorDto[];
+  trendSignals: TrendSignalDto[];
   recommendations: string[];
+  carePlan: CarePlanItemDto[];
   suggestedServices: SuggestedServiceDto[];
   disclaimer: string;
 };
