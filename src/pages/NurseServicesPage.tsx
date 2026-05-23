@@ -22,7 +22,7 @@ const NurseServicesPage = () => {
     const [loading, setLoading] = useState(true);
     const [myServices, setMyServices] = useState<NurseServiceDto[]>([]);
     const [allServices, setAllServices] = useState<ServiceDetailDto[]>([]);
-    const [form, setForm] = useState({ serviceId: '', price: '', unit: 'hourly' });
+    const [form, setForm] = useState({ serviceId: '', price: '', unit: 'fixed' });
     const [editingServiceId, setEditingServiceId] = useState<number | null>(null);
     const [editForm, setEditForm] = useState({ price: '', unit: 'fixed' });
     const [savingEdit, setSavingEdit] = useState(false);
@@ -52,6 +52,13 @@ const NurseServicesPage = () => {
         [allServices, myServices],
     );
 
+    const selectedCatalogService = useMemo(
+        () => allServices.find((item) => item.id === Number(form.serviceId)),
+        [allServices, form.serviceId],
+    );
+
+    const getCatalogService = (serviceId: number) => allServices.find((item) => item.id === serviceId);
+
     const addService = async (event: React.FormEvent) => {
         event.preventDefault();
         try {
@@ -60,7 +67,7 @@ const NurseServicesPage = () => {
                 price: Number(form.price),
                 unit: form.unit,
             });
-            setForm({ serviceId: '', price: '', unit: 'hourly' });
+            setForm({ serviceId: '', price: '', unit: 'fixed' });
             showToast('Đã thêm dịch vụ mới thành công.', 'success');
             await load();
         } catch {
@@ -216,11 +223,16 @@ const NurseServicesPage = () => {
                             <div>
                                 <label className="form-label">Đơn vị thanh toán</label>
                                 <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={form.unit} onChange={(event) => setForm((prev) => ({ ...prev, unit: event.target.value }))}>
-                                    <option value="hourly">Mỗi giờ làm việc</option>
-                                    <option value="fixed">Tính trọn gói ca</option>
+                                    <option value="fixed">Giá cố định theo lượt</option>
+                                    <option value="hourly">Giá theo giờ</option>
                                 </select>
                             </div>
                         </div>
+                        {selectedCatalogService && (
+                            <div className="rounded-xl bg-emerald-50 px-5 py-4 text-sm font-semibold leading-6 text-slate-700">
+                                Dịch vụ này có thời lượng {selectedCatalogService.estimatedDurationMinutes} phút. Chọn <span className="font-black text-slate-900">giá cố định</span> nếu giá nhập là giá cho cả lượt; chọn <span className="font-black text-slate-900">giá theo giờ</span> nếu muốn hệ thống tự chia theo số phút.
+                            </div>
+                        )}
                         <button type="submit" className="bg-[#10B981] text-white w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all">
                             Xác nhận đăng ký dịch vụ
                         </button>
@@ -281,14 +293,21 @@ const NurseServicesPage = () => {
                                                                 setEditForm((prev) => ({ ...prev, unit: event.target.value }))
                                                             }
                                                         >
-                                                            <option value="hourly">Mỗi giờ làm việc</option>
-                                                            <option value="fixed">Tính trọn gói ca</option>
+                                                            <option value="fixed">Giá cố định theo lượt</option>
+                                                            <option value="hourly">Giá theo giờ</option>
                                                         </select>
                                                     </div>
                                                 ) : (
-                                                    <div className="mt-1 text-[11px] font-black text-[#10B981] uppercase tracking-widest">
-                                                        {service.price.toLocaleString('vi-VN')}đ / {service.unit === 'hourly' ? 'Giờ' : 'Ca'}
-                                                    </div>
+                                                    <>
+                                                        <div className="mt-1 text-[11px] font-black text-[#10B981] uppercase tracking-widest">
+                                                            {service.price.toLocaleString('vi-VN')}đ / {service.unit === 'hourly' ? 'Giờ' : 'Lượt'}
+                                                        </div>
+                                                        <div className="mt-1 text-xs font-semibold text-slate-400">
+                                                            {service.unit === 'hourly'
+                                                                ? `Hệ thống chia giá theo thời lượng ${getCatalogService(service.serviceId)?.estimatedDurationMinutes ?? '?'} phút.`
+                                                                : `Khách trả đúng giá này cho lượt ${getCatalogService(service.serviceId)?.estimatedDurationMinutes ?? '?'} phút.`}
+                                                        </div>
+                                                    </>
                                                 )}
                                             </div>
                                         </div>

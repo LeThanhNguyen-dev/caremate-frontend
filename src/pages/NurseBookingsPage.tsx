@@ -19,6 +19,10 @@ import { useAuth } from '../hooks/useAuth';
 import NursePendingApproval from '../components/nurse/NursePendingApproval';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+const PLATFORM_FEE_RATE = 0.15;
+const getPlatformFee = (totalPrice: number) => Math.round(totalPrice * PLATFORM_FEE_RATE);
+const getNursePayout = (booking: BookingDetailDto) =>
+    booking.nursePayoutAmount ?? booking.totalPrice - getPlatformFee(booking.totalPrice);
 
 const statusConfig: Record<string, { label: string; class: string; icon: IconComponent }> = {
     pending_confirm: { 
@@ -242,6 +246,20 @@ const NurseBookingsPage = () => {
                                             Ghi chú khách hàng: "{booking.notes}"
                                         </div>
                                     )}
+                                    <div className="mt-6 grid gap-3 border-t border-slate-50 pt-6 sm:grid-cols-3">
+                                        <div className="rounded-xl bg-slate-50 px-4 py-3">
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Khách trả</div>
+                                            <div className="mt-1 text-sm font-black text-slate-900">{booking.totalPrice.toLocaleString('vi-VN')}đ</div>
+                                        </div>
+                                        <div className="rounded-xl bg-rose-50 px-4 py-3">
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-rose-400">Phí nền tảng 15%</div>
+                                            <div className="mt-1 text-sm font-black text-rose-700">{(booking.platformFee ?? getPlatformFee(booking.totalPrice)).toLocaleString('vi-VN')}đ</div>
+                                        </div>
+                                        <div className="rounded-xl bg-emerald-50 px-4 py-3">
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Y tá thực nhận</div>
+                                            <div className="mt-1 text-sm font-black text-emerald-700">{getNursePayout(booking).toLocaleString('vi-VN')}đ</div>
+                                        </div>
+                                    </div>
                                 </motion.div>
                             );
                         })

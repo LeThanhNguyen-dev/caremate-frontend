@@ -33,6 +33,12 @@ const addDays = (date: string, offset: number) => {
   return toDateInputValue(value);
 };
 
+const addMinutesIso = (value: string, minutes: number) => {
+  const date = new Date(value);
+  date.setMinutes(date.getMinutes() + Math.max(minutes, 1));
+  return date.toISOString();
+};
+
 const formatDate = (value: string) => new Date(`${value}T00:00:00`).toLocaleDateString('vi-VN');
 const formatTime = (value: string) => new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 const pendingBookingStorageKey = 'caremate_pending_booking';
@@ -212,12 +218,13 @@ const NursePublicDetailPage = () => {
 
   const handleSelectSlot = (slot: AvailabilitySlotDto) => {
     if (!slot.isAvailable) return;
+    const bookingEndTime = addMinutesIso(slot.startTime, service?.estimatedDurationMinutes ?? 1);
     setSelectedDate(new Date(slot.startTime).toLocaleDateString('en-CA'));
     setSelectedSlotId(slot.id);
     setBookingForm((prev) => ({
       ...prev,
       startTime: slot.startTime,
-      endTime: slot.endTime,
+      endTime: bookingEndTime,
     }));
   };
 
@@ -537,7 +544,7 @@ const NursePublicDetailPage = () => {
                                 >
                                   <div className="text-[16px] font-bold">{formatTime(slot.startTime)}</div>
                                   <div className={`mt-1 text-[13px] ${active ? 'text-white/80' : 'text-[#9CA3AF]'}`}>
-                                    {formatTime(slot.endTime)}
+                                    {service.estimatedDurationMinutes} phút, đến {formatTime(addMinutesIso(slot.startTime, service.estimatedDurationMinutes))}
                                   </div>
                                 </button>
                               );
@@ -599,7 +606,7 @@ const NursePublicDetailPage = () => {
               <div className="accent-label !bg-[#FDF2F8] !text-[#DB2777]">Thông tin dịch vụ</div>
               <h2 className="text-[24px] font-black text-[#111827]">{service.name}</h2>
               <p className="mt-3 text-[15px] leading-[1.7] text-[#6B7280]">
-                {isPackage ? 'Gói dịch vụ được tính theo toàn bộ lộ trình chăm sóc.' : 'Chi phí được tính theo khung giờ bạn chọn.'}
+                {isPackage ? 'Gói dịch vụ được tính theo toàn bộ lộ trình chăm sóc.' : 'Chi phí được tính theo thời lượng dịch vụ đã chọn.'}
               </p>
 
               <div className="mt-8 space-y-3">

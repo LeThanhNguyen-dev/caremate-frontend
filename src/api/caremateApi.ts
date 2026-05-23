@@ -78,6 +78,7 @@ const normalizeReview = (item: unknown): ReviewDto => {
     nurseName: getString(record.nurseName) ?? getString(record.nurseFullName),
     customerName: getString(record.customerName) ?? getString(record.customerFullName) ?? getString(record.fullName),
     serviceName: getString(record.serviceName),
+    serviceCategory: getString(record.serviceCategory) ?? getString(record.category),
     rating: getNumber(record.rating) ?? 0,
     comment: getString(record.comment),
     createdAt: getString(record.createdAt) ?? getString(record.reviewDate),
@@ -198,12 +199,17 @@ export const caremateApi = {
     (await axiosInstance.post('/api/reviews', payload)).data,
   getReviews: async (params?: { nurseId?: number; serviceId?: number; bookingId?: number }): Promise<ReviewDto[]> => {
     const response = await requestFirst([
+      ...(params?.nurseId ? [
+        async () => (await axiosInstance.get(`/api/reviews/nurse/${params.nurseId}`, { params: { pageSize: 100 } })).data,
+        async () => (await axiosInstance.get(`/api/nurses/${params.nurseId}/reviews`, { params: { pageSize: 100 } })).data,
+      ] : []),
       async () => (await axiosInstance.get('/api/reviews', { params })).data,
       async () => (await axiosInstance.get('/api/reviews/search', { params })).data,
       async () => (await axiosInstance.get('/api/public/reviews', { params })).data,
     ]);
     return toArray(response)
       .map(normalizeReview)
+      .filter((item) => !params?.serviceId || item.serviceId === params.serviceId)
       .filter((item) => item.rating > 0);
   },
 

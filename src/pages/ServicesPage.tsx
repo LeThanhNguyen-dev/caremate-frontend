@@ -184,7 +184,7 @@ const ServicesPage = () => {
     }, [services, searchQuery, selectedCategory]);
 
     const selectedService = useMemo(() => services.find(s => s.id === selectedServiceId), [services, selectedServiceId]);
-    const featuredNurse = useMemo(() => nurses[0] ?? null, [nurses]);
+    const visibleNurses = useMemo(() => nurses.slice(0, 5), [nurses]);
     const selectedPackageSchedule = useMemo(() => getVisiblePackageSchedule(selectedService), [selectedService]);
     const totalScheduleWeeks = Math.max(1, Math.ceil(selectedPackageSchedule.length / 7));
     const currentWeekSchedule = useMemo(
@@ -474,51 +474,47 @@ const ServicesPage = () => {
                     </div>
 
                     <div className="mt-8 rounded-[24px] bg-slate-50 p-5">
-                        <div className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Y tá đi kèm</div>
-                        {featuredNurse ? (
-                            <div className="mt-4">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white text-xl font-black text-brand">
-                                        {featuredNurse.avatar ? <img src={featuredNurse.avatar} alt={featuredNurse.fullName} className="h-full w-full object-cover" /> : featuredNurse.fullName.charAt(0)}
+                        <div className="flex items-center justify-between gap-3">
+                            <div className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Y tá phù hợp</div>
+                            <div className="rounded-full bg-white px-3 py-1 text-[11px] font-black text-slate-500">
+                                {nurses.length} hồ sơ
+                            </div>
+                        </div>
+                        {visibleNurses.length > 0 ? (
+                            <div className="mt-4 space-y-3">
+                                {visibleNurses.map((nurse) => (
+                                    <div key={nurse.userId} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 text-lg font-black text-brand">
+                                                {nurse.avatar ? <img src={nurse.avatar} alt={nurse.fullName} className="h-full w-full object-cover" /> : nurse.fullName.charAt(0)}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="truncate text-[16px] font-black leading-tight text-slate-900">{nurse.fullName}</div>
+                                                <div className="mt-1 truncate text-[12px] font-semibold text-slate-500">{nurse.specialization || 'Y tá chăm sóc tại nhà'}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
+                                                {nurse.yearsExperience}+ năm
+                                            </span>
+                                            <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
+                                                {nurse.serviceRadiusKm} km
+                                            </span>
+                                            <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
+                                                {nurse.averageRating.toFixed(1)} sao
+                                            </span>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${selectedServiceId}`)}
+                                            className="mt-3 w-full rounded-xl bg-slate-900 px-4 py-3 text-[12px] font-black uppercase tracking-widest text-white transition hover:bg-slate-800"
+                                        >
+                                            Xem và đặt lịch
+                                        </button>
                                     </div>
-                                    <div className="min-w-0">
-                                        <div className="text-[22px] font-black leading-tight text-slate-900">{featuredNurse.fullName}</div>
-                                        <div className="mt-1 text-[14px] font-medium text-slate-500">{featuredNurse.specialization || 'Y tá chăm sóc tại nhà'}</div>
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600">
-                                        {featuredNurse.yearsExperience}+ năm kinh nghiệm
-                                    </span>
-                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600">
-                                        {featuredNurse.serviceRadiusKm} km hỗ trợ
-                                    </span>
-                                    <span className="rounded-full bg-white px-3 py-1.5 text-[12px] font-semibold text-slate-600">
-                                        {featuredNurse.averageRating.toFixed(1)} đánh giá
-                                    </span>
-                                </div>
-
-                                <p className="mt-4 text-[14px] font-medium leading-6 text-slate-500">
-                                    Phù hợp để khách xem nhanh hồ sơ và đặt lịch ngay với gói dịch vụ này.
-                                </p>
-
-                                <div className="mt-5 flex flex-wrap gap-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => navigate(`/nurses/${featuredNurse.userId}?serviceId=${selectedServiceId}`)}
-                                        className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:border-slate-400 hover:bg-slate-100"
-                                    >
-                                        Xem hồ sơ
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => navigate(`/nurses/${featuredNurse.userId}?serviceId=${selectedServiceId}`)}
-                                        className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white transition hover:bg-slate-800"
-                                    >
-                                        Đặt lịch
-                                    </button>
-                                </div>
+                                ))}
                             </div>
                         ) : (
                             <div className="mt-4 text-[14px] font-medium leading-6 text-slate-500">

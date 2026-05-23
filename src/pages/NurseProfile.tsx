@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
     AcademicCapIcon,
@@ -8,7 +8,10 @@ import {
     EnvelopeIcon,
     PhoneIcon,
     ShieldCheckIcon,
+    CameraIcon,
+    FunnelIcon,
 } from '@heroicons/react/24/outline';
+import { StarIcon as SolidStarIcon } from '@heroicons/react/24/solid';
 import { useToast } from '../hooks/useToast';
 import { nurseApi } from '../api/nurseApi';
 import type { DocumentDto, NurseProfileDetailDto } from '../types/nurse';
@@ -22,10 +25,12 @@ const NurseProfile = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
-    const [formData, setFormData] = useState({ bio: '', yearsExperience: 0, serviceRadiusKm: 10, bankBin: '', bankAccountNumber: '', bankAccountName: '' });
+    const [avatarUploading, setAvatarUploading] = useState(false);
+    const [formData, setFormData] = useState({ fullName: '', phoneNumber: '', avatar: '', bio: '', specialization: '', yearsExperience: 0, serviceRadiusKm: 10, bankBin: '', bankAccountNumber: '', bankAccountName: '' });
     const [docType, setDocType] = useState('id_card_front');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [banks, setBanks] = useState<BankOptionDto[]>([]);
+    const [reviewCategory, setReviewCategory] = useState('all');
 
     const loadProfile = useCallback(async () => {
         try {
@@ -33,7 +38,11 @@ const NurseProfile = () => {
             const data = await nurseApi.getProfile();
             setProfile(data);
             setFormData({
+                fullName: data.fullName || '',
+                phoneNumber: data.phone || '',
+                avatar: data.avatar || '',
                 bio: data.bio || '',
+                specialization: data.specialization || '',
                 yearsExperience: data.yearsExperience || 0,
                 serviceRadiusKm: data.serviceRadiusKm || 10,
                 bankBin: data.bankBin || '',
@@ -63,6 +72,22 @@ const NurseProfile = () => {
             showToast('Cập nhật hồ sơ thất bại.', 'error');
         } finally {
             setSaving(false);
+        }
+    };
+
+    const uploadAvatar = async (file?: File) => {
+        if (!file) return;
+
+        try {
+            setAvatarUploading(true);
+            const avatar = await nurseApi.uploadAvatar(file);
+            setFormData((prev) => ({ ...prev, avatar }));
+            showToast('Ảnh đại diện đã được cập nhật.', 'success');
+            await loadProfile();
+        } catch (err) {
+            showToast(getErrorMessage(err, 'Không thể tải ảnh đại diện.'), 'error');
+        } finally {
+            setAvatarUploading(false);
         }
     };
 
@@ -106,7 +131,22 @@ const NurseProfile = () => {
     const hasFront = !!profile?.documents?.some((d) => d.type === 'id_card_front');
     const hasBack = !!profile?.documents?.some((d) => d.type === 'id_card_back');
     const hasCertificate = !!profile?.documents?.some((d) => d.type === 'certificate');
-    const canSubmit = hasFront && hasBack && hasCertificate;
+    const isSubmitted = profile?.verificationSubmissionStatus === 'submitted';
+    const isApproved = profile?.verificationSubmissionStatus === 'approved' || profile?.isVerified === 'verified';
+    const canChangeDocuments = !isSubmitted && !isApproved;
+    const canSubmit = hasFront && hasBack && hasCertificate && canChangeDocuments;
+    const reviews = profile?.reviews ?? [];
+    const reviewCategories = useMemo(
+        () => Array.from(new Set(reviews.map((review) => review.serviceCategory || review.serviceName).filter(Boolean))),
+        [reviews],
+    );
+    const filteredReviews = useMemo(
+        () => reviewCategory === 'all'
+            ? reviews
+            : reviews.filter((review) => (review.serviceCategory || review.serviceName) === reviewCategory),
+        [reviewCategory, reviews],
+    );
+    const averageRating = profile?.averageRating ?? (reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0);
 
     if (loading) {
         return (
@@ -126,7 +166,26 @@ const NurseProfile = () => {
                     <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full"></div>
                     <div className="relative z-10">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-4">Hồ sơ chuyên môn</div>
-                        <h1 className="text-4xl font-black text-white mt-4 tracking-tight">{profile?.fullName}</h1>
+                        <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-center">
+                            <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/15">
+                                {profile?.avatar ? (
+                                    <img src={profile.avatar} alt={profile.fullName} className="h-full w-full object-cover" />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center text-4xl font-black text-white/70">
+                                        {profile?.fullName?.charAt(0) || 'Y'}
+                                    </div>
+                                )}
+                                <label className="absolute inset-x-0 bottom-0 flex cursor-pointer items-center justify-center gap-1 bg-black/55 py-2 text-[9px] font-black uppercase tracking-widest text-white">
+                                    <CameraIcon className="h-3.5 w-3.5" />
+                                    {avatarUploading ? 'Đang tải' : 'Đổi ảnh'}
+                                    <input type="file" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={(event) => void uploadAvatar(event.target.files?.[0])} disabled={avatarUploading} />
+                                </label>
+                            </div>
+                            <div>
+                                <h1 className="text-4xl font-black text-white tracking-tight">{profile?.fullName}</h1>
+                                <p className="mt-2 text-sm font-bold text-white/45">{profile?.specialization || 'Chưa cập nhật chuyên môn hiển thị'}</p>
+                            </div>
+                        </div>
                         <p className="mt-4 max-w-2xl text-lg font-medium text-white/50 leading-relaxed">
                             Quản lý thông tin nghề nghiệp và tài liệu chuyên môn để duy trì trạng thái xác minh trên CareMate.
                         </p>
@@ -183,6 +242,18 @@ const NurseProfile = () => {
                         </div>
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
+                                <label className="form-label">Tên hiển thị với khách</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.fullName} onChange={(event) => setFormData((prev) => ({ ...prev, fullName: event.target.value }))} />
+                            </div>
+                            <div>
+                                <label className="form-label">Số điện thoại liên hệ</label>
+                                <input type="tel" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.phoneNumber} onChange={(event) => setFormData((prev) => ({ ...prev, phoneNumber: event.target.value }))} />
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label className="form-label">Chuyên môn hiển thị</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.specialization} onChange={(event) => setFormData((prev) => ({ ...prev, specialization: event.target.value }))} placeholder="VD: Chăm sóc mẹ sau sinh, massage bé, tư vấn nuôi con bằng sữa mẹ" />
+                            </div>
+                            <div>
                                 <label className="form-label">Số năm kinh nghiệm</label>
                                 <input type="number" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.yearsExperience} onChange={(event) => setFormData((prev) => ({ ...prev, yearsExperience: Number(event.target.value) || 0 }))} />
                             </div>
@@ -231,7 +302,7 @@ const NurseProfile = () => {
                             </div>
                             <div>
                                 <label className="form-label">Phân loại tài liệu</label>
-                                <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={docType} onChange={(event) => setDocType(event.target.value)}>
+                                <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all disabled:opacity-50" value={docType} onChange={(event) => setDocType(event.target.value)} disabled={!canChangeDocuments}>
                                     <option value="id_card_front">Căn cước công dân (Mặt trước)</option>
                                     <option value="id_card_back">Căn cước công dân (Mặt sau)</option>
                                     <option value="certificate">Chứng chỉ hành nghề y tế</option>
@@ -240,7 +311,7 @@ const NurseProfile = () => {
                             <div>
                                 <label className="form-label">Chọn tệp tài liệu (JPG/PNG)</label>
                                 <div className="relative group">
-                                    <input type="file" id="doc-upload" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} />
+                                    <input type="file" id="doc-upload" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple disabled={!canChangeDocuments} onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} />
                                     <label htmlFor="doc-upload" className="flex items-center justify-between w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl py-4 px-6 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all group">
                                         <span className={`text-sm font-bold ${selectedFiles.length ? 'text-slate-900' : 'text-slate-400'}`}>
                                             {selectedFiles.length ? `Đã chọn ${selectedFiles.length} tệp` : 'Nhấn để chọn tệp...'}
@@ -250,12 +321,12 @@ const NurseProfile = () => {
                                 </div>
                                 <p className="mt-2 text-[10px] font-medium text-slate-400 italic">Hỗ trợ định dạng JPG, PNG. Dung lượng tối đa 5MB.</p>
                             </div>
-                            <button type="submit" className="w-full py-4 rounded-xl flex items-center justify-center gap-3 border-2 border-emerald-100 text-[#10B981] font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 transition-all" disabled={uploading}>
+                            <button type="submit" className="w-full py-4 rounded-xl flex items-center justify-center gap-3 border-2 border-emerald-100 text-[#10B981] font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 transition-all disabled:opacity-50 disabled:hover:bg-transparent" disabled={uploading || !canChangeDocuments}>
                                 <PlusIcon className="h-5 w-5 text-[#10B981]" />
-                                {uploading ? 'Đang gửi...' : profile?.isVerified === 'rejected' ? 'Gửi lại hồ sơ xác minh' : 'Gửi tài liệu xác minh'}
+                                {uploading ? 'Đang gửi...' : isApproved ? 'Hồ sơ đã xác minh' : isSubmitted ? 'Đang chờ duyệt' : profile?.isVerified === 'rejected' ? 'Gửi lại hồ sơ xác minh' : 'Gửi tài liệu xác minh'}
                             </button>
-                            <button type="button" onClick={() => void submitVerification()} disabled={!canSubmit || profile?.verificationSubmissionStatus === 'submitted'} className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-50">
-                                {profile?.verificationSubmissionStatus === 'submitted' ? 'Đã gửi, đang chờ duyệt' : 'Gửi duyệt hồ sơ 1 lần'}
+                            <button type="button" onClick={() => void submitVerification()} disabled={!canSubmit} className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-50">
+                                {isApproved ? 'Hồ sơ đã được duyệt' : isSubmitted ? 'Đã gửi, đang chờ duyệt' : 'Gửi duyệt hồ sơ 1 lần'}
                             </button>
                         </form>
                     </div>
@@ -300,6 +371,84 @@ const NurseProfile = () => {
                         </div>
                     </div>
                 </div>
+            </section>
+
+            <section className="luxury-card border-none bg-white p-10 shadow-xl">
+                <div className="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                    <div>
+                        <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-[#10B981]">
+                            <SolidStarIcon className="h-4 w-4" />
+                            Đánh giá khách hàng
+                        </div>
+                        <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">Hồ sơ đánh giá của y tá</h3>
+                        <p className="mt-2 text-sm font-bold text-slate-400">
+                            {reviews.length} đánh giá • trung bình {averageRating.toFixed(1)}/5 sao
+                        </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex h-12 items-center gap-2 rounded-xl bg-slate-50 px-4 text-slate-400">
+                            <FunnelIcon className="h-5 w-5" />
+                            <select
+                                className="bg-transparent text-sm font-black text-slate-700 outline-none"
+                                value={reviewCategory}
+                                onChange={(event) => setReviewCategory(event.target.value)}
+                            >
+                                <option value="all">Tất cả danh mục</option>
+                                {reviewCategories.map((category) => (
+                                    <option key={category} value={category}>{category}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {filteredReviews.length ? (
+                    <div className="grid gap-4 lg:grid-cols-2">
+                        {filteredReviews.map((review) => (
+                            <motion.div
+                                key={review.id}
+                                initial={{ opacity: 0, y: 12 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="rounded-2xl border border-slate-100 bg-slate-50/60 p-6"
+                            >
+                                <div className="flex items-start justify-between gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white text-sm font-black text-[#10B981] shadow-sm">
+                                            {review.customerAvatar ? (
+                                                <img src={review.customerAvatar} alt={review.customerName} className="h-full w-full object-cover" />
+                                            ) : (
+                                                review.customerName?.charAt(0) || 'K'
+                                            )}
+                                        </div>
+                                        <div>
+                                            <div className="text-sm font-black text-slate-900">{review.customerName || 'Khách hàng'}</div>
+                                            <div className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                {review.serviceCategory || review.serviceName}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-amber-400 shadow-sm">
+                                        {Array.from({ length: 5 }, (_, index) => (
+                                            <SolidStarIcon key={index} className={`h-4 w-4 ${index < review.rating ? 'text-amber-400' : 'text-slate-200'}`} />
+                                        ))}
+                                    </div>
+                                </div>
+                                <p className="mt-5 text-sm font-semibold leading-7 text-slate-600">
+                                    {review.comment || 'Khách hàng chưa để lại nhận xét chi tiết.'}
+                                </p>
+                                <div className="mt-5 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                    <span>{review.serviceName}</span>
+                                    <span>{new Date(review.createdAt).toLocaleDateString('vi-VN')}</span>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="rounded-2xl border-2 border-dashed border-slate-100 bg-slate-50/40 py-14 text-center">
+                        <SolidStarIcon className="mx-auto h-10 w-10 text-slate-200" />
+                        <p className="mt-4 text-sm font-bold text-slate-400">Chưa có đánh giá nào trong danh mục này.</p>
+                    </div>
+                )}
             </section>
         </div>
     );

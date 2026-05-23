@@ -19,6 +19,11 @@ const bookingStatusLabel: Record<string, string> = {
     rejected: 'Bị từ chối',
 };
 
+const PLATFORM_FEE_RATE = 0.15;
+const getPlatformFee = (totalPrice: number) => Math.round(totalPrice * PLATFORM_FEE_RATE);
+const getNursePayout = (booking: AdminBookingSummaryDto) =>
+    booking.nursePayoutAmount ?? booking.totalPrice - getPlatformFee(booking.totalPrice);
+
 const AdminBookings = () => {
     const [bookings, setBookings] = useState<AdminBookingSummaryDto[]>([]);
     const [refunds, setRefunds] = useState<AdminRefundDto[]>([]);
@@ -49,9 +54,11 @@ const AdminBookings = () => {
 
     const stats = useMemo(() => {
         const revenue = bookings.reduce((sum, item) => sum + item.totalPrice, 0);
+        const platformFee = bookings.reduce((sum, item) => sum + (item.platformFee ?? getPlatformFee(item.totalPrice)), 0);
+        const nursePayout = bookings.reduce((sum, item) => sum + getNursePayout(item), 0);
         const upcoming = bookings.filter((item) => new Date(item.startTime).getTime() >= now).length;
         const pending = bookings.filter((item) => item.status === 'pending_confirm').length;
-        return { revenue, upcoming, pending };
+        return { revenue, platformFee, nursePayout, upcoming, pending };
     }, [bookings, now]);
 
     if (loading) {
@@ -88,6 +95,8 @@ const AdminBookings = () => {
                 <div className="grid gap-4">
                     {[
                         { label: 'Tổng doanh thu', value: `${stats.revenue.toLocaleString('vi-VN')}đ`, icon: CurrencyDollarIcon, color: 'text-green-600 bg-green-50' },
+                        { label: 'Phí web 15%', value: `${stats.platformFee.toLocaleString('vi-VN')}đ`, icon: CurrencyDollarIcon, color: 'text-rose-600 bg-rose-50' },
+                        { label: 'Chi y tá 85%', value: `${stats.nursePayout.toLocaleString('vi-VN')}đ`, icon: CurrencyDollarIcon, color: 'text-emerald-600 bg-emerald-50' },
                         { label: 'Booking sắp tới', value: stats.upcoming, icon: CalendarDaysIcon, color: 'text-admin bg-admin/5' },
                         { label: 'Chờ xác nhận', value: stats.pending, icon: ClockIcon, color: 'text-amber-600 bg-amber-50' },
                     ].map((item) => (
@@ -160,7 +169,11 @@ const AdminBookings = () => {
                                                 {new Date(booking.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - {new Date(booking.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </td>
-                                        <td className="px-8 py-6 text-sm font-black text-slate-900">{booking.totalPrice.toLocaleString('vi-VN')}đ</td>
+                                        <td className="px-8 py-6">
+                                            <div className="text-sm font-black text-slate-900">{booking.totalPrice.toLocaleString('vi-VN')}đ</div>
+                                            <div className="mt-1 text-[10px] font-bold text-rose-500">Web 15%: {(booking.platformFee ?? getPlatformFee(booking.totalPrice)).toLocaleString('vi-VN')}đ</div>
+                                            <div className="text-[10px] font-bold text-emerald-600">Y tá 85%: {getNursePayout(booking).toLocaleString('vi-VN')}đ</div>
+                                        </td>
                                         <td className="px-8 py-6">
                                             <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${
                                                 booking.status === 'completed' ? 'bg-green-50 text-green-600' :
@@ -269,7 +282,9 @@ const AdminBookings = () => {
                                     <div className="space-y-2">
                                         <div className="text-lg font-black text-slate-900">Payout #{payout.payoutId} • Booking #{payout.bookingId}</div>
                                         <div className="text-sm font-bold text-slate-500">Y tá: {payout.nurseName} • {payout.serviceName}</div>
-                                        <div className="text-sm font-bold text-slate-500">Chi: {payout.amount.toLocaleString('vi-VN')}đ • Phí nền tảng: {payout.platformFee.toLocaleString('vi-VN')}đ</div>
+                                        <div className="text-sm font-bold text-slate-500">
+                                            Tổng: {(payout.grossAmount ?? payout.amount + payout.platformFee).toLocaleString('vi-VN')}đ • Web 15%: {payout.platformFee.toLocaleString('vi-VN')}đ • Chi y tá 85%: {payout.amount.toLocaleString('vi-VN')}đ
+                                        </div>
                                         <div className="text-xs font-black uppercase tracking-widest text-slate-400">
                                             {payout.status === 'released' ? 'Đã chi tiền' : payout.status}
                                         </div>

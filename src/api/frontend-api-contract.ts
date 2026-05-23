@@ -27,6 +27,8 @@ export type BookingDetailDto = {
   nurseName?: string;
   status: string;
   totalPrice: number;
+  platformFee: number;
+  nursePayoutAmount: number;
   startTime: string;
   endTime: string;
   address: string;
@@ -60,12 +62,22 @@ export type NurseProfileDetailDto = {
   fullName: string;
   email: string;
   phone: string | null;
+  avatar?: string | null;
+  bankBin?: string | null;
+  bankAccountNumber?: string | null;
+  bankAccountName?: string | null;
   bio: string | null;
+  specialization?: string | null;
   yearsExperience: number;
   serviceRadiusKm: number;
   isVerified: string;
   rejectionReason?: string | null;
+  verificationSubmissionStatus?: string;
+  averageRating?: number;
+  totalReviews?: number;
+  ratingDistribution?: Record<number, number>;
   documents: NurseDocumentDto[];
+  reviews?: ReviewDto[];
 };
 
 export type NurseDiscoveryDto = {
@@ -123,6 +135,7 @@ export type ReviewDto = {
   nurseName: string | null;
   customerName: string | null;
   serviceName: string | null;
+  serviceCategory?: string | null;
   rating: number;
   comment: string | null;
   createdAt: string | null;
@@ -192,6 +205,7 @@ export type AdminPayoutDto = {
   nurseId: number;
   nurseName: string;
   serviceName: string;
+  grossAmount: number;
   amount: number;
   platformFee: number;
   status: string;
@@ -222,6 +236,8 @@ export type AdminBookingSummaryDto = {
   nurseId: number;
   status: string;
   totalPrice: number;
+  platformFee: number;
+  nursePayoutAmount: number;
   startTime: string;
   endTime: string;
 };

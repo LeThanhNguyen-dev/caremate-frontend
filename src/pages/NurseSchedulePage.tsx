@@ -265,24 +265,24 @@ const NurseSchedulePage = () => {
                     </div>
                 </div>
 
-                <div className="relative overflow-auto max-h-[800px] custom-scrollbar">
+                <div className="relative overflow-auto max-h-[800px] custom-scrollbar bg-slate-100/60">
                     <div className="min-w-[1000px]">
-                        <div className="sticky top-0 z-10 flex bg-white border-b border-slate-50">
-                            <div className="w-24 shrink-0 border-r border-slate-50 bg-slate-50/20"></div>
+                        <div className="sticky top-0 z-10 flex bg-white border-b border-slate-200 shadow-sm">
+                            <div className="w-24 shrink-0 border-r border-slate-200 bg-slate-100/70"></div>
                             {weekDays.map((day) => (
-                                <div key={day.toISOString()} className="flex-1 border-r border-slate-50 px-3 py-6 text-center">
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{day.toLocaleDateString('vi-VN', { weekday: 'short' })}</div>
+                                <div key={day.toISOString()} className="flex-1 border-r border-slate-200 px-3 py-6 text-center last:border-r-0">
+                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">{day.toLocaleDateString('vi-VN', { weekday: 'short' })}</div>
                                     <div className={`mt-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-lg font-black ${
-                                        formatDateValue(day) === formatDateValue(new Date()) ? 'bg-[#10B981] text-white shadow-lg shadow-emerald-600/20' : 'bg-slate-50 text-slate-900'
+                                        formatDateValue(day) === formatDateValue(new Date()) ? 'bg-[#10B981] text-white shadow-lg shadow-emerald-600/20' : 'bg-slate-100 text-slate-950'
                                     }`}>{day.getDate()}</div>
                                 </div>
                             ))}
                         </div>
                         <div className="flex">
-                            <div className="w-24 shrink-0 border-r border-slate-50 bg-slate-50/20">
+                            <div className="w-24 shrink-0 border-r border-slate-200 bg-slate-100/70">
                                 {HOURS.map((hour) => (
-                                    <div key={hour} className="relative text-right pr-4" style={{ height: `${HOUR_HEIGHT}px` }}>
-                                        <span className="absolute right-4 top-2 text-[10px] font-black text-slate-300 uppercase">{String(hour).padStart(2, '0')}:00</span>
+                                    <div key={hour} className="relative border-b border-slate-200 pr-4 text-right" style={{ height: `${HOUR_HEIGHT}px` }}>
+                                        <span className="absolute right-4 top-2 rounded-lg bg-white px-2 py-1 text-[10px] font-black uppercase text-slate-600 shadow-sm">{String(hour).padStart(2, '0')}:00</span>
                                     </div>
                                 ))}
                             </div>
@@ -290,22 +290,34 @@ const NurseSchedulePage = () => {
                                 {weekDays.map((day) => {
                                     const events = getEventsForDay(day);
                                     return (
-                                        <div key={day.toISOString()} className="relative flex-1 border-r border-slate-50 last:border-r-0">
+                                        <div key={day.toISOString()} className="relative flex-1 border-r border-slate-200 bg-white last:border-r-0">
                                             {HOURS.map((hour) => (
-                                                <button key={`${day.toISOString()}-${hour}`} type="button" onClick={() => openSlotModal(day, hour)} className="block w-full border-b border-slate-50/50 hover:bg-emerald-500/[0.03] transition-colors" style={{ height: `${HOUR_HEIGHT}px` }} />
+                                                <button key={`${day.toISOString()}-${hour}`} type="button" onClick={() => openSlotModal(day, hour)} className="block w-full border-b border-slate-200 bg-white hover:bg-emerald-50/60 transition-colors" style={{ height: `${HOUR_HEIGHT}px` }} />
                                             ))}
                                             {events.slots.map((slot) => (
-                                                <div key={slot.id} className="absolute left-2 right-2 rounded-xl p-4 text-xs bg-emerald-50 border border-emerald-100 text-[#10B981] shadow-sm group/slot transition-all hover:shadow-md" style={getSlotStyle(slot.startTime, slot.endTime)}>
+                                                <div key={slot.id} className="absolute left-2 right-2 rounded-xl border-2 border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700 shadow-md group/slot transition-all hover:border-emerald-300 hover:shadow-lg" style={getSlotStyle(slot.startTime, slot.endTime)}>
                                                     <div className="flex items-start justify-between">
-                                                        <div className="font-bold">{new Date(slot.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
+                                                        <div>
+                                                            <div className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Khung rảnh</div>
+                                                            <div className="mt-1 font-black">
+                                                                {new Date(slot.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                                {' - '}
+                                                                {new Date(slot.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                            </div>
+                                                        </div>
                                                         <button type="button" onClick={(e) => { e.stopPropagation(); void deleteSlot(slot.id); }} className="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover/slot:opacity-100"><XMarkIcon className="h-4 w-4" /></button>
                                                     </div>
                                                 </div>
                                             ))}
                                             {events.bookings.map((booking) => (
-                                                <div key={booking.id} className="absolute left-2 right-2 rounded-xl bg-slate-900 p-4 text-xs text-white shadow-xl z-10 border-l-4 border-[#10B981]" style={getSlotStyle(booking.startTime, booking.endTime)}>
+                                                <div key={booking.id} className="absolute left-2 right-2 z-10 rounded-xl border-2 border-slate-900 bg-slate-900 p-4 text-xs text-white shadow-xl ring-2 ring-white" style={getSlotStyle(booking.startTime, booking.endTime)}>
                                                     <div className="font-black text-[10px] uppercase text-[#10B981] mb-1">Lịch hẹn khách</div>
                                                     <div className="font-black leading-tight">#{booking.id} - {booking.serviceName}</div>
+                                                    <div className="mt-2 text-[10px] font-bold text-white/70">
+                                                        {new Date(booking.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                        {' - '}
+                                                        {new Date(booking.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
                                                 </div>
                                             ))}
                                             {events.packageSessions.map((session) => (

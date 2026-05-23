@@ -13,6 +13,18 @@ export const nurseApi = {
         await axiosInstance.put('/api/nurse/profile', data);
     },
 
+    uploadAvatar: async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await axiosInstance.post<{ avatar: string }>('/api/nurse/profile/avatar', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+        return response.data.avatar;
+    },
+
     uploadDocument: async (data: UploadDocumentDto): Promise<void> => {
         const formData = new FormData();
         formData.append('Type', data.type); 

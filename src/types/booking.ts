@@ -20,6 +20,8 @@ export interface BookingDetail {
   endTime: string;
   status: BookingStatus;
   totalPrice: number;
+  platformFee?: number;
+  nursePayoutAmount?: number;
   note?: string;
   createdAt: string;
 }

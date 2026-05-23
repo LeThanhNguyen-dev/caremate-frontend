@@ -19,6 +19,11 @@ import NursePendingApproval from '../components/nurse/NursePendingApproval';
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Legend, Tooltip);
 
+const PLATFORM_FEE_RATE = 0.15;
+const getPlatformFee = (totalPrice: number) => Math.round(totalPrice * PLATFORM_FEE_RATE);
+const getNursePayout = (booking: BookingDetailDto) =>
+    booking.nursePayoutAmount ?? booking.totalPrice - getPlatformFee(booking.totalPrice);
+
 const bookingLabels: Record<string, string> = {
     pending_confirm: 'Chờ xác nhận',
     confirmed: 'Đã xác nhận',
@@ -59,11 +64,12 @@ const NurseWorkspacePage = () => {
         const upcoming = bookings.filter((item) => new Date(item.startTime) >= now && item.status !== 'cancelled').length;
         const active = bookings.filter((item) => item.status === 'confirmed' || item.status === 'in_progress').length;
         const availableSlots = slots.filter((item) => item.isAvailable).length;
-        const revenue = bookings
-            .filter((item) => item.status === 'completed')
-            .reduce((acc, curr) => acc + curr.totalPrice, 0);
+        const completedBookings = bookings.filter((item) => item.status === 'completed');
+        const grossRevenue = completedBookings.reduce((acc, curr) => acc + curr.totalPrice, 0);
+        const platformFee = completedBookings.reduce((acc, curr) => acc + (curr.platformFee ?? getPlatformFee(curr.totalPrice)), 0);
+        const revenue = completedBookings.reduce((acc, curr) => acc + getNursePayout(curr), 0);
 
-        return { upcoming, active, availableSlots, revenue };
+        return { upcoming, active, availableSlots, revenue, grossRevenue, platformFee };
     }, [bookings, slots]);
 
     const statusSummary = useMemo(() => {
@@ -124,7 +130,7 @@ const NurseWorkspacePage = () => {
                             { label: 'Ca sắp tới', value: stats.upcoming, icon: CalendarIcon, color: 'text-[#10B981]' },
                             { label: 'Đang xử lý', value: stats.active, icon: SparklesIcon, color: 'text-[#10B981]' },
                             { label: 'Slot trống', value: stats.availableSlots, icon: ClockIcon, color: 'text-[#10B981]' },
-                            { label: 'Thu nhập', value: stats.revenue.toLocaleString('vi-VN') + 'đ', icon: BanknotesIcon, color: 'text-[#10B981]' },
+                            { label: 'Thực nhận', value: stats.revenue.toLocaleString('vi-VN') + 'đ', icon: BanknotesIcon, color: 'text-[#10B981]' },
                         ].map((card) => (
                             <div key={card.label} className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-8 min-w-[180px]">
                                 <card.icon className={`h-6 w-6 ${card.color} mb-4`} />
@@ -134,6 +140,20 @@ const NurseWorkspacePage = () => {
                         ))}
                     </div>
                 </div>
+            </section>
+
+            <section className="grid gap-4 md:grid-cols-3">
+                {[
+                    { label: 'Doanh thu hoàn thành', value: stats.grossRevenue, helper: 'Tổng tiền khách đã trả' },
+                    { label: 'Phí nền tảng 15%', value: stats.platformFee, helper: 'CareMate giữ lại' },
+                    { label: 'Y tá thực nhận 85%', value: stats.revenue, helper: 'Số tiền dự kiến chi cho bạn' },
+                ].map((item) => (
+                    <div key={item.label} className="rounded-xl border border-slate-50 bg-white p-6 shadow-xl shadow-slate-200/20">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</div>
+                        <div className="mt-2 text-2xl font-black text-slate-900">{item.value.toLocaleString('vi-VN')}đ</div>
+                        <div className="mt-1 text-xs font-bold text-slate-400">{item.helper}</div>
+                    </div>
+                ))}
             </section>
 
             {/* Dashboard Content */}
