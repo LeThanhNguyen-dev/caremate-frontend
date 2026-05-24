@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+    AdjustmentsHorizontalIcon,
+    CheckBadgeIcon,
+    MagnifyingGlassIcon,
+    StarIcon,
+    UserGroupIcon,
+    WalletIcon,
+} from '@heroicons/react/24/outline';
+import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import caremateApi from '../api/caremateApi';
 import type { NurseDiscoveryDto, ServiceDetailDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
@@ -25,9 +35,7 @@ const DiscoverNursesPage = () => {
 
     useEffect(() => {
         const load = async () => {
-            if (!serviceId) {
-                return;
-            }
+            if (!serviceId) return;
 
             try {
                 setLoading(true);
@@ -66,165 +74,214 @@ const DiscoverNursesPage = () => {
         }
 
         result.sort((a, b) => {
-            if (sortBy === 'experience') {
-                return b.yearsExperience - a.yearsExperience;
-            }
-            if (sortBy === 'price') {
-                return (a.servicePrice ?? 0) - (b.servicePrice ?? 0);
-            }
-            if (sortBy === 'name') {
-                return a.fullName.localeCompare(b.fullName);
-            }
+            if (sortBy === 'experience') return b.yearsExperience - a.yearsExperience;
+            if (sortBy === 'price') return (a.servicePrice ?? 0) - (b.servicePrice ?? 0);
+            if (sortBy === 'name') return a.fullName.localeCompare(b.fullName);
             return b.averageRating - a.averageRating;
         });
 
         return result;
     }, [nurses, search, sortBy]);
 
+    const statCards = [
+        { label: 'Dịch vụ đang chọn', value: selectedService?.name || 'Đang tải...', icon: AdjustmentsHorizontalIcon },
+        { label: 'Y tá phù hợp', value: filtered.length, icon: UserGroupIcon },
+        {
+            label: 'Mức giá từ',
+            value: filtered.length
+                ? `${Math.min(...filtered.map((item) => item.servicePrice ?? 0)).toLocaleString('vi-VN')} VND`
+                : 'N/A',
+            icon: WalletIcon,
+        },
+    ];
+
     if (loading) {
         return (
-            <div className="page-container flex min-h-[420px] items-center justify-center">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="spinner"></div>
-                    <div className="text-sm text-slate-500">Đang tìm y tá phù hợp...</div>
+            <div className="min-h-[520px] bg-[#fbfaf8] px-5 py-8 lg:px-8">
+                <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2 xl:grid-cols-3">
+                    {Array.from({ length: 6 }).map((_, index) => (
+                        <div key={index} className="animate-pulse rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/40">
+                            <div className="flex items-center gap-4">
+                                <div className="h-16 w-16 rounded-2xl bg-slate-100" />
+                                <div className="flex-1 space-y-3">
+                                    <div className="h-4 w-2/3 rounded bg-slate-100" />
+                                    <div className="h-3 w-1/2 rounded bg-slate-100" />
+                                </div>
+                            </div>
+                            <div className="mt-6 space-y-3">
+                                <div className="h-3 rounded bg-slate-100" />
+                                <div className="h-3 w-5/6 rounded bg-slate-100" />
+                                <div className="h-3 w-3/5 rounded bg-slate-100" />
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="page-container space-y-8">
-            <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-                <div className="hero-shell">
-                    <div className="accent-label">Bước 2</div>
-                    <h1 className="mt-5 font-heading text-4xl font-extrabold text-white">
-                        Danh sách y tá đã được lọc theo đúng dịch vụ bạn vừa chọn.
-                    </h1>
-                    <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
-                        Kết quả chỉ gồm những y tá có mở dịch vụ này, giúp bạn không mất thời gian xem nhầm hồ sơ
-                        không phù hợp.
-                    </p>
-                </div>
+        <div className="bg-[#fbfaf8] px-5 py-8 lg:px-8">
+            <div className="mx-auto max-w-7xl space-y-6">
+                <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-[2rem] border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/55 sm:p-10"
+                    >
+                        <div className="accent-label">Bước 2</div>
+                        <h1 className="mt-4 font-heading text-4xl font-black leading-tight tracking-tight text-[#10233F] md:text-5xl">
+                            Danh sách y tá đã lọc theo đúng dịch vụ bạn vừa chọn.
+                        </h1>
+                        <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-slate-500">
+                            Chỉ hiển thị những y tá có mở dịch vụ này, giúp bạn xem đúng hồ sơ, đúng giá và đặt lịch nhanh hơn.
+                        </p>
+                    </motion.div>
 
-                <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-                    {[
-                        { label: 'Dịch vụ đang chọn', value: selectedService?.name || 'Đang tải...' },
-                        { label: 'Số y tá phù hợp', value: filtered.length },
-                        {
-                            label: 'Mức giá từ',
-                            value: filtered.length
-                                ? `${Math.min(...filtered.map((item) => item.servicePrice ?? 0)).toLocaleString('vi-VN')} VND`
-                                : 'N/A',
-                        },
-                    ].map((card) => (
-                        <div key={card.label} className="metric-card">
-                            <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">{card.label}</div>
-                            <div className="mt-3 text-lg font-bold text-slate-900">{card.value}</div>
+                    <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
+                        {statCards.map((card, index) => (
+                            <motion.div
+                                key={card.label}
+                                initial={{ opacity: 0, y: 14 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.06 }}
+                                className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/45 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-200/70 sm:p-6"
+                            >
+                                <div className="flex items-center justify-between gap-4">
+                                    <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{card.label}</div>
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+                                        <card.icon className="h-5 w-5" />
+                                    </div>
+                                </div>
+                                <div className="mt-3 text-xl font-black leading-snug text-[#10233F]">{card.value}</div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </section>
+
+                <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Dịch vụ đã khóa</div>
+                            <div className="mt-2 font-heading text-2xl font-bold text-[#10233F]">{selectedService?.name}</div>
+                            <div className="mt-1 text-sm text-slate-600">
+                                Cần đổi dịch vụ? Quay lại bước 1 để tìm đúng nhóm y tá tương ứng.
+                            </div>
                         </div>
-                    ))}
-                </div>
-            </section>
+                        <Link to="/services" className="btn-secondary btn-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/10">
+                            Quay lại chọn dịch vụ
+                        </Link>
+                    </div>
+                </section>
 
-            <section className="section-shell">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Dịch vụ đã khóa</div>
-                        <div className="mt-2 font-heading text-2xl font-bold text-slate-900">{selectedService?.name}</div>
-                        <div className="mt-1 text-sm text-slate-600">
-                            Cần đổi dịch vụ? Quay lại bước 1 để tìm đúng nhóm y tá tương ứng.
+                <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                    <div className="grid gap-4 lg:grid-cols-[1fr_240px]">
+                        <div className="relative">
+                            <MagnifyingGlassIcon className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
+                            <input
+                                type="text"
+                                className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-14 pr-5 text-sm font-bold text-[#10233F] shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                placeholder="Tìm theo tên, bio, chuyên môn..."
+                                value={search}
+                                onChange={(event) => setSearch(event.target.value)}
+                            />
+                        </div>
+                        <div className="relative">
+                            <AdjustmentsHorizontalIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
+                            <select
+                                className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-10 text-sm font-black text-[#10233F] shadow-sm outline-none transition focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                value={sortBy}
+                                onChange={(event) => setSortBy(event.target.value)}
+                            >
+                                <option value="rating">Đánh giá cao nhất</option>
+                                <option value="experience">Kinh nghiệm nhiều nhất</option>
+                                <option value="price">Giá hợp lý nhất</option>
+                                <option value="name">Tên A-Z</option>
+                            </select>
+                            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">⌄</div>
                         </div>
                     </div>
-                    <Link to="/services" className="btn-secondary btn-sm">
-                        Quay lại chọn dịch vụ
-                    </Link>
-                </div>
-            </section>
+                </section>
 
-            <section className="section-shell">
-                <div className="grid gap-4 lg:grid-cols-[1fr_220px]">
-                    <div className="relative">
-                        <svg
-                            className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                        >
-                            <circle cx="11" cy="11" r="8" />
-                            <path d="m21 21-4.3-4.3" />
-                        </svg>
-                        <input
-                            type="text"
-                            className="form-input pl-12"
-                            placeholder="Tìm theo tên, bio, chuyên môn..."
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                        />
+                {filtered.length === 0 ? (
+                    <div className="empty-state">
+                        <div className="empty-state-title">Không tìm thấy y tá phù hợp</div>
+                        <div className="empty-state-text">Thử đổi từ khóa tìm kiếm hoặc quay lại chọn một dịch vụ khác.</div>
                     </div>
-                    <select className="form-select" value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
-                        <option value="rating">Đánh giá cao nhất</option>
-                        <option value="experience">Kinh nghiệm nhiều nhất</option>
-                        <option value="price">Giá hợp lý nhất</option>
-                        <option value="name">Tên A-Z</option>
-                    </select>
-                </div>
-            </section>
-
-            {filtered.length === 0 ? (
-                <div className="empty-state">
-                    <div className="empty-state-title">Không tìm thấy y tá phù hợp</div>
-                    <div className="empty-state-text">Thử đổi từ khóa tìm kiếm hoặc quay lại chọn một dịch vụ khác.</div>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
-                    {filtered.map((nurse) => (
-                        <div key={nurse.userId} className="card flex h-full flex-col">
-                            <div className="card-body flex flex-1 flex-col">
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-slate-900 text-2xl font-black text-white">
-                                            {nurse.fullName.charAt(0).toUpperCase()}
+                ) : (
+                    <motion.div layout className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        <AnimatePresence mode="popLayout">
+                            {filtered.map((nurse, index) => (
+                                <motion.div
+                                    key={nurse.userId}
+                                    layout
+                                    initial={{ opacity: 0, y: 14 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 12 }}
+                                    transition={{ delay: Math.min(index * 0.03, 0.18) }}
+                                    className="group flex h-full flex-col rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35 transition duration-300 hover:-translate-y-1 hover:border-brand/20 hover:shadow-2xl hover:shadow-slate-200/80"
+                                >
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="flex min-w-0 items-center gap-4">
+                                            <div className="relative flex h-[68px] w-[68px] shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#10233F] text-2xl font-black text-white shadow-lg shadow-[#10233F]/10">
+                                                {nurse.avatar ? (
+                                                    <img src={nurse.avatar} alt={nurse.fullName} className="h-full w-full object-cover" />
+                                                ) : (
+                                                    nurse.fullName.charAt(0).toUpperCase()
+                                                )}
+                                                <div className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-xl bg-emerald-500 text-white ring-2 ring-white">
+                                                    <CheckBadgeIcon className="h-4 w-4" />
+                                                </div>
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="truncate font-heading text-[22px] font-black leading-tight text-[#10233F]">{nurse.fullName}</div>
+                                                <div className="mt-1 truncate text-sm font-semibold text-slate-500">
+                                                    {nurse.specialization || 'Chuyên viên chăm sóc tại nhà'}
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div className="font-heading text-2xl font-bold text-slate-900">{nurse.fullName}</div>
-                                            <div className="mt-1 text-sm font-medium text-slate-500">
-                                                {nurse.specialization || 'Chuyên viên chăm sóc tại nhà'}
+                                        <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-sm font-black text-amber-600 ring-1 ring-amber-100">
+                                            <StarSolidIcon className="h-4 w-4" />
+                                            {nurse.averageRating.toFixed(1)}
+                                        </div>
+                                    </div>
+
+                                    <p className="mt-5 flex-1 overflow-hidden text-sm font-medium leading-7 text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
+                                        {nurse.bio || 'Hồ sơ đang được bổ sung mô tả chi tiết về kinh nghiệm chăm sóc.'}
+                                    </p>
+
+                                    <div className="mt-6 grid grid-cols-2 gap-3">
+                                        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Kinh nghiệm</div>
+                                            <div className="mt-2 text-sm font-black text-[#10233F]">{nurse.yearsExperience} năm</div>
+                                        </div>
+                                        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Giá dịch vụ</div>
+                                            <div className="mt-2 text-sm font-black text-[#10233F]">
+                                                {(nurse.servicePrice ?? 0).toLocaleString('vi-VN')} VND
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="surface-tag">{nurse.averageRating.toFixed(1)}</div>
-                                </div>
 
-                                <p className="mt-5 flex-1 text-sm leading-7 text-slate-600">
-                                    {nurse.bio || 'Hồ sơ đang được bổ sung mô tả chi tiết về kinh nghiệm chăm sóc.'}
-                                </p>
-
-                                <div className="mt-6 grid grid-cols-2 gap-3">
-                                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-                                        <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Kinh nghiệm</div>
-                                        <div className="mt-2 text-sm font-semibold text-slate-900">{nurse.yearsExperience} năm</div>
+                                    <div className="mt-5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-emerald-600">
+                                        <CheckBadgeIcon className="h-4 w-4" />
+                                        Đã xác minh hồ sơ
+                                        <StarIcon className="ml-auto h-4 w-4 text-brand" />
                                     </div>
-                                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-                                        <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Giá cho dịch vụ này</div>
-                                        <div className="mt-2 text-sm font-semibold text-slate-900">
-                                            {(nurse.servicePrice ?? 0).toLocaleString('vi-VN')} VND
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <div className="mt-6">
-                                    <Link to={`/nurses/${nurse.userId}?serviceId=${serviceId}`} className="btn-primary w-full justify-between">
+                                    <Link
+                                        to={`/nurses/${nurse.userId}?serviceId=${serviceId}`}
+                                        className="btn-primary mt-6 w-full justify-between transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand/20"
+                                    >
                                         Xem hồ sơ và đặt lịch
-                                        <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M5 12h14M13 5l7 7-7 7" />
-                                        </svg>
+                                        <span className="text-lg leading-none">→</span>
                                     </Link>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            )}
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </motion.div>
+                )}
+            </div>
         </div>
     );
 };

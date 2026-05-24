@@ -153,7 +153,7 @@ const CustomerBookingsPage = () => {
         <div className="bg-slate-50 min-h-screen py-20 px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <section className="grid gap-8 lg:grid-cols-[1fr_0.4fr] mb-16">
-                    <div className="bg-slate-900 rounded-xl p-12 relative overflow-hidden flex flex-col justify-center">
+                    <div className="bg-[#10233F] rounded-xl p-12 relative overflow-hidden flex flex-col justify-center">
                         <div className="absolute top-0 right-0 w-96 h-96 bg-brand/10 blur-[120px] -mr-48 -mt-48 rounded-full"></div>
                         <div className="relative z-10">
                             <div className="accent-label !bg-white/10 !text-white border-white/20">Dịch vụ đã đặt</div>
@@ -185,7 +185,7 @@ const CustomerBookingsPage = () => {
                                 </div>
                                 <div>
                                     <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">{card.label}</div>
-                                    <div className="text-3xl font-black text-slate-900">{card.value}</div>
+                                    <div className="text-3xl font-black text-[#10233F]">{card.value}</div>
                                 </div>
                             </div>
                         ))}
@@ -199,7 +199,7 @@ const CustomerBookingsPage = () => {
                                 key={tab.key} 
                                 onClick={() => setFilter(tab.key)} 
                                 className={`rounded-xl px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all ${
-                                    filter === tab.key ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                                    filter === tab.key ? 'bg-[#10233F] text-white shadow-xl' : 'text-slate-500 hover:bg-slate-50 hover:text-[#10233F]'
                                 }`}
                             >
                                 {tab.label}
@@ -218,7 +218,7 @@ const CustomerBookingsPage = () => {
                             <div className="h-24 w-24 rounded-xl bg-slate-50 flex items-center justify-center mx-auto mb-8">
                                 <CalendarDaysIcon className="h-10 w-10 text-slate-200" />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-2">Chưa có bản ghi nào</h3>
+                            <h3 className="text-2xl font-black text-[#10233F] mb-2">Chưa có bản ghi nào</h3>
                             <p className="text-slate-400 text-sm font-medium">Thay đổi bộ lọc hoặc bắt đầu dịch vụ đầu tiên cùng CareMate.</p>
                         </motion.div>
                     ) : (
@@ -238,7 +238,7 @@ const CustomerBookingsPage = () => {
                                         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-12">
                                             <div className="flex-1">
                                                 <div className="flex flex-wrap items-center gap-6 mb-10">
-                                                    <h2 className="text-3xl font-black text-slate-900 tracking-tight">{booking.serviceName}</h2>
+                                                    <h2 className="text-3xl font-black text-[#10233F] tracking-tight">{booking.serviceName}</h2>
                                                     <div className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-[10px] font-black uppercase tracking-widest ${status.className}`}>
                                                         <status.icon className="h-4 w-4" />
                                                         {status.label}
@@ -259,24 +259,24 @@ const CustomerBookingsPage = () => {
                                                 <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
                                                     <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Mã đơn hàng</div>
-                                                        <div className="text-base font-black text-slate-900 group-hover:text-brand transition-colors">#{booking.id}</div>
+                                                        <div className="text-base font-black text-[#10233F] group-hover:text-brand transition-colors">#{booking.id}</div>
                                                     </div>
                                                     <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Thời gian</div>
-                                                        <div className="text-base font-black text-slate-900 flex items-center gap-2">
+                                                        <div className="text-base font-black text-[#10233F] flex items-center gap-2">
                                                             <ClockIcon className="h-4 w-4 text-brand" />
                                                             {new Date(booking.startTime).toLocaleString('vi-VN')}
                                                         </div>
                                                     </div>
                                                     <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Địa điểm</div>
-                                                        <div className="text-base font-black text-slate-900 truncate" title={booking.address}>
+                                                        <div className="text-base font-black text-[#10233F] truncate" title={booking.address}>
                                                             <MapPinIcon className="h-4 w-4 text-brand mb-1 inline" /> {booking.address}
                                                         </div>
                                                     </div>
                                                     <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Tổng thanh toán</div>
-                                                        <div className="text-base font-black text-slate-900 flex items-center gap-2">
+                                                        <div className="text-base font-black text-[#10233F] flex items-center gap-2">
                                                             <BanknotesIcon className="h-4 w-4 text-brand" />
                                                             {booking.totalPrice.toLocaleString('vi-VN')}đ
                                                         </div>
@@ -284,7 +284,7 @@ const CustomerBookingsPage = () => {
                                                     <div className="p-6 rounded-xl bg-slate-50 border border-slate-100 group hover:bg-white hover:shadow-lg transition-all sm:col-span-2 xl:col-span-4">
                                                         <div className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2">Tình trạng hoàn tiền</div>
                                                         <div className="flex flex-wrap items-center gap-3">
-                                                            <div className="text-base font-black text-slate-900">
+                                                            <div className="text-base font-black text-[#10233F]">
                                                                 {booking.refundStatus === 'completed'
                                                                     ? 'Đã hoàn tiền'
                                                                     : booking.refundStatus === 'pending'
@@ -344,9 +344,9 @@ const CustomerBookingsPage = () => {
                 {/* Modals */}
                 <AnimatePresence>
                     {reviewModal.isOpen && (
-                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-md">
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#10233F]/60 p-6 backdrop-blur-md">
                             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-lg rounded-xl bg-white p-12 shadow-2xl">
-                                <h3 className="text-3xl font-black text-slate-900 mb-8">Đánh giá dịch vụ</h3>
+                                <h3 className="text-3xl font-black text-[#10233F] mb-8">Đánh giá dịch vụ</h3>
                                 <div className="space-y-8">
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Mức độ hài lòng</label>
@@ -360,7 +360,7 @@ const CustomerBookingsPage = () => {
                                     </div>
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Chia sẻ cảm nhận</label>
-                                        <textarea className="w-full bg-slate-50 border-none rounded-xl p-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" rows={4} value={reviewForm.comment} onChange={(event) => setReviewForm((prev) => ({ ...prev, comment: event.target.value }))} placeholder="Bạn thấy điều dưỡng chăm sóc thế nào?" />
+                                        <textarea className="w-full bg-slate-50 border-none rounded-xl p-6 text-sm font-bold text-[#10233F] outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" rows={4} value={reviewForm.comment} onChange={(event) => setReviewForm((prev) => ({ ...prev, comment: event.target.value }))} placeholder="Bạn thấy điều dưỡng chăm sóc thế nào?" />
                                     </div>
                                 </div>
                                 <div className="mt-10 flex gap-4">
@@ -372,14 +372,14 @@ const CustomerBookingsPage = () => {
                     )}
 
                     {disputeModal.isOpen && (
-                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-md">
+                        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-[#10233F]/60 p-6 backdrop-blur-md">
                             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-lg rounded-xl bg-white p-12 shadow-2xl">
-                                <h3 className="text-3xl font-black text-slate-900 mb-4 text-red-600">Gửi khiếu nại</h3>
+                                <h3 className="text-3xl font-black text-[#10233F] mb-4 text-red-600">Gửi khiếu nại</h3>
                                 <p className="text-sm font-medium text-slate-400 mb-10">CareMate sẽ tiếp nhận và xử lý sự cố trong vòng 24 giờ làm việc.</p>
                                 <div className="space-y-8">
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Mô tả sự cố</label>
-                                        <textarea className="w-full bg-slate-50 border-none rounded-xl p-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-red-500/5 transition-all" rows={6} value={disputeReason} onChange={(event) => setDisputeReason(event.target.value)} placeholder="Vui lòng mô tả chi tiết vấn đề bạn gặp phải..." />
+                                        <textarea className="w-full bg-slate-50 border-none rounded-xl p-6 text-sm font-bold text-[#10233F] outline-none focus:bg-white focus:ring-4 focus:ring-red-500/5 transition-all" rows={6} value={disputeReason} onChange={(event) => setDisputeReason(event.target.value)} placeholder="Vui lòng mô tả chi tiết vấn đề bạn gặp phải..." />
                                     </div>
                                 </div>
                                 <div className="mt-10 flex gap-4">

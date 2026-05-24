@@ -106,7 +106,7 @@ const BookingDetailPage = () => {
                         {/* Main Boarding Pass Card */}
                         <div className="relative bg-white rounded-xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.06)] border border-slate-50">
                             {/* Header Section */}
-                            <div className="bg-slate-900 p-12 text-white relative overflow-hidden">
+                            <div className="bg-[#10233F] p-12 text-white relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-64 h-64 bg-brand/20 blur-[80px] -mr-32 -mt-32"></div>
                                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
                                     <div>
@@ -134,7 +134,7 @@ const BookingDetailPage = () => {
                                             </div>
                                             <div>
                                                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Ngày phục vụ</div>
-                                                <div className="text-lg font-black text-slate-900 capitalize">
+                                                <div className="text-lg font-black text-[#10233F] capitalize">
                                                     {new Date(detail.startTime).toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                                 </div>
                                             </div>
@@ -145,7 +145,7 @@ const BookingDetailPage = () => {
                                             </div>
                                             <div>
                                                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Khung giờ vàng</div>
-                                                <div className="text-lg font-black text-slate-900 tracking-tight">
+                                                <div className="text-lg font-black text-[#10233F] tracking-tight">
                                                     {new Date(detail.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} 
                                                     <span className="mx-3 text-slate-200">/</span>
                                                     {new Date(detail.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
@@ -161,7 +161,7 @@ const BookingDetailPage = () => {
                                             </div>
                                             <div>
                                                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Địa điểm chăm sóc</div>
-                                                <div className="text-lg font-black text-slate-900 leading-tight max-w-sm">
+                                                <div className="text-lg font-black text-[#10233F] leading-tight max-w-sm">
                                                     {detail.address || 'Hồ sơ khách hàng CareMate'}
                                                 </div>
                                             </div>
@@ -204,7 +204,7 @@ const BookingDetailPage = () => {
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.2 }}
-                            className="bg-white rounded-xl p-10 shadow-2xl shadow-slate-900/5 border border-slate-50 text-center"
+                            className="bg-white rounded-xl p-10 shadow-2xl shadow-[#10233F]/5 border border-slate-50 text-center"
                         >
                             <div className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 mb-8">Điều dưỡng thực hiện</div>
                             <div className="relative inline-block mb-6">
@@ -215,11 +215,11 @@ const BookingDetailPage = () => {
                                     <CheckCircleIcon className="h-6 w-6" />
                                 </div>
                             </div>
-                            <h4 className="text-2xl font-black text-slate-900 tracking-tight">{detail.nurseName || 'Y tá CareMate'}</h4>
+                            <h4 className="text-2xl font-black text-[#10233F] tracking-tight">{detail.nurseName || 'Y tá CareMate'}</h4>
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand mt-2">Xác minh chuyên nghiệp</p>
                             
                             <div className="mt-12 grid gap-4">
-                                <button className="w-full py-5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-brand transition-all shadow-xl shadow-slate-900/10 active:scale-95">
+                                <button className="w-full py-5 rounded-xl bg-[#10233F] text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-brand transition-all shadow-xl shadow-[#10233F]/10 active:scale-95">
                                     <ChatBubbleLeftRightIcon className="h-5 w-5" /> Trò chuyện trực tuyến
                                 </button>
                                 <button className="w-full py-5 rounded-xl bg-white border-2 border-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:border-brand hover:text-brand transition-all active:scale-95">

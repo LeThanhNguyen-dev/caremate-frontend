@@ -19,10 +19,10 @@ export default {
                 "admin-deep": "#2563EB",
             },
             fontFamily: {
-                sans: ['Montserrat', 'sans-serif'],
-                heading: ['Montserrat', 'sans-serif'],
-                serif: ['Montserrat', 'serif'],
-                mono: ['Montserrat', 'monospace'],
+                sans: ['Be Vietnam Pro', 'sans-serif'],
+                heading: ['Be Vietnam Pro', 'sans-serif'],
+                serif: ['Be Vietnam Pro', 'serif'],
+                mono: ['Be Vietnam Pro', 'monospace'],
             },
             borderRadius: {
                 'none': '0',

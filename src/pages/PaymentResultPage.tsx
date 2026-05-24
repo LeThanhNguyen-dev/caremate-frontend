@@ -81,7 +81,7 @@ const PaymentResultPage = () => {
           {isSuccess ? 'OK' : '...'}
         </div>
 
-        <h1 className="text-3xl font-black text-slate-900">{title}</h1>
+        <h1 className="text-3xl font-black text-[#10233F]">{title}</h1>
         <p className="mt-4 text-sm font-medium leading-7 text-slate-500">{description}</p>
 
         {message && (

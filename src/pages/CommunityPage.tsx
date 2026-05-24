@@ -176,14 +176,14 @@ const CommunityPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-20">
-            <section className="border-b border-slate-100 bg-white py-14">
+        <div className="min-h-screen bg-[#fbfaf8] pb-20 pt-10">
+            <section className="py-14">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+                    <div className="rounded-[2rem] bg-white p-10 shadow-2xl shadow-slate-200/70">
                         <div>
                             <div className="accent-label">Cong dong CareMate</div>
-                            <h1 className="mt-4 text-4xl font-black text-slate-900">Chia se va ket noi</h1>
-                            <p className="mt-2 max-w-2xl text-sm font-bold leading-7 text-slate-500">
+                            <h1 className="mt-4 text-5xl font-black leading-tight tracking-tight text-slate-950">Chia se va ket noi</h1>
+                            <p className="mt-3 max-w-2xl text-sm font-bold leading-7 text-slate-500">
                                 Noi cac gia dinh dat cau hoi, chia se kinh nghiem cham soc me va be, va cung nhau tim cau tra loi thuc te.
                             </p>
                         </div>
