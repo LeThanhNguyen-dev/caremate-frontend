@@ -8,7 +8,8 @@ import {
     UserCircleIcon,
     ArrowRightOnRectangleIcon,
     ShieldCheckIcon,
-    LockClosedIcon
+    LockClosedIcon,
+    ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
 
@@ -21,6 +22,7 @@ const NurseSidebar = () => {
         { label: 'Tổng quan', path: '/nurse/overview', icon: Squares2X2Icon, requiresApproval: true },
         { label: 'Lịch làm việc', path: '/nurse/schedule', icon: CalendarIcon, requiresApproval: true },
         { label: 'Quản lý lịch hẹn', path: '/nurse/bookings', icon: ClipboardDocumentListIcon, requiresApproval: true },
+        { label: 'Tin nhắn', path: '/nurse/chat', icon: ChatBubbleLeftRightIcon, requiresApproval: true },
         { label: 'Dịch vụ của tôi', path: '/nurse/services', icon: BriefcaseIcon, requiresApproval: true },
         { label: 'Hồ sơ cá nhân', path: '/nurse/profile', icon: UserCircleIcon, requiresApproval: false },
     ];

@@ -323,7 +323,7 @@ const CustomerBookingsPage = () => {
                                                 {booking.status === 'completed' && (
                                                     <>
                                                         <button onClick={() => setReviewModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-brand/5 text-brand hover:bg-brand hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                                                            Gửi đánh giá
+                                                            Đánh giá buổi chăm sóc
                                                         </button>
                                                         {!dispute && (
                                                             <button onClick={() => setDisputeModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
@@ -346,7 +346,7 @@ const CustomerBookingsPage = () => {
                     {reviewModal.isOpen && (
                         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-900/60 p-6 backdrop-blur-md">
                             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-lg rounded-xl bg-white p-12 shadow-2xl">
-                                <h3 className="text-3xl font-black text-slate-900 mb-8">Đánh giá dịch vụ</h3>
+                                <h3 className="text-3xl font-black text-slate-900 mb-8">Đánh giá buổi chăm sóc</h3>
                                 <div className="space-y-8">
                                     <div>
                                         <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 block">Mức độ hài lòng</label>

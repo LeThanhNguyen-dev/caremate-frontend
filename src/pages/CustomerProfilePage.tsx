@@ -59,7 +59,7 @@ const CustomerProfilePage = () => {
             setProfileForm({
                 fullName: data.fullName || '',
                 email: data.email || '',
-                phone: data.phone || '',
+                phone: data.phone || data.phoneNumber || '',
                 address: data.address || '',
                 bankBin: data.bankBin || '',
                 bankAccountNumber: data.bankAccountNumber || '',
@@ -131,6 +131,10 @@ const CustomerProfilePage = () => {
         }
         if (passwordForm.newPassword.length < 6) {
             showToast('Mật khẩu mới phải có ít nhất 6 ký tự.', 'error');
+            return;
+        }
+        if (!/[a-z]/.test(passwordForm.newPassword) || !/\d/.test(passwordForm.newPassword)) {
+            showToast('Mật khẩu mới cần có chữ thường và số.', 'error');
             return;
         }
 

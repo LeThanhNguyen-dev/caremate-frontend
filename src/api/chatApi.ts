@@ -5,14 +5,21 @@ export interface ChatMessage {
   conversationId: number;
   senderId: number;
   content: string;
+  isRead: boolean;
   createdAt: string;
 }
 
 export interface Conversation {
   id: number;
-  bookingId: number;
-  lastMessage?: string;
-  updatedAt: string;
+  bookingId: number | null;
+  user1Id: number;
+  user2Id: number;
+  type: string;
+  peerName?: string | null;
+  lastMessage?: string | null;
+  lastMessageAt?: string | null;
+  canSend: boolean;
+  createdAt: string;
 }
 
 export const chatApi = {
@@ -33,6 +40,11 @@ export const chatApi = {
 
   getOrCreateByBooking: async (bookingId: number) => {
     const response = await axiosInstance.post<Conversation>(`/api/chat/conversations/by-booking/${bookingId}`);
+    return response.data;
+  },
+
+  getOrCreateSupport: async (userId?: number) => {
+    const response = await axiosInstance.post<Conversation>('/api/chat/conversations/support', { userId });
     return response.data;
   }
 };
