@@ -244,10 +244,11 @@ const CommunityPage = () => {
     const handleOpenCommentLikers = async (postId: number, comment: CommunityCommentDto) => {
         if (comment.likes <= 0) return;
 
-        setLikersDialog({ title: `Người đã thích bình luận của ${comment.author}`, users: [], loading: true });
+        const title = `Người đã thích bình luận của ${comment.author}`;
+        setLikersDialog({ title, users: [], loading: true });
         try {
             const users = await caremateApi.getCommunityCommentLikers(postId, comment.id);
-            setLikersDialog({ title: `Người đã thích bình luận của ${comment.author}`, users, loading: false });
+            setLikersDialog({ title, users, loading: false });
         } catch {
             setLikersDialog(null);
             showToast('Không thể tải danh sách người thích.', 'error');
@@ -259,21 +260,21 @@ const CommunityPage = () => {
         const isReply = depth > 0;
 
         return (
-            <div key={comment.id} className={isReply ? 'relative pl-12' : ''}>
+            <div key={comment.id} className={isReply ? 'relative pl-10 sm:pl-12' : ''}>
                 <div className="relative flex items-start gap-3">
-                    {isReply && <span className="absolute left-0 top-5 h-px w-9 bg-slate-200" />}
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-black text-slate-500">
-                        {comment.avatar ? <img src={comment.avatar} alt={comment.author} className="h-full w-full rounded-full object-cover" /> : getInitial(comment.author)}
+                    {isReply && <span className="absolute left-0 top-5 h-px w-8 bg-slate-200 sm:w-9" />}
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand/10 text-xs font-black text-brand ring-1 ring-brand/10">
+                        {comment.avatar ? <img src={comment.avatar} alt={comment.author} className="h-full w-full object-cover" /> : getInitial(comment.author)}
                     </div>
                     <div className="min-w-0 flex-1">
-                        <div className="relative inline-block max-w-[calc(100%-1.25rem)] rounded-[18px] bg-slate-200/80 px-4 py-2 text-left">
-                            <div className="truncate pr-4 text-sm font-black leading-5 text-slate-950">{comment.author}</div>
-                            <p className="whitespace-pre-line pr-2 text-[15px] font-medium leading-6 text-slate-800">{comment.content}</p>
+                        <div className="relative inline-block max-w-[calc(100%-1.25rem)] rounded-[18px] bg-slate-50 px-4 py-2.5 text-left ring-1 ring-slate-100">
+                            <div className="truncate pr-4 text-sm font-black leading-5 text-[#10233F]">{comment.author}</div>
+                            <p className="whitespace-pre-line pr-2 text-[14px] font-medium leading-6 text-slate-600">{comment.content}</p>
                             {comment.likes > 0 && (
                                 <button
                                     type="button"
                                     onClick={() => handleOpenCommentLikers(postId, comment)}
-                                    className="absolute -bottom-2 -right-3 flex items-center gap-1 rounded-full bg-white px-1.5 py-0.5 text-xs font-black leading-none text-slate-500 shadow-[0_2px_8px_rgba(15,23,42,0.16)] ring-1 ring-slate-100 transition hover:bg-slate-50 hover:text-brand"
+                                    className="absolute -bottom-2 -right-3 flex items-center gap-1 rounded-full bg-white px-1.5 py-0.5 text-xs font-black leading-none text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.12)] ring-1 ring-slate-100 transition hover:text-brand"
                                     aria-label="Xem người đã thích bình luận"
                                 >
                                     {comment.likes}
@@ -283,7 +284,7 @@ const CommunityPage = () => {
                                 </button>
                             )}
                         </div>
-                        <div className="mt-1 flex items-center gap-3 pl-4 text-xs font-black text-slate-500">
+                        <div className="mt-1.5 flex items-center gap-3 pl-4 text-xs font-black text-slate-400">
                             <span>{getRelativeTime(comment.createdAt)}</span>
                             <button
                                 type="button"
@@ -304,8 +305,8 @@ const CommunityPage = () => {
                 </div>
 
                 {replyingToCommentId === comment.id && (
-                    <div className="relative mt-3 flex items-center gap-3 pl-12">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-black text-slate-500">
+                    <div className="relative mt-3 flex items-center gap-3 pl-10 sm:pl-12">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-xs font-black text-brand">
                             {getInitial(currentUserName)}
                         </div>
                         <input
@@ -315,13 +316,13 @@ const CommunityPage = () => {
                                 if (event.key === 'Enter') handleCreateComment(postId, comment.id);
                             }}
                             placeholder={`Trả lời ${comment.author}...`}
-                            className="min-w-0 flex-1 rounded-full border-none bg-slate-200/80 px-4 py-2.5 text-sm font-medium text-slate-900 outline-none placeholder:text-slate-500 focus:bg-white focus:ring-4 focus:ring-brand/10"
+                            className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                         />
                         <button
                             type="button"
                             onClick={() => handleCreateComment(postId, comment.id)}
                             disabled={!replyDrafts[comment.id]?.trim()}
-                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#10233F] text-white transition hover:bg-brand disabled:cursor-not-allowed disabled:opacity-40"
                             aria-label="Gửi phản hồi"
                         >
                             <PaperAirplaneIcon className="h-4 w-4" />
@@ -339,114 +340,149 @@ const CommunityPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] pb-20 pt-20">
-            <section className="border-b border-slate-100 bg-white py-14">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                    <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-                        <div>
-                            <div className="accent-label">Cộng đồng CareMate</div>
-                            <h1 className="mt-4 text-4xl font-black text-slate-900">Chia sẻ và kết nối</h1>
-                            <p className="mt-2 max-w-2xl text-sm font-bold leading-7 text-slate-500">
-                                Nơi các gia đình đặt câu hỏi, chia sẻ kinh nghiệm chăm sóc mẹ và bé, và cùng nhau tìm câu trả lời thực tế.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <div className="min-h-screen bg-[#fbfaf8] px-5 py-8 lg:px-8">
+            <div className="mx-auto max-w-7xl space-y-6">
+                <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+                    <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="rounded-[2rem] border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/55 sm:p-10"
+                    >
+                        <div className="accent-label">Cộng đồng CareMate</div>
+                        <h1 className="mt-4 font-heading text-4xl font-black leading-tight tracking-tight text-[#10233F] md:text-5xl">
+                            Chia sẻ kinh nghiệm chăm sóc mẹ và bé cùng cộng đồng.
+                        </h1>
+                        <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-slate-500">
+                            Đặt câu hỏi, lưu lại trải nghiệm thực tế và tìm những gợi ý gần gũi từ các gia đình đang đồng hành cùng CareMate.
+                        </p>
+                    </motion.div>
 
-            <div className="mx-auto mt-10 grid max-w-7xl gap-10 px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:px-8">
-                <main className="space-y-6">
-                    <div className="rounded-[24px] bg-white p-5 shadow-[0_12px_32px_rgba(15,23,42,0.08)]">
-                        <div className="flex items-center gap-4">
-                            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-xl font-black text-slate-500 ring-1 ring-slate-200">
-                                {getInitial(currentUserName)}
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setIsComposerOpen(true)}
-                                className="flex min-h-14 flex-1 items-center rounded-full bg-slate-100 px-6 text-left text-[18px] font-semibold text-slate-500 transition hover:bg-slate-200"
-                            >
-                                {currentUserName}, bạn đang nghĩ gì thế?
-                            </button>
-                            <label className="hidden h-12 w-12 cursor-pointer items-center justify-center rounded-full text-green-500 transition hover:bg-green-50 md:flex" aria-label="Thêm ảnh">
-                                <PhotoIcon className="h-7 w-7" />
-                                <input
-                                    type="file"
-                                    accept="image/png,image/jpeg"
-                                    className="hidden"
-                                    onChange={(event) => {
-                                        const file = event.target.files?.[0] ?? null;
-                                        setSelectedImage(file);
-                                        setIsComposerOpen(true);
-                                        event.target.value = '';
-                                    }}
-                                />
-                            </label>
-                        </div>
-                    </div>
-
-                    {isComposerOpen && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 px-4 py-6 backdrop-blur-[2px]">
+                    <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
+                        {[
+                            { label: 'Bài viết', value: posts.length },
+                            { label: 'Bình luận', value: posts.reduce((total, post) => total + countComments(post.comments), 0) },
+                            { label: 'Chủ đề', value: new Set(posts.flatMap((post) => post.tags)).size },
+                        ].map((card, index) => (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.96, y: 12 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                className="flex max-h-[calc(100vh-48px)] w-full max-w-[760px] flex-col overflow-hidden rounded-[18px] bg-white shadow-[0_28px_80px_rgba(15,23,42,0.25)]"
+                                key={card.label}
+                                initial={{ opacity: 0, y: 14 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.06 }}
+                                className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/45 sm:p-6"
                             >
-                                <div className="relative border-b border-slate-200 px-6 py-5 text-center">
-                                    <h2 className="text-[28px] font-black leading-none text-slate-950">Tạo bài viết</h2>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsComposerOpen(false)}
-                                        className="absolute right-5 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-700"
-                                        aria-label="Đóng"
-                                    >
-                                        <XMarkIcon className="h-8 w-8" />
-                                    </button>
-                                </div>
+                                <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{card.label}</div>
+                                <div className="mt-3 text-3xl font-black leading-none text-[#10233F]">{card.value}</div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </section>
 
-                                <div className="min-h-0 overflow-y-auto px-6 py-5">
-                                    <div className="mb-5 flex items-center gap-4">
-                                        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 text-xl font-black text-slate-500 ring-1 ring-slate-200">
-                                            {getInitial(currentUserName)}
-                                        </div>
-                                        <div>
-                                            <div className="text-[22px] font-black leading-tight text-slate-950">{currentUserName}</div>
-                                            <button
-                                                type="button"
-                                                className="mt-1 inline-flex items-center gap-1 rounded-md bg-slate-200 px-2.5 py-1.5 text-[13px] font-black text-slate-900"
-                                            >
-                                                <GlobeAltIcon className="h-4 w-4" />
-                                                Công khai
-                                            </button>
-                                        </div>
+                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
+                    <main className="space-y-6">
+                        <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                            <div className="flex flex-col gap-4 md:flex-row md:items-center">
+                                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#10233F] text-xl font-black text-white">
+                                    {getInitial(currentUserName)}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsComposerOpen(true)}
+                                    className="flex min-h-14 flex-1 items-center rounded-2xl border border-slate-200 bg-white px-5 text-left text-sm font-bold text-slate-400 shadow-sm transition hover:border-brand/30 hover:text-[#10233F] hover:shadow-lg hover:shadow-brand/10"
+                                >
+                                    {currentUserName}, bạn muốn chia sẻ điều gì?
+                                </button>
+                                <label className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl bg-brand/10 text-brand transition hover:bg-brand hover:text-white" aria-label="Thêm ảnh">
+                                    <PhotoIcon className="h-6 w-6" />
+                                    <input
+                                        type="file"
+                                        accept="image/png,image/jpeg"
+                                        className="hidden"
+                                        onChange={(event) => {
+                                            const file = event.target.files?.[0] ?? null;
+                                            setSelectedImage(file);
+                                            setIsComposerOpen(true);
+                                            event.target.value = '';
+                                        }}
+                                    />
+                                </label>
+                            </div>
+                        </section>
+
+                        {isComposerOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4 py-6 backdrop-blur-[2px]">
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    className="flex max-h-[calc(100vh-48px)] w-full max-w-[760px] flex-col overflow-hidden rounded-[1.75rem] bg-white shadow-[0_28px_80px_rgba(15,23,42,0.25)]"
+                                >
+                                    <div className="relative border-b border-slate-100 px-6 py-5 text-center">
+                                        <h2 className="text-2xl font-black leading-none text-[#10233F]">Tạo bài viết</h2>
+                                        <button
+                                            type="button"
+                                            onClick={() => setIsComposerOpen(false)}
+                                            className="absolute right-5 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-2xl bg-slate-50 text-slate-500 transition hover:bg-slate-100 hover:text-[#10233F]"
+                                            aria-label="Đóng"
+                                        >
+                                            <XMarkIcon className="h-6 w-6" />
+                                        </button>
                                     </div>
 
-                                    <textarea
-                                        value={draftContent}
-                                        onChange={(event) => setDraftContent(event.target.value)}
-                                        placeholder={`${currentUserName}, bạn đang nghĩ gì thế?`}
-                                        className="min-h-[170px] w-full resize-none border-none bg-transparent px-0 py-2 text-[32px] font-normal leading-tight text-slate-800 outline-none placeholder:text-slate-500 focus:ring-0"
-                                    />
-
-                                    {imagePreviewUrl && (
-                                        <div className="relative mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                                            <img src={imagePreviewUrl} alt="Ảnh xem trước" className="max-h-[360px] w-full object-contain" />
-                                            <button
-                                                type="button"
-                                                onClick={() => setSelectedImage(null)}
-                                                className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/80 text-white transition hover:bg-slate-900"
-                                                aria-label="Xóa ảnh"
-                                            >
-                                                <XMarkIcon className="h-6 w-6" />
-                                            </button>
+                                    <div className="min-h-0 overflow-y-auto px-6 py-5">
+                                        <div className="mb-5 flex items-center gap-4">
+                                            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#10233F] text-xl font-black text-white">
+                                                {getInitial(currentUserName)}
+                                            </div>
+                                            <div>
+                                                <div className="text-xl font-black leading-tight text-[#10233F]">{currentUserName}</div>
+                                                <button
+                                                    type="button"
+                                                    className="mt-1 inline-flex items-center gap-1 rounded-full bg-brand/10 px-3 py-1.5 text-xs font-black text-brand"
+                                                >
+                                                    <GlobeAltIcon className="h-4 w-4" />
+                                                    Công khai
+                                                </button>
+                                            </div>
                                         </div>
-                                    )}
 
-                                    <div className="mt-8 flex items-center justify-between gap-4 rounded-xl border border-slate-300 px-5 py-4 shadow-sm">
-                                        <span className="text-[20px] font-black text-slate-950">Thêm vào bài viết của bạn</span>
-                                        <div className="flex items-center gap-3">
-                                            <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-green-500 transition hover:bg-green-50" aria-label="Chọn ảnh">
-                                                <PhotoIcon className="h-8 w-8" />
+                                        <input
+                                            value={draftTitle}
+                                            onChange={(event) => setDraftTitle(event.target.value)}
+                                            placeholder="Tiêu đề bài viết"
+                                            className="mb-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                        />
+
+                                        <textarea
+                                            value={draftContent}
+                                            onChange={(event) => setDraftContent(event.target.value)}
+                                            placeholder={`${currentUserName}, bạn đang nghĩ gì thế?`}
+                                            className="min-h-[170px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base font-semibold leading-7 text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                        />
+
+                                        <input
+                                            value={draftTags}
+                                            onChange={(event) => setDraftTags(event.target.value)}
+                                            placeholder="Chủ đề, phân tách bằng dấu phẩy"
+                                            className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                        />
+
+                                        {imagePreviewUrl && (
+                                            <div className="relative mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50">
+                                                <img src={imagePreviewUrl} alt="Ảnh xem trước" className="max-h-[360px] w-full object-contain" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setSelectedImage(null)}
+                                                    className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900/80 text-white transition hover:bg-slate-900"
+                                                    aria-label="Xóa ảnh"
+                                                >
+                                                    <XMarkIcon className="h-6 w-6" />
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-slate-200 px-5 py-4">
+                                            <span className="text-sm font-black text-[#10233F]">Thêm vào bài viết</span>
+                                            <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl bg-brand/10 text-brand transition hover:bg-brand hover:text-white" aria-label="Chọn ảnh">
+                                                <PhotoIcon className="h-6 w-6" />
                                                 <input
                                                     type="file"
                                                     accept="image/png,image/jpeg"
@@ -459,171 +495,180 @@ const CommunityPage = () => {
                                             </label>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="px-6 pb-6">
-                                    <button
-                                        type="button"
-                                        onClick={handleCreatePost}
-                                        disabled={isSubmittingPost || (!draftContent.trim() && !selectedImage)}
-                                        className="w-full rounded-xl bg-brand px-6 py-4 text-[18px] font-black text-white transition hover:bg-brand/90 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
-                                    >
-                                        {isSubmittingPost ? 'Đang đăng...' : 'Đăng'}
-                                    </button>
-                                </div>
-                            </motion.div>
-                        </div>
-                    )}
+                                    <div className="px-6 pb-6">
+                                        <button
+                                            type="button"
+                                            onClick={handleCreatePost}
+                                            disabled={isSubmittingPost || (!draftContent.trim() && !selectedImage)}
+                                            className="w-full rounded-2xl bg-[#10233F] px-6 py-4 text-xs font-black uppercase tracking-widest text-white transition hover:bg-brand disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+                                        >
+                                            {isSubmittingPost ? 'Đang đăng...' : 'Đăng bài'}
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        )}
 
-                    <div className="flex gap-4 rounded-[24px] bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.04)]">
-                        <div className="relative flex-1">
-                            <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
-                            <input
-                                type="text"
-                                value={searchQuery}
-                                onChange={(event) => setSearchQuery(event.target.value)}
-                                placeholder="Tìm kiếm bài viết, chủ đề..."
-                                className="w-full rounded-2xl border-none bg-slate-50 py-3 pl-12 pr-4 text-sm font-bold text-slate-900 outline-none focus:ring-2 focus:ring-brand/20"
-                            />
-                        </div>
-                    </div>
+                        <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                            <div className="relative">
+                                <MagnifyingGlassIcon className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(event) => setSearchQuery(event.target.value)}
+                                    placeholder="Tìm kiếm bài viết, chủ đề..."
+                                    className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-14 pr-5 text-sm font-bold text-[#10233F] shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                />
+                            </div>
+                        </section>
 
-                    {filteredPosts.map((post, idx) => {
-                        const liked = post.likedByMe;
-                        const commentsOpen = expandedPostId === post.id;
+                        {filteredPosts.map((post, idx) => {
+                            const liked = post.likedByMe;
+                            const commentsOpen = expandedPostId === post.id;
 
-                        return (
-                            <motion.article
-                                key={post.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                                className="rounded-[24px] bg-white p-6 shadow-[0_18px_45px_rgba(15,23,42,0.06)] transition hover:shadow-[0_24px_55px_rgba(15,23,42,0.08)]"
-                            >
-                                <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand/10 text-xl font-black text-brand">
-                                            {post.avatar ? <img src={post.avatar} alt={post.author} className="h-full w-full rounded-2xl object-cover" /> : getInitial(post.author)}
-                                        </div>
-                                        <div>
-                                            <div className="text-sm font-black text-slate-900">{post.author}</div>
-                                            <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                                                {post.role} • {getRelativeTime(post.createdAt)}
+                            return (
+                                <motion.article
+                                    key={post.id}
+                                    initial={{ opacity: 0, y: 16 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.04 }}
+                                    className="rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35 transition duration-300 hover:-translate-y-0.5 hover:border-brand/20 hover:shadow-2xl hover:shadow-slate-200/75"
+                                >
+                                    <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl bg-[#10233F] text-lg font-black text-white shadow-lg shadow-[#10233F]/10">
+                                                {post.avatar ? <img src={post.avatar} alt={post.author} className="h-full w-full object-cover" /> : getInitial(post.author)}
+                                            </div>
+                                            <div>
+                                                <div className="text-[16px] font-black leading-tight text-[#10233F]">{post.author}</div>
+                                                <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
+                                                    {post.role} · {getRelativeTime(post.createdAt)}
+                                                </div>
                                             </div>
                                         </div>
+                                        {post.tags.length > 0 && (
+                                            <div className="flex flex-wrap gap-2">
+                                                {post.tags.map((tag) => (
+                                                    <button
+                                                        key={tag}
+                                                        type="button"
+                                                        onClick={() => setSearchQuery(tag)}
+                                                        className="rounded-full bg-brand/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand transition hover:bg-brand hover:text-white"
+                                                    >
+                                                        #{tag}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                    {post.tags.length > 0 && (
-                                        <div className="flex flex-wrap gap-2">
-                                            {post.tags.map((tag) => (
-                                                <button
-                                                    key={tag}
-                                                    type="button"
-                                                    onClick={() => setSearchQuery(tag)}
-                                                    className="rounded-xl bg-slate-50 px-3 py-1 text-[10px] font-black uppercase tracking-tight text-slate-400 transition hover:bg-brand/10 hover:text-brand"
-                                                >
-                                                    #{tag}
-                                                </button>
-                                            ))}
+
+                                    {post.title && <h2 className="mb-3 text-2xl font-black leading-tight text-[#10233F]">{post.title}</h2>}
+                                    <p className="mb-6 whitespace-pre-line text-sm font-medium leading-7 text-slate-600">{post.content}</p>
+                                    {post.imageUrl && (
+                                        <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
+                                            <img src={post.imageUrl} alt={post.title || 'Ảnh bài viết cộng đồng'} className="max-h-[560px] w-full object-contain" />
                                         </div>
                                     )}
-                                </div>
 
-                                <h2 className="mb-3 text-xl font-black leading-tight text-slate-900">{post.title}</h2>
-                                <p className="mb-7 whitespace-pre-line text-sm font-medium leading-7 text-slate-600">{post.content}</p>
-                                {post.imageUrl && (
-                                    <div className="mb-7 overflow-hidden rounded-2xl bg-slate-50">
-                                        <img src={post.imageUrl} alt={post.title} className="max-h-[560px] w-full object-contain" />
-                                    </div>
-                                )}
-
-                                <div className="flex items-center justify-between border-t border-slate-100 pt-5">
-                                    <div className="flex gap-5">
-                                        <button
-                                            type="button"
-                                            onClick={() => handleToggleLike(post.id)}
-                                            className={`flex items-center gap-2 transition ${liked ? 'text-brand' : 'text-slate-400 hover:text-brand'}`}
-                                        >
-                                            {liked ? <HandThumbUpSolidIcon className="h-5 w-5" /> : <HandThumbUpIcon className="h-5 w-5" />}
-                                            <span className="text-xs font-black">{post.likes}</span>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setExpandedPostId(commentsOpen ? null : post.id)}
-                                            className={`flex items-center gap-2 transition ${commentsOpen ? 'text-brand' : 'text-slate-400 hover:text-brand'}`}
-                                        >
-                                            <ChatBubbleLeftRightIcon className="h-5 w-5" />
-                                            <span className="text-xs font-black">{countComments(post.comments)}</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {commentsOpen && (
-                                    <div className="mt-6 space-y-4 rounded-2xl bg-slate-50 px-4 py-5">
-                                        {post.comments.map((comment) => renderComment(post.id, comment))}
-
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand/10 text-sm font-black text-brand">
-                                                {getInitial(currentUserName)}
-                                            </div>
-                                            <input
-                                                value={commentDrafts[post.id] ?? ''}
-                                                onChange={(event) => setCommentDrafts((prev) => ({ ...prev, [post.id]: event.target.value }))}
-                                                onKeyDown={(event) => {
-                                                    if (event.key === 'Enter') handleCreateComment(post.id);
-                                                }}
-                                                placeholder="Viết bình luận..."
-                                                className="min-w-0 flex-1 rounded-full border-none bg-slate-200/80 px-5 py-3 text-sm font-medium text-slate-900 outline-none placeholder:text-slate-500 focus:bg-white focus:ring-4 focus:ring-brand/10"
-                                            />
+                                    <div className="flex items-center justify-between border-t border-slate-100 pt-5">
+                                        <div className="flex gap-4">
                                             <button
                                                 type="button"
-                                                onClick={() => handleCreateComment(post.id)}
-                                                disabled={!commentDrafts[post.id]?.trim()}
-                                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-40"
-                                                aria-label="Gửi bình luận"
+                                                onClick={() => handleToggleLike(post.id)}
+                                                className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-black transition ${liked ? 'bg-brand/10 text-brand' : 'bg-slate-50 text-slate-500 hover:bg-brand/10 hover:text-brand'}`}
                                             >
-                                                <PaperAirplaneIcon className="h-5 w-5" />
+                                                {liked ? <HandThumbUpSolidIcon className="h-5 w-5" /> : <HandThumbUpIcon className="h-5 w-5" />}
+                                                {post.likes}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setExpandedPostId(commentsOpen ? null : post.id)}
+                                                className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-black transition ${commentsOpen ? 'bg-brand/10 text-brand' : 'bg-slate-50 text-slate-500 hover:bg-brand/10 hover:text-brand'}`}
+                                            >
+                                                <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                                                {countComments(post.comments)}
                                             </button>
                                         </div>
                                     </div>
-                                )}
-                            </motion.article>
-                        );
-                    })}
 
-                    {loading && (
-                        <div className="rounded-[24px] bg-white px-6 py-14 text-center shadow-[0_18px_45px_rgba(15,23,42,0.04)]">
-                            <h2 className="text-lg font-black text-slate-900">Đang tải cộng đồng...</h2>
-                        </div>
-                    )}
+                                    {commentsOpen && (
+                                        <div className="mt-6 space-y-4 rounded-[1.5rem] bg-slate-50 px-4 py-5 ring-1 ring-slate-100">
+                                            {post.comments.map((comment) => renderComment(post.id, comment))}
 
-                    {!loading && filteredPosts.length === 0 && (
-                        <div className="rounded-[24px] bg-white px-6 py-14 text-center shadow-[0_18px_45px_rgba(15,23,42,0.04)]">
-                            <h2 className="text-lg font-black text-slate-900">Không tìm thấy bài viết</h2>
-                            <p className="mt-2 text-sm font-bold text-slate-400">Thử tìm bằng từ khóa khác hoặc tạo bài viết mới.</p>
-                        </div>
-                    )}
-                </main>
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-sm font-black text-brand">
+                                                    {getInitial(currentUserName)}
+                                                </div>
+                                                <input
+                                                    value={commentDrafts[post.id] ?? ''}
+                                                    onChange={(event) => setCommentDrafts((prev) => ({ ...prev, [post.id]: event.target.value }))}
+                                                    onKeyDown={(event) => {
+                                                        if (event.key === 'Enter') handleCreateComment(post.id);
+                                                    }}
+                                                    placeholder="Viết bình luận..."
+                                                    className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleCreateComment(post.id)}
+                                                    disabled={!commentDrafts[post.id]?.trim()}
+                                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#10233F] text-white transition hover:bg-brand disabled:cursor-not-allowed disabled:opacity-40"
+                                                    aria-label="Gửi bình luận"
+                                                >
+                                                    <PaperAirplaneIcon className="h-5 w-5" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </motion.article>
+                            );
+                        })}
 
-                <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-                    <div className="rounded-[24px] bg-slate-900 p-6 text-white shadow-[0_18px_45px_rgba(15,23,42,0.12)]">
-                        <h3 className="text-lg font-black">Quy tắc cộng đồng</h3>
-                        <div className="mt-4 space-y-3 text-sm font-medium leading-6 text-white/70">
-                            <p>Chia sẻ trải nghiệm thật, tôn trọng khác biệt và tránh đưa lời khuyên y khoa thay cho bác sĩ.</p>
-                            <p>Khi cần hỗ trợ khẩn cấp, hãy liên hệ cơ sở y tế gần nhất.</p>
+                        {loading && (
+                            <div className="rounded-[1.75rem] border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-200/35">
+                                <div className="mx-auto h-10 w-10 animate-spin rounded-full border-[3px] border-brand border-t-transparent"></div>
+                                <h2 className="mt-5 text-sm font-black uppercase tracking-[0.2em] text-slate-400">Đang tải cộng đồng...</h2>
+                            </div>
+                        )}
+
+                        {!loading && filteredPosts.length === 0 && (
+                            <div className="rounded-[1.75rem] border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-200/35">
+                                <h2 className="text-lg font-black text-[#10233F]">Không tìm thấy bài viết</h2>
+                                <p className="mt-2 text-sm font-semibold text-slate-400">Thử tìm bằng từ khóa khác hoặc tạo bài viết mới.</p>
+                            </div>
+                        )}
+                    </main>
+
+                    <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+                        <div className="rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35">
+                            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Quy tắc cộng đồng</div>
+                            <h3 className="mt-3 text-2xl font-black leading-tight text-[#10233F]">Tôn trọng và chia sẻ có trách nhiệm.</h3>
+                            <div className="mt-5 space-y-3 text-sm font-semibold leading-7 text-slate-500">
+                                <p>Chia sẻ trải nghiệm thật, tôn trọng khác biệt và tránh đưa lời khuyên y khoa thay cho bác sĩ.</p>
+                                <p>Khi cần hỗ trợ khẩn cấp, hãy liên hệ cơ sở y tế gần nhất.</p>
+                            </div>
                         </div>
-                    </div>
-                </aside>
+
+                        <div className="rounded-[1.75rem] bg-[#10233F] p-6 text-white shadow-xl shadow-slate-300/40">
+                            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Gợi ý đăng bài</div>
+                            <div className="mt-4 space-y-3 text-sm font-semibold leading-7 text-white/75">
+                                <p>Đặt tiêu đề rõ ý, thêm chủ đề bằng dấu phẩy và mô tả bối cảnh để mọi người dễ hỗ trợ hơn.</p>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
             </div>
 
             {likersDialog && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">
-                    <div className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+                    <div className="w-full max-w-sm overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
                         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                            <h3 className="text-base font-black text-slate-900">Người đã thích</h3>
+                            <h3 className="text-base font-black text-[#10233F]">Người đã thích</h3>
                             <button
                                 type="button"
                                 onClick={() => setLikersDialog(null)}
-                                className="flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                                className="flex h-9 w-9 items-center justify-center rounded-2xl text-slate-400 transition hover:bg-slate-100 hover:text-[#10233F]"
                                 aria-label="Đóng danh sách người thích"
                             >
                                 <XMarkIcon className="h-5 w-5" />
@@ -635,12 +680,12 @@ const CommunityPage = () => {
                             ) : (
                                 <div className="space-y-1">
                                     {likersDialog.users.map((liker) => (
-                                        <div key={liker.userId} className="flex items-center gap-3 rounded-xl px-3 py-2">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-sm font-black text-brand">
-                                                {liker.avatar ? <img src={liker.avatar} alt={liker.fullName} className="h-full w-full rounded-full object-cover" /> : getInitial(liker.fullName)}
+                                        <div key={liker.userId} className="flex items-center gap-3 rounded-2xl px-3 py-2">
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-brand/10 text-sm font-black text-brand">
+                                                {liker.avatar ? <img src={liker.avatar} alt={liker.fullName} className="h-full w-full object-cover" /> : getInitial(liker.fullName)}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <div className="truncate text-sm font-black text-slate-900">{liker.fullName}</div>
+                                                <div className="truncate text-sm font-black text-[#10233F]">{liker.fullName}</div>
                                             </div>
                                             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand text-white">
                                                 <HandThumbUpSolidIcon className="h-3.5 w-3.5" />
