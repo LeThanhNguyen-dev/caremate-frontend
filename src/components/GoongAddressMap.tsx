@@ -1,0 +1,90 @@
+import { useEffect, useRef } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+
+const GOONG_MAPTILES_KEY = import.meta.env.VITE_GOONG_MAPTILES_KEY as string | undefined;
+const DA_NANG_CENTER = { latitude: 16.0544, longitude: 108.2022 };
+
+type GoongAddressMapProps = {
+  latitude?: number | null;
+  longitude?: number | null;
+  onSelectLocation?: (location: { latitude: number; longitude: number }) => void;
+};
+
+const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddressMapProps) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markerRef = useRef<maplibregl.Marker | null>(null);
+  const hasLocation = latitude != null && longitude != null && Number.isFinite(latitude) && Number.isFinite(longitude);
+  const center = hasLocation ? { latitude, longitude } : DA_NANG_CENTER;
+
+  useEffect(() => {
+    if (!containerRef.current || !GOONG_MAPTILES_KEY) return;
+
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      style: `https://tiles.goong.io/assets/goong_map_web.json?api_key=${GOONG_MAPTILES_KEY}`,
+      center: [center.longitude, center.latitude],
+      zoom: hasLocation ? 15 : 11,
+      attributionControl: false,
+    });
+
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.on('click', (event) => {
+      onSelectLocation?.({
+        latitude: Number(event.lngLat.lat.toFixed(6)),
+        longitude: Number(event.lngLat.lng.toFixed(6)),
+      });
+    });
+
+    mapRef.current = map;
+
+    return () => {
+      markerRef.current?.remove();
+      markerRef.current = null;
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.flyTo({
+      center: [center.longitude, center.latitude],
+      zoom: hasLocation ? 15 : 11,
+      essential: true,
+    });
+
+    if (hasLocation) {
+      if (!markerRef.current) {
+        markerRef.current = new maplibregl.Marker({ color: '#EC4899' }).addTo(map);
+      }
+
+      markerRef.current.setLngLat([center.longitude, center.latitude]);
+    } else {
+      markerRef.current?.remove();
+      markerRef.current = null;
+    }
+  }, [center.latitude, center.longitude, hasLocation]);
+
+  if (!GOONG_MAPTILES_KEY) {
+    return (
+      <div className="flex min-h-[260px] items-center justify-center rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm font-semibold leading-6 text-slate-400">
+        Thêm VITE_GOONG_MAPTILES_KEY để bật bản đồ Goong.
+      </div>
+    );
+  }
+
+  return (
+    <div className="overflow-hidden rounded-[24px] border border-slate-100 bg-slate-50 shadow-inner">
+      <div ref={containerRef} className="h-[320px] w-full" />
+      <div className="border-t border-slate-100 bg-white px-5 py-3 text-xs font-semibold text-slate-500">
+        Chọn địa chỉ bằng Goong hoặc click trên bản đồ để cập nhật tọa độ.
+      </div>
+    </div>
+  );
+};
+
+export default GoongAddressMap;

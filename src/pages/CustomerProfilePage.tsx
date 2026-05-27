@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { lazy, Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
     UserIcon,
@@ -20,6 +20,9 @@ import authApi from '../api/authApi';
 import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 import bankApi from '../api/bankApi';
 import type { BankOptionDto } from '../api/frontend-api-contract';
+import goongApi, { createGoongSessionToken, extractGoongAddressParts, type GoongPrediction } from '../api/goongApi';
+
+const GoongAddressMap = lazy(() => import('../components/GoongAddressMap'));
 
 const CustomerProfilePage = () => {
     const { user } = useAuth();
@@ -30,6 +33,10 @@ const CustomerProfilePage = () => {
     // Profile form state
     const [profileLoading, setProfileLoading] = useState(true);
     const [profileSaving, setProfileSaving] = useState(false);
+    const [addressSuggestions, setAddressSuggestions] = useState<GoongPrediction[]>([]);
+    const [addressSuggestionsOpen, setAddressSuggestionsOpen] = useState(false);
+    const [addressLookupLoading, setAddressLookupLoading] = useState(false);
+    const goongSessionTokenRef = useRef(createGoongSessionToken());
     const [profileForm, setProfileForm] = useState({
         fullName: '',
         email: '',
@@ -113,6 +120,75 @@ const CustomerProfilePage = () => {
         void loadActivity();
         void bankApi.getBanks().then(setBanks).catch(() => undefined);
     }, [loadProfile, loadActivity]);
+
+    useEffect(() => {
+        const input = profileForm.address.trim();
+
+        if (!goongApi.hasApiKey || input.length < 3) {
+            setAddressSuggestions([]);
+            setAddressLookupLoading(false);
+            return;
+        }
+
+        const abortController = new AbortController();
+        const timeoutId = window.setTimeout(() => {
+            setAddressLookupLoading(true);
+            void goongApi
+                .autocomplete(input, goongSessionTokenRef.current, abortController.signal)
+                .then((suggestions) => {
+                    setAddressSuggestions(suggestions);
+                    setAddressSuggestionsOpen(suggestions.length > 0);
+                })
+                .catch((error: unknown) => {
+                    if (!(error instanceof DOMException && error.name === 'AbortError')) {
+                        setAddressSuggestions([]);
+                    }
+                })
+                .finally(() => {
+                    if (!abortController.signal.aborted) {
+                        setAddressLookupLoading(false);
+                    }
+                });
+        }, 350);
+
+        return () => {
+            window.clearTimeout(timeoutId);
+            abortController.abort();
+        };
+    }, [profileForm.address]);
+
+    const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setProfileForm((prev) => ({
+            ...prev,
+            address: event.target.value,
+            latitude: '',
+            longitude: '',
+        }));
+        setAddressSuggestionsOpen(true);
+    };
+
+    const handleSelectAddress = async (suggestion: GoongPrediction) => {
+        const fallbackAddress = suggestion.description;
+        setProfileForm((prev) => ({ ...prev, address: fallbackAddress }));
+        setAddressSuggestionsOpen(false);
+        setAddressSuggestions([]);
+
+        try {
+            const detail = await goongApi.getPlaceDetail(suggestion.place_id, goongSessionTokenRef.current);
+            const addressParts = extractGoongAddressParts(detail, fallbackAddress);
+            setProfileForm((prev) => ({
+                ...prev,
+                address: addressParts.fullAddress,
+                ward: addressParts.ward,
+                district: addressParts.district,
+                latitude: addressParts.latitude != null ? String(addressParts.latitude) : '',
+                longitude: addressParts.longitude != null ? String(addressParts.longitude) : '',
+            }));
+            goongSessionTokenRef.current = createGoongSessionToken();
+        } catch {
+            setProfileForm((prev) => ({ ...prev, address: fallbackAddress }));
+        }
+    };
 
     // Save profile
     const handleSaveProfile = async () => {
@@ -304,11 +380,44 @@ const CustomerProfilePage = () => {
                                                     <input
                                                         type="text"
                                                         value={profileForm.address}
-                                                        onChange={(e) => setProfileForm({ ...profileForm, address: e.target.value })}
-                                                        placeholder="Chưa có địa chỉ"
+                                                        onBlur={() => window.setTimeout(() => setAddressSuggestionsOpen(false), 150)}
+                                                        onChange={handleAddressChange}
+                                                        onFocus={() => setAddressSuggestionsOpen(addressSuggestions.length > 0)}
+                                                        placeholder="Nhập địa chỉ để Goong gợi ý"
                                                         className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                     />
+                                                    {addressLookupLoading && (
+                                                        <div className="absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                                                    )}
+                                                    {addressSuggestionsOpen && addressSuggestions.length > 0 && (
+                                                        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
+                                                            {addressSuggestions.map((suggestion) => (
+                                                                <button
+                                                                    key={suggestion.place_id}
+                                                                    type="button"
+                                                                    onMouseDown={(event) => event.preventDefault()}
+                                                                    onClick={() => void handleSelectAddress(suggestion)}
+                                                                    className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-brand/5"
+                                                                >
+                                                                    <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+                                                                    <span className="min-w-0">
+                                                                        <span className="block truncate text-[14px] font-bold text-slate-900">
+                                                                            {suggestion.structured_formatting?.main_text || suggestion.description}
+                                                                        </span>
+                                                                        {suggestion.structured_formatting?.secondary_text && (
+                                                                            <span className="mt-0.5 block truncate text-[12px] font-medium text-slate-500">
+                                                                                {suggestion.structured_formatting.secondary_text}
+                                                                            </span>
+                                                                        )}
+                                                                    </span>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
+                                                {!goongApi.hasApiKey && (
+                                                    <p className="text-xs font-semibold text-slate-400">Thêm VITE_GOONG_API_KEY để bật gợi ý địa chỉ Goong.</p>
+                                                )}
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Quận/Huyện</label>
@@ -351,6 +460,25 @@ const CustomerProfilePage = () => {
                                                     placeholder="Ví dụ: 108.2208"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
+                                            </div>
+                                            <div className="space-y-4 md:col-span-2">
+                                                <div>
+                                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Vị trí trên bản đồ</label>
+                                                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                                                        Chọn địa chỉ từ Goong để tự lấy tọa độ, hoặc click trực tiếp trên bản đồ để chỉnh vị trí.
+                                                    </p>
+                                                </div>
+                                                <Suspense fallback={<div className="h-[320px] rounded-[24px] bg-slate-50" />}>
+                                                    <GoongAddressMap
+                                                        latitude={profileForm.latitude.trim() ? Number(profileForm.latitude) : null}
+                                                        longitude={profileForm.longitude.trim() ? Number(profileForm.longitude) : null}
+                                                        onSelectLocation={(location) => setProfileForm({
+                                                            ...profileForm,
+                                                            latitude: String(location.latitude),
+                                                            longitude: String(location.longitude),
+                                                        })}
+                                                    />
+                                                </Suspense>
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mã ngân hàng / BIN</label>
