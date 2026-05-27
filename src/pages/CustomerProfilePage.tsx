@@ -145,7 +145,7 @@ const CustomerProfilePage = () => {
                 .catch((error: unknown) => {
                     if (!(error instanceof DOMException && error.name === 'AbortError')) {
                         setAddressSuggestions([]);
-                        setAddressLookupError('Không thể tải gợi ý Goong. Hãy kiểm tra VITE_GOONG_API_KEY hoặc domain được phép trong Goong Console.');
+                        setAddressLookupError('Không thể tải gợi ý Goong. Hãy kiểm tra GOONG_API_KEY ở backend hoặc domain được phép trong Goong Console.');
                     }
                 })
                 .finally(() => {
@@ -422,7 +422,7 @@ const CustomerProfilePage = () => {
                                                     )}
                                                 </div>
                                                 {!goongApi.hasApiKey && (
-                                                    <p className="text-xs font-semibold text-slate-400">Thêm VITE_GOONG_API_KEY để bật gợi ý địa chỉ Goong.</p>
+                                                    <p className="text-xs font-semibold text-slate-400">Backend cần GOONG_API_KEY để bật gợi ý địa chỉ Goong.</p>
                                                 )}
                                             </div>
                                             <div className="space-y-4">

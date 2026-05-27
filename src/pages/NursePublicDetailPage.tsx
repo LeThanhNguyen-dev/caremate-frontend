@@ -706,7 +706,7 @@ const NursePublicDetailPage = () => {
                   </div>
                   {!goongApi.hasApiKey && (
                     <p className="ml-1 mt-2 text-[12px] font-medium text-[#9CA3AF]">
-                      Thêm VITE_GOONG_API_KEY để bật gợi ý địa chỉ Goong.
+                      Backend cần GOONG_API_KEY để bật gợi ý địa chỉ Goong.
                     </p>
                   )}
                 </div>
