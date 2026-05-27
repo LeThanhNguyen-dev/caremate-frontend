@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
     UserIcon,
@@ -21,8 +21,7 @@ import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 import bankApi from '../api/bankApi';
 import type { BankOptionDto } from '../api/frontend-api-contract';
 import goongApi, { createGoongSessionToken, extractGoongAddressParts, type GoongPrediction } from '../api/goongApi';
-
-const GoongAddressMap = lazy(() => import('../components/GoongAddressMap'));
+import GoongAddressMap from '../components/GoongAddressMap';
 
 const toCoordinateText = (value: number | null) => (value != null && Number.isFinite(value) ? String(value) : '');
 
@@ -529,17 +528,15 @@ const CustomerProfilePage = () => {
                                                         {addressLookupError}
                                                     </div>
                                                 )}
-                                                <Suspense fallback={<div className="h-[320px] rounded-[24px] bg-slate-50" />}>
-                                                    <GoongAddressMap
-                                                        latitude={selectedLatitude}
-                                                        longitude={selectedLongitude}
-                                                        onSelectLocation={(location) => setProfileForm({
-                                                            ...profileForm,
-                                                            latitude: String(location.latitude),
-                                                            longitude: String(location.longitude),
-                                                        })}
-                                                    />
-                                                </Suspense>
+                                                <GoongAddressMap
+                                                    latitude={selectedLatitude}
+                                                    longitude={selectedLongitude}
+                                                    onSelectLocation={(location) => setProfileForm({
+                                                        ...profileForm,
+                                                        latitude: String(location.latitude),
+                                                        longitude: String(location.longitude),
+                                                    })}
+                                                />
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mã ngân hàng / BIN</label>
