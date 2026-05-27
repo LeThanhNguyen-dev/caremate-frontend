@@ -18,9 +18,40 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
+  const loadedRef = useRef(false);
   const [mapError, setMapError] = useState('');
+  const [mapLoaded, setMapLoaded] = useState(false);
   const hasLocation = latitude != null && longitude != null && Number.isFinite(latitude) && Number.isFinite(longitude);
   const center = hasLocation ? { latitude, longitude } : DA_NANG_CENTER;
+
+  const syncMapLocation = () => {
+    const map = mapRef.current;
+    if (!map || !loadedRef.current) return;
+
+    try {
+      map.resize();
+      map.flyTo({
+        center: [center.longitude, center.latitude],
+        zoom: hasLocation ? 16 : 11,
+        essential: true,
+      });
+
+      if (hasLocation) {
+        if (!markerRef.current) {
+          markerRef.current = new maplibregl.Marker({ color: '#EC4899' }).addTo(map);
+        }
+
+        markerRef.current.setLngLat([center.longitude, center.latitude]);
+      } else {
+        markerRef.current?.remove();
+        markerRef.current = null;
+      }
+
+      setMapError('');
+    } catch {
+      setMapError('Không thể cập nhật vị trí trên bản đồ Goong.');
+    }
+  };
 
   useEffect(() => {
     if (!containerRef.current || !GOONG_MAPTILES_KEY) return;
@@ -33,12 +64,17 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
         container: containerRef.current,
         style: `https://tiles.goong.io/assets/goong_map_web.json?api_key=${GOONG_MAPTILES_KEY}`,
         center: [center.longitude, center.latitude],
-        zoom: hasLocation ? 15 : 11,
+        zoom: hasLocation ? 16 : 11,
         attributionControl: false,
       });
 
+      mapRef.current = map;
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-      map.on('load', () => setMapError(''));
+      map.on('load', () => {
+        loadedRef.current = true;
+        setMapLoaded(true);
+        setMapError('');
+      });
       map.on('click', (event) => {
         if (!event.lngLat || !isFiniteCoordinate(event.lngLat.lat) || !isFiniteCoordinate(event.lngLat.lng)) return;
 
@@ -53,14 +89,13 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
           setMapError('Không thể tải bản đồ Goong. Hãy kiểm tra VITE_GOONG_MAPTILES_KEY và domain được phép trong Goong Console.');
         }
       }, 7000);
-
-      mapRef.current = map;
     } catch {
       setMapError('Không thể khởi tạo bản đồ Goong.');
     }
 
     return () => {
       window.clearTimeout(loadTimeout);
+      loadedRef.current = false;
       markerRef.current?.remove();
       markerRef.current = null;
       map?.remove();
@@ -69,30 +104,8 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
   }, []);
 
   useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-
-    try {
-      map.flyTo({
-        center: [center.longitude, center.latitude],
-        zoom: hasLocation ? 15 : 11,
-        essential: true,
-      });
-
-      if (hasLocation) {
-        if (!markerRef.current) {
-          markerRef.current = new maplibregl.Marker({ color: '#EC4899' }).addTo(map);
-        }
-
-        markerRef.current.setLngLat([center.longitude, center.latitude]);
-      } else {
-        markerRef.current?.remove();
-        markerRef.current = null;
-      }
-    } catch {
-      setMapError('Không thể cập nhật vị trí trên bản đồ Goong.');
-    }
-  }, [center.latitude, center.longitude, hasLocation]);
+    syncMapLocation();
+  }, [center.latitude, center.longitude, hasLocation, mapLoaded]);
 
   if (!GOONG_MAPTILES_KEY) {
     return (

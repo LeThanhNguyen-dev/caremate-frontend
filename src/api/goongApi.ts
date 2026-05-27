@@ -53,6 +53,30 @@ const removeDistrictPrefix = (district: string) =>
     .replace(/^(quận|huyện|thị xã|thành phố|quan|huyen|thi xa|thanh pho)\s+/i, '')
     .trim();
 
+const isAdminSegment = (segment: string) => {
+  const normalized = segment.toLocaleLowerCase('vi-VN');
+  return [
+    'phường',
+    'xã',
+    'thị trấn',
+    'quận',
+    'huyện',
+    'thị xã',
+    'thành phố',
+    'đà nẵng',
+    'việt nam',
+    'phuong',
+    'xa',
+    'thi tran',
+    'quan',
+    'huyen',
+    'thi xa',
+    'thanh pho',
+    'da nang',
+    'viet nam',
+  ].some((prefix) => normalized.startsWith(prefix) || normalized === prefix);
+};
+
 const normalizePrediction = (prediction: Partial<GoongPrediction>): GoongPrediction | null => {
   const description = toText(prediction.description);
   const placeId = toText(prediction.place_id);
@@ -80,9 +104,11 @@ export const extractGoongAddressParts = (detail: GoongPlaceDetail | null, fallba
   const fallbackDistrict = findAddressSegment(segments, ['quận', 'huyện', 'thị xã', 'thành phố', 'quan', 'huyen', 'thi xa', 'thanh pho']);
   const compoundWard = toText(detail?.compound?.commune);
   const compoundDistrict = toText(detail?.compound?.district);
+  const streetAddress = segments.filter((segment) => !isAdminSegment(segment)).join(', ');
 
   return {
     fullAddress: formattedAddress,
+    streetAddress,
     ward: compoundWard || fallbackWard,
     district: compoundDistrict || removeDistrictPrefix(fallbackDistrict),
     latitude: toFiniteNumber(detail?.geometry?.location?.lat),

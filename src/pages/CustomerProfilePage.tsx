@@ -33,6 +33,36 @@ const parseCoordinate = (value: unknown) => {
     return text && Number.isFinite(parsed) ? parsed : null;
 };
 
+const deriveAddressLine = (fullAddress: unknown, ward?: unknown, district?: unknown) => {
+    const wardText = toSafeText(ward).toLocaleLowerCase('vi-VN');
+    const districtText = toSafeText(district).toLocaleLowerCase('vi-VN');
+
+    return toSafeText(fullAddress)
+        .split(',')
+        .map((segment) => segment.trim())
+        .filter(Boolean)
+        .filter((segment) => {
+            const normalized = segment.toLocaleLowerCase('vi-VN');
+            return normalized !== 'đà nẵng' &&
+                normalized !== 'việt nam' &&
+                normalized !== wardText &&
+                normalized !== districtText &&
+                !normalized.startsWith('phường ') &&
+                !normalized.startsWith('xã ') &&
+                !normalized.startsWith('quận ') &&
+                !normalized.startsWith('huyện ');
+        })
+        .join(', ');
+};
+
+const composeFullAddress = (addressLine: unknown, ward: unknown, district: unknown, fallbackAddress: unknown) => {
+    const parts = [addressLine, ward, district, 'Đà Nẵng']
+        .map(toSafeText)
+        .filter(Boolean);
+
+    return parts.length > 1 ? Array.from(new Set(parts)).join(', ') : toSafeText(fallbackAddress);
+};
+
 const CustomerProfilePage = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
@@ -52,6 +82,7 @@ const CustomerProfilePage = () => {
         email: '',
         phone: '',
         address: '',
+        addressLine: '',
         ward: '',
         district: '',
         latitude: '',
@@ -82,6 +113,7 @@ const CustomerProfilePage = () => {
                 email: data.email || '',
                 phone: data.phone || data.phoneNumber || '',
                 address: data.address || '',
+                addressLine: deriveAddressLine(data.address, data.ward || data.defaultAddress?.ward, data.district || data.defaultAddress?.district),
                 ward: data.ward || data.defaultAddress?.ward || '',
                 district: data.district || data.defaultAddress?.district || '',
                 latitude: data.latitude != null ? String(data.latitude) : data.defaultAddress?.latitude != null ? String(data.defaultAddress.latitude) : '',
@@ -97,6 +129,7 @@ const CustomerProfilePage = () => {
                 email: user?.email || '',
                 phone: '',
                 address: '',
+                addressLine: '',
                 ward: '',
                 district: '',
                 latitude: '',
@@ -174,6 +207,7 @@ const CustomerProfilePage = () => {
         setProfileForm((prev) => ({
             ...prev,
             address: event.target.value,
+            addressLine: event.target.value,
             latitude: '',
             longitude: '',
         }));
@@ -197,9 +231,11 @@ const CustomerProfilePage = () => {
         try {
             const detail = await goongApi.getPlaceDetail(placeId, goongSessionTokenRef.current);
             const addressParts = extractGoongAddressParts(detail, fallbackAddress);
+            const nextAddressLine = toSafeText(addressParts.streetAddress) || deriveAddressLine(addressParts.fullAddress, addressParts.ward, addressParts.district);
             setProfileForm((prev) => ({
                 ...prev,
                 address: toSafeText(addressParts.fullAddress) || fallbackAddress,
+                addressLine: nextAddressLine,
                 ward: toSafeText(addressParts.ward),
                 district: toSafeText(addressParts.district),
                 latitude: toCoordinateText(addressParts.latitude),
@@ -219,7 +255,7 @@ const CustomerProfilePage = () => {
             await caremateApi.updateMyProfile({
                 fullName: profileForm.fullName,
                 phone: profileForm.phone,
-                address: profileForm.address,
+                address: composeFullAddress(profileForm.addressLine, profileForm.ward, profileForm.district, profileForm.address),
                 ward: profileForm.ward,
                 district: profileForm.district,
                 latitude: parseCoordinate(profileForm.latitude),
@@ -456,7 +492,11 @@ const CustomerProfilePage = () => {
                                                 <input
                                                     type="text"
                                                     value={profileForm.district}
-                                                    onChange={(e) => setProfileForm({ ...profileForm, district: e.target.value })}
+                                                    onChange={(e) => setProfileForm({
+                                                        ...profileForm,
+                                                        district: e.target.value,
+                                                        address: composeFullAddress(profileForm.addressLine, profileForm.ward, e.target.value, profileForm.address),
+                                                    })}
                                                     placeholder="Ví dụ: Hải Châu"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
@@ -466,8 +506,26 @@ const CustomerProfilePage = () => {
                                                 <input
                                                     type="text"
                                                     value={profileForm.ward}
-                                                    onChange={(e) => setProfileForm({ ...profileForm, ward: e.target.value })}
+                                                    onChange={(e) => setProfileForm({
+                                                        ...profileForm,
+                                                        ward: e.target.value,
+                                                        address: composeFullAddress(profileForm.addressLine, e.target.value, profileForm.district, profileForm.address),
+                                                    })}
                                                     placeholder="Ví dụ: Phường 1"
+                                                    className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-4 md:col-span-2">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Số nhà, tên đường</label>
+                                                <input
+                                                    type="text"
+                                                    value={profileForm.addressLine}
+                                                    onChange={(e) => setProfileForm({
+                                                        ...profileForm,
+                                                        addressLine: e.target.value,
+                                                        address: composeFullAddress(e.target.value, profileForm.ward, profileForm.district, profileForm.address),
+                                                    })}
+                                                    placeholder="Ví dụ: 344 Nguyễn Hữu Thọ"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
