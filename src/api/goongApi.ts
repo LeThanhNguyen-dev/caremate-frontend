@@ -10,7 +10,7 @@ export type GoongPrediction = {
 };
 
 type GoongAutocompleteResponse = {
-  predictions?: GoongPrediction[];
+  predictions?: Array<Partial<GoongPrediction>>;
   status?: string;
 };
 
@@ -52,6 +52,22 @@ const removeDistrictPrefix = (district: string) =>
   district
     .replace(/^(quận|huyện|thị xã|thành phố|quan|huyen|thi xa|thanh pho)\s+/i, '')
     .trim();
+
+const normalizePrediction = (prediction: Partial<GoongPrediction>): GoongPrediction | null => {
+  const description = toText(prediction.description);
+  const placeId = toText(prediction.place_id);
+
+  if (!description || !placeId) return null;
+
+  return {
+    description,
+    place_id: placeId,
+    structured_formatting: {
+      main_text: toText(prediction.structured_formatting?.main_text),
+      secondary_text: toText(prediction.structured_formatting?.secondary_text),
+    },
+  };
+};
 
 export const extractGoongAddressParts = (detail: GoongPlaceDetail | null, fallbackAddress = '') => {
   const formattedAddress = toText(detail?.formatted_address) || fallbackAddress;
@@ -98,7 +114,7 @@ const goongApi = {
     );
 
     const data = response.data;
-    return data.status === 'OK' ? data.predictions ?? [] : [];
+    return data.status === 'OK' ? (data.predictions ?? []).map(normalizePrediction).filter((item): item is GoongPrediction => item != null) : [];
   },
 
   async getPlaceDetail(placeId: string, sessionToken: string) {

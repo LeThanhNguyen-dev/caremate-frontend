@@ -6,15 +6,17 @@ type RenderErrorBoundaryProps = {
 
 type RenderErrorBoundaryState = {
   hasError: boolean;
+  message: string;
 };
 
 class RenderErrorBoundary extends Component<RenderErrorBoundaryProps, RenderErrorBoundaryState> {
   state: RenderErrorBoundaryState = {
     hasError: false,
+    message: '',
   };
 
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, message: error.message };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
@@ -31,6 +33,11 @@ class RenderErrorBoundary extends Component<RenderErrorBoundaryProps, RenderErro
             <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
               Tải lại trang để tiếp tục. Nếu lỗi xuất hiện sau khi chọn địa chỉ, hệ thống vẫn sẽ giữ trang thay vì trắng màn hình.
             </p>
+            {this.state.message && (
+              <p className="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-left text-xs font-semibold leading-5 text-slate-500">
+                {this.state.message}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => window.location.reload()}

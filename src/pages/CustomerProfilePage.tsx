@@ -23,11 +23,14 @@ import type { BankOptionDto } from '../api/frontend-api-contract';
 import goongApi, { createGoongSessionToken, extractGoongAddressParts, type GoongPrediction } from '../api/goongApi';
 import GoongAddressMap from '../components/GoongAddressMap';
 
+const toSafeText = (value: unknown) => (typeof value === 'string' ? value : value == null ? '' : String(value));
+
 const toCoordinateText = (value: number | null) => (value != null && Number.isFinite(value) ? String(value) : '');
 
-const parseCoordinate = (value: string) => {
-    const parsed = Number(value);
-    return value.trim() && Number.isFinite(parsed) ? parsed : null;
+const parseCoordinate = (value: unknown) => {
+    const text = toSafeText(value).trim();
+    const parsed = Number(text);
+    return text && Number.isFinite(parsed) ? parsed : null;
 };
 
 const CustomerProfilePage = () => {
@@ -129,7 +132,7 @@ const CustomerProfilePage = () => {
     }, [loadProfile, loadActivity]);
 
     useEffect(() => {
-        const input = profileForm.address.trim();
+        const input = toSafeText(profileForm.address).trim();
 
         if (!goongApi.hasApiKey || input.length < 3) {
             setAddressSuggestions([]);
@@ -179,19 +182,26 @@ const CustomerProfilePage = () => {
     };
 
     const handleSelectAddress = async (suggestion: GoongPrediction) => {
-        const fallbackAddress = suggestion.description;
+        const fallbackAddress = toSafeText(suggestion.description);
+        const placeId = toSafeText(suggestion.place_id);
+
+        if (!fallbackAddress || !placeId) {
+            setAddressLookupError('Gợi ý địa chỉ không hợp lệ. Vui lòng nhập lại địa chỉ.');
+            return;
+        }
+
         setProfileForm((prev) => ({ ...prev, address: fallbackAddress }));
         setAddressSuggestionsOpen(false);
         setAddressSuggestions([]);
 
         try {
-            const detail = await goongApi.getPlaceDetail(suggestion.place_id, goongSessionTokenRef.current);
+            const detail = await goongApi.getPlaceDetail(placeId, goongSessionTokenRef.current);
             const addressParts = extractGoongAddressParts(detail, fallbackAddress);
             setProfileForm((prev) => ({
                 ...prev,
-                address: addressParts.fullAddress,
-                ward: addressParts.ward,
-                district: addressParts.district,
+                address: toSafeText(addressParts.fullAddress) || fallbackAddress,
+                ward: toSafeText(addressParts.ward),
+                district: toSafeText(addressParts.district),
                 latitude: toCoordinateText(addressParts.latitude),
                 longitude: toCoordinateText(addressParts.longitude),
             }));
@@ -417,11 +427,11 @@ const CustomerProfilePage = () => {
                                                                     <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
                                                                     <span className="min-w-0">
                                                                         <span className="block truncate text-[14px] font-bold text-slate-900">
-                                                                            {suggestion.structured_formatting?.main_text || suggestion.description}
+                                                                            {toSafeText(suggestion.structured_formatting?.main_text) || toSafeText(suggestion.description)}
                                                                         </span>
-                                                                        {suggestion.structured_formatting?.secondary_text && (
+                                                                        {toSafeText(suggestion.structured_formatting?.secondary_text) && (
                                                                             <span className="mt-0.5 block truncate text-[12px] font-medium text-slate-500">
-                                                                                {suggestion.structured_formatting.secondary_text}
+                                                                                {toSafeText(suggestion.structured_formatting?.secondary_text)}
                                                                             </span>
                                                                         )}
                                                                     </span>
@@ -510,11 +520,11 @@ const CustomerProfilePage = () => {
                                                                     <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
                                                                     <span className="min-w-0">
                                                                         <span className="block truncate text-[14px] font-bold text-slate-900">
-                                                                            {suggestion.structured_formatting?.main_text || suggestion.description}
+                                                                            {toSafeText(suggestion.structured_formatting?.main_text) || toSafeText(suggestion.description)}
                                                                         </span>
-                                                                        {suggestion.structured_formatting?.secondary_text && (
+                                                                        {toSafeText(suggestion.structured_formatting?.secondary_text) && (
                                                                             <span className="mt-0.5 block truncate text-[12px] font-medium text-slate-500">
-                                                                                {suggestion.structured_formatting.secondary_text}
+                                                                                {toSafeText(suggestion.structured_formatting?.secondary_text)}
                                                                             </span>
                                                                         )}
                                                                     </span>
