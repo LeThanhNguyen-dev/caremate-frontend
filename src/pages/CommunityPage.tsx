@@ -340,8 +340,8 @@ const CommunityPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[linear-gradient(180deg,#fbfaf8_0%,#ffffff_42%,#fbfaf8_100%)]">
-            <section className="relative overflow-hidden border-b border-brand/10 bg-[linear-gradient(135deg,#f3fbf8_0%,#fff2f8_54%,#fce7f3_100%)] px-5 pb-14 pt-12 shadow-[inset_0_-1px_0_rgba(236,72,153,0.08)] sm:px-8 lg:px-10">
+        <div className="min-h-screen bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)]">
+            <section className="relative overflow-hidden border-b border-brand/10 bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-5 pb-14 pt-12 shadow-[inset_0_-1px_0_rgba(236,72,153,0.08)] sm:px-8 lg:px-10">
                 <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-emerald-200/45 blur-[120px] -ml-44 -mt-44"></div>
                 <div className="absolute right-0 bottom-0 h-[30rem] w-[30rem] rounded-full bg-brand/18 blur-[130px] -mb-56 -mr-52"></div>
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/70 to-transparent"></div>
@@ -356,11 +356,11 @@ const CommunityPage = () => {
                         <div className="mb-5 w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-brand shadow-sm">
                             Cộng đồng CareMate
                         </div>
-                        <h1 className="text-[54px] font-black leading-[1.04] tracking-tight text-[#10233F] sm:text-[70px] lg:text-[88px]">
+                        <h1 className="text-[54px] font-black leading-[1.04] tracking-tight text-[#0B1F3A] sm:text-[70px] lg:text-[88px]">
                             Chia sẻ
                             <span className="mt-2 block font-semibold italic text-brand sm:mt-3">kinh nghiệm.</span>
                         </h1>
-                        <p className="mt-6 max-w-2xl text-[18px] font-black leading-8 text-[#10233F]">
+                        <p className="mt-6 max-w-2xl text-[18px] font-black leading-8 text-[#0B1F3A]">
                             Đặt câu hỏi, lưu lại trải nghiệm thực tế và tìm những gợi ý gần gũi từ các gia đình đang đồng hành cùng CareMate.
                         </p>
                         <p className="mt-4 max-w-2xl text-[15px] font-semibold leading-[1.8] text-slate-500">
@@ -370,11 +370,11 @@ const CommunityPage = () => {
                             <button
                                 type="button"
                                 onClick={() => setIsComposerOpen(true)}
-                                className="rounded-full bg-[#10233F] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#10233F]/15 transition hover:-translate-y-0.5 hover:bg-brand hover:shadow-brand/20"
+                                className="rounded-full bg-[#0B1F3A] px-9 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#0B1F3A]/15 transition hover:-translate-y-0.5 hover:bg-brand hover:shadow-brand/20"
                             >
                                 Tạo bài viết
                             </button>
-                            <a href="#community-feed" className="rounded-full border border-slate-200 bg-white px-8 py-4 text-xs font-black uppercase tracking-widest text-[#10233F] shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:text-brand hover:shadow-lg hover:shadow-slate-200/70">
+                            <a href="#community-feed" className="rounded-full border border-slate-200 bg-white px-9 py-4 text-xs font-black uppercase tracking-widest text-[#0B1F3A] shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:text-brand hover:shadow-lg hover:shadow-slate-200/70">
                                 Xem thảo luận
                             </a>
                         </div>
@@ -675,7 +675,7 @@ const CommunityPage = () => {
                             </div>
                         </div>
 
-                        <div className="rounded-[1.75rem] bg-[#10233F] p-6 text-white shadow-xl shadow-slate-300/40">
+                        <div className="rounded-[1.75rem] bg-[#0B2341] p-6 text-white shadow-xl shadow-slate-300/40">
                             <div className="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Gợi ý đăng bài</div>
                             <div className="mt-4 space-y-3 text-sm font-semibold leading-7 text-white/75">
                                 <p>Đặt tiêu đề rõ ý, thêm chủ đề bằng dấu phẩy và mô tả bối cảnh để mọi người dễ hỗ trợ hơn.</p>

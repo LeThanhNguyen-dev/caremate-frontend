@@ -217,8 +217,8 @@ const ServicesPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[linear-gradient(180deg,#fbfaf8_0%,#ffffff_42%,#fbfaf8_100%)]">
-            <section className="relative overflow-hidden border-b border-brand/10 bg-[linear-gradient(135deg,#f3fbf8_0%,#fff2f8_54%,#fce7f3_100%)] px-5 pb-14 pt-12 shadow-[inset_0_-1px_0_rgba(236,72,153,0.08)] sm:px-8 lg:px-10">
+        <div className="min-h-screen bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)]">
+            <section className="relative overflow-hidden border-b border-brand/10 bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-5 pb-14 pt-12 shadow-[inset_0_-1px_0_rgba(236,72,153,0.08)] sm:px-8 lg:px-10">
                 <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-emerald-200/45 blur-[120px] -ml-44 -mt-44"></div>
                 <div className="absolute right-0 bottom-0 h-[30rem] w-[30rem] rounded-full bg-brand/18 blur-[130px] -mb-56 -mr-52"></div>
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/70 to-transparent"></div>
@@ -233,24 +233,24 @@ const ServicesPage = () => {
                         <div className="mb-5 w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-brand shadow-sm">
                             Hệ thống dịch vụ CareMate
                         </div>
-                        <h1 className="text-[54px] font-black leading-[1.04] tracking-tight text-[#10233F] sm:text-[70px] lg:text-[88px]">
+                        <h1 className="text-[54px] font-black leading-[1.04] tracking-tight text-[#0B1F3A] sm:text-[70px] lg:text-[88px]">
                             Chọn dịch vụ
                             <span className="mt-2 block font-semibold italic text-brand sm:mt-3">chăm sóc.</span>
                         </h1>
-                        <p className="mt-6 max-w-2xl text-[18px] font-black leading-8 text-[#10233F]">
+                        <p className="mt-6 max-w-2xl text-[18px] font-black leading-8 text-[#0B1F3A]">
                             Để mẹ được nghỉ ngơi, bé được chăm đúng cách, và gia đình chọn điều dưỡng phù hợp nhanh hơn.
                         </p>
                         <p className="mt-4 max-w-2xl text-[15px] font-semibold leading-[1.8] text-slate-500">
                             Lọc dịch vụ, xem lộ trình từng buổi, so sánh hồ sơ y tá và chi phí một cách minh bạch trước khi đặt lịch.
                         </p>
                         <div className="mt-9 flex flex-wrap gap-4">
-                            <a href="#service-picker" className="rounded-full bg-[#10233F] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#10233F]/15 transition hover:-translate-y-0.5 hover:bg-brand hover:shadow-brand/20">
+                            <a href="#service-picker" className="rounded-full bg-[#0B1F3A] px-9 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#0B1F3A]/15 transition hover:-translate-y-0.5 hover:bg-brand hover:shadow-brand/20">
                                 Khám phá dịch vụ
                             </a>
                             <button
                                 type="button"
                                 onClick={() => selectedServiceId && navigate(`/find-nurse?serviceId=${selectedServiceId}`)}
-                                className="rounded-full border border-slate-200 bg-white px-8 py-4 text-xs font-black uppercase tracking-widest text-[#10233F] shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:text-brand hover:shadow-lg hover:shadow-slate-200/70"
+                                className="rounded-full border border-slate-200 bg-white px-9 py-4 text-xs font-black uppercase tracking-widest text-[#0B1F3A] shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:text-brand hover:shadow-lg hover:shadow-slate-200/70"
                             >
                                 Tìm y tá
                             </button>

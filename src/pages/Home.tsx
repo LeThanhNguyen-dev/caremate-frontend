@@ -119,13 +119,13 @@ const testimonials = [
 
 const Home = () => {
     return (
-        <div className="overflow-hidden bg-[#fbfaf8] text-[#10233F]">
+        <div className="overflow-hidden bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] text-[#0B1F3A]">
             <section className="relative min-h-[88vh] px-6 py-16 lg:px-8">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(236,72,153,0.18),transparent_30%),radial-gradient(circle_at_16%_12%,rgba(16,185,129,0.10),transparent_28%),radial-gradient(circle_at_42%_86%,rgba(15,23,42,0.08),transparent_34%)]" />
                 <div className="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[0.95fr_0.8fr]">
                     <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
                         <div className="mb-6 text-[10px] font-black uppercase tracking-[0.42em] text-brand">CareMate • Premium Care System</div>
-                        <h1 className="max-w-3xl text-6xl font-black leading-[0.96] tracking-tight text-[#10233F] md:text-8xl">
+                        <h1 className="max-w-3xl text-6xl font-black leading-[0.96] tracking-tight text-[#0B1F3A] md:text-8xl">
                             Chăm sóc
                             <span className="block font-serif italic font-medium text-slate-500">tại nhà.</span>
                         </h1>
@@ -136,10 +136,10 @@ const Home = () => {
                             Mang tiêu chuẩn y khoa đến ngôi nhà của bạn. CareMate giúp gia đình đặt lịch y tá, xem hồ sơ, đánh giá và chi phí một cách minh bạch.
                         </p>
                         <div className="mt-10 flex flex-wrap gap-4">
-                            <Link to="/services" className="rounded-full bg-[#10233F] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#10233F]/10 transition hover:bg-brand">
+                            <Link to="/services" className="rounded-full bg-[#0B1F3A] px-9 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#0B1F3A]/15 transition hover:bg-brand">
                                 Khám phá dịch vụ
                             </Link>
-                            <Link to="/find-nurse" className="rounded-full border border-slate-200 bg-white px-8 py-4 text-xs font-black uppercase tracking-widest text-slate-700 transition hover:border-brand hover:text-brand">
+                            <Link to="/find-nurse" className="rounded-full border border-slate-200 bg-white px-9 py-4 text-xs font-black uppercase tracking-widest text-[#0B1F3A] shadow-sm transition hover:border-brand hover:text-brand">
                                 Tìm y tá
                             </Link>
                         </div>
@@ -246,7 +246,7 @@ const Home = () => {
                 </div>
             </section>
 
-            <section className="bg-white px-6 py-24 lg:px-8">
+            <section className="px-6 py-24 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     <div className="mb-10 max-w-3xl">
                         <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">Tính năng mới cho mẹ sau sinh</div>
@@ -293,7 +293,7 @@ const Home = () => {
                 </div>
             </section>
 
-            <section className="bg-white px-6 py-24 lg:px-8">
+            <section className="px-6 py-24 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     <h2 className="text-4xl font-black tracking-tight text-[#10233F]">Không gian CareMate.</h2>
                     <p className="mt-3 max-w-md text-sm font-semibold leading-7 text-slate-500">Các phần cũ được giữ lại, nhưng gom thành archive cards giống nhịp bố cục mẫu.</p>
@@ -359,22 +359,24 @@ const Home = () => {
                 </div>
             </section>
 
-            <section className="relative overflow-hidden bg-[#10233F] px-6 py-28 text-white lg:px-8">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_52%_18%,rgba(236,72,153,0.18),transparent_28%)]" />
-                <div className="relative mx-auto max-w-7xl">
+            <section className="bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-6 py-24 lg:px-8">
+                <div className="mx-auto max-w-7xl">
+                    <div className="relative overflow-hidden rounded-[48px] bg-[#0B2341] p-10 text-white shadow-2xl shadow-slate-200 md:p-16 lg:p-20">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_52%_18%,rgba(236,72,153,0.18),transparent_28%)]" />
+                    <div className="relative">
                     <div className="mx-auto max-w-3xl text-center">
-                        <h2 className="text-5xl font-black leading-tight tracking-tight md:text-6xl">Chăm sóc tận tâm cho những điều quan trọng nhất.</h2>
+                        <h2 className="text-4xl font-black leading-tight tracking-tight md:text-5xl">Chăm sóc tận tâm cho những điều quan trọng nhất.</h2>
                         <p className="mx-auto mt-5 max-w-xl text-sm font-semibold leading-7 text-white/55">Không chỉ là một lịch hẹn, CareMate tạo cảm giác rõ ràng từ lúc chọn dịch vụ đến khi ca chăm sóc hoàn thành.</p>
                     </div>
                     <div className="mt-12 grid gap-4 md:grid-cols-3">
                         {assuranceStats.map((item) => (
                             <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-center">
-                                <div className="text-4xl font-black">{item.value}</div>
+                                <div className="text-3xl font-black">{item.value}</div>
                                 <div className="mt-2 text-[10px] font-black uppercase tracking-widest text-white/35">{item.label}</div>
                             </div>
                         ))}
                     </div>
-                    <h3 className="mt-20 text-center font-serif text-5xl italic text-white/80">Khách hàng nói gì.</h3>
+                    <h3 className="mt-16 text-center text-4xl font-semibold italic text-white/80">Khách hàng nói gì.</h3>
                     <div className="mt-14 grid gap-5 md:grid-cols-3">
                         {testimonials.map((item, index) => (
                             <motion.div
@@ -399,11 +401,13 @@ const Home = () => {
                             </motion.div>
                         ))}
                     </div>
+                    </div>
+                    </div>
                 </div>
             </section>
 
-            <section className="bg-white px-6 py-28 lg:px-8">
-                <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-[#10233F] text-center text-white shadow-2xl shadow-slate-200">
+            <section className="bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-6 py-24 lg:px-8">
+                <div className="mx-auto max-w-7xl overflow-hidden rounded-[48px] bg-[#0B2341] text-center text-white shadow-2xl shadow-slate-200">
                     <div className="relative p-10 md:p-16">
                         <img
                             src="https://images.unsplash.com/photo-1609220136736-443140cffec6?q=80&w=1800&auto=format&fit=crop"
@@ -416,7 +420,7 @@ const Home = () => {
                             <h2 className="mt-6 text-4xl font-black leading-tight tracking-tight md:text-5xl">Nhận kiến thức hữu ích từ chuyên gia</h2>
                             <form className="mt-8 flex flex-col gap-3 rounded-full border border-white/10 bg-white/10 p-2 backdrop-blur sm:flex-row">
                                 <input type="email" placeholder="Nhập email của bạn..." className="min-w-0 flex-1 rounded-full border-none bg-transparent px-5 py-3 text-sm font-bold text-white outline-none placeholder:text-white/40" />
-                                <button className="rounded-full bg-white px-8 py-3 text-xs font-black uppercase tracking-widest text-[#10233F]">Nhận cẩm nang chăm sóc</button>
+                                <button className="rounded-full bg-[#EC4899] px-8 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-brand/20">Nhận cẩm nang chăm sóc</button>
                             </form>
                         </div>
                     </div>
