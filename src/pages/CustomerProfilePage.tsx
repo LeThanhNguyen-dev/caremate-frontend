@@ -35,6 +35,10 @@ const CustomerProfilePage = () => {
         email: '',
         phone: '',
         address: '',
+        ward: '',
+        district: '',
+        latitude: '',
+        longitude: '',
         bankBin: '',
         bankAccountNumber: '',
         bankAccountName: '',
@@ -61,6 +65,10 @@ const CustomerProfilePage = () => {
                 email: data.email || '',
                 phone: data.phone || data.phoneNumber || '',
                 address: data.address || '',
+                ward: data.ward || data.defaultAddress?.ward || '',
+                district: data.district || data.defaultAddress?.district || '',
+                latitude: data.latitude != null ? String(data.latitude) : data.defaultAddress?.latitude != null ? String(data.defaultAddress.latitude) : '',
+                longitude: data.longitude != null ? String(data.longitude) : data.defaultAddress?.longitude != null ? String(data.defaultAddress.longitude) : '',
                 bankBin: data.bankBin || '',
                 bankAccountNumber: data.bankAccountNumber || '',
                 bankAccountName: data.bankAccountName || '',
@@ -72,6 +80,10 @@ const CustomerProfilePage = () => {
                 email: user?.email || '',
                 phone: '',
                 address: '',
+                ward: '',
+                district: '',
+                latitude: '',
+                longitude: '',
                 bankBin: '',
                 bankAccountNumber: '',
                 bankAccountName: '',
@@ -110,6 +122,10 @@ const CustomerProfilePage = () => {
                 fullName: profileForm.fullName,
                 phone: profileForm.phone,
                 address: profileForm.address,
+                ward: profileForm.ward,
+                district: profileForm.district,
+                latitude: profileForm.latitude.trim() ? Number(profileForm.latitude) : null,
+                longitude: profileForm.longitude.trim() ? Number(profileForm.longitude) : null,
                 bankBin: profileForm.bankBin,
                 bankAccountNumber: profileForm.bankAccountNumber,
                 bankAccountName: profileForm.bankAccountName,
@@ -293,6 +309,48 @@ const CustomerProfilePage = () => {
                                                         className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                     />
                                                 </div>
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Quận/Huyện</label>
+                                                <input
+                                                    type="text"
+                                                    value={profileForm.district}
+                                                    onChange={(e) => setProfileForm({ ...profileForm, district: e.target.value })}
+                                                    placeholder="Ví dụ: Hải Châu"
+                                                    className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Phường/Xã</label>
+                                                <input
+                                                    type="text"
+                                                    value={profileForm.ward}
+                                                    onChange={(e) => setProfileForm({ ...profileForm, ward: e.target.value })}
+                                                    placeholder="Ví dụ: Phường 1"
+                                                    className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Vĩ độ</label>
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    value={profileForm.latitude}
+                                                    onChange={(e) => setProfileForm({ ...profileForm, latitude: e.target.value })}
+                                                    placeholder="Ví dụ: 16.0678"
+                                                    className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Kinh độ</label>
+                                                <input
+                                                    type="number"
+                                                    step="any"
+                                                    value={profileForm.longitude}
+                                                    onChange={(e) => setProfileForm({ ...profileForm, longitude: e.target.value })}
+                                                    placeholder="Ví dụ: 108.2208"
+                                                    className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
+                                                />
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mã ngân hàng / BIN</label>

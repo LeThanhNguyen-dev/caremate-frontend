@@ -37,7 +37,54 @@ const DiscoverNursesPage = () => {
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('bestMatch');
     const [selectedDistrict, setSelectedDistrict] = useState('all');
+    const [customerAddress, setCustomerAddress] = useState<{
+        fullAddress: string | null;
+        ward: string | null;
+        district: string | null;
+        latitude: number | null;
+        longitude: number | null;
+    } | null>(null);
     const selectedLocation = daNangDistricts.find((item) => item.value === selectedDistrict) ?? daNangDistricts[0];
+    const matchingLocation = customerAddress?.latitude != null && customerAddress.longitude != null
+        ? {
+            latitude: customerAddress.latitude,
+            longitude: customerAddress.longitude,
+            district: customerAddress.district ?? undefined,
+        }
+        : {
+            latitude: selectedLocation.latitude,
+            longitude: selectedLocation.longitude,
+            district: selectedDistrict === 'all' ? undefined : selectedDistrict,
+        };
+
+    useEffect(() => {
+        const loadCustomerAddress = async () => {
+            try {
+                const profile = await caremateApi.getMyProfile();
+                const address = profile.defaultAddress ?? {
+                    fullAddress: profile.address ?? '',
+                    ward: profile.ward ?? null,
+                    district: profile.district ?? null,
+                    latitude: profile.latitude ?? null,
+                    longitude: profile.longitude ?? null,
+                };
+                setCustomerAddress({
+                    fullAddress: address.fullAddress || profile.address || null,
+                    ward: address.ward,
+                    district: address.district,
+                    latitude: address.latitude,
+                    longitude: address.longitude,
+                });
+                if (address.district) {
+                    setSelectedDistrict(address.district);
+                }
+            } catch {
+                setCustomerAddress(null);
+            }
+        };
+
+        void loadCustomerAddress();
+    }, []);
 
     useEffect(() => {
         if (!serviceId) {
@@ -55,9 +102,9 @@ const DiscoverNursesPage = () => {
                 const [nurseData, serviceData] = await Promise.all([
                     caremateApi.getNurses({
                         serviceId: Number(serviceId),
-                        latitude: selectedLocation.latitude,
-                        longitude: selectedLocation.longitude,
-                        district: selectedDistrict === 'all' ? undefined : selectedDistrict,
+                        latitude: matchingLocation.latitude,
+                        longitude: matchingLocation.longitude,
+                        district: matchingLocation.district,
                         sortBy: sortBy === 'bestMatch' ? 'bestMatch' : undefined,
                     }),
                     caremateApi.getServices(),
@@ -72,7 +119,7 @@ const DiscoverNursesPage = () => {
         };
 
         void load();
-    }, [selectedDistrict, selectedLocation.latitude, selectedLocation.longitude, serviceId, showToast, sortBy]);
+    }, [matchingLocation.district, matchingLocation.latitude, matchingLocation.longitude, serviceId, showToast, sortBy]);
 
     const selectedService = useMemo(
         () => services.find((item) => item.id === Number(serviceId)),
@@ -190,6 +237,27 @@ const DiscoverNursesPage = () => {
                         </div>
                         <Link to="/services" className="btn-secondary btn-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/10">
                             Quay lại chọn dịch vụ
+                        </Link>
+                    </div>
+                </section>
+
+                <section className="rounded-[1.5rem] border border-brand/10 bg-[#FDF2F8] p-5 shadow-lg shadow-slate-200/25 sm:p-6">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div>
+                            <div className="text-xs font-black uppercase tracking-[0.24em] text-brand">Địa chỉ dùng để matching</div>
+                            <div className="mt-2 text-xl font-black text-[#10233F]">
+                                {customerAddress?.fullAddress || (customerAddress?.district ? `Quận/Huyện ${customerAddress.district}` : 'Chưa có địa chỉ khách hàng')}
+                            </div>
+                            <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
+                                {customerAddress?.latitude != null && customerAddress.longitude != null
+                                    ? `Hệ thống đang tính khoảng cách từ tọa độ ${customerAddress.latitude}, ${customerAddress.longitude}.`
+                                    : customerAddress?.district
+                                        ? 'Hệ thống đang ưu tiên y tá cùng quận/huyện vì hồ sơ chưa có tọa độ.'
+                                        : 'Bạn có thể cập nhật địa chỉ trong hồ sơ để kết quả phù hợp hơn.'}
+                            </p>
+                        </div>
+                        <Link to="/profile" className="rounded-full bg-white px-6 py-3 text-xs font-black uppercase tracking-widest text-brand shadow-sm transition hover:-translate-y-0.5 hover:bg-brand hover:text-white">
+                            Cập nhật địa chỉ
                         </Link>
                     </div>
                 </section>

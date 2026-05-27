@@ -275,11 +275,11 @@ export const caremateApi = {
 
   // === User Profile ===
   /** GET /api/users/me/profile */
-  getMyProfile: async (): Promise<{ fullName: string; email: string; phone: string | null; phoneNumber?: string | null; address: string | null; bankBin: string | null; bankAccountNumber: string | null; bankAccountName: string | null }> =>
+  getMyProfile: async (): Promise<{ fullName: string; email: string; phone: string | null; phoneNumber?: string | null; address: string | null; ward?: string | null; district?: string | null; latitude?: number | null; longitude?: number | null; defaultAddress?: { fullAddress: string; ward: string | null; district: string | null; latitude: number | null; longitude: number | null } | null; bankBin: string | null; bankAccountNumber: string | null; bankAccountName: string | null }> =>
     (await axiosInstance.get('/api/users/me/profile')).data,
 
   /** PUT /api/users/me/profile */
-  updateMyProfile: async (payload: { fullName?: string; phone?: string; phoneNumber?: string; address?: string; bankBin?: string; bankAccountNumber?: string; bankAccountName?: string }): Promise<void> => {
+  updateMyProfile: async (payload: { fullName?: string; phone?: string; phoneNumber?: string; address?: string; ward?: string; district?: string; latitude?: number | null; longitude?: number | null; bankBin?: string; bankAccountNumber?: string; bankAccountName?: string }): Promise<void> => {
     const { phone, ...rest } = payload;
     await axiosInstance.put('/api/users/me/profile', {
       ...rest,
