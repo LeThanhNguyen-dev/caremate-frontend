@@ -8,6 +8,7 @@ import {
     Cog8ToothIcon,
     CalendarDaysIcon,
     BellAlertIcon,
+    ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import NotificationDropdown from './NotificationDropdown';
@@ -108,6 +109,7 @@ const Layout = () => {
                                                     {[
                                                         { name: 'Cài đặt thông tin', icon: Cog8ToothIcon, href: '/profile' },
                                                         { name: 'Quản lý dịch vụ', icon: CalendarDaysIcon, href: '/my-bookings' },
+                                                        { name: 'Nhắn tin hỗ trợ', icon: ChatBubbleLeftRightIcon, href: '/chat' },
                                                         { name: 'Thông báo của tôi', icon: BellAlertIcon, href: '/notifications' },
                                                     ].map((item) => (
                                                         <Link

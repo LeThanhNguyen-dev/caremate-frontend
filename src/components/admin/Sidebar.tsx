@@ -7,7 +7,8 @@ import {
     CalendarIcon,
     ExclamationTriangleIcon,
     Cog6ToothIcon,
-    ArrowRightOnRectangleIcon
+    ArrowRightOnRectangleIcon,
+    ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 const AdminSidebar = () => {
@@ -20,6 +21,7 @@ const AdminSidebar = () => {
         { label: 'Duyệt điều dưỡng', path: '/admin/pending-nurses', icon: ClipboardDocumentCheckIcon },
         { label: 'Quản lý người dùng', path: '/admin/users', icon: UserGroupIcon },
         { label: 'Tất cả lịch hẹn', path: '/admin/bookings', icon: CalendarIcon },
+        { label: 'Tin nhắn hỗ trợ', path: '/admin/chat', icon: ChatBubbleLeftRightIcon },
         { label: 'Khiếu nại & Hỗ trợ', path: '/admin/reports', icon: ExclamationTriangleIcon },
         { label: 'Cài đặt hệ thống', path: '/admin/settings', icon: Cog6ToothIcon },
     ];

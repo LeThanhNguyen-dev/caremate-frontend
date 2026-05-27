@@ -144,10 +144,20 @@ export type ReviewDto = {
 export type CommunityCommentDto = {
   id: number;
   authorId: number;
+  parentCommentId: number | null;
   author: string;
   avatar: string | null;
   content: string;
+  likes: number;
+  likedByMe: boolean;
   createdAt: string;
+  replies: CommunityCommentDto[];
+};
+
+export type CommunityCommentLikerDto = {
+  userId: number;
+  fullName: string;
+  avatar: string | null;
 };
 
 export type CommunityPostDto = {
@@ -263,9 +273,14 @@ export type Notification = {
 
 export type Conversation = {
   id: number;
-  bookingId: number;
+  bookingId: number | null;
   user1Id: number;
   user2Id: number;
+  type: 'booking' | 'support' | string;
+  peerName?: string | null;
+  lastMessage?: string | null;
+  lastMessageAt?: string | null;
+  canSend: boolean;
   createdAt: string;
 };
 

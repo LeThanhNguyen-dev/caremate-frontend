@@ -9,6 +9,7 @@ import type {
   BookingDetailDto,
   ChatMessage,
   CommunityCommentDto,
+  CommunityCommentLikerDto,
   CommunityPostDto,
   Conversation,
   Dispute,
@@ -139,6 +140,10 @@ export const caremateApi = {
 
   createConversationByBooking: async (bookingId: number): Promise<Conversation> =>
     (await axiosInstance.post(`/api/chat/conversations/by-booking/${bookingId}`)).data,
+  getConversations: async (): Promise<Conversation[]> =>
+    (await axiosInstance.get('/api/chat/conversations')).data,
+  createSupportConversation: async (userId?: number): Promise<Conversation> =>
+    (await axiosInstance.post('/api/chat/conversations/support', { userId })).data,
   getMessages: async (conversationId: number): Promise<ChatMessage[]> =>
     (await axiosInstance.get(`/api/chat/conversations/${conversationId}/messages`)).data,
   sendMessage: async (conversationId: number, payload: { content: string }): Promise<ChatMessage> =>
@@ -230,7 +235,11 @@ export const caremateApi = {
   },
   toggleCommunityPostLike: async (postId: number): Promise<CommunityPostDto> =>
     (await axiosInstance.post(`/api/community/posts/${postId}/like`)).data,
-  createCommunityComment: async (postId: number, payload: { content: string }): Promise<CommunityCommentDto> =>
+  toggleCommunityCommentLike: async (postId: number, commentId: number): Promise<CommunityCommentDto> =>
+    (await axiosInstance.post(`/api/community/posts/${postId}/comments/${commentId}/like`)).data,
+  getCommunityCommentLikers: async (postId: number, commentId: number): Promise<CommunityCommentLikerDto[]> =>
+    (await axiosInstance.get(`/api/community/posts/${postId}/comments/${commentId}/likes`)).data,
+  createCommunityComment: async (postId: number, payload: { content: string; parentCommentId?: number | null }): Promise<CommunityCommentDto> =>
     (await axiosInstance.post(`/api/community/posts/${postId}/comments`, payload)).data,
 
   getServices: async (): Promise<ServiceDetailDto[]> => (await axiosInstance.get('/api/services')).data,
@@ -262,12 +271,16 @@ export const caremateApi = {
 
   // === User Profile ===
   /** GET /api/users/me/profile */
-  getMyProfile: async (): Promise<{ fullName: string; email: string; phone: string | null; address: string | null; bankBin: string | null; bankAccountNumber: string | null; bankAccountName: string | null }> =>
+  getMyProfile: async (): Promise<{ fullName: string; email: string; phone: string | null; phoneNumber?: string | null; address: string | null; bankBin: string | null; bankAccountNumber: string | null; bankAccountName: string | null }> =>
     (await axiosInstance.get('/api/users/me/profile')).data,
 
   /** PUT /api/users/me/profile */
-  updateMyProfile: async (payload: { fullName?: string; phone?: string; address?: string; bankBin?: string; bankAccountNumber?: string; bankAccountName?: string }): Promise<void> => {
-    await axiosInstance.put('/api/users/me/profile', payload);
+  updateMyProfile: async (payload: { fullName?: string; phone?: string; phoneNumber?: string; address?: string; bankBin?: string; bankAccountNumber?: string; bankAccountName?: string }): Promise<void> => {
+    const { phone, ...rest } = payload;
+    await axiosInstance.put('/api/users/me/profile', {
+      ...rest,
+      phoneNumber: rest.phoneNumber ?? phone,
+    });
   },
 
   analyzeHealthCheckIn: async (payload: {

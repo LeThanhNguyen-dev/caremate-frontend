@@ -34,6 +34,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import HealthCheckInsPage from './pages/HealthCheckInsPage';
 import PaymentResultPage from './pages/PaymentResultPage';
+import ChatPage from './pages/ChatPage';
 
 import { NotificationProvider } from './contexts/NotificationProvider';
 
@@ -101,6 +102,22 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="chat"
+                  element={
+                    <ProtectedRoute>
+                      <ChatPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="chat/bookings/:bookingId"
+                  element={
+                    <ProtectedRoute>
+                      <ChatPage />
+                    </ProtectedRoute>
+                  }
+                />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Route>
 
@@ -121,6 +138,7 @@ function App() {
                 <Route path="bookings" element={<NurseBookingsPage />} />
                 <Route path="services" element={<NurseServicesPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="chat" element={<ChatPage />} />
                 <Route path="*" element={<Navigate to="/nurse/overview" replace />} />
               </Route>
 
@@ -140,6 +158,7 @@ function App() {
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="bookings" element={<AdminBookings />} />
                 <Route path="reports" element={<AdminReports />} />
+                <Route path="chat" element={<ChatPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="settings" element={<AdminSettings />} />
                 <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />

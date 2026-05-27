@@ -219,7 +219,10 @@ const BookingDetailPage = () => {
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand mt-2">Xác minh chuyên nghiệp</p>
                             
                             <div className="mt-12 grid gap-4">
-                                <button className="w-full py-5 rounded-xl bg-[#10233F] text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-brand transition-all shadow-xl shadow-[#10233F]/10 active:scale-95">
+                                <button
+                                    onClick={() => navigate(`/chat/bookings/${detail.id}`)}
+                                    className="w-full py-5 rounded-xl bg-[#10233F] text-white text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-brand transition-all shadow-xl shadow-[#10233F]/10 active:scale-95"
+                                >
                                     <ChatBubbleLeftRightIcon className="h-5 w-5" /> Trò chuyện trực tuyến
                                 </button>
                                 <button className="w-full py-5 rounded-xl bg-white border-2 border-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:border-brand hover:text-brand transition-all active:scale-95">
