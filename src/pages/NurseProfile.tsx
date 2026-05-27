@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
     AcademicCapIcon,
@@ -10,6 +10,7 @@ import {
     ShieldCheckIcon,
     CameraIcon,
     FunnelIcon,
+    MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as SolidStarIcon } from '@heroicons/react/24/solid';
 import { useToast } from '../hooks/useToast';
@@ -18,6 +19,47 @@ import type { DocumentDto, NurseProfileDetailDto } from '../types/nurse';
 import { getErrorMessage } from '../utils/apiError';
 import bankApi from '../api/bankApi';
 import type { BankOptionDto } from '../api/frontend-api-contract';
+import goongApi, { createGoongSessionToken, extractGoongAddressParts, type GoongPrediction } from '../api/goongApi';
+
+const toSafeText = (value: unknown) => (typeof value === 'string' ? value : value == null ? '' : String(value));
+
+const toCoordinateText = (value: number | null | undefined) => (value != null && Number.isFinite(value) ? String(value) : '');
+
+const parseCoordinate = (value: unknown) => {
+    const text = toSafeText(value).trim();
+    const parsed = Number(text);
+    return text && Number.isFinite(parsed) ? parsed : null;
+};
+
+const deriveAddressLine = (fullAddress: unknown, ward?: unknown, district?: unknown) => {
+    const wardText = toSafeText(ward).toLocaleLowerCase('vi-VN');
+    const districtText = toSafeText(district).toLocaleLowerCase('vi-VN');
+
+    return toSafeText(fullAddress)
+        .split(',')
+        .map((segment) => segment.trim())
+        .filter(Boolean)
+        .filter((segment) => {
+            const normalized = segment.toLocaleLowerCase('vi-VN');
+            return normalized !== 'đà nẵng' &&
+                normalized !== 'việt nam' &&
+                normalized !== wardText &&
+                normalized !== districtText &&
+                !normalized.startsWith('phường ') &&
+                !normalized.startsWith('xã ') &&
+                !normalized.startsWith('quận ') &&
+                !normalized.startsWith('huyện ');
+        })
+        .join(', ');
+};
+
+const composeFullAddress = (addressLine: unknown, ward: unknown, district: unknown, fallbackAddress: unknown) => {
+    const parts = [addressLine, ward, district, 'Đà Nẵng']
+        .map(toSafeText)
+        .filter(Boolean);
+
+    return parts.length > 1 ? Array.from(new Set(parts)).join(', ') : toSafeText(fallbackAddress);
+};
 
 const NurseProfile = () => {
     const { showToast } = useToast();
@@ -26,11 +68,16 @@ const NurseProfile = () => {
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [avatarUploading, setAvatarUploading] = useState(false);
-    const [formData, setFormData] = useState({ fullName: '', phoneNumber: '', avatar: '', bio: '', specialization: '', yearsExperience: 0, serviceRadiusKm: 10, bankBin: '', bankAccountNumber: '', bankAccountName: '' });
+    const [formData, setFormData] = useState({ fullName: '', phoneNumber: '', avatar: '', bio: '', specialization: '', yearsExperience: 0, serviceRadiusKm: 10, bankBin: '', bankAccountNumber: '', bankAccountName: '', address: '', addressLine: '', ward: '', district: '', latitude: '', longitude: '' });
     const [docType, setDocType] = useState('id_card_front');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [banks, setBanks] = useState<BankOptionDto[]>([]);
     const [reviewCategory, setReviewCategory] = useState('all');
+    const [addressSuggestions, setAddressSuggestions] = useState<GoongPrediction[]>([]);
+    const [addressSuggestionsOpen, setAddressSuggestionsOpen] = useState(false);
+    const [addressLookupLoading, setAddressLookupLoading] = useState(false);
+    const [addressLookupError, setAddressLookupError] = useState('');
+    const goongSessionTokenRef = useRef(createGoongSessionToken());
 
     const loadProfile = useCallback(async () => {
         try {
@@ -48,6 +95,12 @@ const NurseProfile = () => {
                 bankBin: data.bankBin || '',
                 bankAccountNumber: data.bankAccountNumber || '',
                 bankAccountName: data.bankAccountName || '',
+                address: data.address || data.defaultAddress?.fullAddress || '',
+                addressLine: deriveAddressLine(data.address || data.defaultAddress?.fullAddress, data.ward || data.defaultAddress?.ward, data.district || data.defaultAddress?.district),
+                ward: data.ward || data.defaultAddress?.ward || '',
+                district: data.district || data.defaultAddress?.district || '',
+                latitude: toCoordinateText(data.latitude ?? data.defaultAddress?.latitude),
+                longitude: toCoordinateText(data.longitude ?? data.defaultAddress?.longitude),
             });
         } catch {
             showToast('Không thể tải hồ sơ điều dưỡng.', 'error');
@@ -61,11 +114,100 @@ const NurseProfile = () => {
         void bankApi.getBanks().then(setBanks).catch(() => undefined);
     }, [loadProfile]);
 
+    useEffect(() => {
+        const input = toSafeText(formData.address).trim();
+
+        if (!goongApi.hasApiKey || input.length < 3) {
+            setAddressSuggestions([]);
+            setAddressLookupLoading(false);
+            setAddressLookupError('');
+            return;
+        }
+
+        const abortController = new AbortController();
+        const timeoutId = window.setTimeout(() => {
+            setAddressLookupLoading(true);
+            void goongApi
+                .autocomplete(input, goongSessionTokenRef.current, abortController.signal)
+                .then((suggestions) => {
+                    setAddressSuggestions(suggestions);
+                    setAddressSuggestionsOpen(suggestions.length > 0);
+                    setAddressLookupError(suggestions.length === 0 ? 'Không tìm thấy gợi ý địa chỉ phù hợp.' : '');
+                })
+                .catch((error: unknown) => {
+                    if (!(error instanceof DOMException && error.name === 'AbortError')) {
+                        setAddressSuggestions([]);
+                        setAddressLookupError('Không thể tải gợi ý Goong. Hãy kiểm tra GOONG_API_KEY ở backend.');
+                    }
+                })
+                .finally(() => {
+                    if (!abortController.signal.aborted) {
+                        setAddressLookupLoading(false);
+                    }
+                });
+        }, 350);
+
+        return () => {
+            window.clearTimeout(timeoutId);
+            abortController.abort();
+        };
+    }, [formData.address]);
+
+    const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFormData((prev) => ({
+            ...prev,
+            address: event.target.value,
+            addressLine: event.target.value,
+            latitude: '',
+            longitude: '',
+        }));
+        setAddressLookupError('');
+        setAddressSuggestionsOpen(true);
+    };
+
+    const handleSelectAddress = async (suggestion: GoongPrediction) => {
+        const fallbackAddress = toSafeText(suggestion.description);
+        const placeId = toSafeText(suggestion.place_id);
+
+        if (!fallbackAddress || !placeId) {
+            setAddressLookupError('Gợi ý địa chỉ không hợp lệ. Vui lòng nhập lại địa chỉ.');
+            return;
+        }
+
+        setFormData((prev) => ({ ...prev, address: fallbackAddress }));
+        setAddressSuggestionsOpen(false);
+        setAddressSuggestions([]);
+
+        try {
+            const detail = await goongApi.getPlaceDetail(placeId, goongSessionTokenRef.current);
+            const addressParts = extractGoongAddressParts(detail, fallbackAddress);
+            const nextAddressLine = toSafeText(addressParts.streetAddress) || deriveAddressLine(addressParts.fullAddress, addressParts.ward, addressParts.district);
+            setFormData((prev) => ({
+                ...prev,
+                address: toSafeText(addressParts.fullAddress) || fallbackAddress,
+                addressLine: nextAddressLine,
+                ward: toSafeText(addressParts.ward),
+                district: toSafeText(addressParts.district),
+                latitude: toCoordinateText(addressParts.latitude),
+                longitude: toCoordinateText(addressParts.longitude),
+            }));
+            goongSessionTokenRef.current = createGoongSessionToken();
+        } catch {
+            setFormData((prev) => ({ ...prev, address: fallbackAddress }));
+            setAddressLookupError('Không thể lấy chi tiết địa chỉ từ Goong.');
+        }
+    };
+
     const updateProfile = async (event: React.FormEvent) => {
         event.preventDefault();
         try {
             setSaving(true);
-            await nurseApi.updateProfile(formData);
+            await nurseApi.updateProfile({
+                ...formData,
+                address: composeFullAddress(formData.addressLine, formData.ward, formData.district, formData.address),
+                latitude: parseCoordinate(formData.latitude),
+                longitude: parseCoordinate(formData.longitude),
+            });
             showToast('Cập nhật hồ sơ thành công.', 'success');
             await loadProfile();
         } catch {
@@ -252,6 +394,81 @@ const NurseProfile = () => {
                             <div className="sm:col-span-2">
                                 <label className="form-label">Chuyên môn hiển thị</label>
                                 <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.specialization} onChange={(event) => setFormData((prev) => ({ ...prev, specialization: event.target.value }))} placeholder="VD: Chăm sóc mẹ sau sinh, massage bé, tư vấn nuôi con bằng sữa mẹ" />
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label className="form-label">Địa chỉ làm việc chính</label>
+                                <div className="relative">
+                                    <MapPinIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" />
+                                    <input
+                                        type="text"
+                                        className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-12 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all"
+                                        value={formData.address}
+                                        onBlur={() => window.setTimeout(() => setAddressSuggestionsOpen(false), 150)}
+                                        onChange={handleAddressChange}
+                                        onFocus={() => setAddressSuggestionsOpen(addressSuggestions.length > 0)}
+                                        placeholder="Nhập địa chỉ để Goong gợi ý, ví dụ: 344 Nguyễn Hữu Thọ, Đà Nẵng"
+                                    />
+                                    {addressLookupLoading && (
+                                        <div className="absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+                                    )}
+                                    {addressSuggestionsOpen && addressSuggestions.length > 0 && (
+                                        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
+                                            {addressSuggestions.map((suggestion) => (
+                                                <button
+                                                    key={suggestion.place_id}
+                                                    type="button"
+                                                    onMouseDown={(event) => {
+                                                        event.preventDefault();
+                                                        event.stopPropagation();
+                                                    }}
+                                                    onClick={(event) => {
+                                                        event.preventDefault();
+                                                        event.stopPropagation();
+                                                        void handleSelectAddress(suggestion);
+                                                    }}
+                                                    className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-emerald-50"
+                                                >
+                                                    <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#10B981]" />
+                                                    <span className="min-w-0">
+                                                        <span className="block truncate text-[14px] font-bold text-slate-900">
+                                                            {toSafeText(suggestion.structured_formatting?.main_text) || toSafeText(suggestion.description)}
+                                                        </span>
+                                                        {toSafeText(suggestion.structured_formatting?.secondary_text) && (
+                                                            <span className="mt-0.5 block truncate text-[12px] font-medium text-slate-500">
+                                                                {toSafeText(suggestion.structured_formatting?.secondary_text)}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                                {addressLookupError && (
+                                    <div className="mt-3 rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-700">
+                                        {addressLookupError}
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <label className="form-label">Quận/Huyện</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.district} onChange={(event) => setFormData((prev) => ({ ...prev, district: event.target.value, address: composeFullAddress(prev.addressLine, prev.ward, event.target.value, prev.address) }))} placeholder="Ví dụ: Cẩm Lệ" />
+                            </div>
+                            <div>
+                                <label className="form-label">Phường/Xã</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.ward} onChange={(event) => setFormData((prev) => ({ ...prev, ward: event.target.value, address: composeFullAddress(prev.addressLine, event.target.value, prev.district, prev.address) }))} placeholder="Ví dụ: Khuê Trung" />
+                            </div>
+                            <div className="sm:col-span-2">
+                                <label className="form-label">Số nhà, tên đường</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.addressLine} onChange={(event) => setFormData((prev) => ({ ...prev, addressLine: event.target.value, address: composeFullAddress(event.target.value, prev.ward, prev.district, prev.address) }))} placeholder="Ví dụ: 344 Nguyễn Hữu Thọ" />
+                            </div>
+                            <div>
+                                <label className="form-label">Vĩ độ</label>
+                                <input type="number" step="any" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.latitude} onChange={(event) => setFormData((prev) => ({ ...prev, latitude: event.target.value }))} />
+                            </div>
+                            <div>
+                                <label className="form-label">Kinh độ</label>
+                                <input type="number" step="any" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.longitude} onChange={(event) => setFormData((prev) => ({ ...prev, longitude: event.target.value }))} />
                             </div>
                             <div>
                                 <label className="form-label">Số năm kinh nghiệm</label>

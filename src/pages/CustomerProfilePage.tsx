@@ -21,7 +21,6 @@ import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 import bankApi from '../api/bankApi';
 import type { BankOptionDto } from '../api/frontend-api-contract';
 import goongApi, { createGoongSessionToken, extractGoongAddressParts, type GoongPrediction } from '../api/goongApi';
-import GoongAddressMap from '../components/GoongAddressMap';
 
 const toSafeText = (value: unknown) => (typeof value === 'string' ? value : value == null ? '' : String(value));
 
@@ -311,9 +310,6 @@ const CustomerProfilePage = () => {
         cancelled: { label: 'Đã hủy', class: 'bg-slate-50 text-slate-400' },
     };
 
-    const selectedLatitude = parseCoordinate(profileForm.latitude);
-    const selectedLongitude = parseCoordinate(profileForm.longitude);
-
     return (
         <div className="bg-slate-50 min-h-screen py-20">
             <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -486,6 +482,11 @@ const CustomerProfilePage = () => {
                                                 {!goongApi.hasApiKey && (
                                                     <p className="text-xs font-semibold text-slate-400">Backend cần GOONG_API_KEY để bật gợi ý địa chỉ Goong.</p>
                                                 )}
+                                                {addressLookupError && (
+                                                    <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-700">
+                                                        {addressLookupError}
+                                                    </div>
+                                                )}
                                             </div>
                                             <div className="space-y-4">
                                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Quận/Huyện</label>
@@ -549,75 +550,6 @@ const CustomerProfilePage = () => {
                                                     onChange={(e) => setProfileForm({ ...profileForm, longitude: e.target.value })}
                                                     placeholder="Ví dụ: 108.2208"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
-                                                />
-                                            </div>
-                                            <div className="space-y-4 md:col-span-2">
-                                                <div>
-                                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Vị trí trên bản đồ</label>
-                                                    <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-                                                        Chọn địa chỉ từ Goong để tự lấy tọa độ, hoặc click trực tiếp trên bản đồ để chỉnh vị trí.
-                                                    </p>
-                                                </div>
-                                                <div className="relative">
-                                                    <MapPinIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" />
-                                                    <input
-                                                        type="text"
-                                                        value={profileForm.address}
-                                                        onBlur={() => window.setTimeout(() => setAddressSuggestionsOpen(false), 150)}
-                                                        onChange={handleAddressChange}
-                                                        onFocus={() => setAddressSuggestionsOpen(addressSuggestions.length > 0)}
-                                                        placeholder="Tìm địa chỉ bằng Goong, ví dụ: 123 Nguyễn Văn Linh, Đà Nẵng"
-                                                        className="w-full rounded-2xl border border-slate-100 bg-white py-4 pl-14 pr-12 text-sm font-bold text-slate-900 shadow-sm outline-none transition focus:border-brand/30 focus:ring-4 focus:ring-brand/10"
-                                                    />
-                                                    {addressLookupLoading && (
-                                                        <div className="absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-brand border-t-transparent" />
-                                                    )}
-                                                    {addressSuggestionsOpen && addressSuggestions.length > 0 && (
-                                                        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-[80] overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
-                                                            {addressSuggestions.map((suggestion) => (
-                                                                <button
-                                                                    key={suggestion.place_id}
-                                                                    type="button"
-                                                                    onMouseDown={(event) => {
-                                                                        event.preventDefault();
-                                                                        event.stopPropagation();
-                                                                    }}
-                                                                    onClick={(event) => {
-                                                                        event.preventDefault();
-                                                                        event.stopPropagation();
-                                                                        void handleSelectAddress(suggestion);
-                                                                    }}
-                                                                    className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-brand/5"
-                                                                >
-                                                                    <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
-                                                                    <span className="min-w-0">
-                                                                        <span className="block truncate text-[14px] font-bold text-slate-900">
-                                                                            {toSafeText(suggestion.structured_formatting?.main_text) || toSafeText(suggestion.description)}
-                                                                        </span>
-                                                                        {toSafeText(suggestion.structured_formatting?.secondary_text) && (
-                                                                            <span className="mt-0.5 block truncate text-[12px] font-medium text-slate-500">
-                                                                                {toSafeText(suggestion.structured_formatting?.secondary_text)}
-                                                                            </span>
-                                                                        )}
-                                                                    </span>
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                {addressLookupError && (
-                                                    <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-700">
-                                                        {addressLookupError}
-                                                    </div>
-                                                )}
-                                                <GoongAddressMap
-                                                    latitude={selectedLatitude}
-                                                    longitude={selectedLongitude}
-                                                    onSelectLocation={(location) => setProfileForm({
-                                                        ...profileForm,
-                                                        latitude: String(location.latitude),
-                                                        longitude: String(location.longitude),
-                                                    })}
                                                 />
                                             </div>
                                             <div className="space-y-4">

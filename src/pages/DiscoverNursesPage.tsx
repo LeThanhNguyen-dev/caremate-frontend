@@ -141,6 +141,7 @@ const DiscoverNursesPage = () => {
 
         result.sort((a, b) => {
             if (sortBy === 'bestMatch') return (b.matchScore ?? 0) - (a.matchScore ?? 0);
+            if (sortBy === 'nearest') return (a.distanceKm ?? Number.MAX_SAFE_INTEGER) - (b.distanceKm ?? Number.MAX_SAFE_INTEGER);
             if (sortBy === 'experience') return b.yearsExperience - a.yearsExperience;
             if (sortBy === 'price') return (a.servicePrice ?? 0) - (b.servicePrice ?? 0);
             if (sortBy === 'name') return a.fullName.localeCompare(b.fullName);
@@ -295,6 +296,7 @@ const DiscoverNursesPage = () => {
                                 onChange={(event) => setSortBy(event.target.value)}
                             >
                                 <option value="bestMatch">Phù hợp nhất</option>
+                                <option value="nearest">Gần khách hàng nhất</option>
                                 <option value="rating">Đánh giá cao nhất</option>
                                 <option value="experience">Kinh nghiệm nhiều nhất</option>
                                 <option value="price">Giá hợp lý nhất</option>
@@ -376,6 +378,23 @@ const DiscoverNursesPage = () => {
                                     </p>
 
                                     <div className="mt-6 grid grid-cols-2 gap-3">
+                                        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Số sao</div>
+                                            <div className="mt-2 flex items-center gap-1 text-amber-400">
+                                                {Array.from({ length: 5 }, (_, starIndex) => (
+                                                    <StarSolidIcon
+                                                        key={starIndex}
+                                                        className={`h-4 w-4 ${starIndex < Math.round(nurse.averageRating) ? 'text-amber-400' : 'text-slate-200'}`}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
+                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Trình độ</div>
+                                            <div className="mt-2 truncate text-sm font-black text-[#10233F]">
+                                                {nurse.specialization || 'Điều dưỡng chăm sóc'}
+                                            </div>
+                                        </div>
                                         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
                                             <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Kinh nghiệm</div>
                                             <div className="mt-2 text-sm font-black text-[#10233F]">{nurse.yearsExperience} năm</div>

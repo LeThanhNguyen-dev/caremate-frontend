@@ -66,6 +66,18 @@ export type NurseProfileDetailDto = {
   bankBin?: string | null;
   bankAccountNumber?: string | null;
   bankAccountName?: string | null;
+  address?: string | null;
+  ward?: string | null;
+  district?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  defaultAddress?: {
+    fullAddress: string;
+    ward: string | null;
+    district: string | null;
+    latitude: number | null;
+    longitude: number | null;
+  } | null;
   bio: string | null;
   specialization?: string | null;
   yearsExperience: number;

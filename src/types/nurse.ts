@@ -17,6 +17,18 @@ export interface NurseProfileDetailDto {
     bankBin?: string | null;
     bankAccountNumber?: string | null;
     bankAccountName?: string | null;
+    address?: string | null;
+    ward?: string | null;
+    district?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    defaultAddress?: {
+        fullAddress: string;
+        ward: string | null;
+        district: string | null;
+        latitude: number | null;
+        longitude: number | null;
+    } | null;
     bio: string;
     specialization?: string | null;
     yearsExperience: number;
@@ -49,6 +61,11 @@ export interface UpdateNurseProfileDto {
     fullName?: string;
     phoneNumber?: string;
     avatar?: string;
+    address?: string;
+    ward?: string;
+    district?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     bio: string;
     specialization?: string;
     yearsExperience: number;
