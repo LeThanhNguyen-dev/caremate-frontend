@@ -14,6 +14,17 @@ import caremateApi from '../api/caremateApi';
 import type { NurseDiscoveryDto, ServiceDetailDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
 
+const daNangDistricts = [
+    { value: 'all', label: 'Tất cả Đà Nẵng', latitude: 16.0544, longitude: 108.2022 },
+    { value: 'Hải Châu', label: 'Hải Châu', latitude: 16.0678, longitude: 108.2208 },
+    { value: 'Thanh Khê', label: 'Thanh Khê', latitude: 16.0707, longitude: 108.1906 },
+    { value: 'Sơn Trà', label: 'Sơn Trà', latitude: 16.1062, longitude: 108.2529 },
+    { value: 'Ngũ Hành Sơn', label: 'Ngũ Hành Sơn', latitude: 16.0037, longitude: 108.2647 },
+    { value: 'Liên Chiểu', label: 'Liên Chiểu', latitude: 16.0744, longitude: 108.1491 },
+    { value: 'Cẩm Lệ', label: 'Cẩm Lệ', latitude: 16.0169, longitude: 108.2047 },
+    { value: 'Hòa Vang', label: 'Hòa Vang', latitude: 16.0390, longitude: 108.1135 },
+];
+
 const DiscoverNursesPage = () => {
     const [searchParams] = useSearchParams();
     const serviceId = searchParams.get('serviceId');
@@ -24,7 +35,9 @@ const DiscoverNursesPage = () => {
     const [services, setServices] = useState<ServiceDetailDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
-    const [sortBy, setSortBy] = useState('rating');
+    const [sortBy, setSortBy] = useState('bestMatch');
+    const [selectedDistrict, setSelectedDistrict] = useState('all');
+    const selectedLocation = daNangDistricts.find((item) => item.value === selectedDistrict) ?? daNangDistricts[0];
 
     useEffect(() => {
         if (!serviceId) {
@@ -40,7 +53,13 @@ const DiscoverNursesPage = () => {
             try {
                 setLoading(true);
                 const [nurseData, serviceData] = await Promise.all([
-                    caremateApi.getNurses({ serviceId: Number(serviceId) }),
+                    caremateApi.getNurses({
+                        serviceId: Number(serviceId),
+                        latitude: selectedLocation.latitude,
+                        longitude: selectedLocation.longitude,
+                        district: selectedDistrict === 'all' ? undefined : selectedDistrict,
+                        sortBy: sortBy === 'bestMatch' ? 'bestMatch' : undefined,
+                    }),
                     caremateApi.getServices(),
                 ]);
                 setNurses(nurseData);
@@ -53,7 +72,7 @@ const DiscoverNursesPage = () => {
         };
 
         void load();
-    }, [serviceId, showToast]);
+    }, [selectedDistrict, selectedLocation.latitude, selectedLocation.longitude, serviceId, showToast, sortBy]);
 
     const selectedService = useMemo(
         () => services.find((item) => item.id === Number(serviceId)),
@@ -74,6 +93,7 @@ const DiscoverNursesPage = () => {
         }
 
         result.sort((a, b) => {
+            if (sortBy === 'bestMatch') return (b.matchScore ?? 0) - (a.matchScore ?? 0);
             if (sortBy === 'experience') return b.yearsExperience - a.yearsExperience;
             if (sortBy === 'price') return (a.servicePrice ?? 0) - (b.servicePrice ?? 0);
             if (sortBy === 'name') return a.fullName.localeCompare(b.fullName);
@@ -175,7 +195,7 @@ const DiscoverNursesPage = () => {
                 </section>
 
                 <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
-                    <div className="grid gap-4 lg:grid-cols-[1fr_240px]">
+                    <div className="grid gap-4 lg:grid-cols-[1fr_220px_240px]">
                         <div className="relative">
                             <MagnifyingGlassIcon className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
                             <input
@@ -190,9 +210,23 @@ const DiscoverNursesPage = () => {
                             <AdjustmentsHorizontalIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
                             <select
                                 className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-10 text-sm font-black text-[#10233F] shadow-sm outline-none transition focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                value={selectedDistrict}
+                                onChange={(event) => setSelectedDistrict(event.target.value)}
+                            >
+                                {daNangDistricts.map((district) => (
+                                    <option key={district.value} value={district.value}>{district.label}</option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">⌄</div>
+                        </div>
+                        <div className="relative">
+                            <AdjustmentsHorizontalIcon className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
+                            <select
+                                className="w-full appearance-none rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-10 text-sm font-black text-[#10233F] shadow-sm outline-none transition focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                                 value={sortBy}
                                 onChange={(event) => setSortBy(event.target.value)}
                             >
+                                <option value="bestMatch">Phù hợp nhất</option>
                                 <option value="rating">Đánh giá cao nhất</option>
                                 <option value="experience">Kinh nghiệm nhiều nhất</option>
                                 <option value="price">Giá hợp lý nhất</option>
@@ -244,6 +278,29 @@ const DiscoverNursesPage = () => {
                                             <StarSolidIcon className="h-4 w-4" />
                                             {nurse.averageRating.toFixed(1)}
                                         </div>
+                                    </div>
+
+                                    <div className="mt-5 rounded-2xl bg-[#FDF2F8] p-4 ring-1 ring-brand/10">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-brand">Smart match</div>
+                                                <div className="mt-1 text-2xl font-black leading-none text-[#10233F]">{nurse.matchScore ?? 0}% phù hợp</div>
+                                            </div>
+                                            {nurse.distanceKm != null && (
+                                                <div className="rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-600 shadow-sm">
+                                                    {nurse.distanceKm.toFixed(1)} km
+                                                </div>
+                                            )}
+                                        </div>
+                                        {nurse.matchReasons && nurse.matchReasons.length > 0 && (
+                                            <div className="mt-3 flex flex-wrap gap-2">
+                                                {nurse.matchReasons.slice(0, 3).map((reason) => (
+                                                    <span key={reason} className="rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                                                        {reason}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
 
                                     <p className="mt-5 flex-1 overflow-hidden text-sm font-medium leading-7 text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">

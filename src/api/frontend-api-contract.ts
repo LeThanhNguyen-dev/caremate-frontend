@@ -92,6 +92,11 @@ export type NurseDiscoveryDto = {
   serviceRadiusKm: number;
   servicePrice: number | null;
   serviceUnit: string | null;
+  distanceKm?: number | null;
+  matchScore?: number;
+  matchReasons?: string[];
+  nextAvailableAt?: string | null;
+  district?: string | null;
 };
 
 export type NurseServiceDto = {

@@ -188,6 +188,10 @@ export const caremateApi = {
     maxPrice?: number;
     startTime?: string;
     endTime?: string;
+    latitude?: number;
+    longitude?: number;
+    district?: string;
+    sortBy?: string;
   }): Promise<NurseDiscoveryDto[]> => (await axiosInstance.get('/api/nurses', { params })).data,
   getNurseByUserId: async (userId: number): Promise<NurseProfileDetailDto> => (await axiosInstance.get(`/api/nurses/${userId}`)).data,
   getNurseAvailabilityByUserId: async (userId: number): Promise<AvailabilitySlotDto[]> =>
