@@ -36,6 +36,7 @@ const CustomerProfilePage = () => {
     const [addressSuggestions, setAddressSuggestions] = useState<GoongPrediction[]>([]);
     const [addressSuggestionsOpen, setAddressSuggestionsOpen] = useState(false);
     const [addressLookupLoading, setAddressLookupLoading] = useState(false);
+    const [addressLookupError, setAddressLookupError] = useState('');
     const goongSessionTokenRef = useRef(createGoongSessionToken());
     const [profileForm, setProfileForm] = useState({
         fullName: '',
@@ -127,6 +128,7 @@ const CustomerProfilePage = () => {
         if (!goongApi.hasApiKey || input.length < 3) {
             setAddressSuggestions([]);
             setAddressLookupLoading(false);
+            setAddressLookupError('');
             return;
         }
 
@@ -138,10 +140,12 @@ const CustomerProfilePage = () => {
                 .then((suggestions) => {
                     setAddressSuggestions(suggestions);
                     setAddressSuggestionsOpen(suggestions.length > 0);
+                    setAddressLookupError(suggestions.length === 0 ? 'Không tìm thấy gợi ý địa chỉ phù hợp.' : '');
                 })
                 .catch((error: unknown) => {
                     if (!(error instanceof DOMException && error.name === 'AbortError')) {
                         setAddressSuggestions([]);
+                        setAddressLookupError('Không thể tải gợi ý Goong. Hãy kiểm tra VITE_GOONG_API_KEY hoặc domain được phép trong Goong Console.');
                     }
                 })
                 .finally(() => {
@@ -164,6 +168,7 @@ const CustomerProfilePage = () => {
             latitude: '',
             longitude: '',
         }));
+        setAddressLookupError('');
         setAddressSuggestionsOpen(true);
     };
 
@@ -187,6 +192,7 @@ const CustomerProfilePage = () => {
             goongSessionTokenRef.current = createGoongSessionToken();
         } catch {
             setProfileForm((prev) => ({ ...prev, address: fallbackAddress }));
+            setAddressLookupError('Không thể lấy chi tiết địa chỉ từ Goong.');
         }
     };
 
@@ -468,6 +474,51 @@ const CustomerProfilePage = () => {
                                                         Chọn địa chỉ từ Goong để tự lấy tọa độ, hoặc click trực tiếp trên bản đồ để chỉnh vị trí.
                                                     </p>
                                                 </div>
+                                                <div className="relative">
+                                                    <MapPinIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" />
+                                                    <input
+                                                        type="text"
+                                                        value={profileForm.address}
+                                                        onBlur={() => window.setTimeout(() => setAddressSuggestionsOpen(false), 150)}
+                                                        onChange={handleAddressChange}
+                                                        onFocus={() => setAddressSuggestionsOpen(addressSuggestions.length > 0)}
+                                                        placeholder="Tìm địa chỉ bằng Goong, ví dụ: 123 Nguyễn Văn Linh, Đà Nẵng"
+                                                        className="w-full rounded-2xl border border-slate-100 bg-white py-4 pl-14 pr-12 text-sm font-bold text-slate-900 shadow-sm outline-none transition focus:border-brand/30 focus:ring-4 focus:ring-brand/10"
+                                                    />
+                                                    {addressLookupLoading && (
+                                                        <div className="absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+                                                    )}
+                                                    {addressSuggestionsOpen && addressSuggestions.length > 0 && (
+                                                        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-[80] overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_40px_rgba(15,23,42,0.12)]">
+                                                            {addressSuggestions.map((suggestion) => (
+                                                                <button
+                                                                    key={suggestion.place_id}
+                                                                    type="button"
+                                                                    onMouseDown={(event) => event.preventDefault()}
+                                                                    onClick={() => void handleSelectAddress(suggestion)}
+                                                                    className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-brand/5"
+                                                                >
+                                                                    <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+                                                                    <span className="min-w-0">
+                                                                        <span className="block truncate text-[14px] font-bold text-slate-900">
+                                                                            {suggestion.structured_formatting?.main_text || suggestion.description}
+                                                                        </span>
+                                                                        {suggestion.structured_formatting?.secondary_text && (
+                                                                            <span className="mt-0.5 block truncate text-[12px] font-medium text-slate-500">
+                                                                                {suggestion.structured_formatting.secondary_text}
+                                                                            </span>
+                                                                        )}
+                                                                    </span>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                {addressLookupError && (
+                                                    <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-700">
+                                                        {addressLookupError}
+                                                    </div>
+                                                )}
                                                 <Suspense fallback={<div className="h-[320px] rounded-[24px] bg-slate-50" />}>
                                                     <GoongAddressMap
                                                         latitude={profileForm.latitude.trim() ? Number(profileForm.latitude) : null}

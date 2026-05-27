@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
@@ -15,6 +15,7 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
+  const [mapError, setMapError] = useState('');
   const hasLocation = latitude != null && longitude != null && Number.isFinite(latitude) && Number.isFinite(longitude);
   const center = hasLocation ? { latitude, longitude } : DA_NANG_CENTER;
 
@@ -30,6 +31,9 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
     });
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.on('error', () => {
+      setMapError('Không thể tải bản đồ Goong. Hãy kiểm tra VITE_GOONG_MAPTILES_KEY và domain được phép trong Goong Console.');
+    });
     map.on('click', (event) => {
       onSelectLocation?.({
         latitude: Number(event.lngLat.lat.toFixed(6)),
@@ -79,7 +83,14 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
 
   return (
     <div className="overflow-hidden rounded-[24px] border border-slate-100 bg-slate-50 shadow-inner">
-      <div ref={containerRef} className="h-[320px] w-full" />
+      <div className="relative">
+        <div ref={containerRef} className="h-[320px] w-full" />
+        {mapError && (
+          <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-white/95 p-4 text-sm font-semibold leading-6 text-slate-600 shadow-xl">
+            {mapError}
+          </div>
+        )}
+      </div>
       <div className="border-t border-slate-100 bg-white px-5 py-3 text-xs font-semibold text-slate-500">
         Chọn địa chỉ bằng Goong hoặc click trên bản đồ để cập nhật tọa độ.
       </div>
