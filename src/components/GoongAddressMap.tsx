@@ -5,6 +5,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 const GOONG_MAPTILES_KEY = import.meta.env.VITE_GOONG_MAPTILES_KEY as string | undefined;
 const DA_NANG_CENTER = { latitude: 16.0544, longitude: 108.2022 };
 
+const isFiniteCoordinate = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value);
+
 type GoongAddressMapProps = {
   latitude?: number | null;
   longitude?: number | null;
@@ -37,6 +40,8 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
       map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
       map.on('load', () => setMapError(''));
       map.on('click', (event) => {
+        if (!event.lngLat || !isFiniteCoordinate(event.lngLat.lat) || !isFiniteCoordinate(event.lngLat.lng)) return;
+
         onSelectLocation?.({
           latitude: Number(event.lngLat.lat.toFixed(6)),
           longitude: Number(event.lngLat.lng.toFixed(6)),
@@ -67,21 +72,25 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
     const map = mapRef.current;
     if (!map) return;
 
-    map.flyTo({
-      center: [center.longitude, center.latitude],
-      zoom: hasLocation ? 15 : 11,
-      essential: true,
-    });
+    try {
+      map.flyTo({
+        center: [center.longitude, center.latitude],
+        zoom: hasLocation ? 15 : 11,
+        essential: true,
+      });
 
-    if (hasLocation) {
-      if (!markerRef.current) {
-        markerRef.current = new maplibregl.Marker({ color: '#EC4899' }).addTo(map);
+      if (hasLocation) {
+        if (!markerRef.current) {
+          markerRef.current = new maplibregl.Marker({ color: '#EC4899' }).addTo(map);
+        }
+
+        markerRef.current.setLngLat([center.longitude, center.latitude]);
+      } else {
+        markerRef.current?.remove();
+        markerRef.current = null;
       }
-
-      markerRef.current.setLngLat([center.longitude, center.latitude]);
-    } else {
-      markerRef.current?.remove();
-      markerRef.current = null;
+    } catch {
+      setMapError('Không thể cập nhật vị trí trên bản đồ Goong.');
     }
   }, [center.latitude, center.longitude, hasLocation]);
 

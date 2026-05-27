@@ -420,8 +420,15 @@ const CustomerProfilePage = () => {
                                                                 <button
                                                                     key={suggestion.place_id}
                                                                     type="button"
-                                                                    onMouseDown={(event) => event.preventDefault()}
-                                                                    onClick={() => void handleSelectAddress(suggestion)}
+                                                                    onMouseDown={(event) => {
+                                                                        event.preventDefault();
+                                                                        event.stopPropagation();
+                                                                    }}
+                                                                    onClick={(event) => {
+                                                                        event.preventDefault();
+                                                                        event.stopPropagation();
+                                                                        void handleSelectAddress(suggestion);
+                                                                    }}
                                                                     className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-brand/5"
                                                                 >
                                                                     <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
@@ -513,8 +520,15 @@ const CustomerProfilePage = () => {
                                                                 <button
                                                                     key={suggestion.place_id}
                                                                     type="button"
-                                                                    onMouseDown={(event) => event.preventDefault()}
-                                                                    onClick={() => void handleSelectAddress(suggestion)}
+                                                                    onMouseDown={(event) => {
+                                                                        event.preventDefault();
+                                                                        event.stopPropagation();
+                                                                    }}
+                                                                    onClick={(event) => {
+                                                                        event.preventDefault();
+                                                                        event.stopPropagation();
+                                                                        void handleSelectAddress(suggestion);
+                                                                    }}
                                                                     className="flex w-full items-start gap-3 px-4 py-3 text-left transition hover:bg-brand/5"
                                                                 >
                                                                     <MapPinIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
