@@ -22,31 +22,43 @@ const GoongAddressMap = ({ latitude, longitude, onSelectLocation }: GoongAddress
   useEffect(() => {
     if (!containerRef.current || !GOONG_MAPTILES_KEY) return;
 
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: `https://tiles.goong.io/assets/goong_map_web.json?api_key=${GOONG_MAPTILES_KEY}`,
-      center: [center.longitude, center.latitude],
-      zoom: hasLocation ? 15 : 11,
-      attributionControl: false,
-    });
+    let map: maplibregl.Map | null = null;
+    let loadTimeout = 0;
 
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-    map.on('error', () => {
-      setMapError('Không thể tải bản đồ Goong. Hãy kiểm tra VITE_GOONG_MAPTILES_KEY và domain được phép trong Goong Console.');
-    });
-    map.on('click', (event) => {
-      onSelectLocation?.({
-        latitude: Number(event.lngLat.lat.toFixed(6)),
-        longitude: Number(event.lngLat.lng.toFixed(6)),
+    try {
+      map = new maplibregl.Map({
+        container: containerRef.current,
+        style: `https://tiles.goong.io/assets/goong_map_web.json?api_key=${GOONG_MAPTILES_KEY}`,
+        center: [center.longitude, center.latitude],
+        zoom: hasLocation ? 15 : 11,
+        attributionControl: false,
       });
-    });
 
-    mapRef.current = map;
+      map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+      map.on('load', () => setMapError(''));
+      map.on('click', (event) => {
+        onSelectLocation?.({
+          latitude: Number(event.lngLat.lat.toFixed(6)),
+          longitude: Number(event.lngLat.lng.toFixed(6)),
+        });
+      });
+
+      loadTimeout = window.setTimeout(() => {
+        if (map && !map.loaded()) {
+          setMapError('Không thể tải bản đồ Goong. Hãy kiểm tra VITE_GOONG_MAPTILES_KEY và domain được phép trong Goong Console.');
+        }
+      }, 7000);
+
+      mapRef.current = map;
+    } catch {
+      setMapError('Không thể khởi tạo bản đồ Goong.');
+    }
 
     return () => {
+      window.clearTimeout(loadTimeout);
       markerRef.current?.remove();
       markerRef.current = null;
-      map.remove();
+      map?.remove();
       mapRef.current = null;
     };
   }, []);

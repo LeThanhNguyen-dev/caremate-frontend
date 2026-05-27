@@ -20,14 +20,14 @@ type GoongPlaceDetailResponse = {
     name?: string;
     geometry?: {
       location?: {
-        lat?: number;
-        lng?: number;
+        lat?: number | string;
+        lng?: number | string;
       };
     };
     compound?: {
-      commune?: string;
-      district?: string;
-      province?: string;
+      commune?: unknown;
+      district?: unknown;
+      province?: unknown;
     };
   };
   status?: string;
@@ -35,22 +35,42 @@ type GoongPlaceDetailResponse = {
 
 export type GoongPlaceDetail = NonNullable<GoongPlaceDetailResponse['result']>;
 
+const toText = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
+
+const toFiniteNumber = (value: unknown) => {
+  const numberValue = typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
+  return Number.isFinite(numberValue) ? numberValue : null;
+};
+
+const findAddressSegment = (segments: string[], prefixes: string[]) =>
+  segments.find((segment) => {
+    const normalized = segment.toLocaleLowerCase('vi-VN');
+    return prefixes.some((prefix) => normalized.startsWith(prefix));
+  }) || '';
+
+const removeDistrictPrefix = (district: string) =>
+  district
+    .replace(/^(quận|huyện|thị xã|thành phố|quan|huyen|thi xa|thanh pho)\s+/i, '')
+    .trim();
+
 export const extractGoongAddressParts = (detail: GoongPlaceDetail | null, fallbackAddress = '') => {
-  const formattedAddress = detail?.formatted_address || fallbackAddress;
+  const formattedAddress = toText(detail?.formatted_address) || fallbackAddress;
   const segments = formattedAddress
     .split(',')
     .map((segment) => segment.trim())
     .filter(Boolean);
 
-  const fallbackWard = segments.find((segment) => /^(phường|xã|thị trấn)\s/i.test(segment));
-  const fallbackDistrict = segments.find((segment) => /^(quận|huyện|thị xã|thành phố)\s/i.test(segment));
+  const fallbackWard = findAddressSegment(segments, ['phường', 'xã', 'thị trấn', 'phuong', 'xa', 'thi tran']);
+  const fallbackDistrict = findAddressSegment(segments, ['quận', 'huyện', 'thị xã', 'thành phố', 'quan', 'huyen', 'thi xa', 'thanh pho']);
+  const compoundWard = toText(detail?.compound?.commune);
+  const compoundDistrict = toText(detail?.compound?.district);
 
   return {
     fullAddress: formattedAddress,
-    ward: detail?.compound?.commune || fallbackWard || '',
-    district: detail?.compound?.district || fallbackDistrict?.replace(/^(quận|huyện|thị xã|thành phố)\s/i, '') || '',
-    latitude: detail?.geometry?.location?.lat ?? null,
-    longitude: detail?.geometry?.location?.lng ?? null,
+    ward: compoundWard || fallbackWard,
+    district: compoundDistrict || removeDistrictPrefix(fallbackDistrict),
+    latitude: toFiniteNumber(detail?.geometry?.location?.lat),
+    longitude: toFiniteNumber(detail?.geometry?.location?.lng),
   };
 };
 

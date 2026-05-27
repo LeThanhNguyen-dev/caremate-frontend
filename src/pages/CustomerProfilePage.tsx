@@ -24,6 +24,13 @@ import goongApi, { createGoongSessionToken, extractGoongAddressParts, type Goong
 
 const GoongAddressMap = lazy(() => import('../components/GoongAddressMap'));
 
+const toCoordinateText = (value: number | null) => (value != null && Number.isFinite(value) ? String(value) : '');
+
+const parseCoordinate = (value: string) => {
+    const parsed = Number(value);
+    return value.trim() && Number.isFinite(parsed) ? parsed : null;
+};
+
 const CustomerProfilePage = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
@@ -186,8 +193,8 @@ const CustomerProfilePage = () => {
                 address: addressParts.fullAddress,
                 ward: addressParts.ward,
                 district: addressParts.district,
-                latitude: addressParts.latitude != null ? String(addressParts.latitude) : '',
-                longitude: addressParts.longitude != null ? String(addressParts.longitude) : '',
+                latitude: toCoordinateText(addressParts.latitude),
+                longitude: toCoordinateText(addressParts.longitude),
             }));
             goongSessionTokenRef.current = createGoongSessionToken();
         } catch {
@@ -206,8 +213,8 @@ const CustomerProfilePage = () => {
                 address: profileForm.address,
                 ward: profileForm.ward,
                 district: profileForm.district,
-                latitude: profileForm.latitude.trim() ? Number(profileForm.latitude) : null,
-                longitude: profileForm.longitude.trim() ? Number(profileForm.longitude) : null,
+                latitude: parseCoordinate(profileForm.latitude),
+                longitude: parseCoordinate(profileForm.longitude),
                 bankBin: profileForm.bankBin,
                 bankAccountNumber: profileForm.bankAccountNumber,
                 bankAccountName: profileForm.bankAccountName,
@@ -258,6 +265,9 @@ const CustomerProfilePage = () => {
         pending_confirm: { label: 'Chờ xác nhận', class: 'bg-amber-50 text-amber-600' },
         cancelled: { label: 'Đã hủy', class: 'bg-slate-50 text-slate-400' },
     };
+
+    const selectedLatitude = parseCoordinate(profileForm.latitude);
+    const selectedLongitude = parseCoordinate(profileForm.longitude);
 
     return (
         <div className="bg-slate-50 min-h-screen py-20">
@@ -521,8 +531,8 @@ const CustomerProfilePage = () => {
                                                 )}
                                                 <Suspense fallback={<div className="h-[320px] rounded-[24px] bg-slate-50" />}>
                                                     <GoongAddressMap
-                                                        latitude={profileForm.latitude.trim() ? Number(profileForm.latitude) : null}
-                                                        longitude={profileForm.longitude.trim() ? Number(profileForm.longitude) : null}
+                                                        latitude={selectedLatitude}
+                                                        longitude={selectedLongitude}
                                                         onSelectLocation={(location) => setProfileForm({
                                                             ...profileForm,
                                                             latitude: String(location.latitude),
