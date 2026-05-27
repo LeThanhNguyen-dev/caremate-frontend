@@ -340,41 +340,66 @@ const CommunityPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#fbfaf8] px-5 py-8 lg:px-8">
-            <div className="mx-auto max-w-7xl space-y-6">
-                <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-                    <motion.div
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="rounded-[2rem] border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/55 sm:p-10"
-                    >
-                        <div className="accent-label">Cộng đồng CareMate</div>
-                        <h1 className="mt-4 font-heading text-4xl font-black leading-tight tracking-tight text-[#10233F] md:text-5xl">
-                            Chia sẻ kinh nghiệm chăm sóc mẹ và bé cùng cộng đồng.
+        <div className="min-h-screen bg-[linear-gradient(180deg,#fbfaf8_0%,#ffffff_42%,#fbfaf8_100%)]">
+            <section className="relative overflow-hidden border-b border-brand/10 bg-[linear-gradient(135deg,#f3fbf8_0%,#fff2f8_54%,#fce7f3_100%)] px-5 pb-14 pt-12 shadow-[inset_0_-1px_0_rgba(236,72,153,0.08)] sm:px-8 lg:px-10">
+                <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-emerald-200/45 blur-[120px] -ml-44 -mt-44"></div>
+                <div className="absolute right-0 bottom-0 h-[30rem] w-[30rem] rounded-full bg-brand/18 blur-[130px] -mb-56 -mr-52"></div>
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/70 to-transparent"></div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.55 }}
+                    className="relative z-10 mx-auto max-w-7xl"
+                >
+                    <div className="max-w-3xl">
+                        <div className="mb-5 w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-brand shadow-sm">
+                            Cộng đồng CareMate
+                        </div>
+                        <h1 className="text-[54px] font-black leading-[1.04] tracking-tight text-[#10233F] sm:text-[70px] lg:text-[88px]">
+                            Chia sẻ
+                            <span className="mt-2 block font-semibold italic text-brand sm:mt-3">kinh nghiệm.</span>
                         </h1>
-                        <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-slate-500">
+                        <p className="mt-6 max-w-2xl text-[18px] font-black leading-8 text-[#10233F]">
                             Đặt câu hỏi, lưu lại trải nghiệm thực tế và tìm những gợi ý gần gũi từ các gia đình đang đồng hành cùng CareMate.
                         </p>
-                    </motion.div>
-
-                    <div className="grid gap-4 sm:grid-cols-3 xl:grid-cols-1">
-                        {[
-                            { label: 'Bài viết', value: posts.length },
-                            { label: 'Bình luận', value: posts.reduce((total, post) => total + countComments(post.comments), 0) },
-                            { label: 'Chủ đề', value: new Set(posts.flatMap((post) => post.tags)).size },
-                        ].map((card, index) => (
-                            <motion.div
-                                key={card.label}
-                                initial={{ opacity: 0, y: 14 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.06 }}
-                                className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/45 sm:p-6"
+                        <p className="mt-4 max-w-2xl text-[15px] font-semibold leading-[1.8] text-slate-500">
+                            Cùng trao đổi về chăm sóc mẹ và bé, lịch sinh hoạt, phục hồi sau sinh và những tình huống thường gặp tại nhà.
+                        </p>
+                        <div className="mt-9 flex flex-wrap gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setIsComposerOpen(true)}
+                                className="rounded-full bg-[#10233F] px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#10233F]/15 transition hover:-translate-y-0.5 hover:bg-brand hover:shadow-brand/20"
                             >
-                                <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{card.label}</div>
-                                <div className="mt-3 text-3xl font-black leading-none text-[#10233F]">{card.value}</div>
-                            </motion.div>
-                        ))}
+                                Tạo bài viết
+                            </button>
+                            <a href="#community-feed" className="rounded-full border border-slate-200 bg-white px-8 py-4 text-xs font-black uppercase tracking-widest text-[#10233F] shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:text-brand hover:shadow-lg hover:shadow-slate-200/70">
+                                Xem thảo luận
+                            </a>
+                        </div>
                     </div>
+                </motion.div>
+            </section>
+
+            <div id="community-feed" className="mx-auto w-full max-w-7xl scroll-mt-28 space-y-6 px-5 pb-14 pt-8 sm:px-8 lg:px-10">
+                <section className="grid gap-4 sm:grid-cols-3">
+                    {[
+                        { label: 'Bài viết', value: posts.length },
+                        { label: 'Bình luận', value: posts.reduce((total, post) => total + countComments(post.comments), 0) },
+                        { label: 'Chủ đề', value: new Set(posts.flatMap((post) => post.tags)).size },
+                    ].map((card, index) => (
+                        <motion.div
+                            key={card.label}
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: index * 0.06 }}
+                            className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/45 sm:p-6"
+                        >
+                            <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{card.label}</div>
+                            <div className="mt-3 text-3xl font-black leading-none text-[#10233F]">{card.value}</div>
+                        </motion.div>
+                    ))}
                 </section>
 
                 <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
