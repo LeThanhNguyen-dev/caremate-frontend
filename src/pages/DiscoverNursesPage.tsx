@@ -44,17 +44,16 @@ const DiscoverNursesPage = () => {
         latitude: number | null;
         longitude: number | null;
     } | null>(null);
-    const selectedLocation = daNangDistricts.find((item) => item.value === selectedDistrict) ?? daNangDistricts[0];
-    const matchingLocation = customerAddress?.latitude != null && customerAddress.longitude != null
+    const matchingLocation = selectedDistrict === 'all'
         ? {
-            latitude: customerAddress.latitude,
-            longitude: customerAddress.longitude,
-            district: customerAddress.district ?? undefined,
+            latitude: undefined,
+            longitude: undefined,
+            district: undefined,
         }
         : {
-            latitude: selectedLocation.latitude,
-            longitude: selectedLocation.longitude,
-            district: selectedDistrict === 'all' ? undefined : selectedDistrict,
+            latitude: undefined,
+            longitude: undefined,
+            district: selectedDistrict,
         };
 
     useEffect(() => {
@@ -75,9 +74,6 @@ const DiscoverNursesPage = () => {
                     latitude: address.latitude,
                     longitude: address.longitude,
                 });
-                if (address.district) {
-                    setSelectedDistrict(address.district);
-                }
             } catch {
                 setCustomerAddress(null);
             }
@@ -97,8 +93,10 @@ const DiscoverNursesPage = () => {
         const load = async () => {
             if (!serviceId) return;
 
+            const isInitialLoad = services.length === 0 && nurses.length === 0;
+
             try {
-                setLoading(true);
+                if (isInitialLoad) setLoading(true);
                 const [nurseData, serviceData] = await Promise.all([
                     caremateApi.getNurses({
                         serviceId: Number(serviceId),
@@ -114,7 +112,7 @@ const DiscoverNursesPage = () => {
             } catch {
                 showToast('Không thể tải danh sách y tá theo dịch vụ đã chọn.', 'error');
             } finally {
-                setLoading(false);
+                if (isInitialLoad) setLoading(false);
             }
         };
 
@@ -162,6 +160,7 @@ const DiscoverNursesPage = () => {
             icon: WalletIcon,
         },
     ];
+    const isFilteringByDistrict = selectedDistrict !== 'all';
 
     if (loading) {
         return (
@@ -245,16 +244,20 @@ const DiscoverNursesPage = () => {
                 <section className="rounded-[1.5rem] border border-brand/10 bg-[#FDF2F8] p-5 shadow-lg shadow-slate-200/25 sm:p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
-                            <div className="text-xs font-black uppercase tracking-[0.24em] text-brand">Địa chỉ dùng để matching</div>
+                            <div className="text-xs font-black uppercase tracking-[0.24em] text-brand">
+                                {isFilteringByDistrict ? 'Đang lọc theo khu vực' : 'Đang hiển thị toàn Đà Nẵng'}
+                            </div>
                             <div className="mt-2 text-xl font-black text-[#10233F]">
-                                {customerAddress?.fullAddress || (customerAddress?.district ? `Quận/Huyện ${customerAddress.district}` : 'Chưa có địa chỉ khách hàng')}
+                                {isFilteringByDistrict
+                                    ? daNangDistricts.find((item) => item.value === selectedDistrict)?.label
+                                    : 'Tất cả y tá có dịch vụ này'}
                             </div>
                             <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
-                                {customerAddress?.latitude != null && customerAddress.longitude != null
-                                    ? `Hệ thống đang tính khoảng cách từ tọa độ ${customerAddress.latitude}, ${customerAddress.longitude}.`
-                                    : customerAddress?.district
-                                        ? 'Hệ thống đang ưu tiên y tá cùng quận/huyện vì hồ sơ chưa có tọa độ.'
-                                        : 'Bạn có thể cập nhật địa chỉ trong hồ sơ để kết quả phù hợp hơn.'}
+                                {isFilteringByDistrict
+                                    ? 'Danh sách đang được lọc theo quận bạn chọn ở ô bên dưới.'
+                                    : customerAddress?.fullAddress
+                                        ? `Địa chỉ hồ sơ của bạn: ${customerAddress.fullAddress}. Chọn quận bên dưới nếu muốn thu hẹp danh sách.`
+                                        : 'Chọn quận bên dưới nếu muốn thu hẹp danh sách y tá theo khu vực.'}
                             </p>
                         </div>
                         <Link to="/profile" className="rounded-full bg-white px-6 py-3 text-xs font-black uppercase tracking-widest text-brand shadow-sm transition hover:-translate-y-0.5 hover:bg-brand hover:text-white">
@@ -313,16 +316,15 @@ const DiscoverNursesPage = () => {
                         <div className="empty-state-text">Thử đổi từ khóa tìm kiếm hoặc quay lại chọn một dịch vụ khác.</div>
                     </div>
                 ) : (
-                    <motion.div layout className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                        <AnimatePresence mode="popLayout">
+                    <motion.div className="grid min-h-[760px] grid-cols-1 content-start gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        <AnimatePresence mode="wait" initial={false}>
                             {filtered.map((nurse, index) => (
                                 <motion.div
                                     key={nurse.userId}
-                                    layout
-                                    initial={{ opacity: 0, y: 14 }}
+                                    initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: 12 }}
-                                    transition={{ delay: Math.min(index * 0.03, 0.18) }}
+                                    exit={{ opacity: 0, y: 6 }}
+                                    transition={{ delay: Math.min(index * 0.015, 0.08), duration: 0.18 }}
                                     className="group flex h-full flex-col rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35 transition duration-300 hover:-translate-y-1 hover:border-brand/20 hover:shadow-2xl hover:shadow-slate-200/80"
                                 >
                                     <div className="flex items-start justify-between gap-3">

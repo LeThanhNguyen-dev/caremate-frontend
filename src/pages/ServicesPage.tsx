@@ -2,9 +2,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
+    ArrowRightIcon,
+    ClockIcon,
+    MapPinIcon,
     MagnifyingGlassIcon,
     Squares2X2Icon,
-    SparklesIcon
+    SparklesIcon,
+    StarIcon
 } from '@heroicons/react/24/outline';
 import caremateApi from '../api/caremateApi';
 import type { ServiceDetailDto, NurseDiscoveryDto, PackageScheduleEntryDto } from '../api/frontend-api-contract';
@@ -280,7 +284,7 @@ const ServicesPage = () => {
             </section>
 
             <div id="service-picker" className="relative z-20 mx-auto w-full max-w-[1680px] scroll-mt-28 px-2 pb-14 pt-8 sm:px-4 lg:px-4">
-                <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+                <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_440px] 2xl:grid-cols-[minmax(0,1fr)_480px]">
                     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.075)] ring-1 ring-slate-100/80 md:p-8">
                     <div className="mb-8 grid gap-4 lg:grid-cols-3">
                         {[
@@ -515,40 +519,48 @@ const ServicesPage = () => {
                     )}
                 </motion.div>
 
-                <aside className="rounded-[28px] bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,0.08)] ring-1 ring-slate-100 xl:sticky xl:top-24 xl:self-start">
-                    <div className="mb-6 rounded-[24px] bg-[#10233F] p-5 text-white">
-                        <div className="text-[10px] font-black uppercase tracking-[0.24em] text-white/35">Luồng đặt lịch</div>
-                        <div className="relative mt-5 flex items-start justify-between gap-2 text-center">
-                            <div className="absolute left-[16%] right-[16%] top-[14px] h-0.5 bg-white/15" />
-                            {['Chọn gói', 'Chọn y tá', 'Đặt giờ'].map((step, index) => (
-                                <div key={step} className="relative z-10 flex-1">
-                                    <div className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-black shadow-lg ${index === 0 ? 'bg-brand text-white shadow-brand/30' : 'bg-white text-[#10233F]'}`}>{index + 1}</div>
-                                    <div className="mt-3 text-[10px] font-black uppercase tracking-tight text-white/70">{step}</div>
+                <aside className="rounded-[22px] bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] ring-1 ring-slate-100 sm:p-6 xl:sticky xl:top-24 xl:self-start">
+                    <div className="mb-5 rounded-[18px] bg-[#10233F] p-4 text-white">
+                        <div className="text-xs font-bold text-white/55">Quy trình đặt lịch</div>
+                        <div className="relative mt-4 grid grid-cols-3 gap-2 text-center">
+                            <div className="absolute left-[16%] right-[16%] top-4 h-px bg-white/15" />
+                            {['Dịch vụ', 'Y tá', 'Thời gian'].map((step, index) => (
+                                <div key={step} className="relative z-10 min-w-0">
+                                    <div className={`mx-auto flex h-8 w-8 items-center justify-center rounded-full text-xs font-black ${index === 0 ? 'bg-brand text-white' : 'bg-white text-[#10233F]'}`}>{index + 1}</div>
+                                    <div className="mt-2 truncate text-[11px] font-bold text-white/75">{step}</div>
                                 </div>
                             ))}
                         </div>
                     </div>
-                    <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Dịch vụ đã chọn</div>
-                    <div className="mt-4 text-[32px] font-black leading-tight text-[#10233F]">{selectedService?.name}</div>
-                    <div className="mt-4 text-[15px] font-semibold leading-7 text-slate-500">
-                        {selectedService?.packageDays ?? 1} buổi • {selectedService?.estimatedDurationMinutes} phút/buổi
+                    <div className="text-xs font-black uppercase text-slate-400">Dịch vụ đã chọn</div>
+                    <div className="mt-3 text-2xl font-black leading-tight text-[#10233F] sm:text-[28px]">{selectedService?.name}</div>
+                    <div className="mt-3 flex flex-wrap gap-2 text-sm font-bold text-slate-600">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5">
+                            <ClockIcon className="h-4 w-4" />
+                            {selectedService?.packageDays ?? 1} buổi
+                        </span>
+                        <span className="rounded-full bg-slate-100 px-3 py-1.5">{selectedService?.estimatedDurationMinutes} phút/buổi</span>
                     </div>
-                    <div className="mt-8 rounded-[24px] bg-[#FFF7FA] p-5 text-[42px] font-black leading-none text-brand ring-1 ring-brand/15">
-                        {selectedService?.basePrice.toLocaleString('vi-VN')}đ
+                    <div className="mt-5 rounded-[18px] bg-[#FFF7FA] p-4 ring-1 ring-brand/15">
+                        <div className="text-xs font-bold text-brand/70">Chi phí từ</div>
+                        <div className="mt-1 text-[34px] font-black leading-none text-brand">{selectedService?.basePrice.toLocaleString('vi-VN')}đ</div>
                     </div>
-                    <div className="mt-4 space-y-2 text-[15px] font-semibold leading-6 text-slate-500">
-                        <div>Thanh toán linh hoạt</div>
-                        <div>Hỗ trợ đổi lịch miễn phí</div>
+                    <div className="mt-4 grid grid-cols-2 gap-2 text-sm font-semibold text-slate-600">
+                        <div className="rounded-2xl bg-slate-50 px-3 py-2">Thanh toán linh hoạt</div>
+                        <div className="rounded-2xl bg-slate-50 px-3 py-2">Đổi lịch miễn phí</div>
                     </div>
 
-                    <div className="mt-8 rounded-[24px] bg-slate-50 p-5">
+                    <div className="mt-6 rounded-[20px] bg-slate-50 p-4">
                         <div className="flex items-center justify-between gap-3">
-                            <div className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">Y tá phù hợp</div>
+                            <div>
+                                <div className="text-sm font-black text-[#10233F]">Y tá phù hợp</div>
+                                <div className="mt-0.5 text-xs font-medium text-slate-500">Gợi ý theo dịch vụ và khu vực</div>
+                            </div>
                             <button
                                 type="button"
                                 onClick={() => selectedServiceId && navigate(`/find-nurse?serviceId=${selectedServiceId}`)}
                                 disabled={!selectedServiceId || nursesLoading}
-                                className="rounded-full bg-white px-3 py-1 text-[11px] font-black text-slate-500 transition hover:bg-brand hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+                                className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-black text-slate-600 transition hover:bg-brand hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                             >
                                 {nurses.length} hồ sơ
                             </button>
@@ -571,35 +583,41 @@ const ServicesPage = () => {
                         ) : visibleNurses.length > 0 ? (
                             <div className="mt-4 space-y-3">
                                 {visibleNurses.map((nurse) => (
-                                    <motion.div key={nurse.userId} layout className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70">
-                                        <div className="flex items-center gap-4">
-                                            <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 text-lg font-black text-brand">
+                                    <motion.div key={nurse.userId} layout className="rounded-[18px] bg-white p-4 shadow-sm ring-1 ring-slate-100 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-200/70">
+                                        <div className="flex items-start gap-3">
+                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#FFF7FA] text-base font-black text-brand">
                                                 {nurse.avatar ? <img src={nurse.avatar} alt={nurse.fullName} className="h-full w-full object-cover" /> : nurse.fullName.charAt(0)}
                                             </div>
-                                            <div className="min-w-0 flex-1">
-                                                <div className="truncate text-[16px] font-black leading-tight text-[#10233F]">{nurse.fullName}</div>
-                                                <div className="mt-1 truncate text-[12px] font-semibold text-slate-500">{nurse.specialization || 'Y tá chăm sóc tại nhà'}</div>
+                                            <div className="min-w-0 flex-1 pr-1">
+                                                <div className="truncate text-[15px] font-black leading-5 text-[#10233F]">{nurse.fullName}</div>
+                                                <div className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">{nurse.specialization || 'Y tá chăm sóc tại nhà'}</div>
+                                            </div>
+                                            <div className="inline-flex shrink-0 items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-xs font-black text-amber-600">
+                                                <StarIcon className="h-3.5 w-3.5 fill-current" />
+                                                {nurse.averageRating.toFixed(1)}
                                             </div>
                                         </div>
 
-                                        <div className="mt-3 flex flex-wrap gap-2">
-                                            <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
+                                        <div className="mt-3 grid grid-cols-3 gap-2">
+                                            <span className="rounded-xl bg-slate-50 px-2.5 py-2 text-center text-[11px] font-bold text-slate-600">
                                                 {nurse.yearsExperience}+ năm
                                             </span>
-                                            <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[11px] font-bold text-slate-600">
-                                                {nurse.serviceRadiusKm} km
+                                            <span className="inline-flex items-center justify-center gap-1 rounded-xl bg-slate-50 px-2.5 py-2 text-center text-[11px] font-bold text-slate-600">
+                                                <MapPinIcon className="h-3.5 w-3.5" />
+                                                {nurse.distanceKm != null ? `${nurse.distanceKm.toFixed(1)} km` : `${nurse.serviceRadiusKm} km`}
                                             </span>
-                                            <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-black text-amber-600">
-                                                ★ {nurse.averageRating.toFixed(1)}
+                                            <span className="rounded-xl bg-[#FFF7FA] px-2.5 py-2 text-center text-[11px] font-black text-brand">
+                                                {nurse.matchScore ?? 0}% hợp
                                             </span>
                                         </div>
 
                                         <button
                                             type="button"
                                             onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${selectedServiceId}`)}
-                                            className="mt-4 w-full rounded-2xl bg-[#10233F] px-4 py-3.5 text-[12px] font-black uppercase tracking-widest text-white transition duration-300 hover:-translate-y-0.5 hover:bg-brand hover:shadow-lg hover:shadow-brand/20"
+                                            className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-[#10233F] px-4 text-sm font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-brand hover:shadow-lg hover:shadow-brand/20"
                                         >
                                             Xem và đặt lịch
+                                            <ArrowRightIcon className="h-4 w-4" />
                                         </button>
                                     </motion.div>
                                 ))}
@@ -607,7 +625,7 @@ const ServicesPage = () => {
                                     type="button"
                                     onClick={() => selectedServiceId && navigate(`/find-nurse?serviceId=${selectedServiceId}`)}
                                     disabled={!selectedServiceId}
-                                    className="w-full rounded-2xl border border-brand/15 bg-white px-4 py-3.5 text-[12px] font-black uppercase tracking-widest text-brand transition duration-300 hover:-translate-y-0.5 hover:border-brand hover:bg-brand hover:text-white hover:shadow-lg hover:shadow-brand/15 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="w-full rounded-2xl border border-brand/15 bg-white px-4 py-3.5 text-sm font-black text-brand transition duration-300 hover:-translate-y-0.5 hover:border-brand hover:bg-brand hover:text-white hover:shadow-lg hover:shadow-brand/15 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                     Xem tất cả y tá cho dịch vụ này
                                 </button>
