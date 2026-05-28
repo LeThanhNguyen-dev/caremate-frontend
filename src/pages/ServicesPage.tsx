@@ -221,8 +221,8 @@ const ServicesPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)]">
-            <section className="relative overflow-hidden border-b border-brand/10 bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-5 pb-14 pt-12 shadow-[inset_0_-1px_0_rgba(236,72,153,0.08)] sm:px-8 lg:px-10">
+        <div className="min-h-screen overflow-x-hidden bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)]">
+            <section className="relative overflow-hidden border-b border-brand/10 bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-4 pb-10 pt-8 shadow-[inset_0_-1px_0_rgba(236,72,153,0.08)] sm:px-8 sm:pb-14 sm:pt-12 lg:px-10">
                 <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-emerald-200/45 blur-[120px] -ml-44 -mt-44"></div>
                 <div className="absolute right-0 bottom-0 h-[30rem] w-[30rem] rounded-full bg-brand/18 blur-[130px] -mb-56 -mr-52"></div>
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/70 to-transparent"></div>
@@ -234,27 +234,27 @@ const ServicesPage = () => {
                     className="relative z-10 mx-auto max-w-7xl"
                 >
                     <div className="max-w-3xl">
-                        <div className="mb-5 w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-brand shadow-sm">
+                        <div className="mb-4 w-fit max-w-full rounded-full border border-slate-200 bg-white px-3 py-2 text-[9px] font-black uppercase tracking-[0.18em] text-brand shadow-sm sm:mb-5 sm:px-4 sm:text-[10px] sm:tracking-[0.35em]">
                             Hệ thống dịch vụ CareMate
                         </div>
-                        <h1 className="text-[54px] font-black leading-[1.04] tracking-tight text-[#0B1F3A] sm:text-[70px] lg:text-[88px]">
+                        <h1 className="text-[40px] font-black leading-[1.06] tracking-tight text-[#0B1F3A] sm:text-[70px] lg:text-[88px]">
                             Chọn dịch vụ
                             <span className="mt-2 block font-semibold italic text-brand sm:mt-3">chăm sóc.</span>
                         </h1>
-                        <p className="mt-6 max-w-2xl text-[18px] font-black leading-8 text-[#0B1F3A]">
+                        <p className="mt-5 max-w-2xl text-[16px] font-black leading-7 text-[#0B1F3A] sm:mt-6 sm:text-[18px] sm:leading-8">
                             Để mẹ được nghỉ ngơi, bé được chăm đúng cách, và gia đình chọn điều dưỡng phù hợp nhanh hơn.
                         </p>
                         <p className="mt-4 max-w-2xl text-[15px] font-semibold leading-[1.8] text-slate-500">
                             Lọc dịch vụ, xem lộ trình từng buổi, so sánh hồ sơ y tá và chi phí một cách minh bạch trước khi đặt lịch.
                         </p>
-                        <div className="mt-9 flex flex-wrap gap-4">
-                            <a href="#service-picker" className="rounded-full bg-[#0B1F3A] px-9 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#0B1F3A]/15 transition hover:-translate-y-0.5 hover:bg-brand hover:shadow-brand/20">
+                        <div className="mt-7 grid gap-3 min-[420px]:flex min-[420px]:flex-wrap sm:mt-9 sm:gap-4">
+                            <a href="#service-picker" className="inline-flex justify-center rounded-full bg-[#0B1F3A] px-6 py-4 text-center text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#0B1F3A]/15 transition hover:-translate-y-0.5 hover:bg-brand hover:shadow-brand/20 sm:px-9">
                                 Khám phá dịch vụ
                             </a>
                             <button
                                 type="button"
                                 onClick={() => selectedServiceId && navigate(`/find-nurse?serviceId=${selectedServiceId}`)}
-                                className="rounded-full border border-slate-200 bg-white px-9 py-4 text-xs font-black uppercase tracking-widest text-[#0B1F3A] shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:text-brand hover:shadow-lg hover:shadow-slate-200/70"
+                                className="rounded-full border border-slate-200 bg-white px-6 py-4 text-xs font-black uppercase tracking-widest text-[#0B1F3A] shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:text-brand hover:shadow-lg hover:shadow-slate-200/70 sm:px-9"
                             >
                                 Tìm y tá
                             </button>
@@ -283,31 +283,31 @@ const ServicesPage = () => {
                 </div>
             </section>
 
-            <div id="service-picker" className="relative z-20 mx-auto w-full max-w-[1680px] scroll-mt-28 px-2 pb-14 pt-8 sm:px-4 lg:px-4">
-                <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_440px] 2xl:grid-cols-[minmax(0,1fr)_480px]">
-                    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-[28px] bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.075)] ring-1 ring-slate-100/80 md:p-8">
-                    <div className="mb-8 grid gap-4 lg:grid-cols-3">
+            <div id="service-picker" className="relative z-20 mx-auto w-full max-w-[1680px] scroll-mt-24 px-2 pb-10 pt-6 sm:scroll-mt-28 sm:px-4 sm:pb-14 sm:pt-8 lg:px-4">
+                <div className="grid gap-5 sm:gap-8 xl:grid-cols-[minmax(0,1fr)_440px] 2xl:grid-cols-[minmax(0,1fr)_480px]">
+                    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="rounded-[20px] bg-white p-3 shadow-[0_24px_70px_rgba(15,23,42,0.075)] ring-1 ring-slate-100/80 sm:rounded-[28px] sm:p-6 md:p-8">
+                    <div className="mb-6 grid gap-3 sm:mb-8 sm:gap-4 lg:grid-cols-3">
                         {[
                             { title: 'Giá minh bạch', desc: 'Hiển thị trước khi chọn y tá' },
                             { title: 'Đúng thời lượng', desc: 'Tính tiền theo gói hoặc theo giờ' },
                             { title: 'Hồ sơ xác minh', desc: 'Ảnh, chứng chỉ, CCCD và đánh giá' },
                         ].map((item) => (
-                            <div key={item.title} className="rounded-2xl bg-[#fbfaf8] p-5 ring-1 ring-slate-100 transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50">
+                            <div key={item.title} className="rounded-2xl bg-[#fbfaf8] p-4 ring-1 ring-slate-100 transition duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 sm:p-5">
                                 <div className="text-[15px] font-black text-[#10233F]">{item.title}</div>
                                 <div className="mt-2 text-[13px] font-semibold leading-6 text-slate-500">{item.desc}</div>
                             </div>
                         ))}
                     </div>
-                    <div className="mb-10 flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-                        <div className="flex items-center gap-4">
-                            <Squares2X2Icon className="h-6 w-6 text-brand" />
-                            <div>
-                                <h2 className="text-xl font-black tracking-tight text-[#10233F]">1. Chọn nhóm dịch vụ phù hợp</h2>
+                    <div className="mb-8 flex min-w-0 flex-col gap-5 sm:mb-10 sm:gap-6 xl:flex-row xl:items-end xl:justify-between">
+                        <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+                            <Squares2X2Icon className="mt-1 h-5 w-5 shrink-0 text-brand sm:mt-0 sm:h-6 sm:w-6" />
+                            <div className="min-w-0">
+                                <h2 className="text-lg font-black leading-tight tracking-tight text-[#10233F] sm:text-xl">1. Chọn nhóm dịch vụ phù hợp</h2>
                                 <p className="mt-1 text-sm font-medium leading-7 text-slate-500">Dịch vụ được chia theo nhóm để gia đình lọc nhanh, đọc nhanh và ra quyết định đỡ mệt hơn.</p>
                             </div>
                         </div>
 
-                        <div className="relative w-full max-w-md group">
+                        <div className="relative w-full max-w-md group xl:shrink-0">
                             <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 transition-colors group-focus-within:text-brand" />
                             <input
                                 type="text"
@@ -319,7 +319,7 @@ const ServicesPage = () => {
                         </div>
                     </div>
 
-                    <div className="mb-8 flex flex-wrap gap-3">
+                    <div className="mb-8 flex flex-wrap gap-2 sm:gap-3">
                         {categories.map((category) => {
                             const active = selectedCategory === category;
                             const label = category === 'all' ? 'Tất cả dịch vụ' : getCategoryLabel(category);
@@ -328,7 +328,7 @@ const ServicesPage = () => {
                                     key={category}
                                     type="button"
                                     onClick={() => setSelectedCategory(category)}
-                                    className={`rounded-full px-5 py-3 text-sm font-black transition duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
+                                    className={`rounded-full px-4 py-3 text-sm font-black transition duration-300 hover:-translate-y-0.5 hover:shadow-lg sm:px-5 ${
                                         active
                                             ? 'bg-[#10233F] text-white shadow-lg shadow-[#10233F]/15 ring-2 ring-[#10233F]/5'
                                             : 'bg-white text-slate-600 ring-1 ring-slate-100 hover:bg-brand/10 hover:text-brand'
@@ -347,7 +347,7 @@ const ServicesPage = () => {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-3 sm:gap-5 xl:grid-cols-3">
                         {filteredServices.map((service) => (
                             <motion.button
                                 key={service.id}
@@ -355,54 +355,54 @@ const ServicesPage = () => {
                                 initial={{ opacity: 0, y: 12 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 onClick={() => void handleServiceSelect(service)}
-                                className={`group rounded-[24px] p-6 text-left transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-200/80 ${
+                                className={`group min-w-0 overflow-hidden rounded-[18px] p-3 text-left transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-200/80 sm:rounded-[24px] sm:p-6 ${
                                     selectedServiceId === service.id
                                         ? 'bg-[#FFF7FA] shadow-[0_22px_52px_rgba(232,90,139,0.18)] ring-2 ring-brand/45'
                                         : 'bg-slate-50/70 ring-1 ring-slate-100 hover:bg-white'
                                 }`}
                             >
-                                <div className="mb-4 flex items-center justify-between gap-3">
-                                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${
+                                <div className="mb-3 flex items-center justify-between gap-2 sm:mb-4 sm:gap-3">
+                                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-12 sm:w-12 ${
                                         selectedServiceId === service.id ? 'bg-brand text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-brand/10 group-hover:text-brand'
                                     }`}>
-                                        <SparklesIcon className="h-6 w-6" />
+                                        <SparklesIcon className="h-4 w-4 sm:h-6 sm:w-6" />
                                     </div>
                                     {service.category && (
-                                        <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500">
+                                        <span className="hidden min-w-0 truncate rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-slate-500 sm:block">
                                             {getCategoryLabel(service.category)}
                                         </span>
                                     )}
                                 </div>
-                                <div className={`mb-2 text-base font-black leading-6 ${
+                                <div className={`mb-2 min-w-0 break-words line-clamp-2 text-[13px] font-black leading-5 sm:text-base sm:leading-6 ${
                                     selectedServiceId === service.id ? 'text-brand' : 'text-[#10233F]'
                                 }`}>
                                     {service.name}
                                 </div>
-                                <p className="mb-5 line-clamp-3 text-sm font-medium leading-7 text-slate-500">
+                                <p className="mb-3 min-w-0 break-words line-clamp-2 text-[11px] font-medium leading-5 text-slate-500 sm:mb-5 sm:line-clamp-3 sm:text-sm sm:leading-7">
                                     {service.description}
                                 </p>
                                 {service.serviceKind === 'package' && (
-                                    <div className="mb-4 space-y-2">
+                                    <div className="mb-3 space-y-2 sm:mb-4">
                                         {service.packageDays && (
-                                            <div className="text-[11px] font-black uppercase tracking-[0.18em] text-brand">
+                                            <div className="text-[10px] font-black uppercase tracking-[0.14em] text-brand sm:text-[11px] sm:tracking-[0.18em]">
                                                 {service.packageDays} ngày
                                             </div>
                                         )}
                                         {getVisiblePackageSchedule(service).length > 0 && (
-                                            <div className="text-[10px] font-bold text-slate-400">
+                                            <div className="hidden text-[10px] font-bold text-slate-400 sm:block">
                                                 Có lộ trình chi tiết {getVisiblePackageSchedule(service).length} buổi
                                             </div>
                                         )}
-                                        <div className="flex flex-wrap gap-2">
-                                            {getIncludedServiceLabels(service).slice(0, 4).map((item) => (
-                                                <span key={item} className="rounded-full bg-brand/5 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                                        <div className="hidden flex-wrap gap-2 min-[430px]:flex">
+                                            {getIncludedServiceLabels(service).slice(0, 2).map((item) => (
+                                                <span key={item} className="max-w-full truncate rounded-full bg-brand/5 px-2.5 py-1 text-[10px] font-bold text-slate-600">
                                                     {item}
                                                 </span>
                                             ))}
                                         </div>
                                     </div>
                                 )}
-                                <div className="mt-6 border-t border-slate-100 pt-4 text-[22px] font-black leading-none text-[#10233F]">
+                                <div className="mt-3 min-w-0 border-t border-slate-100 pt-3 text-[15px] font-black leading-tight text-[#10233F] sm:mt-6 sm:pt-4 sm:text-[22px] sm:leading-none">
                                     Từ {service.basePrice.toLocaleString('vi-VN')}đ
                                 </div>
                             </motion.button>
@@ -519,7 +519,7 @@ const ServicesPage = () => {
                     )}
                 </motion.div>
 
-                <aside className="rounded-[22px] bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] ring-1 ring-slate-100 sm:p-6 xl:sticky xl:top-24 xl:self-start">
+                <aside className="min-w-0 overflow-hidden rounded-[22px] bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)] ring-1 ring-slate-100 sm:p-6 xl:sticky xl:top-24 xl:self-start">
                     <div className="mb-5 rounded-[18px] bg-[#10233F] p-4 text-white">
                         <div className="text-xs font-bold text-white/55">Quy trình đặt lịch</div>
                         <div className="relative mt-4 grid grid-cols-3 gap-2 text-center">
@@ -533,7 +533,7 @@ const ServicesPage = () => {
                         </div>
                     </div>
                     <div className="text-xs font-black uppercase text-slate-400">Dịch vụ đã chọn</div>
-                    <div className="mt-3 text-2xl font-black leading-tight text-[#10233F] sm:text-[28px]">{selectedService?.name}</div>
+                    <div className="mt-3 text-xl font-black leading-tight text-[#10233F] sm:text-[28px]">{selectedService?.name}</div>
                     <div className="mt-3 flex flex-wrap gap-2 text-sm font-bold text-slate-600">
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1.5">
                             <ClockIcon className="h-4 w-4" />
@@ -543,14 +543,14 @@ const ServicesPage = () => {
                     </div>
                     <div className="mt-5 rounded-[18px] bg-[#FFF7FA] p-4 ring-1 ring-brand/15">
                         <div className="text-xs font-bold text-brand/70">Chi phí từ</div>
-                        <div className="mt-1 text-[34px] font-black leading-none text-brand">{selectedService?.basePrice.toLocaleString('vi-VN')}đ</div>
+                        <div className="mt-1 text-[28px] font-black leading-none text-brand sm:text-[34px]">{selectedService?.basePrice.toLocaleString('vi-VN')}đ</div>
                     </div>
                     <div className="mt-4 grid grid-cols-2 gap-2 text-sm font-semibold text-slate-600">
                         <div className="rounded-2xl bg-slate-50 px-3 py-2">Thanh toán linh hoạt</div>
                         <div className="rounded-2xl bg-slate-50 px-3 py-2">Đổi lịch miễn phí</div>
                     </div>
 
-                    <div className="mt-6 rounded-[20px] bg-slate-50 p-4">
+                    <div className="mt-6 min-w-0 rounded-[20px] bg-slate-50 p-3 sm:p-4">
                         <div className="flex items-center justify-between gap-3">
                             <div>
                                 <div className="text-sm font-black text-[#10233F]">Y tá phù hợp</div>
@@ -583,7 +583,7 @@ const ServicesPage = () => {
                         ) : visibleNurses.length > 0 ? (
                             <div className="mt-4 space-y-3">
                                 {visibleNurses.map((nurse) => (
-                                    <motion.div key={nurse.userId} layout className="rounded-[18px] bg-white p-4 shadow-sm ring-1 ring-slate-100 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-200/70">
+                                    <motion.div key={nurse.userId} layout className="min-w-0 overflow-hidden rounded-[18px] bg-white p-3 shadow-sm ring-1 ring-slate-100 transition duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-slate-200/70 sm:p-4">
                                         <div className="flex items-start gap-3">
                                             <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#FFF7FA] text-base font-black text-brand">
                                                 {nurse.avatar ? <img src={nurse.avatar} alt={nurse.fullName} className="h-full w-full object-cover" /> : nurse.fullName.charAt(0)}
@@ -599,14 +599,14 @@ const ServicesPage = () => {
                                         </div>
 
                                         <div className="mt-3 grid grid-cols-3 gap-2">
-                                            <span className="rounded-xl bg-slate-50 px-2.5 py-2 text-center text-[11px] font-bold text-slate-600">
+                                            <span className="rounded-xl bg-slate-50 px-2 py-2 text-center text-[11px] font-bold text-slate-600 sm:px-2.5">
                                                 {nurse.yearsExperience}+ năm
                                             </span>
-                                            <span className="inline-flex items-center justify-center gap-1 rounded-xl bg-slate-50 px-2.5 py-2 text-center text-[11px] font-bold text-slate-600">
+                                            <span className="inline-flex items-center justify-center gap-1 rounded-xl bg-slate-50 px-2 py-2 text-center text-[11px] font-bold text-slate-600 sm:px-2.5">
                                                 <MapPinIcon className="h-3.5 w-3.5" />
                                                 {nurse.distanceKm != null ? `${nurse.distanceKm.toFixed(1)} km` : `${nurse.serviceRadiusKm} km`}
                                             </span>
-                                            <span className="rounded-xl bg-[#FFF7FA] px-2.5 py-2 text-center text-[11px] font-black text-brand">
+                                            <span className="rounded-xl bg-[#FFF7FA] px-2 py-2 text-center text-[11px] font-black text-brand sm:px-2.5">
                                                 {nurse.matchScore ?? 0}% hợp
                                             </span>
                                         </div>
@@ -614,7 +614,7 @@ const ServicesPage = () => {
                                         <button
                                             type="button"
                                             onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${selectedServiceId}`)}
-                                            className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-[#10233F] px-4 text-sm font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-brand hover:shadow-lg hover:shadow-brand/20"
+                                            className="mt-3 inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-[#10233F] px-3 text-sm font-black text-white transition duration-300 hover:-translate-y-0.5 hover:bg-brand hover:shadow-lg hover:shadow-brand/20 sm:px-4"
                                         >
                                             Xem và đặt lịch
                                             <ArrowRightIcon className="h-4 w-4" />
@@ -625,7 +625,7 @@ const ServicesPage = () => {
                                     type="button"
                                     onClick={() => selectedServiceId && navigate(`/find-nurse?serviceId=${selectedServiceId}`)}
                                     disabled={!selectedServiceId}
-                                    className="w-full rounded-2xl border border-brand/15 bg-white px-4 py-3.5 text-sm font-black text-brand transition duration-300 hover:-translate-y-0.5 hover:border-brand hover:bg-brand hover:text-white hover:shadow-lg hover:shadow-brand/15 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="w-full rounded-2xl border border-brand/15 bg-white px-3 py-3.5 text-center text-sm font-black leading-5 text-brand transition duration-300 hover:-translate-y-0.5 hover:border-brand hover:bg-brand hover:text-white hover:shadow-lg hover:shadow-brand/15 disabled:cursor-not-allowed disabled:opacity-60 sm:px-4"
                                 >
                                     Xem tất cả y tá cho dịch vụ này
                                 </button>

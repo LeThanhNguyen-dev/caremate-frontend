@@ -42,14 +42,14 @@ const Layout = () => {
     return (
         <div className="min-h-screen flex flex-col bg-white font-sans">
             <header
-                className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-                    scrolled ? 'bg-white/88 backdrop-blur-2xl py-2 shadow-xl shadow-slate-200/35' : 'bg-white/70 backdrop-blur-md py-3'
+                className={`fixed top-0 left-0 right-0 z-[100] bg-white/95 py-2 shadow-sm shadow-slate-200/50 backdrop-blur-2xl transition-all duration-500 ${
+                    scrolled ? 'lg:bg-white/88 lg:py-2 lg:shadow-xl lg:shadow-slate-200/35' : 'lg:bg-white/70 lg:py-3 lg:shadow-none'
                 }`}
             >
-                <nav className="mx-auto flex max-w-[1360px] items-center justify-between px-6 lg:px-8">
+                <nav className="mx-auto flex max-w-[1360px] items-center justify-between px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center gap-10">
                         <Link to="/" className="flex items-center gap-3 group">
-                            <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-28 w-auto object-contain transition-transform group-hover:scale-105" />
+                            <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-16 w-auto object-contain transition-transform group-hover:scale-105 sm:h-20 lg:h-28" />
                         </Link>
 
                         <div className="hidden lg:flex items-center gap-9">
@@ -68,7 +68,7 @@ const Layout = () => {
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <button className="lg:hidden p-2 text-[#10233F]" onClick={() => setMobileMenuOpen(true)}>
+                        <button className="relative z-[120] shrink-0 rounded-xl p-2 text-[#10233F] hover:bg-slate-100 lg:hidden" onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu">
                             <Bars3Icon className="h-7 w-7" />
                         </button>
 
@@ -155,27 +155,38 @@ const Layout = () => {
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed inset-0 z-[150] lg:hidden"
+                            className="fixed inset-0 z-[150] min-h-dvh lg:hidden"
                         >
                             <div className="absolute inset-0 bg-[#10233F]/20 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)} />
-                            <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white p-8 shadow-2xl flex flex-col">
-                                <div className="flex items-center justify-between mb-12">
+                            <div className="absolute inset-y-0 right-0 flex w-full max-w-none flex-col overflow-hidden bg-white shadow-2xl sm:max-w-sm">
+                                <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
                                     <Link to="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
-                                        <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-20 w-auto object-contain" />
+                                        <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-16 w-auto object-contain" />
                                     </Link>
                                     <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-[#10233F]"><XMarkIcon className="h-7 w-7" /></button>
                                 </div>
-                                <div className="flex-1 space-y-6">
+                                <div className="flex-1 overflow-y-auto px-5 py-6">
+                                    <div className="space-y-2">
                                     {navigation.map((item) => (
-                                        <Link key={item.name} to={item.href} className="block text-3xl font-extrabold text-[#10233F] hover:text-brand transition-colors" onClick={() => setMobileMenuOpen(false)}>{item.name}</Link>
+                                        <Link
+                                            key={item.name}
+                                            to={item.href}
+                                            className={`block rounded-2xl px-4 py-3 text-xl font-black leading-tight transition-colors ${
+                                                location.pathname === item.href ? 'bg-brand-soft text-brand' : 'text-[#10233F] hover:bg-slate-50 hover:text-brand'
+                                            }`}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
+                                            {item.name}
+                                        </Link>
                                     ))}
-                                    <div className="pt-12 border-t border-slate-100 space-y-4">
+                                    </div>
+                                    <div className="mt-6 border-t border-slate-100 pt-6 space-y-3">
                                         {isAuthenticated ? (
-                                            <button onClick={() => void handleLogout()} className="w-full text-left text-3xl font-black text-red-600">Đăng xuất</button>
+                                            <button onClick={() => void handleLogout()} className="w-full rounded-2xl px-4 py-3 text-left text-xl font-black leading-tight text-red-600 hover:bg-red-50">Đăng xuất</button>
                                         ) : (
                                             <>
-                                                <Link to="/login" className="block text-3xl font-extrabold text-[#10233F]" onClick={() => setMobileMenuOpen(false)}>Đăng nhập</Link>
-                                                <Link to="/register" className="btn-primary w-full py-5 text-lg" onClick={() => setMobileMenuOpen(false)}>Tham gia ngay</Link>
+                                                <Link to="/login" className="block rounded-2xl px-4 py-3 text-xl font-black leading-tight text-[#10233F] hover:bg-slate-50" onClick={() => setMobileMenuOpen(false)}>Đăng nhập</Link>
+                                                <Link to="/register" className="btn-primary w-full py-4 text-sm" onClick={() => setMobileMenuOpen(false)}>Tham gia ngay</Link>
                                             </>
                                         )}
                                     </div>
@@ -186,7 +197,7 @@ const Layout = () => {
                 </AnimatePresence>
             </header>
 
-            <main className="flex-grow pt-36">
+            <main className="flex-grow pt-28 lg:pt-36">
                 <Outlet />
             </main>
 
