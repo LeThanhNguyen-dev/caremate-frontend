@@ -21,6 +21,7 @@ import AdminReports from './pages/AdminReports';
 import AdminSettings from './pages/AdminSettings';
 import DiscoverNursesPage from './pages/DiscoverNursesPage';
 import ServicesPage from './pages/ServicesPage';
+import ServiceDetailPage from './pages/ServiceDetailPage';
 import CustomerBookingsPage from './pages/CustomerBookingsPage';
 import NurseSchedulePage from './pages/NurseSchedulePage';
 import NurseBookingsPage from './pages/NurseBookingsPage';
@@ -55,6 +56,7 @@ function App() {
                 <Route path="register" element={<Register />} />
                 <Route path="find-nurse" element={<DiscoverNursesPage />} />
                 <Route path="services" element={<ServicesPage />} />
+                <Route path="services/:serviceId" element={<ServiceDetailPage />} />
                 <Route path="forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="reset-password" element={<ResetPasswordPage />} />
                 <Route path="payment/success" element={<PaymentResultPage />} />

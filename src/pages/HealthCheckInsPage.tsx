@@ -1,12 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
+  ArrowTrendingDownIcon,
+  ArrowTrendingUpIcon,
+  BoltIcon,
   ChartBarSquareIcon,
+  CheckCircleIcon,
   ChevronDownIcon,
   ClipboardDocumentCheckIcon,
   ClockIcon,
   ExclamationTriangleIcon,
   HeartIcon,
+  LifebuoyIcon,
   MoonIcon,
+  ShieldCheckIcon,
+  SignalIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
 import caremateApi from '../api/caremateApi';
@@ -155,25 +163,39 @@ const HealthCheckInsPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 py-8">
+    <main className="min-h-screen bg-[#f7fbfa] bg-[linear-gradient(180deg,#eefaf7_0%,#f7fbfa_34%,#ffffff_100%)] py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <section className="mb-6 overflow-hidden rounded-xl border border-teal-100 bg-white shadow-sm">
-          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="p-6 lg:p-7">
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-teal-700">AI Health Check-in</p>
-              <h1 className="mt-2 text-2xl font-black tracking-tight text-slate-950 md:text-3xl">Theo dõi sức khỏe mẹ và bé</h1>
-              <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-slate-600">
-                Ghi nhận tình trạng hằng ngày, xem cảnh báo, xu hướng 7 lần check-in gần nhất, kế hoạch chăm sóc và lịch sử chi tiết trong một màn hình dễ quan sát.
+        <section className="mb-6 overflow-hidden rounded-[1.35rem] border border-emerald-100 bg-white shadow-[0_24px_70px_rgba(15,118,110,0.10)]">
+          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_390px]">
+            <div className="relative p-6 lg:p-8">
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+              <p className="inline-flex rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-teal-800">
+                AI clinical triage
               </p>
+              <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Theo dõi sức khỏe mẹ và bé</h1>
+              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-slate-600 md:text-base">
+                Bảng phân tích AI ưu tiên dấu hiệu cần chú ý, điểm rủi ro, xu hướng 7 lần check-in gần nhất và kế hoạch chăm sóc tiếp theo trong một luồng ra quyết định rõ ràng.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Capability label="Triage tức thời" />
+                <Capability label="Theo dõi xu hướng" />
+                <Capability label="Gợi ý dịch vụ phù hợp" />
+              </div>
             </div>
-            <div className="border-t border-teal-100 bg-teal-50/70 p-6 lg:border-l lg:border-t-0">
-              <div className={`inline-flex rounded-full border px-3 py-1 text-xs font-black ${getWarningTone(activeWarning)}`}>
-                Mức cảnh báo: {toWarningLabel(activeWarning)}
+            <div className="border-t border-teal-100 bg-slate-950 p-6 text-white lg:border-l lg:border-t-0">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-[0.22em] text-teal-200">Trạng thái hiện tại</div>
+                  <div className="mt-2 text-2xl font-black">{toWarningLabel(activeWarning)}</div>
+                </div>
+                <div className={`rounded-full border px-3 py-1.5 text-xs font-black ${getWarningTone(activeWarning)}`}>
+                  {activeAnalysis ? `${activeAnalysis.riskScore}/100` : 'Chưa có'}
+                </div>
               </div>
               <div className="mt-4 grid grid-cols-3 gap-3">
-                <Stat label="Check-in" value={history.length.toString()} />
-                <Stat label="Ngủ TB" value={history.length ? `${stats.avgSleep.toFixed(1)}h` : '--'} />
-                <Stat label="Cần chú ý" value={(stats.highCount + stats.mediumCount).toString()} />
+                <Stat label="Check-in" value={history.length.toString()} dark />
+                <Stat label="Ngủ TB" value={history.length ? `${stats.avgSleep.toFixed(1)}h` : '--'} dark />
+                <Stat label="Cần chú ý" value={(stats.highCount + stats.mediumCount).toString()} dark />
               </div>
             </div>
           </div>
@@ -285,9 +307,9 @@ const HealthCheckInsPage = () => {
 
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-[1.25rem] border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
       <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-50 text-teal-700">{icon}</div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 ring-1 ring-teal-100">{icon}</div>
         <h2 className="text-lg font-black text-slate-950">{title}</h2>
       </div>
       {children}
@@ -295,11 +317,20 @@ function Panel({ title, icon, children }: { title: string; icon: React.ReactNode
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Capability({ label }: { label: string }) {
   return (
-    <div className="rounded-lg bg-white p-3 text-center shadow-sm">
-      <div className="text-lg font-black text-slate-950">{value}</div>
-      <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">{label}</div>
+    <span className="inline-flex items-center gap-2 rounded-full border border-teal-100 bg-white px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm">
+      <CheckCircleIcon className="h-4 w-4 text-teal-600" />
+      {label}
+    </span>
+  );
+}
+
+function Stat({ label, value, dark = false }: { label: string; value: string; dark?: boolean }) {
+  return (
+    <div className={`rounded-xl p-3 text-center ${dark ? 'bg-white/10 ring-1 ring-white/10' : 'bg-white shadow-sm'}`}>
+      <div className={`text-lg font-black ${dark ? 'text-white' : 'text-slate-950'}`}>{value}</div>
+      <div className={`mt-1 text-[11px] font-bold uppercase tracking-[0.12em] ${dark ? 'text-teal-100' : 'text-slate-400'}`}>{label}</div>
     </div>
   );
 }
@@ -372,18 +403,57 @@ function Select({
 }
 
 function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
+  const clinical = getClinicalStatus(analysis.warningLevel, analysis.riskScore);
+  const primaryAction = analysis.carePlan?.[0]?.action ?? analysis.recommendations?.[0];
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <span className={`rounded-full border px-3 py-1.5 text-xs font-black ${getWarningTone(analysis.warningLevel)}`}>
-          {toWarningLabel(analysis.warningLevel)}
-        </span>
-        <span className="text-xs font-bold text-slate-400">Mã phân tích: {analysis.analysisId.slice(0, 8)}</span>
+    <div className="space-y-5">
+      <div className={`overflow-hidden rounded-[1.15rem] border ${clinical.panelClass}`}>
+        <div className="grid gap-0 lg:grid-cols-[220px_minmax(0,1fr)]">
+          <div className="p-4 sm:p-5">
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em]">
+              <ShieldCheckIcon className="h-4 w-4" />
+              AI triage
+            </div>
+            <div className="mt-4 flex items-end gap-2">
+              <span className="text-5xl font-black tracking-tight">{Math.max(0, Math.min(100, analysis.riskScore ?? 0))}</span>
+              <span className="pb-2 text-sm font-black opacity-70">/100</span>
+            </div>
+            <div className="mt-3">
+              <span className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-black ${getWarningTone(analysis.warningLevel)}`}>
+                {clinical.label}
+              </span>
+            </div>
+          </div>
+
+          <div className="border-t border-current/10 bg-white/70 p-4 sm:p-5 lg:border-l lg:border-t-0">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Tóm tắt điều phối chăm sóc</div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{analysis.summary}</p>
+              </div>
+              <div className="rounded-xl bg-white px-3 py-2 text-right shadow-sm ring-1 ring-slate-100">
+                <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Độ tin cậy</div>
+                <div className="text-xl font-black text-teal-700">{analysis.confidenceScore ?? 0}%</div>
+              </div>
+            </div>
+
+            {primaryAction && (
+              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-950 px-4 py-3 text-white">
+                <div className="flex items-start gap-3">
+                  <BoltIcon className="mt-0.5 h-5 w-5 shrink-0 text-teal-300" />
+                  <div>
+                    <div className="text-xs font-black uppercase tracking-[0.16em] text-teal-200">Ưu tiên tiếp theo</div>
+                    <p className="mt-1 text-sm font-semibold leading-6">{primaryAction}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <RiskScorePanel analysis={analysis} />
-
-      <p className="text-sm font-semibold leading-6 text-slate-700">{analysis.summary}</p>
 
       {analysis.trendSummary && <InfoBlock title="Xu hướng 7 lần gần nhất" content={analysis.trendSummary} tone="teal" />}
       {analysis.trendSignals?.length > 0 && <TrendSignalGrid signals={analysis.trendSignals} />}
@@ -410,19 +480,28 @@ function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
 
 function RiskScorePanel({ analysis }: { analysis: HealthAnalysisResponse }) {
   const score = Math.max(0, Math.min(100, analysis.riskScore ?? 0));
+  const clinical = getClinicalStatus(analysis.warningLevel, score);
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+    <div className="rounded-[1.1rem] border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Điểm rủi ro</div>
-          <div className="mt-1 text-3xl font-black text-slate-950">{score}/100</div>
+          <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Radar rủi ro</div>
+          <div className="mt-1 text-sm font-semibold text-slate-600">{clinical.description}</div>
         </div>
-        <div className="rounded-lg bg-white px-3 py-2 text-right shadow-sm">
-          <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Độ đầy đủ dữ liệu</div>
-          <div className="text-lg font-black text-teal-700">{analysis.confidenceScore ?? 0}%</div>
+        <div className="flex items-center gap-3">
+          <div className="grid h-20 w-20 place-items-center rounded-full" style={{ background: `conic-gradient(${clinical.ringColor} ${score * 3.6}deg, #e2e8f0 0deg)` }}>
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-white text-center shadow-inner">
+              <span className="text-xl font-black text-slate-950">{score}</span>
+            </div>
+          </div>
+          <div className="rounded-xl bg-slate-50 px-3 py-2 text-right ring-1 ring-slate-100">
+            <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Dữ liệu</div>
+            <div className="text-lg font-black text-teal-700">{analysis.confidenceScore ?? 0}%</div>
+          </div>
         </div>
       </div>
-      <div className="h-2 overflow-hidden rounded-full bg-white">
+      <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
         <div className={`h-full rounded-full ${getRiskBarTone(score)}`} style={{ width: `${score}%` }} />
       </div>
     </div>
@@ -433,12 +512,12 @@ function TrendSignalGrid({ signals }: { signals: HealthAnalysisResponse['trendSi
   return (
     <div>
       <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Tín hiệu xu hướng</h3>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {signals.map((signal) => (
-          <div key={signal.metric} className="rounded-lg bg-slate-50 px-3 py-3">
+          <div key={signal.metric} className="rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
             <div className="flex items-center justify-between gap-2">
               <span className="text-sm font-black text-slate-950">{signal.metric}</span>
-              <span className={`text-lg font-black ${getTrendTone(signal.direction)}`}>{toTrendIcon(signal.direction)}</span>
+              <span className={`grid h-8 w-8 place-items-center rounded-full bg-slate-50 ${getTrendTone(signal.direction)}`}>{getTrendIcon(signal.direction)}</span>
             </div>
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{signal.summary}</p>
           </div>
@@ -452,11 +531,12 @@ function RiskFactorList({ factors }: { factors: HealthAnalysisResponse['riskFact
   return (
     <div>
       <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Yếu tố làm tăng rủi ro</h3>
-      <div className="flex flex-wrap gap-2">
+      <div className="grid gap-2 sm:grid-cols-2">
         {factors.map((factor) => (
-          <span key={factor.code} className="rounded-full border border-rose-100 bg-rose-50 px-3 py-1.5 text-xs font-black text-rose-700">
-            +{factor.points} {factor.label}
-          </span>
+          <div key={factor.code} className="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2">
+            <span className="text-sm font-black text-rose-900">{factor.label}</span>
+            <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-black text-rose-700 shadow-sm">+{factor.points}</span>
+          </div>
         ))}
       </div>
     </div>
@@ -539,11 +619,16 @@ function Metric({ label, value }: { label: string; value: string }) {
 }
 
 function InfoBlock({ title, content, tone = 'slate' }: { title: string; content: string; tone?: 'slate' | 'teal' }) {
-  const toneClass = tone === 'teal' ? 'bg-teal-50 text-teal-800' : 'bg-slate-50 text-slate-700';
+  const toneClass = tone === 'teal' ? 'border-teal-100 bg-teal-50 text-teal-900' : 'border-slate-200 bg-slate-50 text-slate-700';
   return (
-    <div className={`rounded-lg px-3 py-3 ${toneClass}`}>
-      <h3 className="text-xs font-black uppercase tracking-[0.16em]">{title}</h3>
-      <p className="mt-2 text-sm font-medium leading-6">{content}</p>
+    <div className={`rounded-xl border px-4 py-3 ${toneClass}`}>
+      <div className="flex items-start gap-3">
+        <SignalIcon className="mt-0.5 h-5 w-5 shrink-0" />
+        <div>
+          <h3 className="text-xs font-black uppercase tracking-[0.16em]">{title}</h3>
+          <p className="mt-2 text-sm font-semibold leading-6">{content}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -557,8 +642,9 @@ function ListBlock({ title, items }: { title: string; items: string[] }) {
     <div>
       <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">{title}</h3>
       <ul className="grid gap-2 md:grid-cols-2">
-        {items.map((item) => (
-          <li key={item} className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium leading-6 text-slate-700">
+        {items.map((item, index) => (
+          <li key={item} className="flex gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-slate-700 shadow-sm">
+            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-50 text-xs font-black text-teal-700 ring-1 ring-teal-100">{index + 1}</span>
             {item}
           </li>
         ))}
@@ -569,10 +655,13 @@ function ListBlock({ title, items }: { title: string; items: string[] }) {
 
 function CarePlanRow({ item }: { item: { timeframe: string; action: string; reason: string } }) {
   return (
-    <div className="rounded-lg bg-slate-50 px-3 py-3">
-      <div className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">{item.timeframe}</div>
-      <div className="mt-1 text-sm font-black leading-6 text-slate-950">{item.action}</div>
-      {item.reason && <div className="mt-1 text-sm font-medium leading-6 text-slate-600">{item.reason}</div>}
+    <div className="relative rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <div className="absolute bottom-3 left-0 top-3 w-1 rounded-r-full bg-teal-500" />
+      <div className="pl-2">
+        <div className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">{item.timeframe}</div>
+        <div className="mt-1 text-sm font-black leading-6 text-slate-950">{item.action}</div>
+        {item.reason && <div className="mt-1 text-sm font-semibold leading-6 text-slate-600">{item.reason}</div>}
+      </div>
     </div>
   );
 }
@@ -584,12 +673,24 @@ function ServiceSuggestions({ services }: { services: HealthAnalysisResponse['su
       {services.length === 0 ? (
         <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium text-slate-500">Hiện chưa có gợi ý dịch vụ cụ thể.</p>
       ) : (
-        <div className="grid gap-2 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           {services.map((service) => (
-            <div key={service.serviceKey} className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-3">
-              <div className="text-sm font-black text-teal-900">{service.serviceName}</div>
-              <div className="mt-1 text-sm font-medium leading-6 text-teal-800">{service.reason}</div>
-            </div>
+            <Link
+              key={service.serviceKey}
+              to={`/services/${encodeURIComponent(service.serviceKey)}`}
+              className="group rounded-xl border border-teal-100 bg-teal-50 px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:bg-white hover:shadow-lg hover:shadow-teal-100"
+            >
+              <div className="flex items-start gap-3">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-teal-700 shadow-sm transition group-hover:bg-teal-600 group-hover:text-white">
+                  <LifebuoyIcon className="h-5 w-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-black text-teal-950">{service.serviceName}</div>
+                  <div className="mt-1 text-sm font-semibold leading-6 text-teal-800">{service.reason}</div>
+                  <div className="mt-2 text-xs font-black uppercase tracking-[0.14em] text-teal-700">Xem gói phù hợp</div>
+                </div>
+              </div>
+            </Link>
           ))}
         </div>
       )}
@@ -604,6 +705,32 @@ function EmptyState({ message }: { message: string }) {
       <p className="mt-3 text-sm font-bold text-slate-500">{message}</p>
     </div>
   );
+}
+
+function getClinicalStatus(level?: string, score = 0) {
+  switch (level) {
+    case 'High':
+      return {
+        label: 'Ưu tiên cao',
+        description: 'Cần theo dõi sát và cân nhắc liên hệ chuyên môn nếu dấu hiệu kéo dài hoặc nặng hơn.',
+        panelClass: 'border-red-100 bg-red-50 text-red-950',
+        ringColor: '#ef4444',
+      };
+    case 'Medium':
+      return {
+        label: 'Cần chú ý',
+        description: 'Có vài tín hiệu cần quan sát trong 24-48 giờ tới để tránh bỏ lỡ thay đổi quan trọng.',
+        panelClass: 'border-amber-100 bg-amber-50 text-amber-950',
+        ringColor: '#f59e0b',
+      };
+    default:
+      return {
+        label: score > 0 ? 'Ổn định có theo dõi' : 'Chưa có dữ liệu',
+        description: 'Tình trạng hiện tương đối ổn, tiếp tục check-in đều để AI nhận diện xu hướng sớm.',
+        panelClass: 'border-emerald-100 bg-emerald-50 text-emerald-950',
+        ringColor: '#10b981',
+      };
+  }
 }
 
 function getWarningTone(level?: string) {
@@ -642,14 +769,14 @@ function getTrendTone(direction?: string) {
   }
 }
 
-function toTrendIcon(direction?: string) {
+function getTrendIcon(direction?: string) {
   switch (direction) {
     case 'up':
-      return '↑';
+      return <ArrowTrendingUpIcon className="h-4 w-4" />;
     case 'down':
-      return '↓';
+      return <ArrowTrendingDownIcon className="h-4 w-4" />;
     default:
-      return '→';
+      return <SignalIcon className="h-4 w-4" />;
   }
 }
 

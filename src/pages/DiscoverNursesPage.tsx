@@ -51,16 +51,16 @@ const DiscoverNursesPage = () => {
         latitude: number | null;
         longitude: number | null;
     } | null>(null);
-    const hasCustomerCoordinates = customerAddress?.latitude != null && customerAddress.longitude != null;
+    const shouldUseCustomerCoordinates = selectedDistrict !== 'all' || sortBy === 'nearest';
     const matchingLocation = selectedDistrict === 'all'
         ? {
-            latitude: customerAddress?.latitude ?? undefined,
-            longitude: customerAddress?.longitude ?? undefined,
-            district: hasCustomerCoordinates ? undefined : customerAddress?.district ?? undefined,
+            latitude: shouldUseCustomerCoordinates ? customerAddress?.latitude ?? undefined : undefined,
+            longitude: shouldUseCustomerCoordinates ? customerAddress?.longitude ?? undefined : undefined,
+            district: undefined,
         }
         : {
-            latitude: customerAddress?.latitude ?? undefined,
-            longitude: customerAddress?.longitude ?? undefined,
+            latitude: shouldUseCustomerCoordinates ? customerAddress?.latitude ?? undefined : undefined,
+            longitude: shouldUseCustomerCoordinates ? customerAddress?.longitude ?? undefined : undefined,
             district: selectedDistrict,
         };
 
@@ -265,9 +265,9 @@ const DiscoverNursesPage = () => {
                             <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
                                 {isFilteringByDistrict
                                     ? 'Danh sách đang được lọc theo quận bạn chọn ở ô bên dưới.'
-                                    : customerAddress?.fullAddress
-                                        ? `Địa chỉ hồ sơ của bạn: ${customerAddress.fullAddress}. ${hasCustomerCoordinates ? 'Khoảng cách đang tính từ tọa độ địa chỉ này.' : 'Địa chỉ này chưa có tọa độ nên chưa thể hiện khoảng cách.'}`
-                                        : 'Chọn quận bên dưới nếu muốn thu hẹp danh sách y tá theo khu vực.'}
+                                    : sortBy === 'nearest' && customerAddress?.fullAddress
+                                        ? `Đang sắp xếp theo địa chỉ hồ sơ của bạn: ${customerAddress.fullAddress}.`
+                                        : 'Đang hiển thị toàn bộ y tá có mở dịch vụ này tại Đà Nẵng.'}
                             </p>
                         </div>
                         <Link to="/profile" className="rounded-full bg-white px-6 py-3 text-xs font-black uppercase tracking-widest text-brand shadow-sm transition hover:-translate-y-0.5 hover:bg-brand hover:text-white">
