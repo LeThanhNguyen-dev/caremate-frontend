@@ -25,6 +25,12 @@ const daNangDistricts = [
     { value: 'Hòa Vang', label: 'Hòa Vang', latitude: 16.0390, longitude: 108.1135 },
 ];
 
+const toCoordinate = (value: unknown): number | null => {
+    if (value === null || value === undefined || value === '') return null;
+    const parsed = typeof value === 'number' ? value : Number(String(value).trim());
+    return Number.isFinite(parsed) ? parsed : null;
+};
+
 const DiscoverNursesPage = () => {
     const [searchParams] = useSearchParams();
     const serviceId = searchParams.get('serviceId');
@@ -37,6 +43,7 @@ const DiscoverNursesPage = () => {
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('bestMatch');
     const [selectedDistrict, setSelectedDistrict] = useState('all');
+    const [customerAddressLoaded, setCustomerAddressLoaded] = useState(false);
     const [customerAddress, setCustomerAddress] = useState<{
         fullAddress: string | null;
         ward: string | null;
@@ -44,15 +51,16 @@ const DiscoverNursesPage = () => {
         latitude: number | null;
         longitude: number | null;
     } | null>(null);
+    const hasCustomerCoordinates = customerAddress?.latitude != null && customerAddress.longitude != null;
     const matchingLocation = selectedDistrict === 'all'
         ? {
-            latitude: undefined,
-            longitude: undefined,
-            district: undefined,
+            latitude: customerAddress?.latitude ?? undefined,
+            longitude: customerAddress?.longitude ?? undefined,
+            district: hasCustomerCoordinates ? undefined : customerAddress?.district ?? undefined,
         }
         : {
-            latitude: undefined,
-            longitude: undefined,
+            latitude: customerAddress?.latitude ?? undefined,
+            longitude: customerAddress?.longitude ?? undefined,
             district: selectedDistrict,
         };
 
@@ -71,11 +79,13 @@ const DiscoverNursesPage = () => {
                     fullAddress: address.fullAddress || profile.address || null,
                     ward: address.ward,
                     district: address.district,
-                    latitude: address.latitude,
-                    longitude: address.longitude,
+                    latitude: toCoordinate(address.latitude),
+                    longitude: toCoordinate(address.longitude),
                 });
             } catch {
                 setCustomerAddress(null);
+            } finally {
+                setCustomerAddressLoaded(true);
             }
         };
 
@@ -91,7 +101,7 @@ const DiscoverNursesPage = () => {
 
     useEffect(() => {
         const load = async () => {
-            if (!serviceId) return;
+            if (!serviceId || !customerAddressLoaded) return;
 
             const isInitialLoad = services.length === 0 && nurses.length === 0;
 
@@ -117,7 +127,7 @@ const DiscoverNursesPage = () => {
         };
 
         void load();
-    }, [matchingLocation.district, matchingLocation.latitude, matchingLocation.longitude, serviceId, showToast, sortBy]);
+    }, [customerAddressLoaded, matchingLocation.district, matchingLocation.latitude, matchingLocation.longitude, serviceId, showToast, sortBy]);
 
     const selectedService = useMemo(
         () => services.find((item) => item.id === Number(serviceId)),
@@ -256,7 +266,7 @@ const DiscoverNursesPage = () => {
                                 {isFilteringByDistrict
                                     ? 'Danh sách đang được lọc theo quận bạn chọn ở ô bên dưới.'
                                     : customerAddress?.fullAddress
-                                        ? `Địa chỉ hồ sơ của bạn: ${customerAddress.fullAddress}. Chọn quận bên dưới nếu muốn thu hẹp danh sách.`
+                                        ? `Địa chỉ hồ sơ của bạn: ${customerAddress.fullAddress}. ${hasCustomerCoordinates ? 'Khoảng cách đang tính từ tọa độ địa chỉ này.' : 'Địa chỉ này chưa có tọa độ nên chưa thể hiện khoảng cách.'}`
                                         : 'Chọn quận bên dưới nếu muốn thu hẹp danh sách y tá theo khu vực.'}
                             </p>
                         </div>
@@ -355,12 +365,12 @@ const DiscoverNursesPage = () => {
                                     <div className="mt-5 rounded-2xl bg-[#FDF2F8] p-4 ring-1 ring-brand/10">
                                         <div className="flex items-center justify-between gap-3">
                                             <div>
-                                                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-brand">Smart match</div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-brand">Điểm gợi ý</div>
                                                 <div className="mt-1 text-2xl font-black leading-none text-[#10233F]">{nurse.matchScore ?? 0}% phù hợp</div>
                                             </div>
                                             {nurse.distanceKm != null && (
                                                 <div className="rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-600 shadow-sm">
-                                                    {nurse.distanceKm.toFixed(1)} km
+                                                    {nurse.distanceKm.toFixed(1)} km đường thẳng
                                                 </div>
                                             )}
                                         </div>

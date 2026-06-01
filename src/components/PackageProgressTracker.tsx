@@ -13,6 +13,29 @@ type Props = {
     onProgressChanged?: () => void;
 };
 
+const formatDateTime = (value?: string | null) =>
+    value ? new Date(value).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Chưa có';
+
+const formatTime = (value?: string | null) =>
+    value ? new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Chưa có';
+
+const formatDuration = (start?: string | null, end?: string | null) => {
+    if (!start || !end) return 'Chưa có';
+    const minutes = Math.max(0, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000));
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours <= 0) return `${mins} phút`;
+    return mins > 0 ? `${hours} giờ ${mins} phút` : `${hours} giờ`;
+};
+
+const resolveSessionStatus = (session: PackageProgressDto['sessions'][number]) => {
+    const isLate = session.status === 'pending' && new Date(session.sessionDate).getTime() < Date.now();
+    if (session.status === 'completed') return { label: 'Hoàn thành', tone: 'bg-emerald-50 text-emerald-600', phase: 'completed' };
+    if (session.status === 'checked_in') return { label: 'Đang chăm sóc', tone: 'bg-brand/10 text-brand', phase: 'active' };
+    if (isLate) return { label: 'Trễ giờ', tone: 'bg-amber-50 text-amber-700', phase: 'late' };
+    return { label: 'Chưa bắt đầu', tone: 'bg-slate-50 text-slate-400', phase: 'pending' };
+};
+
 const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, onProgressChanged }) => {
     const { user } = useAuth();
     const { showToast } = useToast();
@@ -81,9 +104,14 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, onP
         <div className="mt-12 bg-white rounded-xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.06)] border border-slate-50">
             <div className="bg-slate-900 p-8 text-white">
                 <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-black tracking-tight">Tiến độ gói dịch vụ</h3>
+                    <div>
+                        <h3 className="text-xl font-black tracking-tight">Timeline gói dịch vụ</h3>
+                        <p className="mt-2 text-sm font-medium text-white/50">
+                            Mỗi buổi có giờ dự kiến, check-in, check-out và ghi chú riêng.
+                        </p>
+                    </div>
                     <div className="text-[10px] font-black uppercase tracking-[0.2em] bg-white/10 px-4 py-2 rounded-full">
-                        Hoàn thành {progress.completedSessions}/{progress.totalSessions} buổi
+                        Tiến độ {progress.completedSessions}/{progress.totalSessions} buổi
                     </div>
                 </div>
                 {/* Progress Bar */}
@@ -166,9 +194,10 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, onP
 
                     <div className="space-y-8 relative">
                         {progress.sessions.map((session, index) => {
-                            const isCompleted = session.status === 'completed';
-                            const isCurrent = session.status === 'checked_in' || (!isCompleted && index === progress.completedSessions);
-                            const isPending = session.status === 'pending' && !isCurrent;
+                            const status = resolveSessionStatus(session);
+                            const isCompleted = status.phase === 'completed';
+                            const isCurrent = status.phase === 'active' || status.phase === 'late' || (!isCompleted && index === progress.completedSessions);
+                            const isPending = status.phase === 'pending' && !isCurrent;
 
                             return (
                                 <div key={session.id} className="flex gap-6 group">
@@ -184,35 +213,43 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, onP
                                         </div>
                                     </div>
                                     <div className={`flex-1 pt-2 pb-6 border-b border-slate-50 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
-                                        <div className="flex justify-between items-start mb-2">
+                                        <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start mb-4">
                                             <div>
                                                 <div className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1">
-                                                    Buổi {session.sessionNumber} • {new Date(session.sessionDate).toLocaleDateString('vi-VN')}
+                                                    Buổi {session.sessionNumber}/{progress.totalSessions}
                                                 </div>
                                                 <h4 className={`text-lg font-black tracking-tight ${isCurrent ? 'text-brand' : 'text-slate-900'}`}>
                                                     {session.title || `Chăm sóc ngày ${session.sessionNumber}`}
                                                 </h4>
                                             </div>
-                                            <div className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
-                                                isCompleted ? 'bg-green-50 text-green-600' :
-                                                isCurrent ? 'bg-brand/10 text-brand' :
-                                                'bg-slate-50 text-slate-400'
-                                            }`}>
-                                                {isCompleted ? 'Đã xong' : isCurrent ? 'Đang thực hiện' : 'Chờ thực hiện'}
+                                            <div className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${status.tone}`}>
+                                                {status.label}
                                             </div>
                                         </div>
                                         <p className="text-sm text-slate-500 font-medium leading-relaxed">
                                             {session.description || 'Thực hiện các dịch vụ trong liệu trình gói.'}
                                         </p>
 
-                                        {(session.checkInTime || session.checkOutTime) && (
-                                            <div className="mt-4 flex gap-4 text-xs font-semibold text-slate-400 bg-slate-50 p-3 rounded-xl border border-slate-100">
-                                                {session.checkInTime && <div>Check-in: <span className="text-slate-600">{new Date(session.checkInTime).toLocaleTimeString('vi-VN')}</span></div>}
-                                                {session.checkOutTime && <div>Check-out: <span className="text-slate-600">{new Date(session.checkOutTime).toLocaleTimeString('vi-VN')}</span></div>}
+                                        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                                            <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
+                                                <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Giờ dự kiến</div>
+                                                <div className="mt-2 text-xs font-black text-slate-900">{formatDateTime(session.sessionDate)}</div>
                                             </div>
-                                        )}
+                                            <div className="rounded-xl border border-slate-100 bg-white p-4">
+                                                <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Check-in</div>
+                                                <div className="mt-2 text-xs font-black text-slate-900">{formatTime(session.checkInTime)}</div>
+                                            </div>
+                                            <div className="rounded-xl border border-slate-100 bg-white p-4">
+                                                <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Check-out</div>
+                                                <div className="mt-2 text-xs font-black text-slate-900">{formatTime(session.checkOutTime)}</div>
+                                            </div>
+                                            <div className="rounded-xl border border-slate-100 bg-white p-4">
+                                                <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Thời gian thực tế</div>
+                                                <div className="mt-2 text-xs font-black text-slate-900">{formatDuration(session.checkInTime, session.checkOutTime)}</div>
+                                            </div>
+                                        </div>
                                         {session.nurseNote && (
-                                            <div className="mt-3 text-sm italic text-slate-500 bg-yellow-50/50 p-3 rounded-xl border border-yellow-100/50">
+                                            <div className="mt-4 text-sm italic text-slate-500 bg-yellow-50/50 p-4 rounded-xl border border-yellow-100/50">
                                                 <span className="font-semibold not-italic text-yellow-700 mr-2">Ghi chú y tá:</span>
                                                 {session.nurseNote}
                                             </div>

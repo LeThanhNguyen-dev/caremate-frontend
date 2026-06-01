@@ -126,7 +126,7 @@ export const caremateApi = {
   getMyCustomerBookings: async (): Promise<BookingDetailDto[]> => (await axiosInstance.get('/api/bookings/my/customer')).data,
   getMyNurseBookings: async (): Promise<BookingDetailDto[]> => (await axiosInstance.get('/api/bookings/my/nurse')).data,
   getBookingById: async (id: number): Promise<BookingDetailDto> => (await axiosInstance.get(`/api/bookings/${id}`)).data,
-  updateBookingStatus: async (id: number, payload: { status: string }): Promise<void> => {
+  updateBookingStatus: async (id: number, payload: { status: string; note?: string }): Promise<void> => {
     await axiosInstance.patch(`/api/bookings/${id}/status`, payload);
   },
   cancelBooking: async (id: number, payload: { reason?: string }): Promise<MessageResponse> => (await axiosInstance.post(`/api/bookings/${id}/cancel`, payload)).data,

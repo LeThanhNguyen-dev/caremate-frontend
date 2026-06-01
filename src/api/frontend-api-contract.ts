@@ -31,8 +31,12 @@ export type BookingDetailDto = {
   nursePayoutAmount: number;
   startTime: string;
   endTime: string;
+  checkInTime?: string | null;
+  checkOutTime?: string | null;
+  actualDurationMinutes?: number | null;
   address: string;
   notes: string | null;
+  nurseNote?: string | null;
   paymentStatus?: string | null;
   refundAmount?: number | null;
   refundReason?: string | null;
@@ -105,8 +109,11 @@ export type NurseDiscoveryDto = {
   servicePrice: number | null;
   serviceUnit: string | null;
   distanceKm?: number | null;
+  distanceSource?: string | null;
   matchScore?: number;
   matchReasons?: string[];
+  completedBookings?: number;
+  totalReviews?: number;
   nextAvailableAt?: string | null;
   district?: string | null;
 };

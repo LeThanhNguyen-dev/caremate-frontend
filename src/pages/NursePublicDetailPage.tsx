@@ -403,6 +403,14 @@ const NursePublicDetailPage = () => {
                     <StarSolidIcon className="h-5 w-5 text-yellow-400" />
                     {nurseCard.averageRating.toFixed(1)} đánh giá
                   </div>
+                  {(profile.address || profile.defaultAddress?.fullAddress || profile.district) && (
+                    <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[#F3E8FF] bg-white px-4 py-2">
+                      <MapPinIcon className="h-5 w-5 shrink-0 text-[#EC4899]" />
+                      <span className="truncate">
+                        {profile.address || profile.defaultAddress?.fullAddress || `Khu vực ${profile.district}`}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <p className="mt-8 text-[18px] italic leading-[1.75] text-[#6B7280]">
                   "{profile.bio || 'Tôi cam kết mang lại sự chăm sóc tận tâm và an toàn cho gia đình bạn.'}"

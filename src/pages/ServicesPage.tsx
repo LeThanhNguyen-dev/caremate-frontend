@@ -604,7 +604,7 @@ const ServicesPage = () => {
                                             </span>
                                             <span className="inline-flex items-center justify-center gap-1 rounded-xl bg-slate-50 px-2 py-2 text-center text-[11px] font-bold text-slate-600 sm:px-2.5">
                                                 <MapPinIcon className="h-3.5 w-3.5" />
-                                                {nurse.distanceKm != null ? `${nurse.distanceKm.toFixed(1)} km` : `${nurse.serviceRadiusKm} km`}
+                                                {nurse.distanceKm != null ? `${nurse.distanceKm.toFixed(1)} km` : `Bán kính ${nurse.serviceRadiusKm} km`}
                                             </span>
                                             <span className="rounded-xl bg-[#FFF7FA] px-2 py-2 text-center text-[11px] font-black text-brand sm:px-2.5">
                                                 {nurse.matchScore ?? 0}% hợp

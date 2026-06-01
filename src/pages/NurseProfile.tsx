@@ -78,6 +78,7 @@ const NurseProfile = () => {
     const [addressLookupLoading, setAddressLookupLoading] = useState(false);
     const [addressLookupError, setAddressLookupError] = useState('');
     const goongSessionTokenRef = useRef(createGoongSessionToken());
+    const suppressNextAddressLookupRef = useRef(false);
 
     const loadProfile = useCallback(async () => {
         try {
@@ -117,6 +118,15 @@ const NurseProfile = () => {
     useEffect(() => {
         const input = toSafeText(formData.address).trim();
 
+        if (suppressNextAddressLookupRef.current) {
+            suppressNextAddressLookupRef.current = false;
+            setAddressSuggestions([]);
+            setAddressSuggestionsOpen(false);
+            setAddressLookupLoading(false);
+            setAddressLookupError('');
+            return;
+        }
+
         if (!goongApi.hasApiKey || input.length < 3) {
             setAddressSuggestions([]);
             setAddressLookupLoading(false);
@@ -154,6 +164,7 @@ const NurseProfile = () => {
     }, [formData.address]);
 
     const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        suppressNextAddressLookupRef.current = false;
         setFormData((prev) => ({
             ...prev,
             address: event.target.value,
@@ -174,6 +185,7 @@ const NurseProfile = () => {
             return;
         }
 
+        suppressNextAddressLookupRef.current = true;
         setFormData((prev) => ({ ...prev, address: fallbackAddress }));
         setAddressSuggestionsOpen(false);
         setAddressSuggestions([]);
@@ -182,6 +194,7 @@ const NurseProfile = () => {
             const detail = await goongApi.getPlaceDetail(placeId, goongSessionTokenRef.current);
             const addressParts = extractGoongAddressParts(detail, fallbackAddress);
             const nextAddressLine = toSafeText(addressParts.streetAddress) || deriveAddressLine(addressParts.fullAddress, addressParts.ward, addressParts.district);
+            suppressNextAddressLookupRef.current = true;
             setFormData((prev) => ({
                 ...prev,
                 address: toSafeText(addressParts.fullAddress) || fallbackAddress,
@@ -192,9 +205,14 @@ const NurseProfile = () => {
                 longitude: toCoordinateText(addressParts.longitude),
             }));
             goongSessionTokenRef.current = createGoongSessionToken();
+            setAddressSuggestionsOpen(false);
+            setAddressSuggestions([]);
         } catch {
+            suppressNextAddressLookupRef.current = true;
             setFormData((prev) => ({ ...prev, address: fallbackAddress }));
             setAddressLookupError('Không thể lấy chi tiết địa chỉ từ Goong.');
+            setAddressSuggestionsOpen(false);
+            setAddressSuggestions([]);
         }
     };
 

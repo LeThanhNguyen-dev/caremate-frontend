@@ -76,6 +76,7 @@ const CustomerProfilePage = () => {
     const [addressLookupLoading, setAddressLookupLoading] = useState(false);
     const [addressLookupError, setAddressLookupError] = useState('');
     const goongSessionTokenRef = useRef(createGoongSessionToken());
+    const suppressNextAddressLookupRef = useRef(false);
     const [profileForm, setProfileForm] = useState({
         fullName: '',
         email: '',
@@ -107,16 +108,21 @@ const CustomerProfilePage = () => {
         try {
             setProfileLoading(true);
             const data = await caremateApi.getMyProfile();
+            const savedAddress = data.defaultAddress?.fullAddress || data.address || '';
+            const savedWard = data.defaultAddress?.ward || data.ward || '';
+            const savedDistrict = data.defaultAddress?.district || data.district || '';
+            const savedLatitude = data.defaultAddress?.latitude ?? data.latitude;
+            const savedLongitude = data.defaultAddress?.longitude ?? data.longitude;
             setProfileForm({
                 fullName: data.fullName || '',
                 email: data.email || '',
                 phone: data.phone || data.phoneNumber || '',
-                address: data.address || '',
-                addressLine: deriveAddressLine(data.address, data.ward || data.defaultAddress?.ward, data.district || data.defaultAddress?.district),
-                ward: data.ward || data.defaultAddress?.ward || '',
-                district: data.district || data.defaultAddress?.district || '',
-                latitude: data.latitude != null ? String(data.latitude) : data.defaultAddress?.latitude != null ? String(data.defaultAddress.latitude) : '',
-                longitude: data.longitude != null ? String(data.longitude) : data.defaultAddress?.longitude != null ? String(data.defaultAddress.longitude) : '',
+                address: savedAddress,
+                addressLine: deriveAddressLine(savedAddress, savedWard, savedDistrict),
+                ward: savedWard,
+                district: savedDistrict,
+                latitude: savedLatitude != null ? String(savedLatitude) : '',
+                longitude: savedLongitude != null ? String(savedLongitude) : '',
                 bankBin: data.bankBin || '',
                 bankAccountNumber: data.bankAccountNumber || '',
                 bankAccountName: data.bankAccountName || '',
@@ -166,6 +172,15 @@ const CustomerProfilePage = () => {
     useEffect(() => {
         const input = toSafeText(profileForm.address).trim();
 
+        if (suppressNextAddressLookupRef.current) {
+            suppressNextAddressLookupRef.current = false;
+            setAddressSuggestions([]);
+            setAddressSuggestionsOpen(false);
+            setAddressLookupLoading(false);
+            setAddressLookupError('');
+            return;
+        }
+
         if (!goongApi.hasApiKey || input.length < 3) {
             setAddressSuggestions([]);
             setAddressLookupLoading(false);
@@ -203,6 +218,7 @@ const CustomerProfilePage = () => {
     }, [profileForm.address]);
 
     const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        suppressNextAddressLookupRef.current = false;
         setProfileForm((prev) => ({
             ...prev,
             address: event.target.value,
@@ -223,6 +239,7 @@ const CustomerProfilePage = () => {
             return;
         }
 
+        suppressNextAddressLookupRef.current = true;
         setProfileForm((prev) => ({ ...prev, address: fallbackAddress }));
         setAddressSuggestionsOpen(false);
         setAddressSuggestions([]);
@@ -231,6 +248,7 @@ const CustomerProfilePage = () => {
             const detail = await goongApi.getPlaceDetail(placeId, goongSessionTokenRef.current);
             const addressParts = extractGoongAddressParts(detail, fallbackAddress);
             const nextAddressLine = toSafeText(addressParts.streetAddress) || deriveAddressLine(addressParts.fullAddress, addressParts.ward, addressParts.district);
+            suppressNextAddressLookupRef.current = true;
             setProfileForm((prev) => ({
                 ...prev,
                 address: toSafeText(addressParts.fullAddress) || fallbackAddress,
@@ -241,9 +259,14 @@ const CustomerProfilePage = () => {
                 longitude: toCoordinateText(addressParts.longitude),
             }));
             goongSessionTokenRef.current = createGoongSessionToken();
+            setAddressSuggestionsOpen(false);
+            setAddressSuggestions([]);
         } catch {
+            suppressNextAddressLookupRef.current = true;
             setProfileForm((prev) => ({ ...prev, address: fallbackAddress }));
             setAddressLookupError('Không thể lấy chi tiết địa chỉ từ Goong.');
+            setAddressSuggestionsOpen(false);
+            setAddressSuggestions([]);
         }
     };
 
@@ -264,6 +287,7 @@ const CustomerProfilePage = () => {
                 bankAccountName: profileForm.bankAccountName,
             });
             showToast('Cập nhật thông tin thành công!', 'success');
+            await loadProfile();
         } catch {
             showToast('Không thể lưu thay đổi.', 'error');
         } finally {
