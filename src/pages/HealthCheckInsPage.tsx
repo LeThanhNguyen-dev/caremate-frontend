@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  ArrowDownTrayIcon,
   ArrowTrendingDownIcon,
   ArrowTrendingUpIcon,
-  BoltIcon,
+  BellAlertIcon,
   ChartBarSquareIcon,
+  ChatBubbleLeftRightIcon,
   CheckCircleIcon,
   ChevronDownIcon,
   ClipboardDocumentCheckIcon,
@@ -12,9 +14,10 @@ import {
   ExclamationTriangleIcon,
   HeartIcon,
   LifebuoyIcon,
-  MoonIcon,
+  MapPinIcon,
+  MicrophoneIcon,
+  PhoneIcon,
   ShieldCheckIcon,
-  SignalIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
 import caremateApi from '../api/caremateApi';
@@ -24,6 +27,18 @@ import { useToast } from '../hooks/useToast';
 type FormState = {
   sleepHours: number;
   painLevel: number;
+  painLocation: string;
+  painType: string;
+  painDuration: string;
+  painTrend: string;
+  symptoms: string[];
+  medicalHistory: string[];
+  motherAge: string;
+  systolicBloodPressure: string;
+  diastolicBloodPressure: string;
+  temperatureCelsius: string;
+  tookMedicationToday: boolean;
+  medicationNote: string;
   mood: string;
   milkStatus: string;
   babyFeeding: string;
@@ -31,6 +46,25 @@ type FormState = {
   note: string;
 };
 
+type SpeechRecognitionCtor = new () => {
+  lang: string;
+  interimResults: boolean;
+  maxAlternatives: number;
+  onresult: ((event: { results: ArrayLike<{ 0: { transcript: string } }> }) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+};
+
+const painLocations = ['Đầu', 'Ngực', 'Bụng trên', 'Bụng dưới', 'Lưng', 'Vết mổ', 'Ngực/sữa', 'Khớp', 'Chân', 'Toàn thân'];
+const painTypes = ['Âm ỉ', 'Nhói', 'Quặn', 'Rát', 'Căng tức', 'Theo cơn', 'Lan sang vùng khác'];
+const painDurations = ['Mới xuất hiện', 'Dưới 6 giờ', '6-24 giờ', '1-2 ngày', 'Trên 2 ngày'];
+const painTrends = [
+  { value: 'Better', label: 'Đang giảm' },
+  { value: 'Same', label: 'Không đổi' },
+  { value: 'Worse', label: 'Đang tăng' },
+];
+const symptomOptions = ['Sốt', 'Khó thở', 'Đau ngực', 'Chóng mặt', 'Mờ mắt', 'Buồn nôn', 'Ra máu bất thường', 'Vết mổ sưng đỏ', 'Vết mổ chảy dịch', 'Bé bỏ bú'];
+const historyOptions = ['Tăng huyết áp', 'Tiểu đường', 'Tim mạch', 'Thiếu máu', 'Sinh mổ', 'Tiền sản giật', 'Dị ứng thuốc'];
 const moodOptions = [
   { value: 'Calm', label: 'Bình tĩnh' },
   { value: 'Happy', label: 'Thoải mái' },
@@ -39,31 +73,40 @@ const moodOptions = [
   { value: 'Anxious', label: 'Lo âu' },
   { value: 'Overwhelmed', label: 'Quá tải' },
 ];
-
 const milkStatusOptions = [
   { value: 'Normal', label: 'Bình thường' },
   { value: 'Low', label: 'Ít sữa' },
   { value: 'Painful', label: 'Đau khi cho bú' },
   { value: 'Improving', label: 'Đang cải thiện' },
 ];
-
 const babyFeedingOptions = [
   { value: 'Normal', label: 'Bú bình thường' },
-  { value: 'LessThanUsual', label: 'Bú ít hơn thường ngày' },
-  { value: 'RefusesFeeding', label: 'Bé từ chối bú' },
-  { value: 'FrequentFeeding', label: 'Bé bú nhiều lần' },
+  { value: 'LessThanUsual', label: 'Bú ít hơn' },
+  { value: 'RefusesFeeding', label: 'Từ chối bú' },
+  { value: 'FrequentFeeding', label: 'Bú nhiều lần' },
 ];
-
 const babySleepOptions = [
   { value: 'Normal', label: 'Ngủ bình thường' },
   { value: 'CryingOften', label: 'Hay quấy khóc' },
   { value: 'WakingFrequently', label: 'Thức giấc nhiều' },
-  { value: 'SleepingLonger', label: 'Ngủ lâu hơn thường ngày' },
+  { value: 'SleepingLonger', label: 'Ngủ lâu hơn' },
 ];
 
 const initialForm: FormState = {
   sleepHours: 6,
   painLevel: 4,
+  painLocation: '',
+  painType: '',
+  painDuration: '',
+  painTrend: 'Same',
+  symptoms: [],
+  medicalHistory: [],
+  motherAge: '',
+  systolicBloodPressure: '',
+  diastolicBloodPressure: '',
+  temperatureCelsius: '',
+  tookMedicationToday: false,
+  medicationNote: '',
   mood: 'Tired',
   milkStatus: 'Normal',
   babyFeeding: 'Normal',
@@ -76,6 +119,7 @@ const HealthCheckInsPage = () => {
   const [form, setForm] = useState<FormState>(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [listening, setListening] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<HealthAnalysisResponse | null>(null);
   const [latestCheckIn, setLatestCheckIn] = useState<LatestHealthCheckInDto | null>(null);
   const [history, setHistory] = useState<HealthCheckInHistoryDto[]>([]);
@@ -83,14 +127,16 @@ const HealthCheckInsPage = () => {
   const [page, setPage] = useState(1);
 
   const activeAnalysis = analysisResult ?? latestCheckIn?.analysis ?? null;
-  const activeWarning = activeAnalysis?.warningLevel ?? 'Low';
+  const activeWarning = normalizeTriage(activeAnalysis?.triageColor ?? activeAnalysis?.warningLevel);
 
   const stats = useMemo(() => {
-    const highCount = history.filter((item) => item.analysis?.warningLevel === 'High').length;
-    const mediumCount = history.filter((item) => item.analysis?.warningLevel === 'Medium').length;
     const avgSleep = history.length ? history.reduce((sum, item) => sum + item.sleepHours, 0) / history.length : 0;
-    return { highCount, mediumCount, avgSleep };
+    const avgPain = history.length ? history.reduce((sum, item) => sum + item.painLevel, 0) / history.length : 0;
+    const redCount = history.filter((item) => ['Red', 'Emergency'].includes(normalizeTriage(item.analysis?.triageColor ?? item.analysis?.warningLevel))).length;
+    return { avgSleep, avgPain, redCount };
   }, [history]);
+
+  const conditionalPrompts = useMemo(() => buildConditionalPrompts(form), [form]);
 
   const loadData = async (targetPage = page) => {
     try {
@@ -99,7 +145,6 @@ const HealthCheckInsPage = () => {
         caremateApi.getLatestHealthCheckIn().catch(() => null),
         caremateApi.getHealthCheckInHistory({ page: targetPage, pageSize: 8 }),
       ]);
-
       setLatestCheckIn(latest);
       setHistory(historyData);
       setExpandedId((current) => current ?? historyData[0]?.checkInId ?? null);
@@ -114,36 +159,27 @@ const HealthCheckInsPage = () => {
     void loadData(page);
   }, [page]);
 
-  const validateForm = () => {
-    if (form.sleepHours < 0 || form.sleepHours > 24) {
-      showToast('Số giờ ngủ phải nằm trong khoảng từ 0 đến 24.', 'error');
-      return false;
-    }
-
-    if (form.painLevel < 1 || form.painLevel > 10) {
-      showToast('Mức độ đau phải nằm trong khoảng từ 1 đến 10.', 'error');
-      return false;
-    }
-
-    if (form.note.length > 1000) {
-      showToast('Ghi chú không được vượt quá 1000 ký tự.', 'error');
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!validateForm()) {
-      return;
-    }
+    if (!validateForm(form, showToast)) return;
 
     try {
       setSubmitting(true);
       const result = await caremateApi.analyzeHealthCheckIn({
         sleepHours: form.sleepHours,
         painLevel: form.painLevel,
+        painLocation: form.painLocation || undefined,
+        painType: form.painType || undefined,
+        painDuration: form.painDuration || undefined,
+        painTrend: form.painTrend || undefined,
+        symptoms: form.symptoms,
+        medicalHistory: form.medicalHistory,
+        motherAge: toOptionalNumber(form.motherAge),
+        systolicBloodPressure: toOptionalNumber(form.systolicBloodPressure),
+        diastolicBloodPressure: toOptionalNumber(form.diastolicBloodPressure),
+        temperatureCelsius: toOptionalNumber(form.temperatureCelsius),
+        tookMedicationToday: form.tookMedicationToday,
+        medicationNote: form.medicationNote.trim() || undefined,
         mood: form.mood,
         milkStatus: form.milkStatus,
         babyFeeding: form.babyFeeding,
@@ -162,95 +198,200 @@ const HealthCheckInsPage = () => {
     }
   };
 
+  const startVoiceInput = () => {
+    const SpeechRecognition = (window as Window & { SpeechRecognition?: SpeechRecognitionCtor; webkitSpeechRecognition?: SpeechRecognitionCtor }).SpeechRecognition
+      ?? (window as Window & { webkitSpeechRecognition?: SpeechRecognitionCtor }).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      showToast('Trình duyệt hiện chưa hỗ trợ nhập giọng nói.', 'error');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'vi-VN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript ?? '';
+      setForm((prev) => ({ ...prev, note: [prev.note, transcript].filter(Boolean).join(' ') }));
+    };
+    recognition.onend = () => setListening(false);
+    setListening(true);
+    recognition.start();
+  };
+
+  const exportReport = () => {
+    const rows = history.slice(0, 14).map((item) => [
+      formatDateTime(item.createdAt),
+      `${item.painLevel}/10`,
+      item.painLocation ?? '',
+      `${item.sleepHours}h`,
+      toOptionLabel(item.mood, moodOptions),
+      normalizeTriage(item.analysis?.triageColor ?? item.analysis?.warningLevel),
+      item.analysis?.summary ?? '',
+    ]);
+    const html = buildPrintableReport(activeAnalysis, rows);
+    const reportWindow = window.open('', '_blank');
+    if (!reportWindow) {
+      showToast('Không thể mở cửa sổ báo cáo.', 'error');
+      return;
+    }
+    reportWindow.document.write(html);
+    reportWindow.document.close();
+    reportWindow.focus();
+    reportWindow.print();
+  };
+
   return (
-    <main className="min-h-screen bg-[#f7fbfa] bg-[linear-gradient(180deg,#eefaf7_0%,#f7fbfa_34%,#ffffff_100%)] py-8">
+    <main className="min-h-screen bg-[#f6fbf9] py-8">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <section className="mb-6 overflow-hidden rounded-[1.35rem] border border-emerald-100 bg-white shadow-[0_24px_70px_rgba(15,118,110,0.10)]">
-          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_390px]">
-            <div className="relative p-6 lg:p-8">
-              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
-              <p className="inline-flex rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-teal-800">
-                AI clinical triage
-              </p>
-              <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Theo dõi sức khỏe mẹ và bé</h1>
+        <section className="mb-6 overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_20px_60px_rgba(15,118,110,0.09)]">
+          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="p-6 lg:p-8">
+              <p className="inline-flex rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-teal-800">AI symptom triage</p>
+              <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Check-in sức khỏe theo ngữ cảnh</h1>
               <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-slate-600 md:text-base">
-                Bảng phân tích AI ưu tiên dấu hiệu cần chú ý, điểm rủi ro, xu hướng 7 lần check-in gần nhất và kế hoạch chăm sóc tiếp theo trong một luồng ra quyết định rõ ràng.
+                Mẹ nhập theo kiểu hội thoại, chọn vùng đau trên body map, ghi thêm dấu hiệu đi kèm, rồi AI phân loại xanh, vàng, đỏ hoặc đỏ khẩn cấp kèm hành động tiếp theo.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                <Capability label="Triage tức thời" />
-                <Capability label="Theo dõi xu hướng" />
-                <Capability label="Gợi ý dịch vụ phù hợp" />
+                <Capability label="Body map" />
+                <Capability label="Câu hỏi động" />
+                <Capability label="Voice input" />
+                <Capability label="Xuất báo cáo" />
               </div>
             </div>
-            <div className="border-t border-teal-100 bg-slate-950 p-6 text-white lg:border-l lg:border-t-0">
-              <div className="flex items-center justify-between gap-3">
+            <div className={`border-t p-6 text-white lg:border-l lg:border-t-0 ${getTriageHeroClass(activeWarning)}`}>
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-xs font-black uppercase tracking-[0.22em] text-teal-200">Trạng thái hiện tại</div>
-                  <div className="mt-2 text-2xl font-black">{toWarningLabel(activeWarning)}</div>
+                  <div className="text-xs font-black uppercase tracking-[0.18em] text-white/75">Triage hiện tại</div>
+                  <div className="mt-2 text-3xl font-black">{toTriageLabel(activeWarning)}</div>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-white/80">{activeAnalysis?.urgencyAction ?? 'Chưa có dữ liệu check-in mới.'}</p>
                 </div>
-                <div className={`rounded-full border px-3 py-1.5 text-xs font-black ${getWarningTone(activeWarning)}`}>
-                  {activeAnalysis ? `${activeAnalysis.riskScore}/100` : 'Chưa có'}
-                </div>
+                <div className="rounded-full border border-white/25 bg-white/15 px-3 py-1.5 text-xs font-black">{activeAnalysis ? `${activeAnalysis.riskScore}/100` : '--'}</div>
               </div>
+              {activeWarning === 'Emergency' && (
+                <a href="tel:115" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-black text-red-700 shadow-lg">
+                  <PhoneIcon className="h-5 w-5" />
+                  Gọi cấp cứu 115
+                </a>
+              )}
               <div className="mt-4 grid grid-cols-3 gap-3">
-                <Stat label="Check-in" value={history.length.toString()} dark />
+                <Stat label="Đau TB" value={history.length ? stats.avgPain.toFixed(1) : '--'} dark />
                 <Stat label="Ngủ TB" value={history.length ? `${stats.avgSleep.toFixed(1)}h` : '--'} dark />
-                <Stat label="Cần chú ý" value={(stats.highCount + stats.mediumCount).toString()} dark />
+                <Stat label="Red" value={stats.redCount.toString()} dark />
               </div>
             </div>
           </div>
         </section>
 
-        <section className="mb-6 grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <Panel title="Kết quả mới nhất" icon={<SparklesIcon className="h-5 w-5" />}>
+        <section className="mb-6 grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
+          <Panel title="AI summary mới nhất" icon={<SparklesIcon className="h-5 w-5" />}>
             {activeAnalysis ? <AnalysisSummary analysis={activeAnalysis} /> : <EmptyState message="Chưa có kết quả phân tích. Hãy gửi check-in đầu tiên hôm nay." />}
           </Panel>
 
-          <Panel title="Check-in hôm nay" icon={<ClipboardDocumentCheckIcon className="h-5 w-5" />}>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <Panel title="Check-in dạng hội thoại" icon={<ChatBubbleLeftRightIcon className="h-5 w-5" />}>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <ChatPrompt text="Hôm nay mẹ thấy thế nào? Chọn vùng đau và dấu hiệu đi kèm trước, AI sẽ hỏi tiếp đúng ngữ cảnh." />
+              <BodyMap selected={form.painLocation} onSelect={(painLocation) => setForm((prev) => ({ ...prev, painLocation }))} />
+
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <Field label="Số giờ ngủ">
-                  <NumberInput value={form.sleepHours} min={0} max={24} step={0.5} icon={<MoonIcon />} onChange={(value) => setForm((prev) => ({ ...prev, sleepHours: value }))} />
+                <Field label="Mức đau">
+                  <RangeInput value={form.painLevel} min={0} max={10} onChange={(painLevel) => setForm((prev) => ({ ...prev, painLevel }))} suffix="/10" />
                 </Field>
-                <Field label="Mức độ đau">
-                  <NumberInput value={form.painLevel} min={1} max={10} icon={<HeartIcon />} onChange={(value) => setForm((prev) => ({ ...prev, painLevel: value }))} />
+                <Field label="Kiểu đau">
+                  <Select value={form.painType} onChange={(painType) => setForm((prev) => ({ ...prev, painType }))} options={[{ value: '', label: 'Chọn kiểu đau' }, ...painTypes.map((value) => ({ value, label: value }))]} />
+                </Field>
+                <Field label="Đau bao lâu">
+                  <Select value={form.painDuration} onChange={(painDuration) => setForm((prev) => ({ ...prev, painDuration }))} options={[{ value: '', label: 'Chọn thời gian' }, ...painDurations.map((value) => ({ value, label: value }))]} />
+                </Field>
+                <Field label="Diễn tiến đau">
+                  <Select value={form.painTrend} onChange={(painTrend) => setForm((prev) => ({ ...prev, painTrend }))} options={painTrends} />
+                </Field>
+                <Field label="Số giờ ngủ">
+                  <NumberInput value={form.sleepHours} min={0} max={24} step={0.5} onChange={(sleepHours) => setForm((prev) => ({ ...prev, sleepHours }))} />
                 </Field>
                 <Field label="Tâm trạng">
-                  <Select value={form.mood} onChange={(value) => setForm((prev) => ({ ...prev, mood: value }))} options={moodOptions} />
-                </Field>
-                <Field label="Tình trạng sữa">
-                  <Select value={form.milkStatus} onChange={(value) => setForm((prev) => ({ ...prev, milkStatus: value }))} options={milkStatusOptions} />
-                </Field>
-                <Field label="Tình trạng bú của bé">
-                  <Select value={form.babyFeeding} onChange={(value) => setForm((prev) => ({ ...prev, babyFeeding: value }))} options={babyFeedingOptions} />
-                </Field>
-                <Field label="Giấc ngủ của bé">
-                  <Select value={form.babySleep} onChange={(value) => setForm((prev) => ({ ...prev, babySleep: value }))} options={babySleepOptions} />
+                  <Select value={form.mood} onChange={(mood) => setForm((prev) => ({ ...prev, mood }))} options={moodOptions} />
                 </Field>
               </div>
 
-              <Field label="Ghi chú thêm">
-                <textarea
-                  value={form.note}
-                  onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))}
-                  rows={3}
-                  maxLength={1000}
-                  placeholder="Ví dụ: Mẹ mệt hơn hôm qua, bé bú ít, vết mổ hơi đau..."
-                  className="w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50"
+              <ChipGroup label="Triệu chứng đi kèm" options={symptomOptions} values={form.symptoms} onChange={(symptoms) => setForm((prev) => ({ ...prev, symptoms }))} />
+              <ChipGroup label="Tiền sử cần lưu ý" options={historyOptions} values={form.medicalHistory} onChange={(medicalHistory) => setForm((prev) => ({ ...prev, medicalHistory }))} />
+
+              {conditionalPrompts.length > 0 && (
+                <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-black text-amber-900">
+                    <BellAlertIcon className="h-5 w-5" />
+                    AI hỏi thêm theo triệu chứng
+                  </div>
+                  <div className="space-y-2">
+                    {conditionalPrompts.map((prompt) => (
+                      <p key={prompt} className="text-sm font-semibold leading-6 text-amber-800">{prompt}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <Field label="Tuổi mẹ">
+                  <TextInput value={form.motherAge} inputMode="numeric" onChange={(motherAge) => setForm((prev) => ({ ...prev, motherAge }))} placeholder="VD: 32" />
+                </Field>
+                <Field label="Huyết áp trên">
+                  <TextInput value={form.systolicBloodPressure} inputMode="numeric" onChange={(systolicBloodPressure) => setForm((prev) => ({ ...prev, systolicBloodPressure }))} placeholder="VD: 120" />
+                </Field>
+                <Field label="Huyết áp dưới">
+                  <TextInput value={form.diastolicBloodPressure} inputMode="numeric" onChange={(diastolicBloodPressure) => setForm((prev) => ({ ...prev, diastolicBloodPressure }))} placeholder="VD: 80" />
+                </Field>
+                <Field label="Nhiệt độ">
+                  <TextInput value={form.temperatureCelsius} inputMode="decimal" onChange={(temperatureCelsius) => setForm((prev) => ({ ...prev, temperatureCelsius }))} placeholder="VD: 37.5" />
+                </Field>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <Field label="Tình trạng sữa">
+                  <Select value={form.milkStatus} onChange={(milkStatus) => setForm((prev) => ({ ...prev, milkStatus }))} options={milkStatusOptions} />
+                </Field>
+                <Field label="Bé bú">
+                  <Select value={form.babyFeeding} onChange={(babyFeeding) => setForm((prev) => ({ ...prev, babyFeeding }))} options={babyFeedingOptions} />
+                </Field>
+                <Field label="Bé ngủ">
+                  <Select value={form.babySleep} onChange={(babySleep) => setForm((prev) => ({ ...prev, babySleep }))} options={babySleepOptions} />
+                </Field>
+              </div>
+
+              <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <input
+                  type="checkbox"
+                  checked={form.tookMedicationToday}
+                  onChange={(event) => setForm((prev) => ({ ...prev, tookMedicationToday: event.target.checked }))}
+                  className="mt-1 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                 />
+                <span>
+                  <span className="block text-sm font-black text-slate-900">Hôm nay mẹ đã uống thuốc theo dặn dò</span>
+                  <TextInput value={form.medicationNote} onChange={(medicationNote) => setForm((prev) => ({ ...prev, medicationNote }))} placeholder="Ghi chú thuốc nếu cần" className="mt-3" />
+                </span>
+              </label>
+
+              <Field label="Mẹ kể thêm">
+                <div className="relative">
+                  <textarea
+                    value={form.note}
+                    onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))}
+                    rows={4}
+                    maxLength={1000}
+                    placeholder="VD: Mẹ đau bụng dưới từ sáng, hơi chóng mặt, bé bú ít hơn..."
+                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 pr-14 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50"
+                  />
+                  <button type="button" onClick={startVoiceInput} className={`absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-lg ${listening ? 'bg-red-50 text-red-600' : 'bg-teal-50 text-teal-700'}`}>
+                    <MicrophoneIcon className="h-5 w-5" />
+                  </button>
+                </div>
                 <div className="mt-1 text-right text-xs font-bold text-slate-400">{form.note.length}/1000</div>
               </Field>
 
-              <div className="flex flex-col gap-3 rounded-lg border border-amber-100 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-start gap-2">
-                  <ExclamationTriangleIcon className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
-                  <p className="text-xs font-semibold leading-5 text-amber-800">Thông tin từ AI chỉ mang tính tham khảo, không thay thế tư vấn từ bác sĩ hoặc chuyên gia y tế.</p>
-                </div>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="shrink-0 rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
+              <div className="flex flex-col gap-3 rounded-xl border border-amber-100 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs font-semibold leading-5 text-amber-800">AI chỉ hỗ trợ sàng lọc và theo dõi, không thay thế bác sĩ. Nếu có dấu hiệu đỏ, ưu tiên liên hệ cơ sở y tế.</p>
+                <button type="submit" disabled={submitting} className="shrink-0 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50">
                   {submitting ? 'Đang phân tích...' : 'Phân tích'}
                 </button>
               </div>
@@ -258,10 +399,23 @@ const HealthCheckInsPage = () => {
           </Panel>
         </section>
 
-        <Panel title="Lịch sử check-in chi tiết" icon={<ChartBarSquareIcon className="h-5 w-5" />}>
+        <section className="mb-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <Panel title="Health timeline" icon={<ChartBarSquareIcon className="h-5 w-5" />}>
+            <TimelineChart history={history} />
+          </Panel>
+          <Panel title="Báo cáo đi khám" icon={<ArrowDownTrayIcon className="h-5 w-5" />}>
+            <p className="text-sm font-semibold leading-6 text-slate-600">Xuất báo cáo 14 check-in gần nhất để gia đình hoặc bác sĩ xem nhanh mức đau, giấc ngủ, triage và tóm tắt AI.</p>
+            <button type="button" onClick={exportReport} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-teal-700">
+              <ArrowDownTrayIcon className="h-5 w-5" />
+              Xuất PDF
+            </button>
+          </Panel>
+        </section>
+
+        <Panel title="Lịch sử check-in chi tiết" icon={<ClipboardDocumentCheckIcon className="h-5 w-5" />}>
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-teal-600 border-t-transparent" />
+            <div className="grid gap-3 py-4">
+              {[0, 1, 2].map((item) => <div key={item} className="h-24 animate-pulse rounded-xl bg-slate-100" />)}
             </div>
           ) : history.length === 0 ? (
             <EmptyState message="Chưa có lịch sử check-in." />
@@ -269,33 +423,13 @@ const HealthCheckInsPage = () => {
             <>
               <div className="space-y-3">
                 {history.map((item) => (
-                  <HistoryItem
-                    key={item.checkInId}
-                    item={item}
-                    expanded={expandedId === item.checkInId}
-                    onToggle={() => setExpandedId((current) => (current === item.checkInId ? null : item.checkInId))}
-                  />
+                  <HistoryItem key={item.checkInId} item={item} expanded={expandedId === item.checkInId} onToggle={() => setExpandedId((current) => (current === item.checkInId ? null : item.checkInId))} />
                 ))}
               </div>
-
               <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                <button
-                  type="button"
-                  disabled={page === 1}
-                  onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:border-teal-300 hover:text-teal-700 disabled:opacity-40"
-                >
-                  Trang trước
-                </button>
+                <button type="button" disabled={page === 1} onClick={() => setPage((prev) => Math.max(1, prev - 1))} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 disabled:opacity-40">Trang trước</button>
                 <div className="text-sm font-bold text-slate-400">Trang {page}</div>
-                <button
-                  type="button"
-                  disabled={history.length < 8}
-                  onClick={() => setPage((prev) => prev + 1)}
-                  className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 transition hover:border-teal-300 hover:text-teal-700 disabled:opacity-40"
-                >
-                  Trang sau
-                </button>
+                <button type="button" disabled={history.length < 8} onClick={() => setPage((prev) => prev + 1)} className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-black text-slate-700 disabled:opacity-40">Trang sau</button>
               </div>
             </>
           )}
@@ -307,7 +441,7 @@ const HealthCheckInsPage = () => {
 
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-[1.25rem] border border-slate-200 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.06)]">
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_45px_rgba(15,23,42,0.05)]">
       <div className="mb-4 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 ring-1 ring-teal-100">{icon}</div>
         <h2 className="text-lg font-black text-slate-950">{title}</h2>
@@ -317,20 +451,159 @@ function Panel({ title, icon, children }: { title: string; icon: React.ReactNode
   );
 }
 
-function Capability({ label }: { label: string }) {
+function BodyMap({ selected, onSelect }: { selected: string; onSelect: (value: string) => void }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-teal-100 bg-white px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm">
-      <CheckCircleIcon className="h-4 w-4 text-teal-600" />
-      {label}
-    </span>
+    <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[180px_minmax(0,1fr)]">
+      <div className="relative mx-auto h-72 w-36 rounded-full bg-white shadow-inner ring-1 ring-slate-200">
+        {painLocations.slice(0, 7).map((location, index) => (
+          <button
+            key={location}
+            type="button"
+            onClick={() => onSelect(location)}
+            className={`absolute left-1/2 h-7 -translate-x-1/2 rounded-full px-3 text-[11px] font-black transition ${selected === location ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-teal-50'}`}
+            style={{ top: `${18 + index * 32}px` }}
+          >
+            {location}
+          </button>
+        ))}
+      </div>
+      <div>
+        <div className="mb-2 flex items-center gap-2 text-sm font-black text-slate-900">
+          <MapPinIcon className="h-5 w-5 text-teal-700" />
+          Vùng đau đang chọn: {selected || 'Chưa chọn'}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {painLocations.map((location) => (
+            <button key={location} type="button" onClick={() => onSelect(location)} className={`rounded-full border px-3 py-1.5 text-xs font-black ${selected === location ? 'border-teal-600 bg-teal-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200'}`}>
+              {location}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
-function Stat({ label, value, dark = false }: { label: string; value: string; dark?: boolean }) {
+function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
+  const triage = normalizeTriage(analysis.triageColor ?? analysis.warningLevel);
   return (
-    <div className={`rounded-xl p-3 text-center ${dark ? 'bg-white/10 ring-1 ring-white/10' : 'bg-white shadow-sm'}`}>
-      <div className={`text-lg font-black ${dark ? 'text-white' : 'text-slate-950'}`}>{value}</div>
-      <div className={`mt-1 text-[11px] font-bold uppercase tracking-[0.12em] ${dark ? 'text-teal-100' : 'text-slate-400'}`}>{label}</div>
+    <div className="space-y-5">
+      <div className={`rounded-2xl border p-4 ${getTriagePanelClass(triage)}`}>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em]">
+              <ShieldCheckIcon className="h-4 w-4" />
+              {toTriageLabel(triage)}
+            </div>
+            <p className="mt-3 text-sm font-semibold leading-6">{analysis.summary}</p>
+          </div>
+          <div className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-white/80 text-center shadow-sm">
+            <div>
+              <div className="text-3xl font-black">{analysis.riskScore}</div>
+              <div className="text-xs font-black opacity-70">/100</div>
+            </div>
+          </div>
+        </div>
+        {analysis.urgencyAction && (
+          <div className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-black shadow-sm">{analysis.urgencyAction}</div>
+        )}
+      </div>
+      {analysis.weeklySummary && <InfoBlock title="AI summary 7 ngày" content={analysis.weeklySummary} />}
+      {analysis.trendSummary && <InfoBlock title="Xu hướng gần đây" content={analysis.trendSummary} />}
+      {analysis.riskFactors?.length > 0 && <RiskFactorList factors={analysis.riskFactors} />}
+      <ListBlock title="Khuyến nghị cá nhân hóa" items={analysis.recommendations} />
+      <ServiceSuggestions services={analysis.suggestedServices} triage={triage} />
+      <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold leading-5 text-amber-800">{analysis.disclaimer}</p>
+    </div>
+  );
+}
+
+function TimelineChart({ history }: { history: HealthCheckInHistoryDto[] }) {
+  const data = history.slice(0, 7).reverse();
+  if (data.length === 0) return <EmptyState message="Chưa có dữ liệu để vẽ timeline." />;
+  const maxPain = 10;
+  return (
+    <div className="space-y-4">
+      <div className="grid min-h-56 grid-cols-7 items-end gap-2 rounded-xl bg-slate-50 p-4">
+        {data.map((item) => {
+          const triage = normalizeTriage(item.analysis?.triageColor ?? item.analysis?.warningLevel);
+          return (
+            <div key={item.checkInId} className="flex h-48 flex-col items-center justify-end gap-2">
+              <div className="text-xs font-black text-slate-500">{item.painLevel}</div>
+              <div className={`w-full rounded-t-lg ${getTriageBarClass(triage)}`} style={{ height: `${Math.max(12, (item.painLevel / maxPain) * 160)}px` }} />
+              <div className="text-[10px] font-bold text-slate-400">{new Date(item.createdAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <TrendMini title="Đau" current={data.at(-1)?.painLevel ?? 0} previous={data[0]?.painLevel ?? 0} suffix="/10" />
+        <TrendMini title="Ngủ" current={data.at(-1)?.sleepHours ?? 0} previous={data[0]?.sleepHours ?? 0} suffix="h" inverse />
+        <TrendMini title="Check-in" current={data.length} previous={7} suffix="/7" />
+      </div>
+    </div>
+  );
+}
+
+function HistoryItem({ item, expanded, onToggle }: { item: HealthCheckInHistoryDto; expanded: boolean; onToggle: () => void }) {
+  const triage = normalizeTriage(item.analysis?.triageColor ?? item.analysis?.warningLevel);
+  return (
+    <article className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <button type="button" onClick={onToggle} className="flex w-full flex-col gap-3 p-4 text-left transition hover:bg-slate-50 md:flex-row md:items-center md:justify-between">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+            <ClockIcon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="font-black text-slate-950">{formatDateTime(item.createdAt)}</h3>
+              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${getTriageBadgeClass(triage)}`}>{toTriageLabel(triage)}</span>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-500">
+              <Metric label="Đau" value={`${item.painLevel}/10`} />
+              <Metric label="Vùng" value={item.painLocation ?? 'Chưa chọn'} />
+              <Metric label="Ngủ" value={`${item.sleepHours}h`} />
+              <Metric label="Mẹ" value={toOptionLabel(item.mood, moodOptions)} />
+            </div>
+          </div>
+        </div>
+        <ChevronDownIcon className={`h-5 w-5 shrink-0 text-slate-400 transition ${expanded ? 'rotate-180' : ''}`} />
+      </button>
+      {expanded && (
+        <div className="border-t border-slate-100 bg-slate-50 p-4">
+          <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+            <div className="rounded-lg bg-white p-4">
+              <h4 className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Dữ liệu check-in</h4>
+              <div className="grid gap-2 text-sm">
+                <DetailRow label="Mức đau" value={`${item.painLevel}/10`} />
+                <DetailRow label="Vùng đau" value={item.painLocation ?? 'Chưa chọn'} />
+                <DetailRow label="Kiểu đau" value={item.painType ?? 'Chưa chọn'} />
+                <DetailRow label="Triệu chứng" value={item.symptoms?.join(', ') || 'Không ghi nhận'} />
+                <DetailRow label="Huyết áp" value={item.systolicBloodPressure && item.diastolicBloodPressure ? `${item.systolicBloodPressure}/${item.diastolicBloodPressure}` : 'Chưa nhập'} />
+                <DetailRow label="Nhiệt độ" value={item.temperatureCelsius ? `${item.temperatureCelsius}°C` : 'Chưa nhập'} />
+              </div>
+              <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm font-medium leading-6 text-slate-700">{item.note || 'Không có ghi chú.'}</p>
+            </div>
+            <div className="rounded-lg bg-white p-4">{item.analysis ? <AnalysisSummary analysis={item.analysis} /> : <EmptyState message="Lần check-in này chưa có phân tích AI." />}</div>
+          </div>
+        </div>
+      )}
+    </article>
+  );
+}
+
+function ChipGroup({ label, options, values, onChange }: { label: string; options: string[]; values: string[]; onChange: (values: string[]) => void }) {
+  const toggle = (value: string) => onChange(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
+  return (
+    <div>
+      <div className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">{label}</div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <button key={option} type="button" onClick={() => toggle(option)} className={`rounded-full border px-3 py-1.5 text-xs font-black ${values.includes(option) ? 'border-teal-600 bg-teal-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200'}`}>
+            {option}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -344,469 +617,170 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function NumberInput({
-  value,
-  min,
-  max,
-  step,
-  icon,
-  onChange,
-}: {
-  value: number;
-  min: number;
-  max: number;
-  step?: number;
-  icon: React.ReactElement;
-  onChange: (value: number) => void;
-}) {
+function NumberInput({ value, min, max, step, onChange }: { value: number; min: number; max: number; step?: number; onChange: (value: number) => void }) {
+  return <input type="number" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50" />;
+}
+
+function TextInput({ value, onChange, placeholder, inputMode, className = '' }: { value: string; onChange: (value: string) => void; placeholder?: string; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; className?: string }) {
+  return <input value={value} inputMode={inputMode} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className={`w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50 ${className}`} />;
+}
+
+function RangeInput({ value, min, max, suffix, onChange }: { value: number; min: number; max: number; suffix: string; onChange: (value: number) => void }) {
   return (
-    <div className="relative">
-      <span className="pointer-events-none absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300">{icon}</span>
-      <input
-        type="number"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full rounded-lg border border-slate-200 bg-white py-3 pl-10 pr-3 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50"
-      />
+    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+      <div className="mb-2 flex items-center justify-between text-sm font-black text-slate-900"><span>{value}{suffix}</span><HeartIcon className="h-5 w-5 text-teal-600" /></div>
+      <input type="range" min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} className="w-full accent-teal-600" />
     </div>
   );
 }
 
-function Select({
-  value,
-  onChange,
-  options,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
-}) {
+function Select({ value, onChange, options }: { value: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }> }) {
   return (
     <div className="relative">
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-3 pr-10 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-3 pr-10 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50">
+        {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
       </select>
       <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300" />
     </div>
   );
 }
 
-function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
-  const clinical = getClinicalStatus(analysis.warningLevel, analysis.riskScore);
-  const primaryAction = analysis.carePlan?.[0]?.action ?? analysis.recommendations?.[0];
-
-  return (
-    <div className="space-y-5">
-      <div className={`overflow-hidden rounded-[1.15rem] border ${clinical.panelClass}`}>
-        <div className="grid gap-0 lg:grid-cols-[220px_minmax(0,1fr)]">
-          <div className="p-4 sm:p-5">
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em]">
-              <ShieldCheckIcon className="h-4 w-4" />
-              AI triage
-            </div>
-            <div className="mt-4 flex items-end gap-2">
-              <span className="text-5xl font-black tracking-tight">{Math.max(0, Math.min(100, analysis.riskScore ?? 0))}</span>
-              <span className="pb-2 text-sm font-black opacity-70">/100</span>
-            </div>
-            <div className="mt-3">
-              <span className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-black ${getWarningTone(analysis.warningLevel)}`}>
-                {clinical.label}
-              </span>
-            </div>
-          </div>
-
-          <div className="border-t border-current/10 bg-white/70 p-4 sm:p-5 lg:border-l lg:border-t-0">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-500">Tóm tắt điều phối chăm sóc</div>
-                <p className="mt-2 text-sm font-semibold leading-6 text-slate-800">{analysis.summary}</p>
-              </div>
-              <div className="rounded-xl bg-white px-3 py-2 text-right shadow-sm ring-1 ring-slate-100">
-                <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Độ tin cậy</div>
-                <div className="text-xl font-black text-teal-700">{analysis.confidenceScore ?? 0}%</div>
-              </div>
-            </div>
-
-            {primaryAction && (
-              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-950 px-4 py-3 text-white">
-                <div className="flex items-start gap-3">
-                  <BoltIcon className="mt-0.5 h-5 w-5 shrink-0 text-teal-300" />
-                  <div>
-                    <div className="text-xs font-black uppercase tracking-[0.16em] text-teal-200">Ưu tiên tiếp theo</div>
-                    <p className="mt-1 text-sm font-semibold leading-6">{primaryAction}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      <RiskScorePanel analysis={analysis} />
-
-      {analysis.trendSummary && <InfoBlock title="Xu hướng 7 lần gần nhất" content={analysis.trendSummary} tone="teal" />}
-      {analysis.trendSignals?.length > 0 && <TrendSignalGrid signals={analysis.trendSignals} />}
-      {analysis.riskFactors?.length > 0 && <RiskFactorList factors={analysis.riskFactors} />}
-
-      <ListBlock title="Khuyến nghị cá nhân hóa" items={analysis.recommendations} />
-
-      {analysis.carePlan?.length > 0 && (
-        <div>
-          <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Kế hoạch chăm sóc</h3>
-          <div className="space-y-2">
-            {analysis.carePlan.map((item) => (
-              <CarePlanRow key={`${item.timeframe}-${item.action}`} item={item} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <ServiceSuggestions services={analysis.suggestedServices} />
-      <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs font-semibold leading-5 text-amber-800">{analysis.disclaimer}</p>
-    </div>
-  );
+function ChatPrompt({ text }: { text: string }) {
+  return <div className="rounded-2xl rounded-tl-sm bg-slate-950 px-4 py-3 text-sm font-semibold leading-6 text-white shadow-lg">{text}</div>;
 }
 
-function RiskScorePanel({ analysis }: { analysis: HealthAnalysisResponse }) {
-  const score = Math.max(0, Math.min(100, analysis.riskScore ?? 0));
-  const clinical = getClinicalStatus(analysis.warningLevel, score);
-
-  return (
-    <div className="rounded-[1.1rem] border border-slate-200 bg-white p-4 shadow-sm">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Radar rủi ro</div>
-          <div className="mt-1 text-sm font-semibold text-slate-600">{clinical.description}</div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="grid h-20 w-20 place-items-center rounded-full" style={{ background: `conic-gradient(${clinical.ringColor} ${score * 3.6}deg, #e2e8f0 0deg)` }}>
-            <div className="grid h-16 w-16 place-items-center rounded-full bg-white text-center shadow-inner">
-              <span className="text-xl font-black text-slate-950">{score}</span>
-            </div>
-          </div>
-          <div className="rounded-xl bg-slate-50 px-3 py-2 text-right ring-1 ring-slate-100">
-            <div className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Dữ liệu</div>
-            <div className="text-lg font-black text-teal-700">{analysis.confidenceScore ?? 0}%</div>
-          </div>
-        </div>
-      </div>
-      <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
-        <div className={`h-full rounded-full ${getRiskBarTone(score)}`} style={{ width: `${score}%` }} />
-      </div>
-    </div>
-  );
+function Capability({ label }: { label: string }) {
+  return <span className="inline-flex items-center gap-2 rounded-full border border-teal-100 bg-white px-3 py-1.5 text-xs font-black text-slate-700 shadow-sm"><CheckCircleIcon className="h-4 w-4 text-teal-600" />{label}</span>;
 }
 
-function TrendSignalGrid({ signals }: { signals: HealthAnalysisResponse['trendSignals'] }) {
-  return (
-    <div>
-      <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Tín hiệu xu hướng</h3>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {signals.map((signal) => (
-          <div key={signal.metric} className="rounded-xl border border-slate-200 bg-white px-3 py-3 shadow-sm">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-sm font-black text-slate-950">{signal.metric}</span>
-              <span className={`grid h-8 w-8 place-items-center rounded-full bg-slate-50 ${getTrendTone(signal.direction)}`}>{getTrendIcon(signal.direction)}</span>
-            </div>
-            <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{signal.summary}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+function Stat({ label, value, dark = false }: { label: string; value: string; dark?: boolean }) {
+  return <div className={`rounded-xl p-3 text-center ${dark ? 'bg-white/10 ring-1 ring-white/10' : 'bg-white shadow-sm'}`}><div className={`text-lg font-black ${dark ? 'text-white' : 'text-slate-950'}`}>{value}</div><div className={`mt-1 text-[11px] font-bold uppercase tracking-[0.12em] ${dark ? 'text-white/70' : 'text-slate-400'}`}>{label}</div></div>;
+}
+
+function InfoBlock({ title, content }: { title: string; content: string }) {
+  return <div className="rounded-xl border border-teal-100 bg-teal-50 px-4 py-3"><h3 className="text-xs font-black uppercase tracking-[0.16em] text-teal-900">{title}</h3><p className="mt-2 text-sm font-semibold leading-6 text-teal-900">{content}</p></div>;
 }
 
 function RiskFactorList({ factors }: { factors: HealthAnalysisResponse['riskFactors'] }) {
-  return (
-    <div>
-      <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Yếu tố làm tăng rủi ro</h3>
-      <div className="grid gap-2 sm:grid-cols-2">
-        {factors.map((factor) => (
-          <div key={factor.code} className="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2">
-            <span className="text-sm font-black text-rose-900">{factor.label}</span>
-            <span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-black text-rose-700 shadow-sm">+{factor.points}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function HistoryItem({ item, expanded, onToggle }: { item: HealthCheckInHistoryDto; expanded: boolean; onToggle: () => void }) {
-  const displayWarning = getDisplayWarningLevel(item);
-
-  return (
-    <article className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <button type="button" onClick={onToggle} className="flex w-full flex-col gap-3 p-4 text-left transition hover:bg-slate-50 md:flex-row md:items-center md:justify-between">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-            <ClockIcon className="h-5 w-5" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="font-black text-slate-950">{formatDateTime(item.createdAt)}</h3>
-              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${getWarningTone(displayWarning)}`}>
-                {toWarningLabel(displayWarning) ?? 'Chưa phân tích'}
-              </span>
-            </div>
-            <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-500">
-              <Metric label="Ngủ" value={`${item.sleepHours} giờ`} />
-              <Metric label="Đau" value={`${item.painLevel}/10`} />
-              <Metric label="Mẹ" value={toOptionLabel(item.mood, moodOptions)} />
-              <Metric label="Sữa" value={toOptionLabel(item.milkStatus, milkStatusOptions)} />
-              <Metric label="Bé bú" value={toOptionLabel(item.babyFeeding, babyFeedingOptions)} />
-            </div>
-          </div>
-        </div>
-        <ChevronDownIcon className={`h-5 w-5 shrink-0 text-slate-400 transition ${expanded ? 'rotate-180' : ''}`} />
-      </button>
-
-      {expanded && (
-        <div className="border-t border-slate-100 bg-slate-50 p-4">
-          <div className="grid gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <div className="rounded-lg bg-white p-4">
-              <h4 className="mb-3 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Dữ liệu check-in</h4>
-              <div className="grid gap-2 text-sm">
-                <DetailRow label="Số giờ ngủ" value={`${item.sleepHours} giờ`} />
-                <DetailRow label="Mức độ đau" value={`${item.painLevel}/10`} />
-                <DetailRow label="Tâm trạng" value={toOptionLabel(item.mood, moodOptions)} />
-                <DetailRow label="Tình trạng sữa" value={toOptionLabel(item.milkStatus, milkStatusOptions)} />
-                <DetailRow label="Tình trạng bú của bé" value={toOptionLabel(item.babyFeeding, babyFeedingOptions)} />
-                <DetailRow label="Giấc ngủ của bé" value={toOptionLabel(item.babySleep, babySleepOptions)} />
-              </div>
-              <div className="mt-4 rounded-lg bg-slate-50 p-3">
-                <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Ghi chú</div>
-                <p className="mt-2 text-sm font-medium leading-6 text-slate-700">{item.note || 'Không có ghi chú.'}</p>
-              </div>
-            </div>
-
-            <div className="rounded-lg bg-white p-4">
-              {item.analysis ? <AnalysisSummary analysis={item.analysis} /> : <EmptyState message="Lần check-in này chưa có phân tích AI." />}
-            </div>
-          </div>
-        </div>
-      )}
-    </article>
-  );
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2">
-      <span className="font-semibold text-slate-500">{label}</span>
-      <span className="text-right font-black text-slate-950">{value}</span>
-    </div>
-  );
-}
-
-function Metric({ label, value }: { label: string; value: string }) {
-  return (
-    <span className="rounded-full bg-slate-100 px-2.5 py-1">
-      {label}: <strong className="text-slate-800">{value}</strong>
-    </span>
-  );
-}
-
-function InfoBlock({ title, content, tone = 'slate' }: { title: string; content: string; tone?: 'slate' | 'teal' }) {
-  const toneClass = tone === 'teal' ? 'border-teal-100 bg-teal-50 text-teal-900' : 'border-slate-200 bg-slate-50 text-slate-700';
-  return (
-    <div className={`rounded-xl border px-4 py-3 ${toneClass}`}>
-      <div className="flex items-start gap-3">
-        <SignalIcon className="mt-0.5 h-5 w-5 shrink-0" />
-        <div>
-          <h3 className="text-xs font-black uppercase tracking-[0.16em]">{title}</h3>
-          <p className="mt-2 text-sm font-semibold leading-6">{content}</p>
-        </div>
-      </div>
-    </div>
-  );
+  return <div><h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Yếu tố làm tăng rủi ro</h3><div className="grid gap-2 sm:grid-cols-2">{factors.map((factor) => <div key={factor.code} className="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2"><span className="text-sm font-black text-rose-900">{factor.label}</span><span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-black text-rose-700 shadow-sm">+{factor.points}</span></div>)}</div></div>;
 }
 
 function ListBlock({ title, items }: { title: string; items: string[] }) {
-  if (!items.length) {
-    return null;
+  if (!items.length) return null;
+  return <div><h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">{title}</h3><ul className="grid gap-2 md:grid-cols-2">{items.map((item, index) => <li key={item} className="flex gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-slate-700 shadow-sm"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-50 text-xs font-black text-teal-700 ring-1 ring-teal-100">{index + 1}</span>{item}</li>)}</ul></div>;
+}
+
+function ServiceSuggestions({ services, triage }: { services: HealthAnalysisResponse['suggestedServices']; triage: string }) {
+  if (triage === 'Emergency') {
+    return <div className="rounded-xl border border-red-200 bg-red-50 p-4"><div className="flex items-start gap-3"><ExclamationTriangleIcon className="h-5 w-5 text-red-700" /><p className="text-sm font-black leading-6 text-red-900">Ưu tiên cấp cứu hoặc cơ sở y tế trước khi đặt dịch vụ tại nhà.</p></div></div>;
   }
-
-  return (
-    <div>
-      <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">{title}</h3>
-      <ul className="grid gap-2 md:grid-cols-2">
-        {items.map((item, index) => (
-          <li key={item} className="flex gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-semibold leading-6 text-slate-700 shadow-sm">
-            <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-teal-50 text-xs font-black text-teal-700 ring-1 ring-teal-100">{index + 1}</span>
-            {item}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+  return <div><h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Dịch vụ gợi ý</h3>{services.length === 0 ? <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium text-slate-500">Hiện chưa có gợi ý dịch vụ cụ thể.</p> : <div className="grid gap-3 md:grid-cols-2">{services.map((service) => <Link key={service.serviceKey} to={`/services/${encodeURIComponent(service.serviceKey)}`} className="group rounded-xl border border-teal-100 bg-teal-50 px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:bg-white"><div className="flex items-start gap-3"><div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-teal-700 shadow-sm"><LifebuoyIcon className="h-5 w-5" /></div><div><div className="text-sm font-black text-teal-950">{service.serviceName}</div><div className="mt-1 text-sm font-semibold leading-6 text-teal-800">{service.reason}</div></div></div></Link>)}</div>}</div>;
 }
 
-function CarePlanRow({ item }: { item: { timeframe: string; action: string; reason: string } }) {
-  return (
-    <div className="relative rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-      <div className="absolute bottom-3 left-0 top-3 w-1 rounded-r-full bg-teal-500" />
-      <div className="pl-2">
-        <div className="text-xs font-black uppercase tracking-[0.14em] text-teal-700">{item.timeframe}</div>
-        <div className="mt-1 text-sm font-black leading-6 text-slate-950">{item.action}</div>
-        {item.reason && <div className="mt-1 text-sm font-semibold leading-6 text-slate-600">{item.reason}</div>}
-      </div>
-    </div>
-  );
+function TrendMini({ title, current, previous, suffix, inverse = false }: { title: string; current: number; previous: number; suffix: string; inverse?: boolean }) {
+  const diff = current - previous;
+  const better = inverse ? diff > 0 : diff < 0;
+  return <div className="rounded-xl border border-slate-200 bg-white p-3"><div className="flex items-center justify-between"><span className="text-sm font-black text-slate-900">{title}</span>{better ? <ArrowTrendingDownIcon className="h-5 w-5 text-emerald-600" /> : <ArrowTrendingUpIcon className="h-5 w-5 text-amber-600" />}</div><div className="mt-2 text-xl font-black text-slate-950">{current.toFixed(title === 'Check-in' ? 0 : 1)}{suffix}</div></div>;
 }
 
-function ServiceSuggestions({ services }: { services: HealthAnalysisResponse['suggestedServices'] }) {
-  return (
-    <div>
-      <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Dịch vụ gợi ý</h3>
-      {services.length === 0 ? (
-        <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium text-slate-500">Hiện chưa có gợi ý dịch vụ cụ thể.</p>
-      ) : (
-        <div className="grid gap-3 md:grid-cols-2">
-          {services.map((service) => (
-            <Link
-              key={service.serviceKey}
-              to={`/services/${encodeURIComponent(service.serviceKey)}`}
-              className="group rounded-xl border border-teal-100 bg-teal-50 px-4 py-3 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:bg-white hover:shadow-lg hover:shadow-teal-100"
-            >
-              <div className="flex items-start gap-3">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-teal-700 shadow-sm transition group-hover:bg-teal-600 group-hover:text-white">
-                  <LifebuoyIcon className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="text-sm font-black text-teal-950">{service.serviceName}</div>
-                  <div className="mt-1 text-sm font-semibold leading-6 text-teal-800">{service.reason}</div>
-                  <div className="mt-2 text-xs font-black uppercase tracking-[0.14em] text-teal-700">Xem gói phù hợp</div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2"><span className="font-semibold text-slate-500">{label}</span><span className="text-right font-black text-slate-950">{value}</span></div>;
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return <span className="rounded-full bg-slate-100 px-2.5 py-1">{label}: <strong className="text-slate-800">{value}</strong></span>;
 }
 
 function EmptyState({ message }: { message: string }) {
-  return (
-    <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center">
-      <ClockIcon className="mx-auto h-8 w-8 text-slate-300" />
-      <p className="mt-3 text-sm font-bold text-slate-500">{message}</p>
-    </div>
-  );
+  return <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center"><ClockIcon className="mx-auto h-8 w-8 text-slate-300" /><p className="mt-3 text-sm font-bold text-slate-500">{message}</p></div>;
 }
 
-function getClinicalStatus(level?: string, score = 0) {
+function buildConditionalPrompts(form: FormState) {
+  const prompts: string[] = [];
+  if (form.painLocation.includes('Đầu')) prompts.push('Mẹ có chóng mặt, mờ mắt hoặc đau đầu dữ dội không?');
+  if (form.painLocation.includes('Ngực') || form.symptoms.includes('Đau ngực')) prompts.push('Có khó thở, hồi hộp, vã mồ hôi hoặc đau lan sang tay/hàm không?');
+  if (form.painLocation.includes('Bụng') || form.painLocation.includes('Vết mổ')) prompts.push('Có sốt, ra máu bất thường, vết mổ sưng đỏ hoặc chảy dịch không?');
+  if (form.babyFeeding === 'RefusesFeeding' || form.symptoms.includes('Bé bỏ bú')) prompts.push('Bé bỏ bú bao lâu rồi, có sốt hoặc lừ đừ không?');
+  if (form.painLevel >= 8) prompts.push('Mức đau cao: nếu đau tăng nhanh hoặc kèm dấu hiệu bất thường, nên liên hệ y tế sớm.');
+  return prompts;
+}
+
+function validateForm(form: FormState, showToast: (message: string, type?: 'success' | 'error' | 'info') => void) {
+  if (form.sleepHours < 0 || form.sleepHours > 24) {
+    showToast('Số giờ ngủ phải nằm trong khoảng 0 đến 24.', 'error');
+    return false;
+  }
+  if (form.painLevel < 0 || form.painLevel > 10) {
+    showToast('Mức độ đau phải nằm trong khoảng 0 đến 10.', 'error');
+    return false;
+  }
+  if (form.note.length > 1000) {
+    showToast('Ghi chú không được vượt quá 1000 ký tự.', 'error');
+    return false;
+  }
+  return true;
+}
+
+function normalizeTriage(level?: string) {
   switch (level) {
-    case 'High':
-      return {
-        label: 'Ưu tiên cao',
-        description: 'Cần theo dõi sát và cân nhắc liên hệ chuyên môn nếu dấu hiệu kéo dài hoặc nặng hơn.',
-        panelClass: 'border-red-100 bg-red-50 text-red-950',
-        ringColor: '#ef4444',
-      };
-    case 'Medium':
-      return {
-        label: 'Cần chú ý',
-        description: 'Có vài tín hiệu cần quan sát trong 24-48 giờ tới để tránh bỏ lỡ thay đổi quan trọng.',
-        panelClass: 'border-amber-100 bg-amber-50 text-amber-950',
-        ringColor: '#f59e0b',
-      };
-    default:
-      return {
-        label: score > 0 ? 'Ổn định có theo dõi' : 'Chưa có dữ liệu',
-        description: 'Tình trạng hiện tương đối ổn, tiếp tục check-in đều để AI nhận diện xu hướng sớm.',
-        panelClass: 'border-emerald-100 bg-emerald-50 text-emerald-950',
-        ringColor: '#10b981',
-      };
+    case 'Emergency': return 'Emergency';
+    case 'Red':
+    case 'High': return 'Red';
+    case 'Yellow':
+    case 'Medium': return 'Yellow';
+    default: return 'Green';
   }
 }
 
-function getWarningTone(level?: string) {
+function toTriageLabel(level?: string) {
+  switch (normalizeTriage(level)) {
+    case 'Emergency': return 'Đỏ khẩn cấp';
+    case 'Red': return 'Đỏ';
+    case 'Yellow': return 'Vàng';
+    default: return 'Xanh';
+  }
+}
+
+function getTriageHeroClass(level: string) {
   switch (level) {
-    case 'High':
-      return 'border-red-100 bg-red-50 text-red-700';
-    case 'Medium':
-      return 'border-amber-100 bg-amber-50 text-amber-700';
-    case 'Low':
-      return 'border-emerald-100 bg-emerald-50 text-emerald-700';
-    default:
-      return 'border-slate-200 bg-slate-50 text-slate-600';
+    case 'Emergency': return 'border-red-900 bg-red-700';
+    case 'Red': return 'border-red-800 bg-red-600';
+    case 'Yellow': return 'border-amber-700 bg-amber-600';
+    default: return 'border-teal-900 bg-slate-950';
   }
 }
 
-function getRiskBarTone(score: number) {
-  if (score >= 60) {
-    return 'bg-red-500';
-  }
-
-  if (score >= 30) {
-    return 'bg-amber-500';
-  }
-
-  return 'bg-emerald-500';
-}
-
-function getTrendTone(direction?: string) {
-  switch (direction) {
-    case 'up':
-      return 'text-amber-600';
-    case 'down':
-      return 'text-red-600';
-    default:
-      return 'text-emerald-600';
-  }
-}
-
-function getTrendIcon(direction?: string) {
-  switch (direction) {
-    case 'up':
-      return <ArrowTrendingUpIcon className="h-4 w-4" />;
-    case 'down':
-      return <ArrowTrendingDownIcon className="h-4 w-4" />;
-    default:
-      return <SignalIcon className="h-4 w-4" />;
-  }
-}
-
-function toWarningLabel(level?: string) {
+function getTriagePanelClass(level: string) {
   switch (level) {
-    case 'High':
-      return 'Cao';
-    case 'Medium':
-      return 'Trung bình';
-    case 'Low':
-      return 'Thấp';
-    default:
-      return level;
+    case 'Emergency': return 'border-red-200 bg-red-50 text-red-950';
+    case 'Red': return 'border-rose-200 bg-rose-50 text-rose-950';
+    case 'Yellow': return 'border-amber-200 bg-amber-50 text-amber-950';
+    default: return 'border-emerald-200 bg-emerald-50 text-emerald-950';
   }
 }
 
-function getDisplayWarningLevel(item: HealthCheckInHistoryDto) {
-  if (item.analysis && item.analysis.riskScore > 0) {
-    return item.analysis.warningLevel;
+function getTriageBadgeClass(level: string) {
+  switch (level) {
+    case 'Emergency': return 'border-red-200 bg-red-50 text-red-700';
+    case 'Red': return 'border-rose-200 bg-rose-50 text-rose-700';
+    case 'Yellow': return 'border-amber-200 bg-amber-50 text-amber-700';
+    default: return 'border-emerald-200 bg-emerald-50 text-emerald-700';
   }
+}
 
-  if (item.painLevel >= 9 || item.babyFeeding === 'RefusesFeeding') {
-    return 'High';
+function getTriageBarClass(level: string) {
+  switch (level) {
+    case 'Emergency': return 'bg-red-700';
+    case 'Red': return 'bg-rose-500';
+    case 'Yellow': return 'bg-amber-400';
+    default: return 'bg-emerald-500';
   }
+}
 
-  if (item.painLevel >= 7 || item.sleepHours < 5 || item.babyFeeding === 'LessThanUsual' || item.mood === 'Stressed' || item.mood === 'Anxious' || item.mood === 'Overwhelmed') {
-    return 'Medium';
-  }
-
-  return item.analysis?.warningLevel ?? 'Low';
+function toOptionalNumber(value: string) {
+  if (!value.trim()) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function toOptionLabel(value: string, options: Array<{ value: string; label: string }>) {
@@ -814,13 +788,16 @@ function toOptionLabel(value: string, options: Array<{ value: string; label: str
 }
 
 function formatDateTime(value: string) {
-  return new Date(value).toLocaleString('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
+  return new Date(value).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+function buildPrintableReport(analysis: HealthAnalysisResponse | null, rows: string[][]) {
+  const bodyRows = rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('');
+  return `<!doctype html><html><head><meta charset="utf-8"><title>CareMate Health Report</title><style>body{font-family:Arial,sans-serif;padding:32px;color:#0f172a}h1{margin:0 0 8px}p{line-height:1.6}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #e2e8f0;padding:10px;text-align:left;font-size:12px}th{background:#f8fafc}.box{border:1px solid #cbd5e1;border-radius:12px;padding:16px;margin-top:16px}</style></head><body><h1>CareMate Health Report</h1><p>Ngày xuất: ${new Date().toLocaleString('vi-VN')}</p><div class="box"><strong>Triage:</strong> ${escapeHtml(toTriageLabel(analysis?.triageColor ?? analysis?.warningLevel))}<br><strong>Risk score:</strong> ${analysis?.riskScore ?? '--'}/100<p>${escapeHtml(analysis?.summary ?? 'Chưa có phân tích mới.')}</p></div><table><thead><tr><th>Thời gian</th><th>Đau</th><th>Vùng đau</th><th>Ngủ</th><th>Mood</th><th>Triage</th><th>Tóm tắt</th></tr></thead><tbody>${bodyRows}</tbody></table></body></html>`;
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[char] ?? char);
 }
 
 export default HealthCheckInsPage;

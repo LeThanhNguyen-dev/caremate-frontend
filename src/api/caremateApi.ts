@@ -290,6 +290,18 @@ export const caremateApi = {
   analyzeHealthCheckIn: async (payload: {
     sleepHours: number;
     painLevel: number;
+    painLocation?: string;
+    painType?: string;
+    painDuration?: string;
+    painTrend?: string;
+    symptoms?: string[];
+    medicalHistory?: string[];
+    motherAge?: number;
+    systolicBloodPressure?: number;
+    diastolicBloodPressure?: number;
+    temperatureCelsius?: number;
+    tookMedicationToday?: boolean;
+    medicationNote?: string;
     mood: string;
     milkStatus: string;
     babyFeeding: string;
