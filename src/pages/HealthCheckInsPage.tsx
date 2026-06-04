@@ -18,7 +18,9 @@ import {
   MicrophoneIcon,
   PhoneIcon,
   ShieldCheckIcon,
+  SpeakerWaveIcon,
   SparklesIcon,
+  StopCircleIcon,
 } from '@heroicons/react/24/outline';
 import caremateApi from '../api/caremateApi';
 import type { HealthAnalysisResponse, HealthCheckInHistoryDto, LatestHealthCheckInDto } from '../api/frontend-api-contract';
@@ -27,12 +29,20 @@ import { useToast } from '../hooks/useToast';
 type FormState = {
   sleepHours: number;
   painLevel: number;
-  painLocation: string;
+  painLocation: string[];
   painType: string;
   painDuration: string;
   painTrend: string;
   symptoms: string[];
   medicalHistory: string[];
+  postpartumDay: string;
+  deliveryMethod: string;
+  bleedingLevel: string;
+  incisionStatus: string;
+  swellingLevel: string;
+  urinationIssue: boolean;
+  babyWetDiapers: string;
+  babyActivity: string;
   motherAge: string;
   systolicBloodPressure: string;
   diastolicBloodPressure: string;
@@ -91,16 +101,57 @@ const babySleepOptions = [
   { value: 'WakingFrequently', label: 'Thức giấc nhiều' },
   { value: 'SleepingLonger', label: 'Ngủ lâu hơn' },
 ];
+const deliveryMethodOptions = [
+  { value: '', label: 'Chưa chọn' },
+  { value: 'Vaginal', label: 'Sinh thường' },
+  { value: 'CSection', label: 'Sinh mổ' },
+];
+const bleedingLevelOptions = [
+  { value: '', label: 'Chưa chọn' },
+  { value: 'None', label: 'Không/rất ít' },
+  { value: 'Light', label: 'Ít' },
+  { value: 'Moderate', label: 'Vừa' },
+  { value: 'Heavy', label: 'Nhiều' },
+];
+const incisionStatusOptions = [
+  { value: '', label: 'Không áp dụng' },
+  { value: 'Normal', label: 'Bình thường' },
+  { value: 'Painful', label: 'Đau/tăng đau' },
+  { value: 'RedSwollen', label: 'Sưng đỏ' },
+  { value: 'Discharge', label: 'Chảy dịch' },
+];
+const swellingLevelOptions = [
+  { value: '', label: 'Chưa chọn' },
+  { value: 'None', label: 'Không' },
+  { value: 'Mild', label: 'Nhẹ' },
+  { value: 'Moderate', label: 'Vừa' },
+  { value: 'Severe', label: 'Nhiều' },
+];
+const babyActivityOptions = [
+  { value: '', label: 'Chưa chọn' },
+  { value: 'Normal', label: 'Bình thường' },
+  { value: 'Sleepier', label: 'Buồn ngủ hơn' },
+  { value: 'Fussy', label: 'Quấy khóc' },
+  { value: 'Lethargic', label: 'Lừ đừ/yếu' },
+];
 
 const initialForm: FormState = {
   sleepHours: 6,
   painLevel: 4,
-  painLocation: '',
+  painLocation: [],
   painType: '',
   painDuration: '',
   painTrend: 'Same',
   symptoms: [],
   medicalHistory: [],
+  postpartumDay: '',
+  deliveryMethod: '',
+  bleedingLevel: '',
+  incisionStatus: '',
+  swellingLevel: '',
+  urinationIssue: false,
+  babyWetDiapers: '',
+  babyActivity: '',
   motherAge: '',
   systolicBloodPressure: '',
   diastolicBloodPressure: '',
@@ -168,12 +219,13 @@ const HealthCheckInsPage = () => {
       const result = await caremateApi.analyzeHealthCheckIn({
         sleepHours: form.sleepHours,
         painLevel: form.painLevel,
-        painLocation: form.painLocation || undefined,
+        painLocation: form.painLocation.length ? form.painLocation.join(', ') : undefined,
         painType: form.painType || undefined,
         painDuration: form.painDuration || undefined,
         painTrend: form.painTrend || undefined,
         symptoms: form.symptoms,
         medicalHistory: form.medicalHistory,
+        contextData: buildContextData(form),
         motherAge: toOptionalNumber(form.motherAge),
         systolicBloodPressure: toOptionalNumber(form.systolicBloodPressure),
         diastolicBloodPressure: toOptionalNumber(form.diastolicBloodPressure),
@@ -290,108 +342,152 @@ const HealthCheckInsPage = () => {
           </Panel>
 
           <Panel title="Check-in dạng hội thoại" icon={<ChatBubbleLeftRightIcon className="h-5 w-5" />}>
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <ChatPrompt text="Hôm nay mẹ thấy thế nào? Chọn vùng đau và dấu hiệu đi kèm trước, AI sẽ hỏi tiếp đúng ngữ cảnh." />
-              <BodyMap selected={form.painLocation} onSelect={(painLocation) => setForm((prev) => ({ ...prev, painLocation }))} />
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <Field label="Mức đau">
-                  <RangeInput value={form.painLevel} min={0} max={10} onChange={(painLevel) => setForm((prev) => ({ ...prev, painLevel }))} suffix="/10" />
-                </Field>
-                <Field label="Kiểu đau">
-                  <Select value={form.painType} onChange={(painType) => setForm((prev) => ({ ...prev, painType }))} options={[{ value: '', label: 'Chọn kiểu đau' }, ...painTypes.map((value) => ({ value, label: value }))]} />
-                </Field>
-                <Field label="Đau bao lâu">
-                  <Select value={form.painDuration} onChange={(painDuration) => setForm((prev) => ({ ...prev, painDuration }))} options={[{ value: '', label: 'Chọn thời gian' }, ...painDurations.map((value) => ({ value, label: value }))]} />
-                </Field>
-                <Field label="Diễn tiến đau">
-                  <Select value={form.painTrend} onChange={(painTrend) => setForm((prev) => ({ ...prev, painTrend }))} options={painTrends} />
-                </Field>
-                <Field label="Số giờ ngủ">
-                  <NumberInput value={form.sleepHours} min={0} max={24} step={0.5} onChange={(sleepHours) => setForm((prev) => ({ ...prev, sleepHours }))} />
-                </Field>
-                <Field label="Tâm trạng">
-                  <Select value={form.mood} onChange={(mood) => setForm((prev) => ({ ...prev, mood }))} options={moodOptions} />
-                </Field>
-              </div>
+              <FormSection title="Vùng đau và mức độ" subtitle="Chọn một hoặc nhiều vị trí, sau đó mô tả cường độ và diễn tiến để AI hiểu ngữ cảnh chính.">
+                <BodyMap selected={form.painLocation} onChange={(painLocation) => setForm((prev) => ({ ...prev, painLocation }))} />
 
-              <ChipGroup label="Triệu chứng đi kèm" options={symptomOptions} values={form.symptoms} onChange={(symptoms) => setForm((prev) => ({ ...prev, symptoms }))} />
-              <ChipGroup label="Tiền sử cần lưu ý" options={historyOptions} values={form.medicalHistory} onChange={(medicalHistory) => setForm((prev) => ({ ...prev, medicalHistory }))} />
-
-              {conditionalPrompts.length > 0 && (
-                <div className="rounded-xl border border-amber-100 bg-amber-50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-black text-amber-900">
-                    <BellAlertIcon className="h-5 w-5" />
-                    AI hỏi thêm theo triệu chứng
-                  </div>
-                  <div className="space-y-2">
-                    {conditionalPrompts.map((prompt) => (
-                      <p key={prompt} className="text-sm font-semibold leading-6 text-amber-800">{prompt}</p>
-                    ))}
-                  </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <Field label="Mức đau">
+                    <RangeInput value={form.painLevel} min={0} max={10} onChange={(painLevel) => setForm((prev) => ({ ...prev, painLevel }))} suffix="/10" />
+                  </Field>
+                  <Field label="Kiểu đau">
+                    <Select value={form.painType} onChange={(painType) => setForm((prev) => ({ ...prev, painType }))} options={[{ value: '', label: 'Chọn kiểu đau' }, ...painTypes.map((value) => ({ value, label: value }))]} />
+                  </Field>
+                  <Field label="Đau bao lâu">
+                    <Select value={form.painDuration} onChange={(painDuration) => setForm((prev) => ({ ...prev, painDuration }))} options={[{ value: '', label: 'Chọn thời gian' }, ...painDurations.map((value) => ({ value, label: value }))]} />
+                  </Field>
+                  <Field label="Diễn tiến đau">
+                    <Select value={form.painTrend} onChange={(painTrend) => setForm((prev) => ({ ...prev, painTrend }))} options={painTrends} />
+                  </Field>
+                  <Field label="Số giờ ngủ">
+                    <NumberInput value={form.sleepHours} min={0} max={24} step={0.5} onChange={(sleepHours) => setForm((prev) => ({ ...prev, sleepHours }))} />
+                  </Field>
+                  <Field label="Tâm trạng">
+                    <Select value={form.mood} onChange={(mood) => setForm((prev) => ({ ...prev, mood }))} options={moodOptions} />
+                  </Field>
                 </div>
-              )}
+              </FormSection>
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <Field label="Tuổi mẹ">
-                  <TextInput value={form.motherAge} inputMode="numeric" onChange={(motherAge) => setForm((prev) => ({ ...prev, motherAge }))} placeholder="VD: 32" />
-                </Field>
-                <Field label="Huyết áp trên">
-                  <TextInput value={form.systolicBloodPressure} inputMode="numeric" onChange={(systolicBloodPressure) => setForm((prev) => ({ ...prev, systolicBloodPressure }))} placeholder="VD: 120" />
-                </Field>
-                <Field label="Huyết áp dưới">
-                  <TextInput value={form.diastolicBloodPressure} inputMode="numeric" onChange={(diastolicBloodPressure) => setForm((prev) => ({ ...prev, diastolicBloodPressure }))} placeholder="VD: 80" />
-                </Field>
-                <Field label="Nhiệt độ">
-                  <TextInput value={form.temperatureCelsius} inputMode="decimal" onChange={(temperatureCelsius) => setForm((prev) => ({ ...prev, temperatureCelsius }))} placeholder="VD: 37.5" />
-                </Field>
-              </div>
+              <FormSection title="Triệu chứng và tiền sử" subtitle="Các tag này giúp AI nhận diện dấu hiệu nguy cơ và xu hướng lặp lại.">
+                <ChipGroup label="Triệu chứng đi kèm" options={symptomOptions} values={form.symptoms} onChange={(symptoms) => setForm((prev) => ({ ...prev, symptoms }))} />
+                <ChipGroup label="Tiền sử cần lưu ý" options={historyOptions} values={form.medicalHistory} onChange={(medicalHistory) => setForm((prev) => ({ ...prev, medicalHistory }))} />
 
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                <Field label="Tình trạng sữa">
-                  <Select value={form.milkStatus} onChange={(milkStatus) => setForm((prev) => ({ ...prev, milkStatus }))} options={milkStatusOptions} />
-                </Field>
-                <Field label="Bé bú">
-                  <Select value={form.babyFeeding} onChange={(babyFeeding) => setForm((prev) => ({ ...prev, babyFeeding }))} options={babyFeedingOptions} />
-                </Field>
-                <Field label="Bé ngủ">
-                  <Select value={form.babySleep} onChange={(babySleep) => setForm((prev) => ({ ...prev, babySleep }))} options={babySleepOptions} />
-                </Field>
-              </div>
+                {conditionalPrompts.length > 0 && (
+                  <div className="rounded-2xl border border-amber-100 bg-amber-50/90 p-4 shadow-inner">
+                    <div className="mb-2 flex items-center gap-2 text-sm font-black text-amber-900">
+                      <BellAlertIcon className="h-5 w-5" />
+                      AI hỏi thêm theo triệu chứng
+                    </div>
+                    <div className="space-y-2">
+                      {conditionalPrompts.map((prompt) => (
+                        <p key={prompt} className="text-sm font-semibold leading-6 text-amber-800">{prompt}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </FormSection>
 
-              <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <input
-                  type="checkbox"
-                  checked={form.tookMedicationToday}
-                  onChange={(event) => setForm((prev) => ({ ...prev, tookMedicationToday: event.target.checked }))}
-                  className="mt-1 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
-                />
-                <span>
-                  <span className="block text-sm font-black text-slate-900">Hôm nay mẹ đã uống thuốc theo dặn dò</span>
-                  <TextInput value={form.medicationNote} onChange={(medicationNote) => setForm((prev) => ({ ...prev, medicationNote }))} placeholder="Ghi chú thuốc nếu cần" className="mt-3" />
-                </span>
-              </label>
+              <FormSection title="Chỉ số đo được" subtitle="Nhập các chỉ số hiện có. Bỏ trống nếu chưa đo để tránh nhiễu dữ liệu.">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field label="Tuổi mẹ">
+                    <TextInput value={form.motherAge} inputMode="numeric" onChange={(motherAge) => setForm((prev) => ({ ...prev, motherAge }))} placeholder="VD: 32" />
+                  </Field>
+                  <Field label="Huyết áp trên">
+                    <TextInput value={form.systolicBloodPressure} inputMode="numeric" onChange={(systolicBloodPressure) => setForm((prev) => ({ ...prev, systolicBloodPressure }))} placeholder="VD: 120" />
+                  </Field>
+                  <Field label="Huyết áp dưới">
+                    <TextInput value={form.diastolicBloodPressure} inputMode="numeric" onChange={(diastolicBloodPressure) => setForm((prev) => ({ ...prev, diastolicBloodPressure }))} placeholder="VD: 80" />
+                  </Field>
+                  <Field label="Nhiệt độ">
+                    <TextInput value={form.temperatureCelsius} inputMode="decimal" onChange={(temperatureCelsius) => setForm((prev) => ({ ...prev, temperatureCelsius }))} placeholder="VD: 37.5" />
+                  </Field>
+                </div>
 
-              <Field label="Mẹ kể thêm">
-                <div className="relative">
-                  <textarea
-                    value={form.note}
-                    onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))}
-                    rows={4}
-                    maxLength={1000}
-                    placeholder="VD: Mẹ đau bụng dưới từ sáng, hơi chóng mặt, bé bú ít hơn..."
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 pr-14 text-sm font-medium text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50"
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  <Field label="Tình trạng sữa">
+                    <Select value={form.milkStatus} onChange={(milkStatus) => setForm((prev) => ({ ...prev, milkStatus }))} options={milkStatusOptions} />
+                  </Field>
+                  <Field label="Bé bú">
+                    <Select value={form.babyFeeding} onChange={(babyFeeding) => setForm((prev) => ({ ...prev, babyFeeding }))} options={babyFeedingOptions} />
+                  </Field>
+                  <Field label="Bé ngủ">
+                    <Select value={form.babySleep} onChange={(babySleep) => setForm((prev) => ({ ...prev, babySleep }))} options={babySleepOptions} />
+                  </Field>
+                </div>
+              </FormSection>
+
+              <FormSection title="Dữ liệu AI bổ sung" subtitle="Các tín hiệu sau sinh và sơ sinh giúp hệ thống cá nhân hóa phân tích hơn.">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  <Field label="Ngày sau sinh">
+                    <TextInput value={form.postpartumDay} inputMode="numeric" onChange={(postpartumDay) => setForm((prev) => ({ ...prev, postpartumDay }))} placeholder="VD: 12" />
+                  </Field>
+                  <Field label="Kiểu sinh">
+                    <Select value={form.deliveryMethod} onChange={(deliveryMethod) => setForm((prev) => ({ ...prev, deliveryMethod }))} options={deliveryMethodOptions} />
+                  </Field>
+                  <Field label="Sản dịch/ra máu">
+                    <Select value={form.bleedingLevel} onChange={(bleedingLevel) => setForm((prev) => ({ ...prev, bleedingLevel }))} options={bleedingLevelOptions} />
+                  </Field>
+                  <Field label="Vết mổ/vết khâu">
+                    <Select value={form.incisionStatus} onChange={(incisionStatus) => setForm((prev) => ({ ...prev, incisionStatus }))} options={incisionStatusOptions} />
+                  </Field>
+                  <Field label="Phù chân/tay">
+                    <Select value={form.swellingLevel} onChange={(swellingLevel) => setForm((prev) => ({ ...prev, swellingLevel }))} options={swellingLevelOptions} />
+                  </Field>
+                  <Field label="Tã ướt của bé/ngày">
+                    <TextInput value={form.babyWetDiapers} inputMode="numeric" onChange={(babyWetDiapers) => setForm((prev) => ({ ...prev, babyWetDiapers }))} placeholder="VD: 6" />
+                  </Field>
+                  <Field label="Hoạt động của bé">
+                    <Select value={form.babyActivity} onChange={(babyActivity) => setForm((prev) => ({ ...prev, babyActivity }))} options={babyActivityOptions} />
+                  </Field>
+                  <label className="flex h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm transition hover:border-teal-200">
+                    <input
+                      type="checkbox"
+                      checked={form.urinationIssue}
+                      onChange={(event) => setForm((prev) => ({ ...prev, urinationIssue: event.target.checked }))}
+                      className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
+                    />
+                    <span className="text-sm font-black text-slate-900">Khó tiểu/tiểu buốt</span>
+                  </label>
+                </div>
+              </FormSection>
+
+              <FormSection title="Ghi chú cuối cùng" subtitle="Thêm điều mẹ muốn kể, hoặc dùng microphone để nhập nhanh bằng giọng nói.">
+                <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 shadow-inner">
+                  <input
+                    type="checkbox"
+                    checked={form.tookMedicationToday}
+                    onChange={(event) => setForm((prev) => ({ ...prev, tookMedicationToday: event.target.checked }))}
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                   />
-                  <button type="button" onClick={startVoiceInput} className={`absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-lg ${listening ? 'bg-red-50 text-red-600' : 'bg-teal-50 text-teal-700'}`}>
-                    <MicrophoneIcon className="h-5 w-5" />
-                  </button>
-                </div>
-                <div className="mt-1 text-right text-xs font-bold text-slate-400">{form.note.length}/1000</div>
-              </Field>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-black text-slate-900">Hôm nay mẹ đã uống thuốc theo dặn dò</span>
+                    <TextInput value={form.medicationNote} onChange={(medicationNote) => setForm((prev) => ({ ...prev, medicationNote }))} placeholder="Ghi chú thuốc nếu cần" className="mt-3" />
+                  </span>
+                </label>
 
-              <div className="flex flex-col gap-3 rounded-xl border border-amber-100 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <Field label="Mẹ kể thêm">
+                  <div className="relative">
+                    <textarea
+                      value={form.note}
+                      onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))}
+                      rows={4}
+                      maxLength={1000}
+                      placeholder="VD: Mẹ đau bụng dưới từ sáng, hơi chóng mặt, bé bú ít hơn..."
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-14 text-sm font-semibold leading-6 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50"
+                    />
+                    <button type="button" onClick={startVoiceInput} className={`absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-xl shadow-sm transition hover:-translate-y-0.5 ${listening ? 'bg-red-50 text-red-600 ring-1 ring-red-100' : 'bg-teal-50 text-teal-700 ring-1 ring-teal-100'}`}>
+                      <MicrophoneIcon className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <div className="mt-1 text-right text-xs font-bold text-slate-400">{form.note.length}/1000</div>
+                </Field>
+              </FormSection>
+
+              <div className="flex flex-col gap-3 rounded-2xl border border-amber-100 bg-amber-50/80 p-4 shadow-inner sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-xs font-semibold leading-5 text-amber-800">AI chỉ hỗ trợ sàng lọc và theo dõi, không thay thế bác sĩ. Nếu có dấu hiệu đỏ, ưu tiên liên hệ cơ sở y tế.</p>
-                <button type="submit" disabled={submitting} className="shrink-0 rounded-xl bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50">
+                <button type="submit" disabled={submitting} className="h-12 shrink-0 rounded-2xl bg-slate-950 px-6 text-sm font-black text-white shadow-[0_12px_26px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50">
                   {submitting ? 'Đang phân tích...' : 'Phân tích'}
                 </button>
               </div>
@@ -441,44 +537,74 @@ const HealthCheckInsPage = () => {
 
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_16px_45px_rgba(15,23,42,0.05)]">
-      <div className="mb-4 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-50 text-teal-700 ring-1 ring-teal-100">{icon}</div>
-        <h2 className="text-lg font-black text-slate-950">{title}</h2>
+    <section className="rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_55px_rgba(15,118,110,0.08)] ring-1 ring-white">
+      <div className="mb-5 flex items-center gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 ring-1 ring-teal-100/80">{icon}</div>
+        <h2 className="text-[19px] font-black tracking-tight text-slate-950">{title}</h2>
       </div>
       {children}
     </section>
   );
 }
 
-function BodyMap({ selected, onSelect }: { selected: string; onSelect: (value: string) => void }) {
+function FormSection({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <div className="grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[180px_minmax(0,1fr)]">
-      <div className="relative mx-auto h-72 w-36 rounded-full bg-white shadow-inner ring-1 ring-slate-200">
-        {painLocations.slice(0, 7).map((location, index) => (
-          <button
-            key={location}
-            type="button"
-            onClick={() => onSelect(location)}
-            className={`absolute left-1/2 h-7 -translate-x-1/2 rounded-full px-3 text-[11px] font-black transition ${selected === location ? 'bg-teal-600 text-white shadow-lg' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-teal-50'}`}
-            style={{ top: `${18 + index * 32}px` }}
-          >
-            {location}
-          </button>
-        ))}
+    <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:p-5">
+      <div className="mb-4 flex flex-col gap-1 border-b border-slate-100 pb-3">
+        <h3 className="text-base font-black tracking-tight text-slate-950">{title}</h3>
+        <p className="text-sm font-semibold leading-6 text-slate-500">{subtitle}</p>
       </div>
-      <div>
-        <div className="mb-2 flex items-center gap-2 text-sm font-black text-slate-900">
-          <MapPinIcon className="h-5 w-5 text-teal-700" />
-          Vùng đau đang chọn: {selected || 'Chưa chọn'}
+      <div className="space-y-4">{children}</div>
+    </section>
+  );
+}
+
+function BodyMap({ selected, onChange }: { selected: string[]; onChange: (value: string[]) => void }) {
+  const toggle = (location: string) => {
+    onChange(selected.includes(location)
+      ? selected.filter((item) => item !== location)
+      : [...selected, location]);
+  };
+
+  return (
+    <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-white via-teal-50/40 to-slate-50 p-4 shadow-inner sm:p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-teal-100 bg-white px-3.5 py-2.5 text-sm font-black text-slate-900 shadow-sm">
+          <MapPinIcon className="h-4 w-4 shrink-0 text-teal-700" />
+          <span className="truncate">Vùng đau đang chọn:</span>
+          <span className="shrink-0 text-teal-700">{selected.length ? `${selected.length} vùng` : 'Chưa chọn'}</span>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {painLocations.map((location) => (
-            <button key={location} type="button" onClick={() => onSelect(location)} className={`rounded-full border px-3 py-1.5 text-xs font-black ${selected === location ? 'border-teal-600 bg-teal-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200'}`}>
-              {location}
+        {selected.length > 0 && (
+          <button type="button" onClick={() => onChange([])} className="w-fit rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-500 shadow-sm transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800">
+            Bỏ chọn tất cả
+          </button>
+        )}
+      </div>
+
+      {selected.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {selected.map((location) => (
+            <button key={location} type="button" onClick={() => toggle(location)} className="rounded-full bg-teal-600 px-3 py-1.5 text-xs font-black text-white shadow-sm transition hover:bg-teal-700">
+              {location} ×
             </button>
           ))}
         </div>
+      )}
+
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {painLocations.map((location) => {
+          const active = selected.includes(location);
+          return (
+            <button
+              key={location}
+              type="button"
+              onClick={() => toggle(location)}
+              className={`min-h-12 rounded-2xl border px-3 py-2.5 text-sm font-black shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-teal-100 ${active ? 'border-teal-600 bg-teal-600 text-white shadow-teal-100' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800'}`}
+            >
+              {location}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -486,14 +612,51 @@ function BodyMap({ selected, onSelect }: { selected: string; onSelect: (value: s
 
 function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
   const triage = normalizeTriage(analysis.triageColor ?? analysis.warningLevel);
+  const [speaking, setSpeaking] = useState(false);
+
+  const speakAnalysis = () => {
+    const speechSynthesis = (window as Window & { speechSynthesis?: SpeechSynthesis }).speechSynthesis;
+    if (!speechSynthesis) {
+      globalThis.alert('Trình duyệt hiện chưa hỗ trợ đọc giọng nói.');
+      return;
+    }
+
+    if (speaking) {
+      speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(buildAnalysisSpeechText(analysis, triage));
+    utterance.lang = 'vi-VN';
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+
+    speechSynthesis.cancel();
+    speechSynthesis.speak(utterance);
+    setSpeaking(true);
+  };
+
   return (
     <div className="space-y-5">
       <div className={`rounded-2xl border p-4 ${getTriagePanelClass(triage)}`}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em]">
-              <ShieldCheckIcon className="h-4 w-4" />
-              {toTriageLabel(triage)}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em]">
+                <ShieldCheckIcon className="h-4 w-4" />
+                {toTriageLabel(triage)}
+              </div>
+              <button
+                type="button"
+                onClick={speakAnalysis}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-black shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:bg-white"
+              >
+                {speaking ? <StopCircleIcon className="h-4 w-4" /> : <SpeakerWaveIcon className="h-4 w-4" />}
+                {speaking ? 'Dừng đọc' : 'Nghe AI đọc'}
+              </button>
             </div>
             <p className="mt-3 text-sm font-semibold leading-6">{analysis.summary}</p>
           </div>
@@ -581,6 +744,7 @@ function HistoryItem({ item, expanded, onToggle }: { item: HealthCheckInHistoryD
                 <DetailRow label="Triệu chứng" value={item.symptoms?.join(', ') || 'Không ghi nhận'} />
                 <DetailRow label="Huyết áp" value={item.systolicBloodPressure && item.diastolicBloodPressure ? `${item.systolicBloodPressure}/${item.diastolicBloodPressure}` : 'Chưa nhập'} />
                 <DetailRow label="Nhiệt độ" value={item.temperatureCelsius ? `${item.temperatureCelsius}°C` : 'Chưa nhập'} />
+                <DetailRow label="Dữ liệu AI" value={formatContextData(item.contextData)} />
               </div>
               <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm font-medium leading-6 text-slate-700">{item.note || 'Không có ghi chú.'}</p>
             </div>
@@ -596,10 +760,10 @@ function ChipGroup({ label, options, values, onChange }: { label: string; option
   const toggle = (value: string) => onChange(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
   return (
     <div>
-      <div className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">{label}</div>
-      <div className="flex flex-wrap gap-2">
+      <div className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">{label}</div>
+      <div className="flex flex-wrap gap-2.5">
         {options.map((option) => (
-          <button key={option} type="button" onClick={() => toggle(option)} className={`rounded-full border px-3 py-1.5 text-xs font-black ${values.includes(option) ? 'border-teal-600 bg-teal-600 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200'}`}>
+          <button key={option} type="button" onClick={() => toggle(option)} className={`rounded-full border px-3.5 py-2 text-xs font-black shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-teal-100 ${values.includes(option) ? 'border-teal-600 bg-teal-600 text-white shadow-teal-100' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800'}`}>
             {option}
           </button>
         ))}
@@ -611,23 +775,23 @@ function ChipGroup({ label, options, values, onChange }: { label: string; option
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-black uppercase tracking-[0.16em] text-slate-500">{label}</span>
+      <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">{label}</span>
       {children}
     </label>
   );
 }
 
 function NumberInput({ value, min, max, step, onChange }: { value: number; min: number; max: number; step?: number; onChange: (value: number) => void }) {
-  return <input type="number" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50" />;
+  return <input type="number" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50" />;
 }
 
 function TextInput({ value, onChange, placeholder, inputMode, className = '' }: { value: string; onChange: (value: string) => void; placeholder?: string; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; className?: string }) {
-  return <input value={value} inputMode={inputMode} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className={`w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50 ${className}`} />;
+  return <input value={value} inputMode={inputMode} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className={`h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50 ${className}`} />;
 }
 
 function RangeInput({ value, min, max, suffix, onChange }: { value: number; min: number; max: number; suffix: string; onChange: (value: number) => void }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-3 py-2">
+    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-teal-200">
       <div className="mb-2 flex items-center justify-between text-sm font-black text-slate-900"><span>{value}{suffix}</span><HeartIcon className="h-5 w-5 text-teal-600" /></div>
       <input type="range" min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} className="w-full accent-teal-600" />
     </div>
@@ -637,16 +801,26 @@ function RangeInput({ value, min, max, suffix, onChange }: { value: number; min:
 function Select({ value, onChange, options }: { value: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }> }) {
   return (
     <div className="relative">
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3 py-3 pr-10 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-4 focus:ring-teal-50">
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white px-4 pr-10 text-sm font-bold text-slate-900 shadow-sm outline-none transition hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50">
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
       </select>
-      <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300" />
+      <ChevronDownIcon className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300" />
     </div>
   );
 }
 
 function ChatPrompt({ text }: { text: string }) {
-  return <div className="rounded-2xl rounded-tl-sm bg-slate-950 px-4 py-3 text-sm font-semibold leading-6 text-white shadow-lg">{text}</div>;
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-slate-900/80 bg-slate-950 px-5 py-4 text-sm font-bold leading-6 text-white shadow-[0_14px_34px_rgba(15,23,42,0.16)]">
+      <div className="absolute inset-y-0 left-0 w-1 bg-teal-400" />
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-white/10 text-teal-100 ring-1 ring-white/10">
+          <ChatBubbleLeftRightIcon className="h-4 w-4" />
+        </div>
+        <p>{text}</p>
+      </div>
+    </div>
+  );
 }
 
 function Capability({ label }: { label: string }) {
@@ -697,12 +871,16 @@ function EmptyState({ message }: { message: string }) {
 
 function buildConditionalPrompts(form: FormState) {
   const prompts: string[] = [];
-  if (form.painLocation.includes('Đầu')) prompts.push('Mẹ có chóng mặt, mờ mắt hoặc đau đầu dữ dội không?');
-  if (form.painLocation.includes('Ngực') || form.symptoms.includes('Đau ngực')) prompts.push('Có khó thở, hồi hộp, vã mồ hôi hoặc đau lan sang tay/hàm không?');
-  if (form.painLocation.includes('Bụng') || form.painLocation.includes('Vết mổ')) prompts.push('Có sốt, ra máu bất thường, vết mổ sưng đỏ hoặc chảy dịch không?');
+  if (hasPainLocation(form, 'Đầu')) prompts.push('Mẹ có chóng mặt, mờ mắt hoặc đau đầu dữ dội không?');
+  if (hasPainLocation(form, 'Ngực') || form.symptoms.includes('Đau ngực')) prompts.push('Có khó thở, hồi hộp, vã mồ hôi hoặc đau lan sang tay/hàm không?');
+  if (hasPainLocation(form, 'Bụng') || hasPainLocation(form, 'Vết mổ')) prompts.push('Có sốt, ra máu bất thường, vết mổ sưng đỏ hoặc chảy dịch không?');
   if (form.babyFeeding === 'RefusesFeeding' || form.symptoms.includes('Bé bỏ bú')) prompts.push('Bé bỏ bú bao lâu rồi, có sốt hoặc lừ đừ không?');
   if (form.painLevel >= 8) prompts.push('Mức đau cao: nếu đau tăng nhanh hoặc kèm dấu hiệu bất thường, nên liên hệ y tế sớm.');
   return prompts;
+}
+
+function hasPainLocation(form: FormState, keyword: string) {
+  return form.painLocation.some((location) => location.includes(keyword));
 }
 
 function validateForm(form: FormState, showToast: (message: string, type?: 'success' | 'error' | 'info') => void) {
@@ -719,6 +897,53 @@ function validateForm(form: FormState, showToast: (message: string, type?: 'succ
     return false;
   }
   return true;
+}
+
+function buildContextData(form: FormState) {
+  const entries: Record<string, string> = {};
+  addContext(entries, 'postpartumDay', form.postpartumDay);
+  addContext(entries, 'deliveryMethod', form.deliveryMethod);
+  addContext(entries, 'bleedingLevel', form.bleedingLevel);
+  addContext(entries, 'incisionStatus', form.incisionStatus);
+  addContext(entries, 'swellingLevel', form.swellingLevel);
+  addContext(entries, 'babyWetDiapers', form.babyWetDiapers);
+  addContext(entries, 'babyActivity', form.babyActivity);
+  if (form.urinationIssue) entries.urinationIssue = 'true';
+  return entries;
+}
+
+function addContext(target: Record<string, string>, key: string, value: string) {
+  if (value.trim()) target[key] = value.trim();
+}
+
+function formatContextData(contextData?: Record<string, string> | null) {
+  if (!contextData || Object.keys(contextData).length === 0) return 'Chưa nhập';
+  const labels: Record<string, string> = {
+    postpartumDay: 'Ngày sau sinh',
+    deliveryMethod: 'Kiểu sinh',
+    bleedingLevel: 'Sản dịch',
+    incisionStatus: 'Vết mổ/khâu',
+    swellingLevel: 'Phù',
+    urinationIssue: 'Khó tiểu',
+    babyWetDiapers: 'Tã ướt/ngày',
+    babyActivity: 'Hoạt động bé',
+  };
+  return Object.entries(contextData)
+    .map(([key, value]) => `${labels[key] ?? key}: ${value}`)
+    .join('; ');
+}
+
+function buildAnalysisSpeechText(analysis: HealthAnalysisResponse, triage: string) {
+  const parts = [
+    `Kết quả phân tích hiện tại ở mức ${toTriageLabel(triage)}.`,
+    `Điểm rủi ro là ${analysis.riskScore} trên 100.`,
+    analysis.summary,
+    analysis.urgencyAction ? `Hành động ưu tiên: ${analysis.urgencyAction}` : '',
+    analysis.recommendations?.length ? `Khuyến nghị chính: ${analysis.recommendations.slice(0, 3).join('. ')}` : '',
+    'Thông tin từ AI chỉ mang tính tham khảo và không thay thế tư vấn từ bác sĩ.',
+  ];
+
+  return parts.filter(Boolean).join(' ');
 }
 
 function normalizeTriage(level?: string) {

@@ -1,5 +1,5 @@
 import { PlusIcon } from '@heroicons/react/24/outline';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import NotificationDropdown from '../NotificationDropdown';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -39,30 +39,30 @@ const NurseHeader = () => {
     };
 
     return (
-        <header className="sticky top-0 z-40 border-b border-slate-50 bg-white/80 px-8 py-6 backdrop-blur-2xl">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <header className="sticky top-0 z-40 border-b border-slate-100 bg-white/85 px-5 py-4 backdrop-blur-2xl lg:px-7">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div>
-                    <div className="mb-2 inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-[#10B981] shadow-sm">
+                    <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-[#10B981] shadow-sm">
                         Kênh điều dưỡng chuyên nghiệp
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight text-slate-900">{meta.title}</h1>
-                    <p className="mt-1 text-sm font-medium text-slate-500">{meta.subtitle}</p>
+                    <h1 className="text-2xl font-black tracking-tight text-slate-900">{meta.title}</h1>
+                    <p className="mt-1 text-xs font-medium text-slate-500">{meta.subtitle}</p>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <NotificationDropdown
                         key={location.pathname}
                         accentClassName="bg-emerald-50 text-[#10B981]"
                         badgeClassName="bg-[#10B981]"
-                        buttonClassName="group relative rounded-xl bg-slate-50 p-3 text-slate-400 transition-all hover:bg-emerald-50 hover:text-[#10B981]"
+                        buttonClassName="group relative rounded-xl bg-slate-50 p-2.5 text-slate-400 transition-all hover:bg-emerald-50 hover:text-[#10B981]"
                         emptyIconClassName="text-emerald-100"
                         alignClassName="right-0"
                     />
 
-                    <button className="flex items-center gap-2 rounded-xl bg-[#10B981] px-8 py-3.5 text-[11px] font-black uppercase tracking-widest text-white shadow-xl shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-95">
+                    <Link to="/nurse/schedule" className="inline-flex h-10 items-center gap-2 whitespace-nowrap rounded-xl bg-[#10B981] px-4 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/15 transition-all hover:-translate-y-0.5 hover:bg-emerald-600 active:scale-95">
                         <PlusIcon className="h-4 w-4" />
                         Cài đặt lịch
-                    </button>
+                    </Link>
 
                     <div className="hidden items-center gap-3 border-l border-slate-100 pl-4 xl:flex">
                         <div className="text-right">

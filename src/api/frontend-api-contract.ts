@@ -392,6 +392,7 @@ export type HealthCheckInHistoryDto = {
   painTrend: string | null;
   symptoms: string[];
   medicalHistory: string[];
+  contextData: Record<string, string>;
   motherAge: number | null;
   systolicBloodPressure: number | null;
   diastolicBloodPressure: number | null;
@@ -417,6 +418,7 @@ export type LatestHealthCheckInDto = {
   painTrend: string | null;
   symptoms: string[];
   medicalHistory: string[];
+  contextData: Record<string, string>;
   motherAge: number | null;
   systolicBloodPressure: number | null;
   diastolicBloodPressure: number | null;

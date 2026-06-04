@@ -296,6 +296,7 @@ export const caremateApi = {
     painTrend?: string;
     symptoms?: string[];
     medicalHistory?: string[];
+    contextData?: Record<string, string>;
     motherAge?: number;
     systolicBloodPressure?: number;
     diastolicBloodPressure?: number;
