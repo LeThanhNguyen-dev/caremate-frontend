@@ -78,7 +78,7 @@ const archiveCards = [
         title: 'Check-in sức khỏe',
         desc: 'Ghi nhận tình trạng mẹ bé mỗi ngày.',
         image: 'https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?q=80&w=1400&auto=format&fit=crop',
-        link: '/',
+        link: '/health-checkins',
     },
 ];
 
@@ -88,7 +88,7 @@ const values = [
     { title: 'Minh bạch & An toàn', desc: 'Giá cả công khai, hồ sơ y tá được kiểm định nghiêm ngặt.', icon: SparklesIcon },
 ];
 
-const trustBadges = ['Background checked', 'Chứng chỉ điều dưỡng', 'Hồ sơ CCCD rõ ràng'];
+const trustBadges = ['Xác minh hồ sơ', 'Chứng chỉ điều dưỡng', 'Hồ sơ CCCD rõ ràng'];
 
 const assuranceStats = [
     { value: '1,900+', label: 'gia đình tin dùng' },
@@ -124,13 +124,13 @@ const Home = () => {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(236,72,153,0.18),transparent_30%),radial-gradient(circle_at_16%_12%,rgba(16,185,129,0.10),transparent_28%),radial-gradient(circle_at_42%_86%,rgba(15,23,42,0.08),transparent_34%)]" />
                 <div className="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[0.95fr_0.8fr]">
                     <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.65 }}>
-                        <div className="mb-6 text-[10px] font-black uppercase tracking-[0.42em] text-brand">CareMate • Premium Care System</div>
+                        <div className="mb-6 text-[10px] font-black uppercase tracking-[0.42em] text-brand">CareMate • Chăm sóc mẹ bé tại nhà</div>
                         <h1 className="max-w-3xl text-6xl font-black leading-[0.96] tracking-tight text-[#0B1F3A] md:text-8xl">
                             Chăm sóc
                             <span className="block font-serif italic font-medium text-slate-500">tại nhà.</span>
                         </h1>
                         <p className="mt-6 max-w-lg text-xl font-black leading-8 text-slate-800">
-                            Để mẹ được nghỉ ngơi, bé được chăm đúng cách, và gia đình bớt phải đoán mò.
+                            Để mẹ được nghỉ ngơi, bé được chăm đúng cách, và gia đình luôn biết bước tiếp theo.
                         </p>
                         <p className="mt-4 max-w-xl text-base font-semibold leading-[1.75] text-slate-500">
                             Mang tiêu chuẩn y khoa đến ngôi nhà của bạn. CareMate giúp gia đình đặt lịch y tá, xem hồ sơ, đánh giá và chi phí một cách minh bạch.
@@ -217,8 +217,8 @@ const Home = () => {
                     <div className="mb-10 flex items-end justify-between gap-6">
                         <div>
                             <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">Dịch vụ nổi bật</div>
-                            <h2 className="text-4xl font-black tracking-tight text-[#10233F]">Các điểm chạm quan trọng.</h2>
-                            <p className="mt-4 max-w-md text-sm font-semibold leading-7 text-slate-500">Giữ tinh thần gallery của mẫu, nhưng nội dung vẫn là các dịch vụ chính của CareMate.</p>
+                            <h2 className="text-4xl font-black tracking-tight text-[#10233F]">Dịch vụ cho những ngày gia đình cần thêm một đôi tay.</h2>
+                            <p className="mt-4 max-w-md text-sm font-semibold leading-7 text-slate-500">Từ chăm sóc sau sinh, tư vấn nhanh đến theo dõi sức khỏe mẹ và bé hằng ngày.</p>
                         </div>
                         <Link to="/services" className="hidden items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand sm:flex">
                             Xem tất cả <ArrowRightIcon className="h-4 w-4" />
@@ -295,8 +295,8 @@ const Home = () => {
 
             <section className="px-6 py-24 lg:px-8">
                 <div className="mx-auto max-w-7xl">
-                    <h2 className="text-4xl font-black tracking-tight text-[#10233F]">Không gian CareMate.</h2>
-                    <p className="mt-3 max-w-md text-sm font-semibold leading-7 text-slate-500">Các phần cũ được giữ lại, nhưng gom thành archive cards giống nhịp bố cục mẫu.</p>
+                    <h2 className="text-4xl font-black tracking-tight text-[#10233F]">Không gian hỗ trợ của CareMate.</h2>
+                    <p className="mt-3 max-w-md text-sm font-semibold leading-7 text-slate-500">Nơi gia đình tìm cộng đồng, hồ sơ y tá, gói chăm sóc và công cụ check-in sức khỏe.</p>
                     <div className="mt-10 grid auto-rows-[230px] grid-cols-1 gap-5 md:grid-cols-3">
                         {archiveCards.map((card, index) => (
                             <Link

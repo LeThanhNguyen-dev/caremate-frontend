@@ -23,13 +23,14 @@ const trustItems = [
 
 const ServicesPage = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { showToast } = useToast();
   const [services, setServices] = useState<ServiceDetailDto[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const serviceIdFromUrl = searchParams.get('serviceId');
+  const categoryFromUrl = searchParams.get('category');
 
   useEffect(() => {
     if (serviceIdFromUrl) {
@@ -57,6 +58,29 @@ const ServicesPage = () => {
     const unique = Array.from(new Set(services.map((service) => service.category?.trim()).filter(Boolean)));
     return ['all', ...unique];
   }, [services]);
+
+  useEffect(() => {
+    if (!categoryFromUrl) {
+      setSelectedCategory('all');
+      return;
+    }
+
+    if (categories.includes(categoryFromUrl)) {
+      setSelectedCategory(categoryFromUrl);
+    }
+  }, [categories, categoryFromUrl]);
+
+  const selectCategory = (category: string) => {
+    setSelectedCategory(category);
+    const next = new URLSearchParams(searchParams);
+    next.delete('serviceId');
+    if (category === 'all') {
+      next.delete('category');
+    } else {
+      next.set('category', category);
+    }
+    setSearchParams(next, { replace: true });
+  };
 
   const filteredServices = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase();
@@ -151,7 +175,7 @@ const ServicesPage = () => {
                 <button
                   key={category}
                   type="button"
-                  onClick={() => setSelectedCategory(category)}
+                  onClick={() => selectCategory(category)}
                   className={`rounded-full px-4 py-2 text-sm font-black transition ${
                     active ? 'bg-[#10233F] text-white shadow-lg shadow-slate-200' : 'bg-slate-50 text-slate-600 hover:bg-brand-soft hover:text-brand'
                   }`}

@@ -16,7 +16,7 @@ import { useAuth } from '../hooks/useAuth';
 import NursePendingApproval from '../components/nurse/NursePendingApproval';
 
 const HOURS = Array.from({ length: 13 }, (_, index) => index + 7);
-const HOUR_HEIGHT = 80;
+const HOUR_HEIGHT = 56;
 const DEFAULT_DURATION_HOURS = 2;
 const PACKAGE_SESSION_DURATION_HOURS = 2;
 
@@ -173,11 +173,19 @@ const NurseSchedulePage = () => {
     const getSlotStyle = (startTime: string, endTime: string) => {
         const start = new Date(startTime);
         const end = new Date(endTime);
-        const startHour = start.getHours() + start.getMinutes() / 60;
-        const endHour = end.getHours() + end.getMinutes() / 60;
+        const firstHour = HOURS[0];
+        const lastHour = HOURS[HOURS.length - 1] + 1;
+        const rawStartHour = start.getHours() + start.getMinutes() / 60;
+        const rawEndHour = end.getHours() + end.getMinutes() / 60;
+        if (rawEndHour <= firstHour || rawStartHour >= lastHour) {
+            return { display: 'none' };
+        }
+        const startHour = Math.max(firstHour, rawStartHour);
+        const endHour = Math.min(lastHour, rawEndHour);
+        const visibleDuration = Math.max(0.75, endHour - startHour);
         return {
-            top: `${(startHour - HOURS[0]) * HOUR_HEIGHT}px`,
-            height: `${(endHour - startHour) * HOUR_HEIGHT}px`,
+            top: `${(startHour - firstHour) * HOUR_HEIGHT}px`,
+            height: `${visibleDuration * HOUR_HEIGHT}px`,
         };
     };
 
@@ -219,70 +227,70 @@ const NurseSchedulePage = () => {
     }
 
     return (
-        <div className="space-y-12 pb-20 selection:bg-emerald-100">
-            <section className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] items-start">
-                <div className="luxury-card bg-slate-900 text-white p-12 border-none shadow-2xl relative overflow-hidden">
+        <div className="space-y-6 pb-12 selection:bg-emerald-100">
+            <section className="grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+                <div className="luxury-card relative overflow-hidden border-none bg-slate-900 p-6 text-white shadow-xl lg:p-7">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full"></div>
                     <div className="relative z-10">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-4">Quản trị thời gian</div>
-                        <h1 className="text-4xl font-black text-white mt-4 tracking-tight">Lịch làm việc của bạn</h1>
-                        <div className="mt-8 flex gap-4">
-                            <button onClick={() => setAnchorDate(new Date())} className="px-8 py-3.5 rounded-xl bg-white/10 border border-white/10 text-white hover:bg-white/20 transition-all text-[10px] font-black uppercase tracking-widest">Hôm nay</button>
-                            <button onClick={() => setSlotModalOpen(true)} className="bg-[#10B981] text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 flex items-center gap-2 hover:scale-[1.02] transition-all active:scale-95">
+                        <div className="mb-3 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-white">Quản trị thời gian</div>
+                        <h1 className="mt-3 text-2xl font-black tracking-tight text-white sm:text-3xl">Lịch làm việc của bạn</h1>
+                        <div className="mt-5 flex flex-wrap gap-3">
+                            <button onClick={() => setAnchorDate(new Date())} className="h-10 rounded-xl border border-white/10 bg-white/10 px-5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-white/20">Hôm nay</button>
+                            <button onClick={() => setSlotModalOpen(true)} className="flex h-10 items-center gap-2 rounded-xl bg-[#10B981] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-95">
                                 <PlusIcon className="h-4 w-4" /> Tạo slot rảnh
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="grid gap-4">
+                <div className="grid gap-3">
                     {[
                         { label: 'Slot còn trống', value: stats.free, icon: ClockIcon, color: 'text-[#10B981] bg-emerald-50' },
                         { label: 'Slot đã được đặt', value: stats.booked, icon: CheckBadgeIcon, color: 'text-[#10B981] bg-emerald-50' },
                         { label: 'Booking sắp tới', value: stats.upcoming, icon: CalendarIcon, color: 'text-[#10B981] bg-emerald-50' },
                     ].map((item) => (
-                        <div key={item.label} className="luxury-card p-6 flex items-center gap-5 border-none shadow-lg">
-                            <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${item.color}`}>
-                                <item.icon className="h-6 w-6" />
+                        <div key={item.label} className="luxury-card flex items-center gap-4 border-none p-4 shadow-md">
+                            <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.color}`}>
+                                <item.icon className="h-5 w-5" />
                             </div>
                             <div>
-                                <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</div>
-                                <div className="mt-1 text-2xl font-black text-slate-900">{item.value}</div>
+                                <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{item.label}</div>
+                                <div className="mt-0.5 text-xl font-black text-slate-900">{item.value}</div>
                             </div>
                         </div>
                     ))}
                 </div>
             </section>
 
-            <section className="luxury-card p-0 overflow-hidden border-none shadow-xl">
-                <div className="flex flex-col gap-6 p-8 lg:flex-row lg:items-center lg:justify-between border-b border-slate-50">
+            <section className="luxury-card overflow-hidden border-none p-0 shadow-lg">
+                <div className="flex flex-col gap-4 border-b border-slate-50 p-5 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-4">
                         <div className="flex gap-1">
-                            <button onClick={() => setAnchorDate(addDays(anchorDate, -7))} className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-all"><ChevronLeftIcon className="h-5 w-5" /></button>
-                            <button onClick={() => setAnchorDate(addDays(anchorDate, 7))} className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-all"><ChevronRightIcon className="h-5 w-5" /></button>
+                            <button onClick={() => setAnchorDate(addDays(anchorDate, -7))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-600 transition-all hover:bg-slate-100"><ChevronLeftIcon className="h-4 w-4" /></button>
+                            <button onClick={() => setAnchorDate(addDays(anchorDate, 7))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-600 transition-all hover:bg-slate-100"><ChevronRightIcon className="h-4 w-4" /></button>
                         </div>
-                        <h3 className="text-xl font-black text-slate-900">Tháng {new Intl.DateTimeFormat('vi-VN', { month: 'numeric', year: 'numeric' }).format(anchorDate)}</h3>
+                        <h3 className="text-lg font-black text-slate-900">Tháng {new Intl.DateTimeFormat('vi-VN', { month: 'numeric', year: 'numeric' }).format(anchorDate)}</h3>
                     </div>
                 </div>
 
-                <div className="relative overflow-auto max-h-[800px] custom-scrollbar bg-slate-100/60">
-                    <div className="min-w-[1000px]">
+                <div className="custom-scrollbar relative max-h-[640px] overflow-auto bg-slate-100/60">
+                    <div className="min-w-[860px]">
                         <div className="sticky top-0 z-10 flex bg-white border-b border-slate-200 shadow-sm">
-                            <div className="w-24 shrink-0 border-r border-slate-200 bg-slate-100/70"></div>
+                            <div className="w-20 shrink-0 border-r border-slate-200 bg-slate-100/70"></div>
                             {weekDays.map((day) => (
-                                <div key={day.toISOString()} className="flex-1 border-r border-slate-200 px-3 py-6 text-center last:border-r-0">
-                                    <div className="text-[10px] font-black uppercase tracking-widest text-slate-500">{day.toLocaleDateString('vi-VN', { weekday: 'short' })}</div>
-                                    <div className={`mt-3 inline-flex h-12 w-12 items-center justify-center rounded-xl text-lg font-black ${
+                                <div key={day.toISOString()} className="flex-1 border-r border-slate-200 px-2 py-4 text-center last:border-r-0">
+                                    <div className="text-[9px] font-black uppercase tracking-widest text-slate-500">{day.toLocaleDateString('vi-VN', { weekday: 'short' })}</div>
+                                    <div className={`mt-2 inline-flex h-10 w-10 items-center justify-center rounded-xl text-base font-black ${
                                         formatDateValue(day) === formatDateValue(new Date()) ? 'bg-[#10B981] text-white shadow-lg shadow-emerald-600/20' : 'bg-slate-100 text-slate-950'
                                     }`}>{day.getDate()}</div>
                                 </div>
                             ))}
                         </div>
                         <div className="flex">
-                            <div className="w-24 shrink-0 border-r border-slate-200 bg-slate-100/70">
+                            <div className="w-20 shrink-0 border-r border-slate-200 bg-slate-100/70">
                                 {HOURS.map((hour) => (
-                                    <div key={hour} className="relative border-b border-slate-200 pr-4 text-right" style={{ height: `${HOUR_HEIGHT}px` }}>
-                                        <span className="absolute right-4 top-2 rounded-lg bg-white px-2 py-1 text-[10px] font-black uppercase text-slate-600 shadow-sm">{String(hour).padStart(2, '0')}:00</span>
+                                    <div key={hour} className="relative border-b border-slate-200 pr-3 text-right" style={{ height: `${HOUR_HEIGHT}px` }}>
+                                        <span className="absolute right-3 top-2 rounded-lg bg-white px-2 py-0.5 text-[9px] font-black uppercase text-slate-600 shadow-sm">{String(hour).padStart(2, '0')}:00</span>
                                     </div>
                                 ))}
                             </div>
@@ -295,11 +303,11 @@ const NurseSchedulePage = () => {
                                                 <button key={`${day.toISOString()}-${hour}`} type="button" onClick={() => openSlotModal(day, hour)} className="block w-full border-b border-slate-200 bg-white hover:bg-emerald-50/60 transition-colors" style={{ height: `${HOUR_HEIGHT}px` }} />
                                             ))}
                                             {events.slots.map((slot) => (
-                                                <div key={slot.id} className="absolute left-2 right-2 rounded-xl border-2 border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700 shadow-md group/slot transition-all hover:border-emerald-300 hover:shadow-lg" style={getSlotStyle(slot.startTime, slot.endTime)}>
+                                                <div key={slot.id} className="group/slot absolute left-1.5 right-1.5 rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-[11px] text-emerald-700 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md" style={getSlotStyle(slot.startTime, slot.endTime)}>
                                                     <div className="flex items-start justify-between">
                                                         <div>
                                                             <div className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Khung rảnh</div>
-                                                            <div className="mt-1 font-black">
+                                                            <div className="mt-0.5 font-black">
                                                                 {new Date(slot.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                                                                 {' - '}
                                                                 {new Date(slot.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
@@ -310,7 +318,7 @@ const NurseSchedulePage = () => {
                                                 </div>
                                             ))}
                                             {events.bookings.map((booking) => (
-                                                <div key={booking.id} className="absolute left-2 right-2 z-10 rounded-xl border-2 border-slate-900 bg-slate-900 p-4 text-xs text-white shadow-xl ring-2 ring-white" style={getSlotStyle(booking.startTime, booking.endTime)}>
+                                                <div key={booking.id} className="absolute left-1.5 right-1.5 z-10 rounded-lg border border-slate-900 bg-slate-900 p-2.5 text-[11px] text-white shadow-lg ring-1 ring-white" style={getSlotStyle(booking.startTime, booking.endTime)}>
                                                     <div className="font-black text-[10px] uppercase text-[#10B981] mb-1">Lịch hẹn khách</div>
                                                     <div className="font-black leading-tight">#{booking.id} - {booking.serviceName}</div>
                                                     <div className="mt-2 text-[10px] font-bold text-white/70">
@@ -324,7 +332,7 @@ const NurseSchedulePage = () => {
                                                 <Link
                                                     key={session.id}
                                                     to={`/bookings/${session.bookingId}`}
-                                                    className={`absolute left-2 right-2 rounded-xl p-4 text-xs text-white shadow-xl z-20 border-l-4 transition hover:scale-[1.01] ${
+                                                    className={`absolute left-1.5 right-1.5 z-20 rounded-lg border-l-4 p-2.5 text-[11px] text-white shadow-lg transition hover:scale-[1.01] ${
                                                         session.status === 'completed'
                                                             ? 'border-emerald-300 bg-emerald-600'
                                                             : session.status === 'checked_in'

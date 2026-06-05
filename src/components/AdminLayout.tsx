@@ -11,13 +11,13 @@ const AdminLayout = () => {
             <main className="flex-1 flex flex-col min-w-0 lg:ml-[300px]">
                 <Header />
                 
-                <div className="flex-1 p-6 lg:p-10">
-                    <div className="max-w-[1400px] mx-auto">
+                <div className="flex-1 px-5 py-5 sm:px-6 lg:px-7">
+                    <div className="w-full">
                         <Outlet />
                     </div>
                 </div>
 
-                <footer className="px-10 py-6 text-center border-t border-slate-100 mt-auto bg-white">
+                <footer className="mt-auto border-t border-slate-100 bg-white px-5 py-5 text-center sm:px-6 lg:px-7">
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300">
                         CareMate Admin System © 2026. Quản trị & Bảo mật.
                     </p>
