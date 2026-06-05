@@ -120,6 +120,7 @@ const CustomerBookingsPage = () => {
             showToast('Cảm ơn bạn đã gửi đánh giá!', 'success');
             setReviewModal({ isOpen: false, bookingId: null });
             setReviewForm({ rating: 5, comment: '' });
+            await load();
         } catch {
             showToast('Không thể gửi đánh giá.', 'error');
         }
@@ -322,8 +323,11 @@ const CustomerBookingsPage = () => {
                                                 )}
                                                 {booking.status === 'completed' && (
                                                     <>
-                                                        <button onClick={() => setReviewModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-brand/5 text-brand hover:bg-brand hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                                                        <button disabled={Boolean(booking.finalReviewRating)} onClick={() => !booking.finalReviewRating && setReviewModal({ isOpen: true, bookingId: booking.id })} className={`w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${booking.finalReviewRating ? 'cursor-default bg-emerald-50 text-emerald-700' : 'bg-brand/5 text-brand hover:bg-brand hover:text-white'}`}>
+                                                            <span>{booking.finalReviewRating ? `Đã đánh giá ${booking.finalReviewRating}/5` : 'Đánh giá cuối cùng'}</span>
+                                                            <span className="hidden">
                                                             Đánh giá buổi chăm sóc
+                                                            </span>
                                                         </button>
                                                         {!dispute && (
                                                             <button onClick={() => setDisputeModal({ isOpen: true, bookingId: booking.id })} className="w-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">

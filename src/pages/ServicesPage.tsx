@@ -178,12 +178,11 @@ const ServicesPage = () => {
                 <Link to={`/services/${service.id}`} className="block">
                   <div className="relative h-40 overflow-hidden bg-[linear-gradient(135deg,#fdf2f8,#ffffff_55%,#ecfdf5)]">
                     <div className="absolute inset-0 p-5">
-                      <div className="flex h-full flex-col justify-between rounded-[1.1rem] border border-white/80 bg-white/70 p-4">
-                        <div className="text-xs font-black uppercase tracking-[0.16em] text-brand">{getCategoryLabel(service.category)}</div>
+                      <div className="flex h-full items-end rounded-[1.1rem] border border-white/80 bg-white/70 p-4">
                         <div className="text-2xl font-black leading-tight text-[#10233F]">{service.packageDays ?? 1} buổi</div>
                       </div>
                     </div>
-                    <div className="absolute left-4 top-4 rounded-full bg-brand px-3 py-1.5 text-xs font-black text-white shadow-lg shadow-pink-200">
+                    <div className="absolute left-4 top-4 z-10 max-w-[calc(100%-2rem)] truncate whitespace-nowrap rounded-full bg-brand px-3 py-1.5 text-xs font-black text-white shadow-lg shadow-pink-200">
                       {service.serviceKind === 'package' ? 'Gói chăm sóc' : getCategoryLabel(service.category)}
                     </div>
                   </div>

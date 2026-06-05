@@ -325,6 +325,12 @@ export const caremateApi = {
   checkOutSession: async (bookingId: number, payload?: { nurseNote?: string }): Promise<PackageSessionDto> =>
     (await axiosInstance.post(`/api/bookings/${bookingId}/sessions/checkout`, payload || {})).data,
 
+  submitPackageSessionFeedback: async (bookingId: number, sessionId: number, payload: { rating: number; note?: string; tags?: string[] }): Promise<PackageSessionDto> =>
+    (await axiosInstance.post(`/api/bookings/${bookingId}/sessions/${sessionId}/feedback`, payload)).data,
+
+  submitSingleSessionFeedback: async (bookingId: number, payload: { rating: number; note?: string; tags?: string[] }): Promise<BookingDetailDto> =>
+    (await axiosInstance.post(`/api/bookings/${bookingId}/sessions/feedback`, payload)).data,
+
   // === Notification Management ===
   /** DELETE /api/notifications/{id} */
   deleteNotification: async (id: number): Promise<void> => {

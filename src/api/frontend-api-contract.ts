@@ -37,6 +37,14 @@ export type BookingDetailDto = {
   address: string;
   notes: string | null;
   nurseNote?: string | null;
+  customerSessionRating?: number | null;
+  customerSessionNote?: string | null;
+  customerSessionTags?: string[];
+  customerSessionReviewedAt?: string | null;
+  finalReviewId?: number | null;
+  finalReviewRating?: number | null;
+  finalReviewComment?: string | null;
+  finalReviewCreatedAt?: string | null;
   paymentStatus?: string | null;
   refundAmount?: number | null;
   refundReason?: string | null;
@@ -441,6 +449,10 @@ export type PackageSessionDto = {
   checkInTime: string | null;
   checkOutTime: string | null;
   nurseNote: string | null;
+  customerRating: number | null;
+  customerNote: string | null;
+  customerTags: string[];
+  customerReviewedAt: string | null;
 };
 
 export type PackageProgressDto = {
@@ -448,6 +460,8 @@ export type PackageProgressDto = {
   totalSessions: number;
   completedSessions: number;
   progressPercent: number;
+  reviewedSessions: number;
+  averageCustomerRating: number | null;
   todaySession: PackageSessionDto | null;
   sessions: PackageSessionDto[];
 };

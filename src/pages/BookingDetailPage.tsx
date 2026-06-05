@@ -188,6 +188,9 @@ const BookingDetailPage = () => {
                                 bookingId={detail.id}
                                 packageDays={detail.packageDays}
                                 bookingStatus={detail.status}
+                                finalReviewRating={detail.finalReviewRating}
+                                finalReviewComment={detail.finalReviewComment}
+                                finalReviewCreatedAt={detail.finalReviewCreatedAt}
                                 onProgressChanged={() => void refreshDetail()}
                             />
                         ) : (

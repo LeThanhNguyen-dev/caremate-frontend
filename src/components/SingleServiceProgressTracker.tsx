@@ -1,4 +1,4 @@
-import { CheckCircleIcon, ClockIcon, PlayIcon, XCircleIcon } from '@heroicons/react/24/solid';
+import { CheckCircleIcon, ClockIcon, PlayIcon, StarIcon, XCircleIcon } from '@heroicons/react/24/solid';
 import { motion } from 'framer-motion';
 import caremateApi from '../api/caremateApi';
 import type { BookingDetailDto } from '../api/frontend-api-contract';
@@ -44,13 +44,18 @@ const formatDuration = (minutes?: number | null) => {
   return mins > 0 ? `${hours} giờ ${mins} phút` : `${hours} giờ`;
 };
 
+const quickFeedbackTags = ['Đúng giờ', 'Thái độ tốt', 'Chăm sóc kỹ', 'Tư vấn dễ hiểu', 'Bé/mẹ thoải mái', 'Cần cải thiện giao tiếp', 'Chưa đúng mong đợi'];
+
 const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => {
   const { user } = useAuth();
   const { showToast } = useToast();
   const [actionLoading, setActionLoading] = useState(false);
   const [nurseNote, setNurseNote] = useState('');
+  const [reviewForm, setReviewForm] = useState({ rating: booking.customerSessionRating ?? 5, note: booking.customerSessionNote ?? '', tags: booking.customerSessionTags ?? [] });
+  const [reviewLoading, setReviewLoading] = useState(false);
 
   const isNurse = user?.role === 'nurse_confirmed';
+  const isCustomer = user?.role === 'customer';
   const currentIndex = steps.findIndex((step) => step.status === booking.status);
   const isTerminal = booking.status === 'cancelled' || booking.status === 'rejected';
   const isLate = !isTerminal && booking.status !== 'completed' && new Date(booking.startTime).getTime() < Date.now() && !booking.checkInTime;
@@ -69,6 +74,31 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
       showToast(error.response?.data?.message || 'Không thể cập nhật tiến độ lịch hẹn.', 'error');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const toggleReviewTag = (tag: string) => {
+    setReviewForm((prev) => ({
+      ...prev,
+      tags: prev.tags.includes(tag) ? prev.tags.filter((item) => item !== tag) : [...prev.tags, tag],
+    }));
+  };
+
+  const submitReview = async () => {
+    try {
+      setReviewLoading(true);
+      await caremateApi.submitSingleSessionFeedback(booking.id, {
+        rating: reviewForm.rating,
+        note: reviewForm.note.trim() || undefined,
+        tags: reviewForm.tags,
+      });
+      showToast('Đã lưu đánh giá buổi chăm sóc.', 'success');
+      onProgressChanged?.();
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      showToast(error.response?.data?.message || 'Không thể lưu đánh giá buổi chăm sóc.', 'error');
+    } finally {
+      setReviewLoading(false);
     }
   };
 
@@ -215,6 +245,85 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
             {booking.nurseNote || 'Y tá chưa để lại ghi chú sau buổi chăm sóc.'}
           </p>
         </div>
+
+        {booking.customerSessionRating ? (
+          <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-6">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700">Đánh giá của khách</div>
+              <div className="flex text-yellow-400">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <StarIcon key={index} className={`h-5 w-5 ${index < (booking.customerSessionRating ?? 0) ? 'opacity-100' : 'opacity-25'}`} />
+                ))}
+              </div>
+            </div>
+            <p className="mt-3 text-sm font-semibold leading-7 text-slate-700">
+              {booking.customerSessionNote || 'Khách hàng chưa để lại ghi chú.'}
+            </p>
+            {(booking.customerSessionTags?.length ?? 0) > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {booking.customerSessionTags?.map((tag) => (
+                  <span key={tag} className="rounded-full bg-white px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-700">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : isCustomer && booking.status === 'completed' ? (
+          <div className="mt-4 rounded-xl border border-brand/10 bg-brand/5 p-6">
+            <div className="text-[10px] font-black uppercase tracking-[0.2em] text-brand">Đánh giá buổi chăm sóc</div>
+            <div className="mt-3 flex gap-1">
+              {Array.from({ length: 5 }).map((_, index) => {
+                const star = index + 1;
+                return (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewForm((prev) => ({ ...prev, rating: star }))}
+                    className="rounded-lg p-1 text-yellow-400 transition hover:scale-110"
+                  >
+                    <StarIcon className={`h-7 w-7 ${star <= reviewForm.rating ? 'opacity-100' : 'opacity-25'}`} />
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {quickFeedbackTags.map((tag) => {
+                const active = reviewForm.tags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleReviewTag(tag)}
+                    className={`rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] transition ${
+                      active
+                        ? 'border-brand bg-brand text-white shadow-lg shadow-pink-500/10'
+                        : 'border-slate-200 bg-white text-slate-500 hover:border-brand hover:text-brand'
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
+            </div>
+            <textarea
+              value={reviewForm.note}
+              onChange={(event) => setReviewForm((prev) => ({ ...prev, note: event.target.value }))}
+              rows={3}
+              maxLength={1000}
+              placeholder="Ghi chú cảm nhận sau buổi chăm sóc..."
+              className="mt-3 w-full rounded-xl border border-slate-200 bg-white p-4 text-sm font-medium text-slate-700 outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/10"
+            />
+            <button
+              type="button"
+              disabled={reviewLoading}
+              onClick={() => void submitReview()}
+              className="mt-3 rounded-xl bg-brand px-5 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-pink-500/20 transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {reviewLoading ? 'Đang lưu...' : 'Lưu đánh giá'}
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
   );
