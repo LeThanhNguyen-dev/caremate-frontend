@@ -33,6 +33,11 @@ type GoongPlaceDetailResponse = {
   status?: string;
 };
 
+type GoongReverseGeocodeResponse = {
+  results?: GoongPlaceDetail[];
+  status?: string;
+};
+
 export type GoongPlaceDetail = NonNullable<GoongPlaceDetailResponse['result']>;
 
 const toText = (value: unknown) => (typeof value === 'string' ? value.trim() : '');
@@ -156,6 +161,21 @@ const goongApi = {
 
     const data = response.data;
     return data.status === 'OK' ? data.result ?? null : null;
+  },
+
+  async reverseGeocode(latitude: number, longitude: number) {
+    const response = await axiosInstance.get<GoongReverseGeocodeResponse>(
+      '/api/goong/reverse-geocode',
+      {
+        params: {
+          latitude,
+          longitude,
+        },
+      },
+    );
+
+    const data = response.data;
+    return data.status === 'OK' ? data.results?.[0] ?? null : null;
   },
 };
 

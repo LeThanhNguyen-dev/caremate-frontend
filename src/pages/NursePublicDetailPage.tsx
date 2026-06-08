@@ -15,7 +15,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import caremateApi from '../api/caremateApi';
-import goongApi, { createGoongSessionToken, type GoongPrediction } from '../api/goongApi';
+import goongApi, { createGoongSessionToken, extractGoongAddressParts, type GoongPrediction } from '../api/goongApi';
+import GoongAddressMap from '../components/GoongAddressMap';
 import type {
   AvailabilitySlotDto,
   NurseDiscoveryDto,
@@ -79,6 +80,8 @@ const NursePublicDetailPage = () => {
   const [addressSuggestionsOpen, setAddressSuggestionsOpen] = useState(false);
   const [addressLookupLoading, setAddressLookupLoading] = useState(false);
   const goongSessionTokenRef = useRef(createGoongSessionToken());
+  const suppressNextAddressLookupRef = useRef(false);
+  const [bookingLocation, setBookingLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [bookingForm, setBookingForm] = useState({
     serviceId: serviceIdFromUrl || '',
     startTime: '',
@@ -178,6 +181,11 @@ const NursePublicDetailPage = () => {
   useEffect(() => {
     const input = bookingForm.address.trim();
 
+    if (suppressNextAddressLookupRef.current) {
+      suppressNextAddressLookupRef.current = false;
+      return;
+    }
+
     if (!goongApi.hasApiKey || input.length < 3) {
       setAddressSuggestions([]);
       setAddressLookupLoading(false);
@@ -255,25 +263,65 @@ const NursePublicDetailPage = () => {
 
   const handleAddressChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setBookingForm({ ...bookingForm, address: event.target.value });
+    setBookingLocation(null);
     setAddressSuggestionsOpen(true);
   };
 
   const handleSelectAddress = async (suggestion: GoongPrediction) => {
     const fallbackAddress = suggestion.description;
 
+    suppressNextAddressLookupRef.current = true;
     setBookingForm((prev) => ({ ...prev, address: fallbackAddress }));
     setAddressSuggestionsOpen(false);
     setAddressSuggestions([]);
 
     try {
       const detail = await goongApi.getPlaceDetail(suggestion.place_id, goongSessionTokenRef.current);
+      const addressParts = extractGoongAddressParts(detail, fallbackAddress);
+
+      if (addressParts.latitude != null && addressParts.longitude != null) {
+        setBookingLocation({
+          latitude: addressParts.latitude,
+          longitude: addressParts.longitude,
+        });
+      }
+
+      suppressNextAddressLookupRef.current = true;
       setBookingForm((prev) => ({
         ...prev,
-        address: detail?.formatted_address || fallbackAddress,
+        address: addressParts.fullAddress || fallbackAddress,
       }));
       goongSessionTokenRef.current = createGoongSessionToken();
     } catch {
+      suppressNextAddressLookupRef.current = true;
       setBookingForm((prev) => ({ ...prev, address: fallbackAddress }));
+    }
+  };
+
+  const handleMapLocationSelect = async (location: { latitude: number; longitude: number }) => {
+    setBookingLocation(location);
+    setAddressLookupLoading(true);
+
+    try {
+      const detail = await goongApi.reverseGeocode(location.latitude, location.longitude);
+      const fallbackAddress = `${location.latitude}, ${location.longitude}`;
+      const addressParts = extractGoongAddressParts(detail, fallbackAddress);
+
+      suppressNextAddressLookupRef.current = true;
+      setBookingForm((prev) => ({
+        ...prev,
+        address: addressParts.fullAddress || fallbackAddress,
+      }));
+      setAddressSuggestionsOpen(false);
+      setAddressSuggestions([]);
+    } catch {
+      suppressNextAddressLookupRef.current = true;
+      setBookingForm((prev) => ({
+        ...prev,
+        address: `${location.latitude}, ${location.longitude}`,
+      }));
+    } finally {
+      setAddressLookupLoading(false);
     }
   };
 
@@ -291,6 +339,8 @@ const NursePublicDetailPage = () => {
         serviceId: Number(bookingForm.serviceId),
         startTime: bookingForm.startTime,
         address: bookingForm.address,
+        latitude: bookingLocation?.latitude,
+        longitude: bookingLocation?.longitude,
         notes: bookingForm.notes || null,
       };
 
@@ -711,6 +761,15 @@ const NursePublicDetailPage = () => {
                         ))}
                       </div>
                     )}
+                  </div>
+                  <div className="mt-3">
+                    <GoongAddressMap
+                      latitude={bookingLocation?.latitude}
+                      longitude={bookingLocation?.longitude}
+                      heightClassName="h-[220px]"
+                      helperText="Kéo bản đồ hoặc click để chọn vị trí dưới ghim."
+                      onSelectLocation={(location) => void handleMapLocationSelect(location)}
+                    />
                   </div>
                   {!goongApi.hasApiKey && (
                     <p className="ml-1 mt-2 text-[12px] font-medium text-[#9CA3AF]">
