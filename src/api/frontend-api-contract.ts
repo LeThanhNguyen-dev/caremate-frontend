@@ -375,11 +375,11 @@ export type HealthAnalysisResponse = {
   analysisId: string;
   summary: string;
   warningLevel: 'Green' | 'Yellow' | 'Red' | 'Emergency' | 'Low' | 'Medium' | 'High' | string;
-  triageColor: 'Green' | 'Yellow' | 'Red' | 'Emergency' | string;
   urgencyAction: string;
   weeklySummary: string;
   riskScore: number;
   confidenceScore: number;
+  confidenceLabel: string;
   trendSummary: string;
   riskFactors: RiskFactorDto[];
   trendSignals: TrendSignalDto[];
@@ -387,6 +387,7 @@ export type HealthAnalysisResponse = {
   carePlan: CarePlanItemDto[];
   suggestedServices: SuggestedServiceDto[];
   disclaimer: string;
+  engineVersion: string;
 };
 
 export type HealthCheckInHistoryDto = {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowDownTrayIcon,
@@ -178,12 +178,12 @@ const HealthCheckInsPage = () => {
   const [page, setPage] = useState(1);
 
   const activeAnalysis = analysisResult ?? latestCheckIn?.analysis ?? null;
-  const activeWarning = normalizeTriage(activeAnalysis?.triageColor ?? activeAnalysis?.warningLevel);
+  const activeWarning = normalizeTriage(activeAnalysis?.warningLevel);
 
   const stats = useMemo(() => {
     const avgSleep = history.length ? history.reduce((sum, item) => sum + item.sleepHours, 0) / history.length : 0;
     const avgPain = history.length ? history.reduce((sum, item) => sum + item.painLevel, 0) / history.length : 0;
-    const redCount = history.filter((item) => ['Red', 'Emergency'].includes(normalizeTriage(item.analysis?.triageColor ?? item.analysis?.warningLevel))).length;
+    const redCount = history.filter((item) => ['Red', 'Emergency'].includes(normalizeTriage(item.analysis?.warningLevel))).length;
     return { avgSleep, avgPain, redCount };
   }, [history]);
 
@@ -279,7 +279,7 @@ const HealthCheckInsPage = () => {
       item.painLocation ?? '',
       `${item.sleepHours}h`,
       toOptionLabel(item.mood, moodOptions),
-      normalizeTriage(item.analysis?.triageColor ?? item.analysis?.warningLevel),
+      normalizeTriage(item.analysis?.warningLevel),
       item.analysis?.summary ?? '',
     ]);
     const html = buildPrintableReport(activeAnalysis, rows);
@@ -300,10 +300,10 @@ const HealthCheckInsPage = () => {
         <section className="mb-6 overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_20px_60px_rgba(15,118,110,0.09)]">
           <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_380px]">
             <div className="p-6 lg:p-8">
-              <p className="inline-flex rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-teal-800">AI symptom triage</p>
+              <p className="inline-flex rounded-full border border-teal-100 bg-teal-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-teal-800">Theo dõi sức khỏe</p>
               <h1 className="mt-4 text-3xl font-black tracking-tight text-slate-950 md:text-4xl">Check-in sức khỏe theo ngữ cảnh</h1>
               <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-slate-600 md:text-base">
-                Mẹ nhập theo kiểu hội thoại, chọn vùng đau trên body map, ghi thêm dấu hiệu đi kèm, rồi AI phân loại xanh, vàng, đỏ hoặc đỏ khẩn cấp kèm hành động tiếp theo.
+                Mẹ nhập theo kiểu hội thoại, chọn vùng đau trên body map, ghi thêm dấu hiệu đi kèm, rồi CareMate phân loại xanh, vàng, đỏ hoặc đỏ khẩn cấp kèm hành động tiếp theo.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <Capability label="Body map" />
@@ -336,19 +336,15 @@ const HealthCheckInsPage = () => {
           </div>
         </section>
 
-        <section className="mb-6 grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)]">
-          <Panel title="AI summary mới nhất" icon={<SparklesIcon className="h-5 w-5" />}>
-            {activeAnalysis ? <AnalysisSummary analysis={activeAnalysis} /> : <EmptyState message="Chưa có kết quả phân tích. Hãy gửi check-in đầu tiên hôm nay." />}
-          </Panel>
-
+        <section className="mb-6 grid gap-6 2xl:grid-cols-[minmax(0,1fr)_400px]">
           <Panel title="Check-in dạng hội thoại" icon={<ChatBubbleLeftRightIcon className="h-5 w-5" />}>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <ChatPrompt text="Hôm nay mẹ thấy thế nào? Chọn vùng đau và dấu hiệu đi kèm trước, AI sẽ hỏi tiếp đúng ngữ cảnh." />
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <ChatPrompt text="Hôm nay mẹ thấy thế nào? Chọn vùng đau và dấu hiệu đi kèm trước, hệ thống sẽ hỏi tiếp đúng ngữ cảnh." />
 
-              <FormSection title="Vùng đau và mức độ" subtitle="Chọn một hoặc nhiều vị trí, sau đó mô tả cường độ và diễn tiến để AI hiểu ngữ cảnh chính.">
+              <FormSection title="Vùng đau và mức độ" subtitle="Chọn một hoặc nhiều vị trí, sau đó mô tả cường độ và diễn tiến để hệ thống hiểu ngữ cảnh chính.">
                 <BodyMap selected={form.painLocation} onChange={(painLocation) => setForm((prev) => ({ ...prev, painLocation }))} />
 
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <Field label="Mức đau">
                     <RangeInput value={form.painLevel} min={0} max={10} onChange={(painLevel) => setForm((prev) => ({ ...prev, painLevel }))} suffix="/10" />
                   </Field>
@@ -370,15 +366,15 @@ const HealthCheckInsPage = () => {
                 </div>
               </FormSection>
 
-              <FormSection title="Triệu chứng và tiền sử" subtitle="Các tag này giúp AI nhận diện dấu hiệu nguy cơ và xu hướng lặp lại.">
+              <FormSection title="Triệu chứng và tiền sử" subtitle="Các tag này giúp hệ thống nhận diện dấu hiệu nguy cơ và xu hướng lặp lại.">
                 <ChipGroup label="Triệu chứng đi kèm" options={symptomOptions} values={form.symptoms} onChange={(symptoms) => setForm((prev) => ({ ...prev, symptoms }))} />
                 <ChipGroup label="Tiền sử cần lưu ý" options={historyOptions} values={form.medicalHistory} onChange={(medicalHistory) => setForm((prev) => ({ ...prev, medicalHistory }))} />
 
                 {conditionalPrompts.length > 0 && (
-                  <div className="rounded-2xl border border-amber-100 bg-amber-50/90 p-4 shadow-inner">
+                  <div className="rounded-xl border border-amber-100 bg-amber-50/90 p-4 shadow-inner">
                     <div className="mb-2 flex items-center gap-2 text-sm font-black text-amber-900">
                       <BellAlertIcon className="h-5 w-5" />
-                      AI hỏi thêm theo triệu chứng
+                      Hỏi thêm theo triệu chứng
                     </div>
                     <div className="space-y-2">
                       {conditionalPrompts.map((prompt) => (
@@ -390,7 +386,7 @@ const HealthCheckInsPage = () => {
               </FormSection>
 
               <FormSection title="Chỉ số đo được" subtitle="Nhập các chỉ số hiện có. Bỏ trống nếu chưa đo để tránh nhiễu dữ liệu.">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                   <Field label="Tuổi mẹ">
                     <TextInput value={form.motherAge} inputMode="numeric" onChange={(motherAge) => setForm((prev) => ({ ...prev, motherAge }))} placeholder="VD: 32" />
                   </Field>
@@ -405,7 +401,7 @@ const HealthCheckInsPage = () => {
                   </Field>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <Field label="Tình trạng sữa">
                     <Select value={form.milkStatus} onChange={(milkStatus) => setForm((prev) => ({ ...prev, milkStatus }))} options={milkStatusOptions} />
                   </Field>
@@ -418,8 +414,8 @@ const HealthCheckInsPage = () => {
                 </div>
               </FormSection>
 
-              <FormSection title="Dữ liệu AI bổ sung" subtitle="Các tín hiệu sau sinh và sơ sinh giúp hệ thống cá nhân hóa phân tích hơn.">
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <FormSection title="Dữ liệu bổ sung" subtitle="Các tín hiệu sau sinh và sơ sinh giúp hệ thống cá nhân hóa phân tích hơn.">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                   <Field label="Ngày sau sinh">
                     <TextInput value={form.postpartumDay} inputMode="numeric" onChange={(postpartumDay) => setForm((prev) => ({ ...prev, postpartumDay }))} placeholder="VD: 12" />
                   </Field>
@@ -441,20 +437,20 @@ const HealthCheckInsPage = () => {
                   <Field label="Hoạt động của bé">
                     <Select value={form.babyActivity} onChange={(babyActivity) => setForm((prev) => ({ ...prev, babyActivity }))} options={babyActivityOptions} />
                   </Field>
-                  <label className="flex h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 shadow-sm transition hover:border-teal-200">
+                  <label className="flex min-h-14 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 shadow-sm transition hover:border-teal-200">
                     <input
                       type="checkbox"
                       checked={form.urinationIssue}
                       onChange={(event) => setForm((prev) => ({ ...prev, urinationIssue: event.target.checked }))}
                       className="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
                     />
-                    <span className="text-sm font-black text-slate-900">Khó tiểu/tiểu buốt</span>
+                    <span className="text-sm font-black leading-5 text-slate-900">Khó tiểu/tiểu buốt</span>
                   </label>
                 </div>
               </FormSection>
 
               <FormSection title="Ghi chú cuối cùng" subtitle="Thêm điều mẹ muốn kể, hoặc dùng microphone để nhập nhanh bằng giọng nói.">
-                <label className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-slate-50/80 p-4 shadow-inner">
+                <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50/80 p-4 shadow-inner">
                   <input
                     type="checkbox"
                     checked={form.tookMedicationToday}
@@ -475,7 +471,7 @@ const HealthCheckInsPage = () => {
                       rows={4}
                       maxLength={1000}
                       placeholder="VD: Mẹ đau bụng dưới từ sáng, hơi chóng mặt, bé bú ít hơn..."
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 pr-14 text-sm font-semibold leading-6 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-14 text-sm font-semibold leading-6 text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50"
                     />
                     <button type="button" onClick={startVoiceInput} className={`absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-xl shadow-sm transition hover:-translate-y-0.5 ${listening ? 'bg-red-50 text-red-600 ring-1 ring-red-100' : 'bg-teal-50 text-teal-700 ring-1 ring-teal-100'}`}>
                       <MicrophoneIcon className="h-5 w-5" />
@@ -485,13 +481,17 @@ const HealthCheckInsPage = () => {
                 </Field>
               </FormSection>
 
-              <div className="flex flex-col gap-3 rounded-2xl border border-amber-100 bg-amber-50/80 p-4 shadow-inner sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs font-semibold leading-5 text-amber-800">AI chỉ hỗ trợ sàng lọc và theo dõi, không thay thế bác sĩ. Nếu có dấu hiệu đỏ, ưu tiên liên hệ cơ sở y tế.</p>
-                <button type="submit" disabled={submitting} className="h-12 shrink-0 rounded-2xl bg-slate-950 px-6 text-sm font-black text-white shadow-[0_12px_26px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50">
+              <div className="flex flex-col gap-3 rounded-xl border border-amber-100 bg-amber-50/80 p-4 shadow-inner sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs font-semibold leading-5 text-amber-800">Hệ thống chỉ hỗ trợ sàng lọc và theo dõi, không thay thế bác sĩ. Nếu có dấu hiệu đỏ, ưu tiên liên hệ cơ sở y tế.</p>
+                <button type="submit" disabled={submitting} className="h-12 shrink-0 rounded-xl bg-slate-950 px-6 text-sm font-black text-white shadow-[0_12px_26px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50">
                   {submitting ? 'Đang phân tích...' : 'Phân tích'}
                 </button>
               </div>
             </form>
+          </Panel>
+
+          <Panel title="Tóm tắt mới nhất" icon={<SparklesIcon className="h-5 w-5" />}>
+            {activeAnalysis ? <AnalysisSummary analysis={activeAnalysis} /> : <EmptyState message="Chưa có kết quả phân tích. Hãy gửi check-in đầu tiên hôm nay." />}
           </Panel>
         </section>
 
@@ -500,7 +500,7 @@ const HealthCheckInsPage = () => {
             <TimelineChart history={history} />
           </Panel>
           <Panel title="Báo cáo đi khám" icon={<ArrowDownTrayIcon className="h-5 w-5" />}>
-            <p className="text-sm font-semibold leading-6 text-slate-600">Xuất báo cáo 14 check-in gần nhất để gia đình hoặc bác sĩ xem nhanh mức đau, giấc ngủ, triage và tóm tắt AI.</p>
+            <p className="text-sm font-semibold leading-6 text-slate-600">Xuất báo cáo 14 check-in gần nhất để gia đình hoặc bác sĩ xem nhanh mức đau, giấc ngủ, triage và tóm tắt phân tích.</p>
             <button type="button" onClick={exportReport} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-3 text-sm font-black text-white hover:bg-teal-700">
               <ArrowDownTrayIcon className="h-5 w-5" />
               Xuất PDF
@@ -537,7 +537,7 @@ const HealthCheckInsPage = () => {
 
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_55px_rgba(15,118,110,0.08)] ring-1 ring-white">
+    <section className="rounded-xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_55px_rgba(15,118,110,0.08)] ring-1 ring-white lg:p-6">
       <div className="mb-5 flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 ring-1 ring-teal-100/80">{icon}</div>
         <h2 className="text-[19px] font-black tracking-tight text-slate-950">{title}</h2>
@@ -549,12 +549,12 @@ function Panel({ title, icon, children }: { title: string; icon: React.ReactNode
 
 function FormSection({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:p-5">
+    <section className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.04)] sm:p-5">
       <div className="mb-4 flex flex-col gap-1 border-b border-slate-100 pb-3">
         <h3 className="text-base font-black tracking-tight text-slate-950">{title}</h3>
         <p className="text-sm font-semibold leading-6 text-slate-500">{subtitle}</p>
       </div>
-      <div className="space-y-4">{children}</div>
+      <div className="space-y-5">{children}</div>
     </section>
   );
 }
@@ -567,7 +567,7 @@ function BodyMap({ selected, onChange }: { selected: string[]; onChange: (value:
   };
 
   return (
-    <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-white via-teal-50/40 to-slate-50 p-4 shadow-inner sm:p-5">
+    <div className="rounded-xl border border-teal-100 bg-gradient-to-br from-white via-teal-50/40 to-slate-50 p-4 shadow-inner sm:p-5">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="inline-flex w-fit max-w-full items-center gap-2 rounded-full border border-teal-100 bg-white px-3.5 py-2.5 text-sm font-black text-slate-900 shadow-sm">
           <MapPinIcon className="h-4 w-4 shrink-0 text-teal-700" />
@@ -591,7 +591,7 @@ function BodyMap({ selected, onChange }: { selected: string[]; onChange: (value:
         </div>
       )}
 
-      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
         {painLocations.map((location) => {
           const active = selected.includes(location);
           return (
@@ -599,7 +599,7 @@ function BodyMap({ selected, onChange }: { selected: string[]; onChange: (value:
               key={location}
               type="button"
               onClick={() => toggle(location)}
-              className={`min-h-12 rounded-2xl border px-3 py-2.5 text-sm font-black shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-teal-100 ${active ? 'border-teal-600 bg-teal-600 text-white shadow-teal-100' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800'}`}
+              className={`min-h-14 rounded-xl border px-3 py-3 text-sm font-black leading-5 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-teal-100 ${active ? 'border-teal-600 bg-teal-600 text-white shadow-teal-100' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800'}`}
             >
               {location}
             </button>
@@ -611,7 +611,7 @@ function BodyMap({ selected, onChange }: { selected: string[]; onChange: (value:
 }
 
 function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
-  const triage = normalizeTriage(analysis.triageColor ?? analysis.warningLevel);
+  const triage = normalizeTriage(analysis.warningLevel);
   const [speaking, setSpeaking] = useState(false);
 
   const speakAnalysis = () => {
@@ -655,7 +655,7 @@ function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
                 className="inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1.5 text-xs font-black shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:bg-white"
               >
                 {speaking ? <StopCircleIcon className="h-4 w-4" /> : <SpeakerWaveIcon className="h-4 w-4" />}
-                {speaking ? 'Dừng đọc' : 'Nghe AI đọc'}
+                {speaking ? 'Dừng đọc' : 'Nghe đọc'}
               </button>
             </div>
             <p className="mt-3 text-sm font-semibold leading-6">{analysis.summary}</p>
@@ -671,7 +671,7 @@ function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
           <div className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-black shadow-sm">{analysis.urgencyAction}</div>
         )}
       </div>
-      {analysis.weeklySummary && <InfoBlock title="AI summary 7 ngày" content={analysis.weeklySummary} />}
+      {analysis.weeklySummary && <InfoBlock title="Tóm tắt 7 ngày" content={analysis.weeklySummary} />}
       {analysis.trendSummary && <InfoBlock title="Xu hướng gần đây" content={analysis.trendSummary} />}
       {analysis.riskFactors?.length > 0 && <RiskFactorList factors={analysis.riskFactors} />}
       <ListBlock title="Khuyến nghị cá nhân hóa" items={analysis.recommendations} />
@@ -689,7 +689,7 @@ function TimelineChart({ history }: { history: HealthCheckInHistoryDto[] }) {
     <div className="space-y-4">
       <div className="grid min-h-56 grid-cols-7 items-end gap-2 rounded-xl bg-slate-50 p-4">
         {data.map((item) => {
-          const triage = normalizeTriage(item.analysis?.triageColor ?? item.analysis?.warningLevel);
+          const triage = normalizeTriage(item.analysis?.warningLevel);
           return (
             <div key={item.checkInId} className="flex h-48 flex-col items-center justify-end gap-2">
               <div className="text-xs font-black text-slate-500">{item.painLevel}</div>
@@ -709,7 +709,7 @@ function TimelineChart({ history }: { history: HealthCheckInHistoryDto[] }) {
 }
 
 function HistoryItem({ item, expanded, onToggle }: { item: HealthCheckInHistoryDto; expanded: boolean; onToggle: () => void }) {
-  const triage = normalizeTriage(item.analysis?.triageColor ?? item.analysis?.warningLevel);
+  const triage = normalizeTriage(item.analysis?.warningLevel);
   return (
     <article className="overflow-hidden rounded-xl border border-slate-200 bg-white">
       <button type="button" onClick={onToggle} className="flex w-full flex-col gap-3 p-4 text-left transition hover:bg-slate-50 md:flex-row md:items-center md:justify-between">
@@ -744,11 +744,11 @@ function HistoryItem({ item, expanded, onToggle }: { item: HealthCheckInHistoryD
                 <DetailRow label="Triệu chứng" value={item.symptoms?.join(', ') || 'Không ghi nhận'} />
                 <DetailRow label="Huyết áp" value={item.systolicBloodPressure && item.diastolicBloodPressure ? `${item.systolicBloodPressure}/${item.diastolicBloodPressure}` : 'Chưa nhập'} />
                 <DetailRow label="Nhiệt độ" value={item.temperatureCelsius ? `${item.temperatureCelsius}°C` : 'Chưa nhập'} />
-                <DetailRow label="Dữ liệu AI" value={formatContextData(item.contextData)} />
+                <DetailRow label="Dữ liệu bổ sung" value={formatContextData(item.contextData)} />
               </div>
               <p className="mt-4 rounded-lg bg-slate-50 p-3 text-sm font-medium leading-6 text-slate-700">{item.note || 'Không có ghi chú.'}</p>
             </div>
-            <div className="rounded-lg bg-white p-4">{item.analysis ? <AnalysisSummary analysis={item.analysis} /> : <EmptyState message="Lần check-in này chưa có phân tích AI." />}</div>
+            <div className="rounded-lg bg-white p-4">{item.analysis ? <AnalysisSummary analysis={item.analysis} /> : <EmptyState message="Lần check-in này chưa có phân tích." />}</div>
           </div>
         </div>
       )}
@@ -763,7 +763,7 @@ function ChipGroup({ label, options, values, onChange }: { label: string; option
       <div className="mb-2 text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">{label}</div>
       <div className="flex flex-wrap gap-2.5">
         {options.map((option) => (
-          <button key={option} type="button" onClick={() => toggle(option)} className={`rounded-full border px-3.5 py-2 text-xs font-black shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-teal-100 ${values.includes(option) ? 'border-teal-600 bg-teal-600 text-white shadow-teal-100' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800'}`}>
+          <button key={option} type="button" onClick={() => toggle(option)} className={`min-h-10 rounded-xl border px-3.5 py-2 text-sm font-black leading-5 shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-teal-100 ${values.includes(option) ? 'border-teal-600 bg-teal-600 text-white shadow-teal-100' : 'border-slate-200 bg-white text-slate-700 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-800'}`}>
             {option}
           </button>
         ))}
@@ -782,16 +782,16 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function NumberInput({ value, min, max, step, onChange }: { value: number; min: number; max: number; step?: number; onChange: (value: number) => void }) {
-  return <input type="number" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50" />;
+  return <input type="number" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} className="h-[52px] min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50" />;
 }
 
 function TextInput({ value, onChange, placeholder, inputMode, className = '' }: { value: string; onChange: (value: string) => void; placeholder?: string; inputMode?: React.HTMLAttributes<HTMLInputElement>['inputMode']; className?: string }) {
-  return <input value={value} inputMode={inputMode} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className={`h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50 ${className}`} />;
+  return <input value={value} inputMode={inputMode} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className={`h-[52px] min-h-[52px] w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm outline-none transition placeholder:text-slate-300 hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50 ${className}`} />;
 }
 
 function RangeInput({ value, min, max, suffix, onChange }: { value: number; min: number; max: number; suffix: string; onChange: (value: number) => void }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-teal-200">
+    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition hover:border-teal-200">
       <div className="mb-2 flex items-center justify-between text-sm font-black text-slate-900"><span>{value}{suffix}</span><HeartIcon className="h-5 w-5 text-teal-600" /></div>
       <input type="range" min={min} max={max} value={value} onChange={(event) => onChange(Number(event.target.value))} className="w-full accent-teal-600" />
     </div>
@@ -801,7 +801,7 @@ function RangeInput({ value, min, max, suffix, onChange }: { value: number; min:
 function Select({ value, onChange, options }: { value: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }> }) {
   return (
     <div className="relative">
-      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white px-4 pr-10 text-sm font-bold text-slate-900 shadow-sm outline-none transition hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50">
+      <select value={value} onChange={(event) => onChange(event.target.value)} className="h-[52px] min-h-[52px] w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm font-bold text-slate-900 shadow-sm outline-none transition hover:border-teal-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-50">
         {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
       </select>
       <ChevronDownIcon className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300" />
@@ -940,7 +940,7 @@ function buildAnalysisSpeechText(analysis: HealthAnalysisResponse, triage: strin
     analysis.summary,
     analysis.urgencyAction ? `Hành động ưu tiên: ${analysis.urgencyAction}` : '',
     analysis.recommendations?.length ? `Khuyến nghị chính: ${analysis.recommendations.slice(0, 3).join('. ')}` : '',
-    'Thông tin từ AI chỉ mang tính tham khảo và không thay thế tư vấn từ bác sĩ.',
+    'Thông tin từ CareMate chỉ mang tính tham khảo và không thay thế tư vấn từ bác sĩ.',
   ];
 
   return parts.filter(Boolean).join(' ');
@@ -1018,7 +1018,7 @@ function formatDateTime(value: string) {
 
 function buildPrintableReport(analysis: HealthAnalysisResponse | null, rows: string[][]) {
   const bodyRows = rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('');
-  return `<!doctype html><html><head><meta charset="utf-8"><title>CareMate Health Report</title><style>body{font-family:Arial,sans-serif;padding:32px;color:#0f172a}h1{margin:0 0 8px}p{line-height:1.6}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #e2e8f0;padding:10px;text-align:left;font-size:12px}th{background:#f8fafc}.box{border:1px solid #cbd5e1;border-radius:12px;padding:16px;margin-top:16px}</style></head><body><h1>CareMate Health Report</h1><p>Ngày xuất: ${new Date().toLocaleString('vi-VN')}</p><div class="box"><strong>Triage:</strong> ${escapeHtml(toTriageLabel(analysis?.triageColor ?? analysis?.warningLevel))}<br><strong>Risk score:</strong> ${analysis?.riskScore ?? '--'}/100<p>${escapeHtml(analysis?.summary ?? 'Chưa có phân tích mới.')}</p></div><table><thead><tr><th>Thời gian</th><th>Đau</th><th>Vùng đau</th><th>Ngủ</th><th>Mood</th><th>Triage</th><th>Tóm tắt</th></tr></thead><tbody>${bodyRows}</tbody></table></body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><title>CareMate Health Report</title><style>body{font-family:Arial,sans-serif;padding:32px;color:#0f172a}h1{margin:0 0 8px}p{line-height:1.6}table{width:100%;border-collapse:collapse;margin-top:20px}td,th{border:1px solid #e2e8f0;padding:10px;text-align:left;font-size:12px}th{background:#f8fafc}.box{border:1px solid #cbd5e1;border-radius:12px;padding:16px;margin-top:16px}</style></head><body><h1>CareMate Health Report</h1><p>Ngày xuất: ${new Date().toLocaleString('vi-VN')}</p><div class="box"><strong>Triage:</strong> ${escapeHtml(toTriageLabel(analysis?.warningLevel))}<br><strong>Risk score:</strong> ${analysis?.riskScore ?? '--'}/100<p>${escapeHtml(analysis?.summary ?? 'Chưa có phân tích mới.')}</p></div><table><thead><tr><th>Thời gian</th><th>Đau</th><th>Vùng đau</th><th>Ngủ</th><th>Mood</th><th>Triage</th><th>Tóm tắt</th></tr></thead><tbody>${bodyRows}</tbody></table></body></html>`;
 }
 
 function escapeHtml(value: string) {

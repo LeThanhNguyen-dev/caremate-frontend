@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from 'react';
+﻿import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
 import type { AvailabilitySlotDto, BookingDetailDto, PackageSessionDto } from '../api/frontend-api-contract';
@@ -118,7 +118,7 @@ const NurseSchedulePage = () => {
                     setPackageSessions(sessionData);
                 }
             } catch {
-                showToast('KhÃ´ng thá»ƒ táº£i dá»¯ liá»‡u lá»‹ch lÃ m viá»‡c.', 'error');
+                showToast('Không thể tải dữ liệu lịch làm việc.', 'error');
             }
         };
 

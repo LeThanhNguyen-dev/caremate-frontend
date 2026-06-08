@@ -1,5 +1,5 @@
 import axiosInstance from './axios';
-import type { NurseProfileDetailDto, UpdateNurseProfileDto, UploadDocumentDto, UploadDocumentsDto } from '../types/nurse';
+import type { CccdOcrResultDto, NurseProfileDetailDto, UpdateNurseProfileDto, UploadDocumentDto, UploadDocumentsDto } from '../types/nurse';
 
 type NurseSearchParams = Record<string, string | number | boolean | undefined>;
 
@@ -46,6 +46,19 @@ export const nurseApi = {
                 'Content-Type': 'multipart/form-data'
             }
         });
+    },
+    ocrCccd: async (type: string, file: File): Promise<CccdOcrResultDto> => {
+        const formData = new FormData();
+        formData.append('Type', type);
+        formData.append('File', file);
+
+        const response = await axiosInstance.post<CccdOcrResultDto>('/api/nurse/documents/ocr', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        return response.data;
     },
     submitVerification: async (): Promise<void> => {
         await axiosInstance.post('/api/nurse/verification/submit');

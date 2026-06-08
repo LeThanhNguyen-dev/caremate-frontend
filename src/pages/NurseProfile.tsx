@@ -15,7 +15,7 @@ import {
 import { StarIcon as SolidStarIcon } from '@heroicons/react/24/solid';
 import { useToast } from '../hooks/useToast';
 import { nurseApi } from '../api/nurseApi';
-import type { DocumentDto, NurseProfileDetailDto } from '../types/nurse';
+import type { CccdOcrResultDto, DocumentDto, NurseProfileDetailDto } from '../types/nurse';
 import { getErrorMessage } from '../utils/apiError';
 import bankApi from '../api/bankApi';
 import type { BankOptionDto } from '../api/frontend-api-contract';
@@ -30,6 +30,21 @@ const parseCoordinate = (value: unknown) => {
     const parsed = Number(text);
     return text && Number.isFinite(parsed) ? parsed : null;
 };
+
+const isCccdDocumentType = (type: string) => type === 'id_card_front' || type === 'id_card_back';
+
+const cccdOcrFields: Array<{ key: keyof CccdOcrResultDto; label: string }> = [
+    { key: 'idNumber', label: 'Số CCCD' },
+    { key: 'fullName', label: 'Họ tên' },
+    { key: 'dateOfBirth', label: 'Ngày sinh' },
+    { key: 'gender', label: 'Giới tính' },
+    { key: 'nationality', label: 'Quốc tịch' },
+    { key: 'placeOfOrigin', label: 'Quê quán' },
+    { key: 'placeOfResidence', label: 'Nơi thường trú' },
+    { key: 'dateOfIssue', label: 'Ngày cấp' },
+    { key: 'dateOfExpiry', label: 'Có giá trị đến' },
+    { key: 'issuingAuthority', label: 'Nơi cấp' },
+];
 
 const deriveAddressLine = (fullAddress: unknown, ward?: unknown, district?: unknown) => {
     const wardText = toSafeText(ward).toLocaleLowerCase('vi-VN');
@@ -71,6 +86,8 @@ const NurseProfile = () => {
     const [formData, setFormData] = useState({ fullName: '', phoneNumber: '', avatar: '', bio: '', specialization: '', yearsExperience: 0, serviceRadiusKm: 10, bankBin: '', bankAccountNumber: '', bankAccountName: '', address: '', addressLine: '', ward: '', district: '', latitude: '', longitude: '' });
     const [docType, setDocType] = useState('id_card_front');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [cccdOcrResult, setCccdOcrResult] = useState<CccdOcrResultDto | null>(null);
+    const [cccdOcrLoading, setCccdOcrLoading] = useState(false);
     const [banks, setBanks] = useState<BankOptionDto[]>([]);
     const [reviewCategory, setReviewCategory] = useState('all');
     const [addressSuggestions, setAddressSuggestions] = useState<GoongPrediction[]>([]);
@@ -251,6 +268,48 @@ const NurseProfile = () => {
         }
     };
 
+    const runCccdOcr = async (file: File, type = docType) => {
+        try {
+            setCccdOcrLoading(true);
+            const result = await nurseApi.ocrCccd(type, file);
+            setCccdOcrResult(result);
+
+            if (result.isIdentityCard) {
+                showToast('Đã OCR ảnh CCCD bằng FPT AI.', 'success');
+            } else {
+                showToast(result.warning || 'FPT AI chưa nhận diện đây là CCCD.', 'error');
+            }
+
+            return result;
+        } catch (err) {
+            setCccdOcrResult(null);
+            showToast(getErrorMessage(err, 'Không thể OCR ảnh CCCD bằng FPT AI.'), 'error');
+            return null;
+        } finally {
+            setCccdOcrLoading(false);
+        }
+    };
+
+    const handleDocumentFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(event.target.files || []);
+        setSelectedFiles(files);
+        setCccdOcrResult(null);
+
+        if (files.length === 1 && isCccdDocumentType(docType)) {
+            void runCccdOcr(files[0], docType);
+        }
+    };
+
+    const handleDocumentTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const nextType = event.target.value;
+        setDocType(nextType);
+        setCccdOcrResult(null);
+
+        if (selectedFiles.length === 1 && isCccdDocumentType(nextType)) {
+            void runCccdOcr(selectedFiles[0], nextType);
+        }
+    };
+
     const uploadDocument = async (event: React.FormEvent) => {
         event.preventDefault();
         if (!selectedFiles.length) {
@@ -260,8 +319,17 @@ const NurseProfile = () => {
 
         try {
             setUploading(true);
+            if (isCccdDocumentType(docType)) {
+                const ocrResult = cccdOcrResult ?? await runCccdOcr(selectedFiles[0], docType);
+                if (!ocrResult?.isIdentityCard) {
+                    showToast(ocrResult?.warning || 'Ảnh được chọn chưa giống CCCD. Vui lòng kiểm tra lại.', 'error');
+                    return;
+                }
+            }
+
             await nurseApi.uploadDocuments({ type: docType, files: selectedFiles });
             setSelectedFiles([]);
+            setCccdOcrResult(null);
             showToast(`Đã gửi ${selectedFiles.length} tài liệu lên hệ thống.`, 'success');
             await loadProfile();
         } catch (err) {
@@ -537,7 +605,7 @@ const NurseProfile = () => {
                             </div>
                             <div>
                                 <label className="form-label">Phân loại tài liệu</label>
-                                <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all disabled:opacity-50" value={docType} onChange={(event) => setDocType(event.target.value)} disabled={!canChangeDocuments}>
+                                <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all disabled:opacity-50" value={docType} onChange={handleDocumentTypeChange} disabled={!canChangeDocuments}>
                                     <option value="id_card_front">Căn cước công dân (Mặt trước)</option>
                                     <option value="id_card_back">Căn cước công dân (Mặt sau)</option>
                                     <option value="certificate">Chứng chỉ hành nghề y tế</option>
@@ -546,7 +614,7 @@ const NurseProfile = () => {
                             <div>
                                 <label className="form-label">Chọn tệp tài liệu (JPG/PNG)</label>
                                 <div className="relative group">
-                                    <input type="file" id="doc-upload" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple disabled={!canChangeDocuments} onChange={(event) => setSelectedFiles(Array.from(event.target.files || []))} />
+                                    <input type="file" id="doc-upload" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple disabled={!canChangeDocuments} onChange={handleDocumentFilesChange} />
                                     <label htmlFor="doc-upload" className="flex items-center justify-between w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl py-4 px-6 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all group">
                                         <span className={`text-sm font-bold ${selectedFiles.length ? 'text-slate-900' : 'text-slate-400'}`}>
                                             {selectedFiles.length ? `Đã chọn ${selectedFiles.length} tệp` : 'Nhấn để chọn tệp...'}
@@ -556,6 +624,50 @@ const NurseProfile = () => {
                                 </div>
                                 <p className="mt-2 text-[10px] font-medium text-slate-400 italic">Hỗ trợ định dạng JPG, PNG. Dung lượng tối đa 5MB.</p>
                             </div>
+                            {isCccdDocumentType(docType) && selectedFiles.length === 1 && (
+                                <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-5">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-700">FPT AI OCR CCCD</div>
+                                            <div className="mt-1 text-xs font-bold text-slate-500">
+                                                {cccdOcrLoading
+                                                    ? 'Đang đọc thông tin từ ảnh...'
+                                                    : cccdOcrResult
+                                                      ? `Độ tin cậy ${cccdOcrResult.confidenceScore}%`
+                                                      : 'Chưa có kết quả OCR.'}
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => void runCccdOcr(selectedFiles[0], docType)}
+                                            disabled={cccdOcrLoading}
+                                            className="shrink-0 rounded-xl bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-emerald-700 shadow-sm disabled:opacity-50"
+                                        >
+                                            {cccdOcrLoading ? 'Đang quét' : 'Quét lại'}
+                                        </button>
+                                    </div>
+                                    {cccdOcrResult && (
+                                        <div className="mt-4 space-y-3">
+                                            {cccdOcrResult.warning && (
+                                                <div className="rounded-xl bg-amber-50 px-4 py-3 text-xs font-bold text-amber-700">
+                                                    {cccdOcrResult.warning}
+                                                </div>
+                                            )}
+                                            <div className="grid gap-3 sm:grid-cols-2">
+                                                {cccdOcrFields
+                                                    .map((field) => ({ ...field, value: cccdOcrResult[field.key] }))
+                                                    .filter((field) => typeof field.value === 'string' && field.value.trim())
+                                                    .map((field) => (
+                                                        <div key={field.key} className="rounded-xl bg-white px-4 py-3">
+                                                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{field.label}</div>
+                                                            <div className="mt-1 text-sm font-black text-slate-900">{field.value}</div>
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                             <button type="submit" className="w-full py-4 rounded-xl flex items-center justify-center gap-3 border-2 border-emerald-100 text-[#10B981] font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 transition-all disabled:opacity-50 disabled:hover:bg-transparent" disabled={uploading || !canChangeDocuments}>
                                 <PlusIcon className="h-5 w-5 text-[#10B981]" />
                                 {uploading ? 'Đang gửi...' : isApproved ? 'Hồ sơ đã xác minh' : isSubmitted ? 'Đang chờ duyệt' : profile?.isVerified === 'rejected' ? 'Gửi lại hồ sơ xác minh' : 'Gửi tài liệu xác minh'}

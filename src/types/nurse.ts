@@ -85,6 +85,24 @@ export interface UploadDocumentsDto {
     files: File[];
 }
 
+export interface CccdOcrResultDto {
+    isIdentityCard: boolean;
+    side: 'front' | 'back' | 'unknown' | string;
+    idNumber?: string | null;
+    fullName?: string | null;
+    dateOfBirth?: string | null;
+    gender?: string | null;
+    nationality?: string | null;
+    placeOfOrigin?: string | null;
+    placeOfResidence?: string | null;
+    dateOfIssue?: string | null;
+    dateOfExpiry?: string | null;
+    issuingAuthority?: string | null;
+    confidenceScore: number;
+    warning?: string | null;
+    rawText: string;
+}
+
 export interface ReviewNurseProfileDto {
     isApproved: boolean;
     comment: string;
