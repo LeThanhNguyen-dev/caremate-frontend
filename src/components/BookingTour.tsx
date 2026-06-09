@@ -26,6 +26,12 @@ const steps: TourStep[] = [
     body: 'Bạn có thể tìm theo tên dịch vụ hoặc lọc theo nhóm để thấy đúng nhu cầu chăm sóc.',
   },
   {
+    selector: '[data-tour="service-categories"]',
+    path: /^\/services$/,
+    title: 'Chọn nhóm dịch vụ',
+    body: 'Các nút nhóm giúp bạn lọc nhanh theo nhu cầu, ví dụ chăm sóc sau sinh, chăm bé hoặc gói dài ngày.',
+  },
+  {
     selector: '[data-tour="service-card"]',
     path: /^\/services$/,
     title: 'Chọn một dịch vụ',
@@ -125,6 +131,7 @@ const BookingTour = () => {
 
   useEffect(() => {
     if (!open) return;
+    if (!step.path || step.path.test(location.pathname)) return;
 
     const routeStepIndex = steps.findIndex((item, index) => index > stepIndex && item.path?.test(location.pathname));
     if (routeStepIndex !== -1) {

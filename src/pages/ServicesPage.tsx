@@ -168,7 +168,7 @@ const ServicesPage = () => {
             <p className="mt-2 text-sm font-semibold text-slate-500">{filteredServices.length} dịch vụ phù hợp với nhu cầu của bạn.</p>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div data-tour="service-categories" className="flex flex-wrap gap-2">
             {categories.map((category) => {
               const active = selectedCategory === category;
               return (
