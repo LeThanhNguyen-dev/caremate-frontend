@@ -39,6 +39,12 @@ const steps: TourStep[] = [
     action: 'click-target',
   },
   {
+    selector: '[data-tour="service-detail-info"]',
+    path: /^\/services\/[^/]+$/,
+    title: 'Xem thông tin dịch vụ',
+    body: 'Kiểm tra nhóm dịch vụ, số buổi, thời lượng và chi phí dự kiến trước khi chuyển sang bước chọn y tá.',
+  },
+  {
     selector: '[data-tour="service-book-now"]',
     path: /^\/services\/[^/]+$/,
     title: 'Đi tới bước chọn y tá',

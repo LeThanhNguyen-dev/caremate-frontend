@@ -112,7 +112,7 @@ const ServiceDetailPage = () => {
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-slate-100 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
+          <div data-tour="service-detail-info" className="rounded-[2rem] border border-slate-100 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
             <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Thông tin từ hệ thống</div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <DataTile label="Mã dịch vụ" value={`#${service.id}`} />
