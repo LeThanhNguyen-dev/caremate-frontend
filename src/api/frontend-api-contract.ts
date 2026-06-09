@@ -362,6 +362,14 @@ export type RiskFactorDto = {
   code: string;
   label: string;
   points: number;
+  category: string;
+};
+
+export type NutritionTipDto = {
+  category: string;
+  tip: string;
+  reason: string;
+  icon: string;
 };
 
 export type TrendSignalDto = {
@@ -388,6 +396,14 @@ export type HealthAnalysisResponse = {
   suggestedServices: SuggestedServiceDto[];
   disclaimer: string;
   engineVersion: string;
+  ppdScreeningScore: number;
+  ppdScreeningLevel: 'Low' | 'Moderate' | 'High' | string;
+  ppdScreeningNote: string;
+  nutritionGuidance: NutritionTipDto[];
+  narrativeSummary: string;
+  dataCoveragePercent: number;
+  dataCoverageItems: string[];
+  missingDataItems: string[];
 };
 
 export type HealthCheckInHistoryDto = {

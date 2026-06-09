@@ -310,6 +310,7 @@ const HealthCheckInsPage = () => {
                 <Capability label="Câu hỏi động" />
                 <Capability label="Voice input" />
                 <Capability label="Xuất báo cáo" />
+                <Capability label={activeAnalysis?.engineVersion ? `CareMate Engine ${activeAnalysis.engineVersion.replace('rule-', '')}` : 'CareMate Engine v3.0'} />
               </div>
             </div>
             <div className={`border-t p-6 text-white lg:border-l lg:border-t-0 ${getTriageHeroClass(activeWarning)}`}>
@@ -671,6 +672,12 @@ function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
           <div className="mt-4 rounded-xl bg-white px-4 py-3 text-sm font-black shadow-sm">{analysis.urgencyAction}</div>
         )}
       </div>
+      {analysis.narrativeSummary && <NarrativeSummaryCard summary={analysis.narrativeSummary} engineVersion={analysis.engineVersion} />}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <PpdGauge score={analysis.ppdScreeningScore ?? 0} level={analysis.ppdScreeningLevel} note={analysis.ppdScreeningNote} />
+        <DataCoverageRing percent={analysis.dataCoveragePercent ?? 0} filled={analysis.dataCoverageItems ?? []} missing={analysis.missingDataItems ?? []} />
+      </div>
+      {analysis.nutritionGuidance?.length > 0 && <NutritionGuidancePanel tips={analysis.nutritionGuidance} />}
       {analysis.weeklySummary && <InfoBlock title="Tóm tắt 7 ngày" content={analysis.weeklySummary} />}
       {analysis.trendSummary && <InfoBlock title="Xu hướng gần đây" content={analysis.trendSummary} />}
       {analysis.riskFactors?.length > 0 && <RiskFactorList factors={analysis.riskFactors} />}
@@ -831,12 +838,131 @@ function Stat({ label, value, dark = false }: { label: string; value: string; da
   return <div className={`rounded-xl p-3 text-center ${dark ? 'bg-white/10 ring-1 ring-white/10' : 'bg-white shadow-sm'}`}><div className={`text-lg font-black ${dark ? 'text-white' : 'text-slate-950'}`}>{value}</div><div className={`mt-1 text-[11px] font-bold uppercase tracking-[0.12em] ${dark ? 'text-white/70' : 'text-slate-400'}`}>{label}</div></div>;
 }
 
+function NarrativeSummaryCard({ summary, engineVersion }: { summary: string; engineVersion: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white shadow-[0_18px_42px_rgba(15,23,42,0.16)]">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-teal-100">
+          <SparklesIcon className="h-4 w-4" />
+          AI narrative
+        </div>
+        <span className="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-black text-white/80">{engineVersion || 'rule-v3.0'}</span>
+      </div>
+      <p className="text-sm font-semibold leading-7 text-slate-100">{summary}</p>
+    </div>
+  );
+}
+
+function PpdGauge({ score, level, note }: { score: number; level?: string; note?: string }) {
+  const normalized = Math.max(0, Math.min(30, score));
+  const percent = (normalized / 30) * 100;
+  const levelLabel = toPpdLabel(level);
+  const levelClass = normalized >= 16 ? 'text-rose-700 bg-rose-50 border-rose-100' : normalized >= 9 ? 'text-amber-700 bg-amber-50 border-amber-100' : 'text-emerald-700 bg-emerald-50 border-emerald-100';
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">PPD screening</h3>
+          <p className="mt-1 text-sm font-semibold text-slate-600">Sàng lọc tâm lý sau sinh</p>
+        </div>
+        <span className={`rounded-full border px-3 py-1 text-xs font-black ${levelClass}`}>{levelLabel}</span>
+      </div>
+      <div className="relative mx-auto h-24 w-48 overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-48 rounded-full bg-[conic-gradient(from_270deg,#10b981_0deg,#10b981_60deg,#f59e0b_60deg,#f59e0b_108deg,#e11d48_108deg,#e11d48_180deg,transparent_180deg)]" />
+        <div className="absolute inset-x-5 top-5 h-40 rounded-full bg-white" />
+        <div className="absolute bottom-0 left-1/2 h-1 w-20 origin-left rounded-full bg-slate-950 transition" style={{ transform: `rotate(${Math.max(0, Math.min(180, percent * 1.8))}deg)` }} />
+      </div>
+      <div className="mt-2 text-center">
+        <div className="text-3xl font-black text-slate-950">{normalized}<span className="text-sm text-slate-400">/30</span></div>
+        <p className="mx-auto mt-2 max-w-sm text-sm font-semibold leading-6 text-slate-600">{note || 'Chưa có ghi chú sàng lọc tâm lý.'}</p>
+      </div>
+    </div>
+  );
+}
+
+function DataCoverageRing({ percent, filled, missing }: { percent: number; filled: string[]; missing: string[] }) {
+  const safePercent = Math.max(0, Math.min(100, percent));
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Data coverage</h3>
+          <p className="mt-1 text-sm font-semibold text-slate-600">{filled.length}/20 chỉ số đã nhập</p>
+        </div>
+        <ClipboardDocumentCheckIcon className="h-6 w-6 text-teal-600" />
+      </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div className="grid h-28 w-28 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(#0d9488 ${safePercent * 3.6}deg, #e2e8f0 0deg)` }}>
+          <div className="grid h-20 w-20 place-items-center rounded-full bg-white text-xl font-black text-slate-950">{safePercent}%</div>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-bold text-slate-700">Thiếu dữ liệu ưu tiên</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {(missing.length ? missing.slice(0, 6) : ['Đã đủ dữ liệu chính']).map((item) => (
+              <span key={item} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{item}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function NutritionGuidancePanel({ tips }: { tips: HealthAnalysisResponse['nutritionGuidance'] }) {
+  return (
+    <div>
+      <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Gợi ý dinh dưỡng</h3>
+      <div className="grid gap-3 md:grid-cols-2">
+        {tips.map((tip) => (
+          <div key={`${tip.category}-${tip.tip}`} className="rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 shadow-sm">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-white text-emerald-700 shadow-sm">
+                {tip.icon ? <span className="text-lg leading-none">{tip.icon}</span> : <HeartIcon className="h-5 w-5" />}
+              </div>
+              <div className="text-sm font-black text-emerald-950">{tip.category}</div>
+            </div>
+            <p className="text-sm font-black leading-6 text-emerald-950">{tip.tip}</p>
+            <p className="mt-1 text-sm font-semibold leading-6 text-emerald-800">{tip.reason}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function InfoBlock({ title, content }: { title: string; content: string }) {
   return <div className="rounded-xl border border-teal-100 bg-teal-50 px-4 py-3"><h3 className="text-xs font-black uppercase tracking-[0.16em] text-teal-900">{title}</h3><p className="mt-2 text-sm font-semibold leading-6 text-teal-900">{content}</p></div>;
 }
 
 function RiskFactorList({ factors }: { factors: HealthAnalysisResponse['riskFactors'] }) {
-  return <div><h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Yếu tố làm tăng rủi ro</h3><div className="grid gap-2 sm:grid-cols-2">{factors.map((factor) => <div key={factor.code} className="flex items-center justify-between gap-3 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2"><span className="text-sm font-black text-rose-900">{factor.label}</span><span className="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-black text-rose-700 shadow-sm">+{factor.points}</span></div>)}</div></div>;
+  const groups = factors.reduce<Record<string, HealthAnalysisResponse['riskFactors']>>((acc, factor) => {
+    const key = factor.category || 'General';
+    acc[key] = [...(acc[key] ?? []), factor];
+    return acc;
+  }, {});
+  return (
+    <div>
+      <h3 className="mb-2 text-xs font-black uppercase tracking-[0.16em] text-slate-500">Yếu tố làm tăng rủi ro</h3>
+      <div className="grid gap-3">
+        {Object.entries(groups).map(([category, items]) => (
+          <div key={category} className="rounded-xl border border-rose-100 bg-rose-50 p-3">
+            <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-rose-700">
+              <ExclamationTriangleIcon className="h-4 w-4" />
+              {toCategoryLabel(category)}
+            </div>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {items.map((factor) => (
+                <div key={factor.code} className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-2 shadow-sm">
+                  <span className="text-sm font-black text-rose-900">{factor.label}</span>
+                  <span className="shrink-0 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-black text-rose-700">+{factor.points}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function ListBlock({ title, items }: { title: string; items: string[] }) {
@@ -963,6 +1089,28 @@ function toTriageLabel(level?: string) {
     case 'Red': return 'Đỏ';
     case 'Yellow': return 'Vàng';
     default: return 'Xanh';
+  }
+}
+
+function toPpdLabel(level?: string) {
+  switch (level) {
+    case 'High': return 'Cao';
+    case 'Moderate': return 'Trung bình';
+    default: return 'Thấp';
+  }
+}
+
+function toCategoryLabel(category?: string) {
+  switch (category) {
+    case 'VitalSigns': return 'Chỉ số sinh tồn';
+    case 'Pain': return 'Đau';
+    case 'Baby': return 'Sơ sinh';
+    case 'Mental': return 'Tâm lý';
+    case 'Wound': return 'Vết mổ/khâu';
+    case 'Feeding': return 'Cho bú';
+    case 'Bleeding': return 'Sản dịch/ra máu';
+    case 'Medication': return 'Thuốc';
+    default: return 'Tổng quát';
   }
 }
 
