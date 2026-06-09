@@ -13,6 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import NotificationDropdown from './NotificationDropdown';
+import BookingTour from './BookingTour';
 import caremateApi from '../api/caremateApi';
 import type { ServiceDetailDto } from '../api/frontend-api-contract';
 import { getCategoryLabel, getIncludedServiceLabels } from '../utils/servicePresentation';
@@ -93,6 +94,7 @@ const Layout = () => {
                                     <div key={item.name} className="group relative">
                                         <Link
                                             to={item.href}
+                                            data-tour="nav-services"
                                             className={`inline-flex items-center gap-1.5 text-[17px] font-extrabold tracking-[0.01em] transition-colors ${
                                                 location.pathname.startsWith('/services') ? 'text-brand' : 'text-slate-500 hover:text-brand'
                                             }`}
@@ -305,6 +307,7 @@ const Layout = () => {
                                             <div key={item.name} className="rounded-2xl bg-slate-50 p-2">
                                                 <Link
                                                     to={item.href}
+                                                    data-tour="nav-services"
                                                     className={`block rounded-xl px-4 py-3 text-xl font-black leading-tight transition-colors ${
                                                         location.pathname.startsWith('/services') ? 'bg-white text-brand shadow-sm' : 'text-[#10233F] hover:bg-white hover:text-brand'
                                                     }`}
@@ -381,6 +384,7 @@ const Layout = () => {
             </header>
 
             <main className="flex-grow pt-28 lg:pt-36">
+                <BookingTour />
                 <Outlet />
             </main>
 

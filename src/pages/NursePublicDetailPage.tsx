@@ -468,7 +468,7 @@ const NursePublicDetailPage = () => {
               </div>
             </motion.section>
 
-            <section className="luxury-card p-8">
+            <section data-tour="booking-schedule" className="luxury-card p-8">
               <div className="mb-8 flex items-center justify-between">
                 <div>
                   <h2 className="text-[24px] font-black text-[#10233F]">
@@ -542,6 +542,7 @@ const NursePublicDetailPage = () => {
                                   <button
                                     key={slot.id}
                                     type="button"
+                                    data-tour="booking-slot"
                                     onClick={() => handlePackageSlotSelect(date, slot)}
                                     className={`rounded-2xl px-4 py-4 text-left ring-1 ring-transparent transition duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
                                       active
@@ -625,6 +626,7 @@ const NursePublicDetailPage = () => {
                                 <button
                                   key={slot.id}
                                   type="button"
+                                  data-tour="booking-slot"
                                   onClick={() => handleSelectSlot(slot)}
                                   className={`rounded-2xl px-4 py-4 text-left ring-1 ring-transparent transition duration-300 hover:-translate-y-0.5 hover:shadow-lg ${
                                       active
@@ -719,7 +721,7 @@ const NursePublicDetailPage = () => {
               </div>
 
               <form onSubmit={submitBooking} className="mt-8 space-y-5">
-                <div>
+                <div data-tour="booking-address">
                   <label className="ml-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Địa chỉ phục vụ</label>
                   <div className="relative mt-2">
                     <MapPinIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
@@ -792,11 +794,11 @@ const NursePublicDetailPage = () => {
                 </div>
 
                 {!isAuthenticated ? (
-                  <button type="button" onClick={() => navigate('/login')} className="btn-primary w-full rounded-2xl !bg-[#10233F] py-5 text-[15px] font-black !text-white shadow-xl shadow-[#10233F]/10 hover:!bg-slate-800">
+                  <button type="button" data-tour="booking-submit" onClick={() => navigate('/login')} className="btn-primary w-full rounded-2xl !bg-[#10233F] py-5 text-[15px] font-black !text-white shadow-xl shadow-[#10233F]/10 hover:!bg-slate-800">
                     Đăng nhập để đặt lịch
                   </button>
                 ) : (
-                  <button type="submit" disabled={booking || !canSubmit} className="btn-primary w-full rounded-2xl !bg-[#EC4899] py-5 text-[15px] font-black !text-white shadow-[0_18px_30px_rgba(236,72,153,0.25)] disabled:opacity-30 disabled:shadow-none">
+                  <button type="submit" data-tour="booking-submit" disabled={booking || !canSubmit} className="btn-primary w-full rounded-2xl !bg-[#EC4899] py-5 text-[15px] font-black !text-white shadow-[0_18px_30px_rgba(236,72,153,0.25)] disabled:opacity-30 disabled:shadow-none">
                     {booking ? 'Đang xử lý...' : 'Tiếp tục đặt lịch'}
                   </button>
                 )}
@@ -833,6 +835,7 @@ const NursePublicDetailPage = () => {
             </div>
             <button
               type="button"
+              data-tour="booking-submit"
               disabled={!canSubmit || booking}
               onClick={() => document.querySelector('form')?.requestSubmit()}
               className="shrink-0 rounded-2xl bg-[#EC4899] px-6 py-4 text-[14px] font-black text-white shadow-[0_18px_30px_rgba(236,72,153,0.22)] transition hover:bg-[#db2777] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"

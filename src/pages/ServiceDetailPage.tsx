@@ -262,6 +262,7 @@ const ServiceDetailPage = () => {
 
           <button
             type="button"
+            data-tour="service-book-now"
             onClick={() => navigate(`/find-nurse?serviceId=${service.id}`)}
             className="mt-6 inline-flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-4 text-sm font-black text-white shadow-lg shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-brand-deep"
           >

@@ -236,7 +236,7 @@ const DiscoverNursesPage = () => {
                     </div>
                 </section>
 
-                <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                <section data-tour="nurse-filters" className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Dịch vụ đã khóa</div>
@@ -427,6 +427,7 @@ const DiscoverNursesPage = () => {
 
                                     <Link
                                         to={`/nurses/${nurse.userId}?serviceId=${serviceId}`}
+                                        data-tour="nurse-card"
                                         className="btn-primary mt-6 w-full justify-between transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand/20"
                                     >
                                         Xem hồ sơ và đặt lịch
