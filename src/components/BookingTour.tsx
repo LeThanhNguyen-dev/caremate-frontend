@@ -102,6 +102,9 @@ const findVisibleTarget = (selector: string) => {
   return matches.find(isVisibleElement) ?? null;
 };
 
+const findFirstRouteStepIndex = (pathname: string) =>
+  steps.findIndex((item) => item.path?.test(pathname));
+
 const getTooltipPosition = (rect: DOMRect | null) => {
   if (!rect) {
     return {
@@ -137,9 +140,9 @@ const BookingTour = () => {
 
   useEffect(() => {
     if (!open) return;
-    if (!step.path || step.path.test(location.pathname)) return;
+    if (step.path?.test(location.pathname)) return;
 
-    const routeStepIndex = steps.findIndex((item, index) => index > stepIndex && item.path?.test(location.pathname));
+    const routeStepIndex = findFirstRouteStepIndex(location.pathname);
     if (routeStepIndex !== -1) {
       setStepIndex(routeStepIndex);
     }
@@ -228,7 +231,7 @@ const BookingTour = () => {
       <button
         type="button"
         onClick={restart}
-        className="fixed bottom-5 left-5 z-[180] rounded-full bg-[#10233F] px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-slate-900/20 transition hover:bg-brand"
+        className="fixed right-5 top-24 z-[180] rounded-full bg-[#10233F] px-4 py-3 text-xs font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-slate-900/20 transition hover:bg-brand lg:top-32"
       >
         Hướng dẫn đặt lịch
       </button>
