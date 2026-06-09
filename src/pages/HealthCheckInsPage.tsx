@@ -296,7 +296,7 @@ const HealthCheckInsPage = () => {
 
   return (
     <main className="min-h-screen bg-[#f6fbf9] py-8">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-[1760px] px-3 sm:px-5 lg:px-8 2xl:px-10">
         <section className="mb-6 overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_20px_60px_rgba(15,118,110,0.09)]">
           <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_380px]">
             <div className="p-6 lg:p-8">
@@ -337,7 +337,7 @@ const HealthCheckInsPage = () => {
           </div>
         </section>
 
-        <section className="mb-6 grid gap-6 2xl:grid-cols-[minmax(0,1fr)_400px]">
+        <section className="mb-6 grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1fr)_minmax(460px,520px)]">
           <Panel title="Check-in dạng hội thoại" icon={<ChatBubbleLeftRightIcon className="h-5 w-5" />}>
             <form onSubmit={handleSubmit} className="space-y-5">
               <ChatPrompt text="Hôm nay mẹ thấy thế nào? Chọn vùng đau và dấu hiệu đi kèm trước, hệ thống sẽ hỏi tiếp đúng ngữ cảnh." />
@@ -496,7 +496,7 @@ const HealthCheckInsPage = () => {
           </Panel>
         </section>
 
-        <section className="mb-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="mb-6 grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_420px]">
           <Panel title="Health timeline" icon={<ChartBarSquareIcon className="h-5 w-5" />}>
             <TimelineChart history={history} />
           </Panel>
@@ -538,7 +538,7 @@ const HealthCheckInsPage = () => {
 
 function Panel({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_55px_rgba(15,118,110,0.08)] ring-1 ring-white lg:p-6">
+    <section className="min-w-0 rounded-xl border border-slate-200/80 bg-white/95 p-5 shadow-[0_18px_55px_rgba(15,118,110,0.08)] ring-1 ring-white lg:p-6">
       <div className="mb-5 flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-teal-50 text-teal-700 ring-1 ring-teal-100/80">{icon}</div>
         <h2 className="text-[19px] font-black tracking-tight text-slate-950">{title}</h2>
@@ -673,7 +673,7 @@ function AnalysisSummary({ analysis }: { analysis: HealthAnalysisResponse }) {
         )}
       </div>
       {analysis.narrativeSummary && <NarrativeSummaryCard summary={analysis.narrativeSummary} engineVersion={analysis.engineVersion} />}
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid min-w-0 gap-4">
         <PpdGauge score={analysis.ppdScreeningScore ?? 0} level={analysis.ppdScreeningLevel} note={analysis.ppdScreeningNote} />
         <DataCoverageRing percent={analysis.dataCoveragePercent ?? 0} filled={analysis.dataCoverageItems ?? []} missing={analysis.missingDataItems ?? []} />
       </div>
@@ -859,18 +859,18 @@ function PpdGauge({ score, level, note }: { score: number; level?: string; note?
   const levelLabel = toPpdLabel(level);
   const levelClass = normalized >= 16 ? 'text-rose-700 bg-rose-50 border-rose-100' : normalized >= 9 ? 'text-amber-700 bg-amber-50 border-amber-100' : 'text-emerald-700 bg-emerald-50 border-emerald-100';
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">PPD screening</h3>
+        <div className="min-w-0">
+          <h3 className="break-words text-xs font-black uppercase tracking-[0.14em] text-slate-500">PPD screening</h3>
           <p className="mt-1 text-sm font-semibold text-slate-600">Sàng lọc tâm lý sau sinh</p>
         </div>
         <span className={`rounded-full border px-3 py-1 text-xs font-black ${levelClass}`}>{levelLabel}</span>
       </div>
-      <div className="relative mx-auto h-24 w-48 overflow-hidden">
+      <div className="relative mx-auto h-[clamp(84px,18vw,112px)] w-full max-w-[240px] overflow-hidden">
         <div className="absolute inset-x-0 top-0 h-48 rounded-full bg-[conic-gradient(from_270deg,#10b981_0deg,#10b981_60deg,#f59e0b_60deg,#f59e0b_108deg,#e11d48_108deg,#e11d48_180deg,transparent_180deg)]" />
         <div className="absolute inset-x-5 top-5 h-40 rounded-full bg-white" />
-        <div className="absolute bottom-0 left-1/2 h-1 w-20 origin-left rounded-full bg-slate-950 transition" style={{ transform: `rotate(${Math.max(0, Math.min(180, percent * 1.8))}deg)` }} />
+        <div className="absolute bottom-0 left-1/2 h-1 w-[38%] origin-left rounded-full bg-slate-950 transition" style={{ transform: `rotate(${Math.max(0, Math.min(180, percent * 1.8))}deg)` }} />
       </div>
       <div className="mt-2 text-center">
         <div className="text-3xl font-black text-slate-950">{normalized}<span className="text-sm text-slate-400">/30</span></div>
@@ -883,23 +883,23 @@ function PpdGauge({ score, level, note }: { score: number; level?: string; note?
 function DataCoverageRing({ percent, filled, missing }: { percent: number; filled: string[]; missing: string[] }) {
   const safePercent = Math.max(0, Math.min(100, percent));
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <h3 className="text-xs font-black uppercase tracking-[0.16em] text-slate-500">Data coverage</h3>
+        <div className="min-w-0">
+          <h3 className="break-words text-xs font-black uppercase tracking-[0.14em] text-slate-500">Data coverage</h3>
           <p className="mt-1 text-sm font-semibold text-slate-600">{filled.length}/20 chỉ số đã nhập</p>
         </div>
-        <ClipboardDocumentCheckIcon className="h-6 w-6 text-teal-600" />
+        <ClipboardDocumentCheckIcon className="h-6 w-6 shrink-0 text-teal-600" />
       </div>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div className="flex flex-col items-center gap-4">
         <div className="grid h-28 w-28 shrink-0 place-items-center rounded-full" style={{ background: `conic-gradient(#0d9488 ${safePercent * 3.6}deg, #e2e8f0 0deg)` }}>
           <div className="grid h-20 w-20 place-items-center rounded-full bg-white text-xl font-black text-slate-950">{safePercent}%</div>
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-slate-700">Thiếu dữ liệu ưu tiên</p>
-          <div className="mt-2 flex flex-wrap gap-2">
+        <div className="min-w-0 w-full">
+          <p className="text-center text-sm font-bold text-slate-700">Thiếu dữ liệu ưu tiên</p>
+          <div className="mt-2 flex flex-wrap justify-center gap-2">
             {(missing.length ? missing.slice(0, 6) : ['Đã đủ dữ liệu chính']).map((item) => (
-              <span key={item} className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">{item}</span>
+              <span key={item} className="max-w-full rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold leading-5 text-slate-600">{item}</span>
             ))}
           </div>
         </div>

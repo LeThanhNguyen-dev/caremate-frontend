@@ -82,7 +82,7 @@ const Layout = () => {
                     scrolled ? 'lg:bg-white/88 lg:py-2 lg:shadow-xl lg:shadow-slate-200/35' : 'lg:bg-white/70 lg:py-3 lg:shadow-none'
                 }`}
             >
-                <nav className="mx-auto flex max-w-[1360px] items-center justify-between px-4 sm:px-6 lg:px-8">
+                <nav className="mx-auto flex w-full max-w-[1760px] items-center justify-between px-4 sm:px-6 lg:px-8 2xl:px-10">
                     <div className="flex items-center gap-10">
                         <Link to="/" className="flex items-center gap-3 group">
                             <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-16 w-auto object-contain transition-transform group-hover:scale-105 sm:h-20 lg:h-28" />
@@ -391,7 +391,7 @@ const Layout = () => {
             <footer className="bg-[#10233F] pt-28 pb-12 text-white overflow-hidden relative">
                 <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand/5 blur-[120px] -mr-48 -mb-48 rounded-full"></div>
 
-                <div className="mx-auto max-w-7xl px-6 lg:px-8 relative z-10">
+                <div className="relative z-10 mx-auto w-full max-w-[1760px] px-6 lg:px-8 2xl:px-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
                         <div className="space-y-8">
                             <Link to="/" className="flex items-center gap-3 group">
