@@ -708,8 +708,8 @@ const CommunityPage = () => {
                                         </div>
                                     </div>
 
-                                    {visibleTitle && <h2 className="mb-3 text-2xl font-black leading-tight text-[#10233F]">{visibleTitle}</h2>}
-                                    <p className="mb-6 whitespace-pre-line text-sm font-medium leading-7 text-slate-600">{post.content}</p>
+                                    {visibleTitle && <h2 className="mb-4 max-w-3xl break-words text-2xl font-black leading-snug text-[#10233F]">{visibleTitle}</h2>}
+                                    <p className="mb-7 max-w-3xl whitespace-pre-line break-words text-[15px] font-normal leading-8 text-slate-600">{post.content}</p>
                                     {post.imageUrl && (
                                         <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
                                             <img src={post.imageUrl} alt={visibleTitle || 'Ảnh bài viết cộng đồng'} className="max-h-[560px] w-full object-contain" />
