@@ -64,6 +64,12 @@ const Layout = () => {
         { name: 'Cộng đồng', href: '/community' },
         { name: 'Giới thiệu', href: '/about' },
     ];
+    const socialLinks = [
+        { label: 'FB', href: 'https://www.facebook.com/profile.php?id=61586875252074' },
+        { label: 'IG' },
+        { label: 'LI' },
+        { label: 'YT' },
+    ];
 
     const serviceGroups = services.reduce<Array<{ category: string; title: string; items: ServiceDetailDto[] }>>((groups, service) => {
         const category = service.category || 'khac';
@@ -448,10 +454,23 @@ const Layout = () => {
                             &copy; 2026 CareMate. Luxury Care Experience.
                         </div>
                         <div className="flex gap-4">
-                            {['FB', 'IG', 'LI', 'YT'].map((social) => (
-                                <div key={social} className="h-11 w-11 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group">
-                                    <span className="text-[10px] font-black group-hover:scale-110 transition-transform">{social}</span>
-                                </div>
+                            {socialLinks.map((social) => (
+                                social.href ? (
+                                    <a
+                                        key={social.label}
+                                        href={social.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        aria-label="Facebook CareMate"
+                                        className="h-11 w-11 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group"
+                                    >
+                                        <span className="text-[10px] font-black group-hover:scale-110 transition-transform">{social.label}</span>
+                                    </a>
+                                ) : (
+                                    <div key={social.label} className="h-11 w-11 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-brand transition-all cursor-pointer group">
+                                        <span className="text-[10px] font-black group-hover:scale-110 transition-transform">{social.label}</span>
+                                    </div>
+                                )
                             ))}
                         </div>
                     </div>
