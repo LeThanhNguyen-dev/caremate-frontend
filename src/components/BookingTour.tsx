@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
@@ -105,6 +106,9 @@ const findVisibleTarget = (selector: string) => {
 const findFirstRouteStepIndex = (pathname: string) =>
   steps.findIndex((item) => item.path?.test(pathname));
 
+const isCenteredEnough = (rect: DOMRect) =>
+  rect.top >= 96 && rect.bottom <= window.innerHeight - 96;
+
 const getTooltipPosition = (rect: DOMRect | null) => {
   if (!rect) {
     return {
@@ -152,13 +156,19 @@ const BookingTour = () => {
     if (!open) return;
 
     let attempts = 0;
+    let didScrollToTarget = false;
     const updateTarget = () => {
       const target = findVisibleTarget(step.selector);
       if (target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-        window.setTimeout(() => {
+        const rect = target.getBoundingClientRect();
+        if (!didScrollToTarget && !isCenteredEnough(rect)) {
+          didScrollToTarget = true;
+          target.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        }
+
+        window.requestAnimationFrame(() => {
           setTargetRect(target.getBoundingClientRect());
-        }, 180);
+        });
         return true;
       }
 
@@ -172,7 +182,7 @@ const BookingTour = () => {
       if (updateTarget() || attempts > 12) {
         window.clearInterval(retryId);
       }
-    }, 250);
+    }, 140);
 
     const handleUpdate = () => {
       const target = findVisibleTarget(step.selector);
@@ -236,11 +246,20 @@ const BookingTour = () => {
         Hướng dẫn đặt lịch
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-[220] pointer-events-none">
+      <AnimatePresence>
+        {open && (
+        <motion.div
+          className="fixed inset-0 z-[220] pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.12 }}
+        >
           {targetRect && (
-            <div
-              className="absolute rounded-2xl border-2 border-brand bg-transparent shadow-[0_12px_36px_rgba(236,72,153,0.18)] ring-4 ring-white/80 transition-all duration-300"
+            <motion.div
+              layout
+              className="absolute rounded-2xl border-2 border-brand bg-transparent shadow-[0_12px_36px_rgba(236,72,153,0.18)] ring-4 ring-white/80"
+              transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 left: targetRect.left - 8,
                 top: targetRect.top - 8,
@@ -250,8 +269,12 @@ const BookingTour = () => {
             />
           )}
 
-          <div
+          <motion.div
+            key={stepIndex}
             className="pointer-events-auto absolute w-[min(360px,calc(100vw-32px))] rounded-2xl border border-white/70 bg-white p-5 text-[#10233F] shadow-2xl shadow-slate-900/20"
+            initial={{ opacity: 0, y: 6, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.14, ease: [0.22, 1, 0.36, 1] }}
             style={tooltipPosition}
           >
             <div className="mb-4 flex items-start justify-between gap-4">
@@ -303,9 +326,10 @@ const BookingTour = () => {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
