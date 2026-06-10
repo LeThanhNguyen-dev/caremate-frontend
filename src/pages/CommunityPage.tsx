@@ -75,6 +75,29 @@ const replaceComment = (
 const flattenReplies = (comments: CommunityCommentDto[]): CommunityCommentDto[] =>
     comments.flatMap((comment) => [comment, ...flattenReplies(comment.replies ?? [])]);
 
+const isGeneratedTitle = (title: string, content: string) => {
+    const normalizedTitle = title.trim();
+    const normalizedContent = content.trim();
+    if (!normalizedTitle || !normalizedContent) return false;
+
+    const generatedTitle = normalizedContent.length > 80 ? `${normalizedContent.slice(0, 77)}...` : normalizedContent;
+    return normalizedTitle === generatedTitle;
+};
+
+const getVisiblePostTitle = (post: CommunityPostDto) =>
+    isGeneratedTitle(post.title, post.content) ? '' : post.title.trim();
+
+const getCommunityRoleLabel = (role: string) => {
+    const normalized = role.trim().toLowerCase();
+    if (normalized === 'admin' || normalized.includes('quản trị') || normalized.includes('quan tri')) {
+        return 'Quản trị viên';
+    }
+    if (normalized === 'nurse_confirmed' || normalized.includes('chuyên gia') || normalized.includes('chuyen gia')) {
+        return 'Chuyên gia CareMate';
+    }
+    return 'Thành viên CareMate';
+};
+
 const CommunityPage = () => {
     const { user, isAuthenticated } = useAuth();
     const { showToast } = useToast();
@@ -219,7 +242,7 @@ const CommunityPage = () => {
 
     const openEditPost = (post: CommunityPostDto) => {
         setEditingPost(post);
-        setEditTitle(post.title);
+        setEditTitle(getVisiblePostTitle(post));
         setEditContent(post.content);
         setEditTags(post.tags.join(', '));
         setOpenPostMenuId(null);
@@ -612,6 +635,7 @@ const CommunityPage = () => {
                             const liked = post.likedByMe;
                             const commentsOpen = expandedPostId === post.id;
                             const canManagePost = currentUserIsAdmin || currentUserId === post.authorId;
+                            const visibleTitle = getVisiblePostTitle(post);
 
                             return (
                                 <motion.article
@@ -629,7 +653,7 @@ const CommunityPage = () => {
                                             <div>
                                                 <div className="text-[16px] font-black leading-tight text-[#10233F]">{post.author}</div>
                                                 <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
-                                                    {post.role} · {getRelativeTime(post.createdAt)}
+                                                    {getCommunityRoleLabel(post.role)} · {getRelativeTime(post.createdAt)}
                                                 </div>
                                             </div>
                                         </div>
@@ -684,11 +708,11 @@ const CommunityPage = () => {
                                         </div>
                                     </div>
 
-                                    {post.title && <h2 className="mb-3 text-2xl font-black leading-tight text-[#10233F]">{post.title}</h2>}
+                                    {visibleTitle && <h2 className="mb-3 text-2xl font-black leading-tight text-[#10233F]">{visibleTitle}</h2>}
                                     <p className="mb-6 whitespace-pre-line text-sm font-medium leading-7 text-slate-600">{post.content}</p>
                                     {post.imageUrl && (
                                         <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
-                                            <img src={post.imageUrl} alt={post.title || 'Ảnh bài viết cộng đồng'} className="max-h-[560px] w-full object-contain" />
+                                            <img src={post.imageUrl} alt={visibleTitle || 'Ảnh bài viết cộng đồng'} className="max-h-[560px] w-full object-contain" />
                                         </div>
                                     )}
 
@@ -817,7 +841,7 @@ const CommunityPage = () => {
                             />
                             {editingPost.imageUrl && (
                                 <div className="mt-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
-                                    <img src={editingPost.imageUrl} alt={editingPost.title || 'Ảnh bài viết cộng đồng'} className="max-h-[320px] w-full object-contain" />
+                                    <img src={editingPost.imageUrl} alt={getVisiblePostTitle(editingPost) || 'Ảnh bài viết cộng đồng'} className="max-h-[320px] w-full object-contain" />
                                 </div>
                             )}
                         </div>
