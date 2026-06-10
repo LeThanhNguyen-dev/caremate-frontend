@@ -2,11 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
     ChatBubbleLeftRightIcon,
+    EllipsisHorizontalIcon,
     GlobeAltIcon,
     HandThumbUpIcon,
     MagnifyingGlassIcon,
     PaperAirplaneIcon,
+    PencilSquareIcon,
     PhotoIcon,
+    TrashIcon,
     XMarkIcon
 } from '@heroicons/react/24/outline';
 import { HandThumbUpIcon as HandThumbUpSolidIcon } from '@heroicons/react/24/solid';
@@ -86,6 +89,13 @@ const CommunityPage = () => {
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
     const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+    const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+    const [openPostMenuId, setOpenPostMenuId] = useState<number | null>(null);
+    const [editingPost, setEditingPost] = useState<CommunityPostDto | null>(null);
+    const [editTitle, setEditTitle] = useState('');
+    const [editContent, setEditContent] = useState('');
+    const [editTags, setEditTags] = useState('');
+    const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
     const [commentDrafts, setCommentDrafts] = useState<Record<number, string>>({});
     const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({});
     const [replyingToCommentId, setReplyingToCommentId] = useState<number | null>(null);
@@ -96,6 +106,8 @@ const CommunityPage = () => {
     } | null>(null);
 
     const currentUserName = user?.username || 'Thành viên CareMate';
+    const currentUserId = user?.userId ?? null;
+    const currentUserIsAdmin = user?.role === 'admin';
 
     useEffect(() => {
         const loadCommunityPosts = async () => {
@@ -178,6 +190,73 @@ const CommunityPage = () => {
             setPosts((prev) => prev.map((post) => post.id === postId ? updatedPost : post));
         } catch {
             showToast('Không thể cập nhật lượt thích.', 'error');
+        }
+    };
+
+    const handleDeletePost = async (postId: number) => {
+        if (deletingPostId) return;
+
+        if (!isAuthenticated) {
+            showToast('Vui lòng đăng nhập để xóa bài viết.', 'error');
+            return;
+        }
+
+        const confirmed = window.confirm('Xóa bài viết này? Hành động này không thể hoàn tác.');
+        if (!confirmed) return;
+
+        try {
+            setDeletingPostId(postId);
+            await caremateApi.deleteCommunityPost(postId);
+            setPosts((prev) => prev.filter((post) => post.id !== postId));
+            setExpandedPostId((prev) => (prev === postId ? null : prev));
+            showToast('Đã xóa bài viết.', 'success');
+        } catch {
+            showToast('Không thể xóa bài viết.', 'error');
+        } finally {
+            setDeletingPostId(null);
+        }
+    };
+
+    const openEditPost = (post: CommunityPostDto) => {
+        setEditingPost(post);
+        setEditTitle(post.title);
+        setEditContent(post.content);
+        setEditTags(post.tags.join(', '));
+        setOpenPostMenuId(null);
+    };
+
+    const closeEditPost = () => {
+        if (isSubmittingEdit) return;
+        setEditingPost(null);
+        setEditTitle('');
+        setEditContent('');
+        setEditTags('');
+    };
+
+    const handleUpdatePost = async () => {
+        if (!editingPost || isSubmittingEdit) return;
+
+        const title = editTitle.trim();
+        const content = editContent.trim();
+        if (!content && !editingPost.imageUrl) {
+            showToast('Vui lòng nhập nội dung bài viết.', 'error');
+            return;
+        }
+
+        try {
+            setIsSubmittingEdit(true);
+            const updatedPost = await caremateApi.updateCommunityPost(editingPost.id, {
+                title,
+                content,
+                tags: parseTags(editTags),
+            });
+            setPosts((prev) => prev.map((post) => post.id === updatedPost.id ? updatedPost : post));
+            closeEditPost();
+            showToast('Đã cập nhật bài viết.', 'success');
+        } catch (error) {
+            showToast(getErrorMessage(error, 'Không thể cập nhật bài viết.'), 'error');
+        } finally {
+            setIsSubmittingEdit(false);
         }
     };
 
@@ -383,25 +462,6 @@ const CommunityPage = () => {
             </section>
 
             <div id="community-feed" className="mx-auto w-full max-w-7xl scroll-mt-28 space-y-6 px-5 pb-14 pt-8 sm:px-8 lg:px-10">
-                <section className="grid gap-4 sm:grid-cols-3">
-                    {[
-                        { label: 'Bài viết', value: posts.length },
-                        { label: 'Bình luận', value: posts.reduce((total, post) => total + countComments(post.comments), 0) },
-                        { label: 'Chủ đề', value: new Set(posts.flatMap((post) => post.tags)).size },
-                    ].map((card, index) => (
-                        <motion.div
-                            key={card.label}
-                            initial={{ opacity: 0, y: 14 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.06 }}
-                            className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/45 sm:p-6"
-                        >
-                            <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{card.label}</div>
-                            <div className="mt-3 text-3xl font-black leading-none text-[#10233F]">{card.value}</div>
-                        </motion.div>
-                    ))}
-                </section>
-
                 <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
                     <main className="space-y-6">
                         <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
@@ -551,6 +611,7 @@ const CommunityPage = () => {
                         {filteredPosts.map((post, idx) => {
                             const liked = post.likedByMe;
                             const commentsOpen = expandedPostId === post.id;
+                            const canManagePost = currentUserIsAdmin || currentUserId === post.authorId;
 
                             return (
                                 <motion.article
@@ -572,20 +633,55 @@ const CommunityPage = () => {
                                                 </div>
                                             </div>
                                         </div>
-                                        {post.tags.length > 0 && (
-                                            <div className="flex flex-wrap gap-2">
-                                                {post.tags.map((tag) => (
+                                        <div className="flex flex-wrap items-center justify-start gap-2 md:justify-end">
+                                            {post.tags.map((tag) => (
+                                                <button
+                                                    key={tag}
+                                                    type="button"
+                                                    onClick={() => setSearchQuery(tag)}
+                                                    className="rounded-full bg-brand/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand transition hover:bg-brand hover:text-white"
+                                                >
+                                                    #{tag}
+                                                </button>
+                                            ))}
+                                            {canManagePost && (
+                                                <div className="relative">
                                                     <button
-                                                        key={tag}
                                                         type="button"
-                                                        onClick={() => setSearchQuery(tag)}
-                                                        className="rounded-full bg-brand/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-brand transition hover:bg-brand hover:text-white"
+                                                        onClick={() => setOpenPostMenuId(openPostMenuId === post.id ? null : post.id)}
+                                                        className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-50 text-slate-500 transition hover:bg-brand/10 hover:text-brand"
+                                                        aria-label="Mở tuỳ chọn bài viết"
+                                                        title="Tuỳ chọn bài viết"
                                                     >
-                                                        #{tag}
+                                                        <EllipsisHorizontalIcon className="h-5 w-5" />
                                                     </button>
-                                                ))}
-                                            </div>
-                                        )}
+                                                    {openPostMenuId === post.id && (
+                                                        <div className="absolute right-0 top-11 z-20 w-44 overflow-hidden rounded-2xl border border-slate-100 bg-white py-2 text-sm font-bold text-slate-600 shadow-xl shadow-slate-200/60">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => openEditPost(post)}
+                                                                className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-slate-50 hover:text-[#10233F]"
+                                                            >
+                                                                <PencilSquareIcon className="h-4 w-4" />
+                                                                Chỉnh sửa
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setOpenPostMenuId(null);
+                                                                    void handleDeletePost(post.id);
+                                                                }}
+                                                                disabled={deletingPostId === post.id}
+                                                                className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                                            >
+                                                                <TrashIcon className="h-4 w-4" />
+                                                                Xóa bài viết
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {post.title && <h2 className="mb-3 text-2xl font-black leading-tight text-[#10233F]">{post.title}</h2>}
@@ -684,6 +780,68 @@ const CommunityPage = () => {
                     </aside>
                 </div>
             </div>
+
+            {editingPost && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 py-6">
+                    <div className="w-full max-w-2xl overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+                        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+                            <h3 className="text-lg font-black text-[#10233F]">Chỉnh sửa bài viết</h3>
+                            <button
+                                type="button"
+                                onClick={closeEditPost}
+                                className="flex h-9 w-9 items-center justify-center rounded-2xl text-slate-400 transition hover:bg-slate-100 hover:text-[#10233F]"
+                                aria-label="Đóng chỉnh sửa bài viết"
+                            >
+                                <XMarkIcon className="h-5 w-5" />
+                            </button>
+                        </div>
+                        <div className="max-h-[calc(100vh-11rem)] overflow-y-auto px-6 py-5">
+                            <input
+                                value={editTitle}
+                                onChange={(event) => setEditTitle(event.target.value)}
+                                placeholder="Tiêu đề bài viết"
+                                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                            />
+                            <textarea
+                                value={editContent}
+                                onChange={(event) => setEditContent(event.target.value)}
+                                placeholder="Nội dung bài viết"
+                                rows={7}
+                                className="mt-4 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold leading-7 text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                            />
+                            <input
+                                value={editTags}
+                                onChange={(event) => setEditTags(event.target.value)}
+                                placeholder="Chủ đề, phân tách bằng dấu phẩy"
+                                className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                            />
+                            {editingPost.imageUrl && (
+                                <div className="mt-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50">
+                                    <img src={editingPost.imageUrl} alt={editingPost.title || 'Ảnh bài viết cộng đồng'} className="max-h-[320px] w-full object-contain" />
+                                </div>
+                            )}
+                        </div>
+                        <div className="flex justify-end gap-3 border-t border-slate-100 px-6 py-4">
+                            <button
+                                type="button"
+                                onClick={closeEditPost}
+                                disabled={isSubmittingEdit}
+                                className="rounded-2xl border border-slate-200 px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-500 transition hover:border-slate-300 hover:text-[#10233F] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleUpdatePost}
+                                disabled={isSubmittingEdit || (!editContent.trim() && !editingPost.imageUrl)}
+                                className="rounded-2xl bg-[#10233F] px-5 py-3 text-xs font-black uppercase tracking-widest text-white transition hover:bg-brand disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
+                            >
+                                {isSubmittingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {likersDialog && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">

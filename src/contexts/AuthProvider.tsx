@@ -20,6 +20,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.setItem('user', JSON.stringify(user));
     };
 
+    const parseUserId = (value: string | number | null | undefined): number | null => {
+        if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+        if (!value) return null;
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : null;
+    };
+
     useEffect(() => {
         const bootstrap = async () => {
             const accessToken = localStorage.getItem('accessToken');
@@ -43,6 +50,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
                 const me = await authApi.getCurrentUser();
                 const hydratedUser: User = {
+                    userId: parseUserId(me.userId) ?? cachedUser.userId ?? null,
                     username: me.fullName || cachedUser.username,
                     email: me.email || cachedUser.email,
                     role: me.role || cachedUser.role,
@@ -68,6 +76,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const refreshToken = response.refreshToken;
         
         let user: User = {
+            userId: null,
             username: response.username || response.fullName || response.email || 'User',
             email: response.email || '',
             role: response.role || 'customer',
@@ -83,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             const me = await authApi.getCurrentUser();
             user = {
+                userId: parseUserId(me.userId),
                 username: me.fullName || user.username,
                 email: me.email || user.email,
                 role: me.role || user.role,

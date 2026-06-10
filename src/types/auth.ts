@@ -40,6 +40,7 @@ export interface TokenResponse {
 }
 
 export interface User {
+  userId?: number | null;
   username: string;
   email: string;
   role: string;

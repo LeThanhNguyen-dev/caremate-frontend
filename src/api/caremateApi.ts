@@ -237,8 +237,13 @@ export const caremateApi = {
       }
     })).data;
   },
+  updateCommunityPost: async (postId: number, payload: { title: string; content: string; tags: string[] }): Promise<CommunityPostDto> =>
+    (await axiosInstance.put(`/api/community/posts/${postId}`, payload)).data,
   toggleCommunityPostLike: async (postId: number): Promise<CommunityPostDto> =>
     (await axiosInstance.post(`/api/community/posts/${postId}/like`)).data,
+  deleteCommunityPost: async (postId: number): Promise<void> => {
+    await axiosInstance.delete(`/api/community/posts/${postId}`);
+  },
   toggleCommunityCommentLike: async (postId: number, commentId: number): Promise<CommunityCommentDto> =>
     (await axiosInstance.post(`/api/community/posts/${postId}/comments/${commentId}/like`)).data,
   getCommunityCommentLikers: async (postId: number, commentId: number): Promise<CommunityCommentLikerDto[]> =>
