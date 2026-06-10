@@ -1,6 +1,6 @@
-import { Outlet } from 'react-router-dom';
 import Sidebar from './admin/Sidebar';
 import Header from './admin/Header';
+import PageTransition from './PageTransition';
 
 const AdminLayout = () => {
     return (
@@ -13,7 +13,7 @@ const AdminLayout = () => {
                 
                 <div className="flex-1 px-5 py-5 sm:px-6 lg:px-7">
                     <div className="w-full">
-                        <Outlet />
+                        <PageTransition />
                     </div>
                 </div>
 

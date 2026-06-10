@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Bars3Icon,
@@ -14,6 +14,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import NotificationDropdown from './NotificationDropdown';
 import BookingTour from './BookingTour';
+import PageTransition from './PageTransition';
 import caremateApi from '../api/caremateApi';
 import type { ServiceDetailDto } from '../api/frontend-api-contract';
 import { getCategoryLabel, getIncludedServiceLabels } from '../utils/servicePresentation';
@@ -385,7 +386,7 @@ const Layout = () => {
 
             <main className="flex-grow pt-28 lg:pt-36">
                 <BookingTour />
-                <Outlet />
+                <PageTransition />
             </main>
 
             <footer className="bg-[#10233F] pt-28 pb-12 text-white overflow-hidden relative">

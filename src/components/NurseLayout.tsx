@@ -1,6 +1,6 @@
-import { Outlet } from 'react-router-dom';
 import NurseSidebar from './nurse/NurseSidebar';
 import NurseHeader from './nurse/NurseHeader';
+import PageTransition from './PageTransition';
 
 const NurseLayout = () => {
     return (
@@ -13,7 +13,7 @@ const NurseLayout = () => {
                 
                 <div className="flex-1 px-5 py-5 sm:px-6 lg:px-7">
                     <div className="w-full">
-                        <Outlet />
+                        <PageTransition />
                     </div>
                 </div>
 

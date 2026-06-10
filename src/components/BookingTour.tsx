@@ -238,11 +238,9 @@ const BookingTour = () => {
 
       {open && (
         <div className="fixed inset-0 z-[220] pointer-events-none">
-          <div className="absolute inset-0 bg-[#10233F]/45 backdrop-blur-[2px]" />
-
           {targetRect && (
             <div
-              className="absolute rounded-2xl border-2 border-white shadow-[0_0_0_9999px_rgba(16,35,63,0.28),0_18px_60px_rgba(236,72,153,0.35)] ring-4 ring-brand/70 transition-all"
+              className="absolute rounded-2xl border-2 border-brand bg-transparent shadow-[0_12px_36px_rgba(236,72,153,0.18)] ring-4 ring-white/80 transition-all duration-300"
               style={{
                 left: targetRect.left - 8,
                 top: targetRect.top - 8,
