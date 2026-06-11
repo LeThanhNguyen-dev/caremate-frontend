@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+﻿import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { 
     Squares2X2Icon, 
@@ -17,13 +17,13 @@ const AdminSidebar = () => {
     const { user, logout } = useAuth();
 
     const menuItems = [
-        { label: 'Tổng quan', path: '/admin/dashboard', icon: Squares2X2Icon },
-        { label: 'Duyệt điều dưỡng', path: '/admin/pending-nurses', icon: ClipboardDocumentCheckIcon },
-        { label: 'Quản lý người dùng', path: '/admin/users', icon: UserGroupIcon },
-        { label: 'Tất cả lịch hẹn', path: '/admin/bookings', icon: CalendarIcon },
-        { label: 'Tin nhắn hỗ trợ', path: '/admin/chat', icon: ChatBubbleLeftRightIcon },
-        { label: 'Khiếu nại & Hỗ trợ', path: '/admin/reports', icon: ExclamationTriangleIcon },
-        { label: 'Cài đặt hệ thống', path: '/admin/settings', icon: Cog6ToothIcon },
+        { label: 'Tá»•ng quan', path: '/admin/dashboard', icon: Squares2X2Icon },
+        { label: 'Duyá»‡t Ä‘iá»u dÆ°á»¡ng', path: '/admin/pending-nurses', icon: ClipboardDocumentCheckIcon },
+        { label: 'Quáº£n lÃ½ ngÆ°á»i dÃ¹ng', path: '/admin/users', icon: UserGroupIcon },
+        { label: 'Táº¥t cáº£ lá»‹ch háº¹n', path: '/admin/bookings', icon: CalendarIcon },
+        { label: 'Tin nháº¯n há»— trá»£', path: '/admin/chat', icon: ChatBubbleLeftRightIcon },
+        { label: 'Khiáº¿u náº¡i & Há»— trá»£', path: '/admin/reports', icon: ExclamationTriangleIcon },
+        { label: 'CÃ i Ä‘áº·t há»‡ thá»‘ng', path: '/admin/settings', icon: Cog6ToothIcon },
     ];
 
     const handleLogout = async () => {
@@ -36,13 +36,13 @@ const AdminSidebar = () => {
             {/* Logo Section */}
             <div className="p-8">
                 <Link to="/admin/dashboard" className="flex items-center gap-3 group">
-                    <img src="/assets/images/logo.png" alt="CareMate Admin" className="h-24 w-auto object-contain" />
+                    <img src="/assets/images/logo-new-transparent.png" alt="CareMate Admin" className="h-24 w-auto object-contain" />
                 </Link>
             </div>
 
             {/* Navigation */}
             <nav className="flex-1 px-4 mt-4 space-y-2 overflow-y-auto custom-scrollbar">
-                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Menu hệ thống</div>
+                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Menu há»‡ thá»‘ng</div>
                 {menuItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
@@ -70,7 +70,7 @@ const AdminSidebar = () => {
                     </div>
                     <div className="min-w-0">
                         <div className="text-sm font-black text-slate-900 truncate">{user?.username || 'System Admin'}</div>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">Quản trị viên hệ thống</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">Quáº£n trá»‹ viÃªn há»‡ thá»‘ng</div>
                     </div>
                 </div>
                 <button 
@@ -78,7 +78,7 @@ const AdminSidebar = () => {
                     className="flex w-full items-center justify-center gap-3 py-4 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#3B82F6] transition-all active:scale-95 shadow-sm"
                 >
                     <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                    Đăng xuất hệ thống
+                    ÄÄƒng xuáº¥t há»‡ thá»‘ng
                 </button>
             </div>
         </aside>

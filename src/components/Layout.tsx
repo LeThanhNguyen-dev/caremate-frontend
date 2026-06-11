@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -59,10 +59,10 @@ const Layout = () => {
     };
 
     const navigation = [
-        { name: 'Trang chủ', href: '/' },
-        { name: 'Dịch vụ', href: '/services' },
-        { name: 'Cộng đồng', href: '/community' },
-        { name: 'Giới thiệu', href: '/about' },
+        { name: 'Trang chá»§', href: '/' },
+        { name: 'Dá»‹ch vá»¥', href: '/services' },
+        { name: 'Cá»™ng Ä‘á»“ng', href: '/community' },
+        { name: 'Giá»›i thiá»‡u', href: '/about' },
     ];
     const socialLinks = [
         { label: 'FB', href: 'https://www.facebook.com/profile.php?id=61586875252074' },
@@ -92,12 +92,12 @@ const Layout = () => {
                 <nav className="mx-auto flex w-full max-w-[1760px] items-center justify-between px-4 sm:px-6 lg:px-8 2xl:px-10">
                     <div className="flex items-center gap-10">
                         <Link to="/" className="flex items-center gap-3 group">
-                            <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-16 w-auto object-contain transition-transform group-hover:scale-105 sm:h-20 lg:h-28" />
+                            <img src="/assets/images/logo-new-transparent.png" alt="CareMate Logo" className="h-16 w-auto object-contain transition-transform group-hover:scale-105 sm:h-20 lg:h-28" />
                         </Link>
 
                         <div className="hidden lg:flex items-center gap-9">
                             {navigation.map((item) => (
-                                item.name === 'Dịch vụ' ? (
+                                item.name === 'Dá»‹ch vá»¥' ? (
                                     <div key={item.name} className="group relative">
                                         <Link
                                             to={item.href}
@@ -118,13 +118,13 @@ const Layout = () => {
                                                             to="/services"
                                                             className="mb-2 flex items-center justify-between rounded-2xl bg-white px-4 py-3 text-sm font-black text-[#10233F] shadow-sm transition hover:text-brand"
                                                         >
-                                                            Tất cả dịch vụ
+                                                            Táº¥t cáº£ dá»‹ch vá»¥
                                                             <ChevronDownIcon className="-rotate-90 h-4 w-4 text-slate-300" />
                                                         </Link>
                                                         <div className="space-y-1">
                                                             {serviceGroups.length === 0 && (
                                                                 <div className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-500">
-                                                                    Đang tải danh mục dịch vụ...
+                                                                    Äang táº£i danh má»¥c dá»‹ch vá»¥...
                                                                 </div>
                                                             )}
                                                             {serviceGroups.map((group) => (
@@ -135,7 +135,7 @@ const Layout = () => {
                                                                     >
                                                                         <span>
                                                                             <span className="block text-sm font-black text-[#10233F] transition group-hover/category:text-brand">{group.title}</span>
-                                                                            <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">{group.items.length} dịch vụ</span>
+                                                                            <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">{group.items.length} dá»‹ch vá»¥</span>
                                                                         </span>
                                                                         <ChevronDownIcon className="-rotate-90 mt-1 h-4 w-4 shrink-0 text-slate-300 transition group-hover/category:text-brand" />
                                                                     </Link>
@@ -156,8 +156,8 @@ const Layout = () => {
                                                                                     >
                                                                                         <div className="text-sm font-black text-[#10233F] transition group-hover/item:text-brand">{service.name}</div>
                                                                                         <div className="mt-1 flex flex-wrap gap-1.5 text-[11px] font-black text-slate-400">
-                                                                                            <span className="rounded-full bg-slate-50 px-2 py-1">{service.serviceKind === 'package' ? 'Gói dịch vụ' : 'Dịch vụ đơn'}</span>
-                                                                                            <span className="rounded-full bg-slate-50 px-2 py-1">{service.packageDays ?? 1} buổi</span>
+                                                                                            <span className="rounded-full bg-slate-50 px-2 py-1">{service.serviceKind === 'package' ? 'GÃ³i dá»‹ch vá»¥' : 'Dá»‹ch vá»¥ Ä‘Æ¡n'}</span>
+                                                                                            <span className="rounded-full bg-slate-50 px-2 py-1">{service.packageDays ?? 1} buá»•i</span>
                                                                                         </div>
                                                                                         {included.length > 0 && (
                                                                                             <div className="mt-2 space-y-1">
@@ -181,13 +181,13 @@ const Layout = () => {
                                                     </div>
 
                                                     <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-pink-50 p-5">
-                                                        <div className="inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-brand shadow-sm">Dịch vụ CareMate</div>
-                                                        <h3 className="mt-4 text-xl font-black leading-tight text-[#10233F]">Tất cả dịch vụ được nhóm theo danh mục.</h3>
+                                                        <div className="inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-brand shadow-sm">Dá»‹ch vá»¥ CareMate</div>
+                                                        <h3 className="mt-4 text-xl font-black leading-tight text-[#10233F]">Táº¥t cáº£ dá»‹ch vá»¥ Ä‘Æ°á»£c nhÃ³m theo danh má»¥c.</h3>
                                                         <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
-                                                            Rê vào danh mục bên trái để xem toàn bộ dịch vụ và các dịch vụ con trong từng gói.
+                                                            RÃª vÃ o danh má»¥c bÃªn trÃ¡i Ä‘á»ƒ xem toÃ n bá»™ dá»‹ch vá»¥ vÃ  cÃ¡c dá»‹ch vá»¥ con trong tá»«ng gÃ³i.
                                                         </p>
                                                         <Link to="/services" className="mt-5 inline-flex rounded-full bg-[#10233F] px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition hover:bg-brand">
-                                                            Xem tất cả
+                                                            Xem táº¥t cáº£
                                                         </Link>
                                                     </div>
                                                 </div>
@@ -210,7 +210,7 @@ const Layout = () => {
                     </div>
 
                     <div className="flex items-center gap-6">
-                        <button className="relative z-[120] shrink-0 rounded-xl p-2 text-[#10233F] hover:bg-slate-100 lg:hidden" onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu">
+                        <button className="relative z-[120] shrink-0 rounded-xl p-2 text-[#10233F] hover:bg-slate-100 lg:hidden" onClick={() => setMobileMenuOpen(true)} aria-label="Má»Ÿ menu">
                             <Bars3Icon className="h-7 w-7" />
                         </button>
 
@@ -231,7 +231,7 @@ const Layout = () => {
                                         <div className="text-right hidden xl:block">
                                             <div className="text-sm font-black text-[#10233F] group-hover:text-brand transition-colors">{user?.username}</div>
                                             <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                                                {user?.role === 'admin' ? 'Quản trị viên' : user?.role?.startsWith('nurse') ? 'Điều dưỡng' : 'Khách hàng'}
+                                                {user?.role === 'admin' ? 'Quáº£n trá»‹ viÃªn' : user?.role?.startsWith('nurse') ? 'Äiá»u dÆ°á»¡ng' : 'KhÃ¡ch hÃ ng'}
                                             </div>
                                         </div>
                                         <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center font-black text-lg">
@@ -249,10 +249,10 @@ const Layout = () => {
                                             >
                                                 <div className="space-y-1 mb-6">
                                                     {[
-                                                        { name: 'Cài đặt thông tin', icon: Cog8ToothIcon, href: '/profile' },
-                                                        { name: 'Quản lý dịch vụ', icon: CalendarDaysIcon, href: '/my-bookings' },
-                                                        { name: 'Nhắn tin hỗ trợ', icon: ChatBubbleLeftRightIcon, href: '/chat' },
-                                                        { name: 'Thông báo của tôi', icon: BellAlertIcon, href: '/notifications' },
+                                                        { name: 'CÃ i Ä‘áº·t thÃ´ng tin', icon: Cog8ToothIcon, href: '/profile' },
+                                                        { name: 'Quáº£n lÃ½ dá»‹ch vá»¥', icon: CalendarDaysIcon, href: '/my-bookings' },
+                                                        { name: 'Nháº¯n tin há»— trá»£', icon: ChatBubbleLeftRightIcon, href: '/chat' },
+                                                        { name: 'ThÃ´ng bÃ¡o cá»§a tÃ´i', icon: BellAlertIcon, href: '/notifications' },
                                                     ].map((item) => (
                                                         <Link
                                                             key={item.name}
@@ -274,7 +274,7 @@ const Layout = () => {
                                                     <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                                                         <ArrowRightOnRectangleIcon className="h-4 w-4" />
                                                     </div>
-                                                    <span className="text-xs font-black">Đăng xuất</span>
+                                                    <span className="text-xs font-black">ÄÄƒng xuáº¥t</span>
                                                 </button>
                                             </motion.div>
                                         )}
@@ -283,8 +283,8 @@ const Layout = () => {
                             </div>
                         ) : (
                             <div className="hidden lg:flex items-center gap-6">
-                                <Link to="/login" className="text-[17px] font-extrabold tracking-[0.01em] text-[#10233F] transition hover:text-brand">Đăng nhập</Link>
-                                <Link to="/register" className="rounded-full bg-[#10233F] px-10 py-[18px] text-[15px] font-black uppercase tracking-[0.1em] text-white shadow-xl shadow-[#10233F]/15 transition hover:bg-brand hover:shadow-brand/20">Bắt đầu ngay</Link>
+                                <Link to="/login" className="text-[17px] font-extrabold tracking-[0.01em] text-[#10233F] transition hover:text-brand">ÄÄƒng nháº­p</Link>
+                                <Link to="/register" className="rounded-full bg-[#10233F] px-10 py-[18px] text-[15px] font-black uppercase tracking-[0.1em] text-white shadow-xl shadow-[#10233F]/15 transition hover:bg-brand hover:shadow-brand/20">Báº¯t Ä‘áº§u ngay</Link>
                             </div>
                         )}
                     </div>
@@ -303,14 +303,14 @@ const Layout = () => {
                             <div className="absolute inset-y-0 right-0 flex w-full max-w-none flex-col overflow-hidden bg-white shadow-2xl sm:max-w-sm">
                                 <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
                                     <Link to="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
-                                        <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-16 w-auto object-contain" />
+                                        <img src="/assets/images/logo-new-transparent.png" alt="CareMate Logo" className="h-16 w-auto object-contain" />
                                     </Link>
                                     <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-[#10233F]"><XMarkIcon className="h-7 w-7" /></button>
                                 </div>
                                 <div className="flex-1 overflow-y-auto px-5 py-6">
                                     <div className="space-y-2">
                                     {navigation.map((item) => (
-                                        item.name === 'Dịch vụ' ? (
+                                        item.name === 'Dá»‹ch vá»¥' ? (
                                             <div key={item.name} className="rounded-2xl bg-slate-50 p-2">
                                                 <Link
                                                     to={item.href}
@@ -324,7 +324,7 @@ const Layout = () => {
                                                 </Link>
                                                 <div className="mt-2 grid gap-3 px-2 pb-2">
                                                     {serviceGroups.length === 0 && (
-                                                        <div className="rounded-xl px-3 py-2 text-sm font-black text-slate-500">Đang tải dịch vụ...</div>
+                                                        <div className="rounded-xl px-3 py-2 text-sm font-black text-slate-500">Äang táº£i dá»‹ch vá»¥...</div>
                                                     )}
                                                     {serviceGroups.map((group) => (
                                                         <div key={group.category}>
@@ -348,7 +348,7 @@ const Layout = () => {
                                                                             <span>{service.name}</span>
                                                                             {included.length > 0 && (
                                                                                 <span className="mt-1 block text-xs font-semibold leading-5 text-slate-400">
-                                                                                    {included.slice(0, 2).join(' • ')}
+                                                                                    {included.slice(0, 2).join(' â€¢ ')}
                                                                                 </span>
                                                                             )}
                                                                         </Link>
@@ -375,10 +375,10 @@ const Layout = () => {
                                     </div>
                                     <div className="mt-6 border-t border-slate-100 pt-6 space-y-3">
                                         {isAuthenticated ? (
-                                            <button onClick={() => void handleLogout()} className="w-full rounded-2xl px-4 py-3 text-left text-xl font-black leading-tight text-red-600 hover:bg-red-50">Đăng xuất</button>
+                                            <button onClick={() => void handleLogout()} className="w-full rounded-2xl px-4 py-3 text-left text-xl font-black leading-tight text-red-600 hover:bg-red-50">ÄÄƒng xuáº¥t</button>
                                         ) : (
                                             <>
-                                                <Link to="/login" className="block rounded-2xl px-4 py-3 text-xl font-black leading-tight text-[#10233F] hover:bg-slate-50" onClick={() => setMobileMenuOpen(false)}>Đăng nhập</Link>
+                                                <Link to="/login" className="block rounded-2xl px-4 py-3 text-xl font-black leading-tight text-[#10233F] hover:bg-slate-50" onClick={() => setMobileMenuOpen(false)}>ÄÄƒng nháº­p</Link>
                                                 <Link to="/register" className="btn-primary w-full py-4 text-sm" onClick={() => setMobileMenuOpen(false)}>Tham gia ngay</Link>
                                             </>
                                         )}
@@ -402,43 +402,43 @@ const Layout = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
                         <div className="space-y-8">
                             <Link to="/" className="flex items-center gap-3 group">
-                                <img src="/assets/images/logo.png" alt="CareMate Logo" className="h-24 w-auto object-contain brightness-0 invert" />
+                                <img src="/assets/images/logo-new-transparent.png" alt="CareMate Logo" className="h-24 w-auto object-contain" />
                             </Link>
                             <p className="text-slate-400 text-sm leading-relaxed font-medium max-w-xs">
-                                Định nghĩa lại tiêu chuẩn chăm sóc gia đình Việt với công nghệ và sự tận tâm từ trái tim.
+                                Äá»‹nh nghÄ©a láº¡i tiÃªu chuáº©n chÄƒm sÃ³c gia Ä‘Ã¬nh Viá»‡t vá»›i cÃ´ng nghá»‡ vÃ  sá»± táº­n tÃ¢m tá»« trÃ¡i tim.
                             </p>
                         </div>
 
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Điều hướng</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Äiá»u hÆ°á»›ng</h4>
                             <ul className="space-y-4 text-sm font-bold">
-                                <li><Link to="/" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Trang chủ</Link></li>
-                                <li><Link to="/services" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Dịch vụ</Link></li>
-                                <li><Link to="/community" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Cộng đồng</Link></li>
-                                <li><Link to="/about" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Giới thiệu</Link></li>
+                                <li><Link to="/" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Trang chá»§</Link></li>
+                                <li><Link to="/services" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Dá»‹ch vá»¥</Link></li>
+                                <li><Link to="/community" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Cá»™ng Ä‘á»“ng</Link></li>
+                                <li><Link to="/about" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Giá»›i thiá»‡u</Link></li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Trung tâm hỗ trợ</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Trung tÃ¢m há»— trá»£</h4>
                             <ul className="space-y-4 text-sm font-bold text-slate-400">
-                                <li><Link to="/" className="hover:text-white transition-colors">Câu hỏi thường gặp</Link></li>
-                                <li><Link to="/" className="hover:text-white transition-colors">Chính sách bảo mật</Link></li>
-                                <li><Link to="/" className="hover:text-white transition-colors">Liên hệ 24/7</Link></li>
+                                <li><Link to="/" className="hover:text-white transition-colors">CÃ¢u há»i thÆ°á»ng gáº·p</Link></li>
+                                <li><Link to="/" className="hover:text-white transition-colors">ChÃ­nh sÃ¡ch báº£o máº­t</Link></li>
+                                <li><Link to="/" className="hover:text-white transition-colors">LiÃªn há»‡ 24/7</Link></li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Văn phòng</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">VÄƒn phÃ²ng</h4>
                             <div className="text-sm font-bold space-y-4 text-slate-400">
-                                <p>HCM: Khu Công nghệ cao, Quận 9</p>
+                                <p>HCM: Khu CÃ´ng nghá»‡ cao, Quáº­n 9</p>
                                 <p>Hotline: 1900 6789</p>
                                 <p className="text-brand">support@caremate.vn</p>
                             </div>
                         </div>
 
                         <div className="hidden">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Tải ứng dụng</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Táº£i á»©ng dá»¥ng</h4>
                             <div className="space-y-3">
                                 {['App Store', 'Google Play'].map((store) => (
                                     <div key={store} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-black text-white/75 transition hover:border-brand/50 hover:bg-brand/10">
