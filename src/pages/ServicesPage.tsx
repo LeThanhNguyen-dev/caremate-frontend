@@ -111,7 +111,7 @@ const ServicesPage = () => {
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
             <div className="inline-flex items-center gap-2 rounded-full border border-pink-100 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-brand shadow-sm">
               <SparklesIcon className="h-4 w-4" />
-              CareMate services
+              Dịch vụ CareMate
             </div>
             <h1 className="mt-6 max-w-2xl text-4xl font-black leading-tight tracking-tight text-[#10233F] sm:text-5xl lg:text-6xl">
               Chọn dịch vụ <span className="text-brand">chăm sóc phù hợp</span> cho gia đình bạn

@@ -19,12 +19,12 @@ const NurseSidebar = () => {
     const { user, logout } = useAuth();
 
     const items = [
-        { label: 'Tá»•ng quan', path: '/nurse/overview', icon: Squares2X2Icon, requiresApproval: true },
-        { label: 'Lá»‹ch lÃ m viá»‡c', path: '/nurse/schedule', icon: CalendarIcon, requiresApproval: true },
-        { label: 'Quáº£n lÃ½ lá»‹ch háº¹n', path: '/nurse/bookings', icon: ClipboardDocumentListIcon, requiresApproval: true },
-        { label: 'Tin nháº¯n', path: '/nurse/chat', icon: ChatBubbleLeftRightIcon, requiresApproval: true },
-        { label: 'Dá»‹ch vá»¥ cá»§a tÃ´i', path: '/nurse/services', icon: BriefcaseIcon, requiresApproval: true },
-        { label: 'Há»“ sÆ¡ cÃ¡ nhÃ¢n', path: '/nurse/profile', icon: UserCircleIcon, requiresApproval: false },
+        { label: 'Tổng quan', path: '/nurse/overview', icon: Squares2X2Icon, requiresApproval: true },
+        { label: 'Lịch làm việc', path: '/nurse/schedule', icon: CalendarIcon, requiresApproval: true },
+        { label: 'Quản lý lịch hẹn', path: '/nurse/bookings', icon: ClipboardDocumentListIcon, requiresApproval: true },
+        { label: 'Tin nhắn', path: '/nurse/chat', icon: ChatBubbleLeftRightIcon, requiresApproval: true },
+        { label: 'Dịch vụ của tôi', path: '/nurse/services', icon: BriefcaseIcon, requiresApproval: true },
+        { label: 'Hồ sơ cá nhân', path: '/nurse/profile', icon: UserCircleIcon, requiresApproval: false },
     ];
 
     const handleLogout = async () => {
@@ -37,7 +37,7 @@ const NurseSidebar = () => {
             {/* Logo Section */}
             <div className="p-8">
                 <Link to="/nurse/overview" className="flex items-center gap-3 group">
-                    <img src="/assets/images/logo-new-transparent.png" alt="CareMate Nurse" className="h-24 w-auto object-contain" />
+                    <img src="/assets/images/logo-new-transparent.png" alt="CareMate Nurse" className="h-16 w-auto object-contain" />
                 </Link>
             </div>
 
@@ -48,10 +48,10 @@ const NurseSidebar = () => {
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
                             <ShieldCheckIcon className={`h-4 w-4 ${user?.role === 'nurse_confirmed' ? 'text-[#10B981]' : 'text-amber-400'}`} />
-                            <span className="text-[9px] font-black uppercase tracking-widest text-white/50">Tráº¡ng thÃ¡i há»“ sÆ¡</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-white/50">Trạng thái hồ sơ</span>
                         </div>
                         <div className="text-sm font-bold text-white mb-2">
-                            {user?.role === 'nurse_confirmed' ? 'ÄÃ£ xÃ¡c minh chuyÃªn mÃ´n' : 'Äang chá» phÃª duyá»‡t'}
+                            {user?.role === 'nurse_confirmed' ? 'Đã xác minh chuyên môn' : 'Đang chờ phê duyệt'}
                         </div>
                         <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                             <motion.div 
@@ -66,7 +66,7 @@ const NurseSidebar = () => {
 
             {/* Navigation */}
             <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
-                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Danh má»¥c quáº£n lÃ½</div>
+                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Danh mục quản lý</div>
                 {items.map((item) => {
                     const isActive = location.pathname === item.path;
                     const isRestricted = item.requiresApproval && user?.role !== 'nurse_confirmed';
@@ -119,7 +119,7 @@ const NurseSidebar = () => {
                     className="flex w-full items-center justify-center gap-3 py-4 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 shadow-sm"
                 >
                     <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                    ÄÄƒng xuáº¥t
+                    Đăng xuất
                 </button>
             </div>
         </aside>
