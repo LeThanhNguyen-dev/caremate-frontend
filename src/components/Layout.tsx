@@ -110,7 +110,8 @@ const Layout = () => {
                                             <ChevronDownIcon className="h-4 w-4 transition group-hover:rotate-180" />
                                         </Link>
 
-                                        <div className="pointer-events-none absolute left-1/2 top-full z-[120] w-[860px] -translate-x-1/2 pt-5 opacity-0 transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
+                                        {!location.pathname.startsWith('/services') && (
+                                        <div className="pointer-events-none absolute left-0 top-full z-[120] w-[min(860px,calc(100vw-2rem))] pt-5 opacity-0 transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
                                             <div className="rounded-3xl border border-slate-100 bg-white p-3 shadow-2xl shadow-slate-900/10">
                                                 <div className="grid grid-cols-[300px_minmax(0,1fr)] gap-3">
                                                     <div className="rounded-2xl bg-slate-50 p-2">
@@ -193,6 +194,7 @@ const Layout = () => {
                                                 </div>
                                             </div>
                                         </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <Link
