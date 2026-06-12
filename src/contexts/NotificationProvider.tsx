@@ -3,6 +3,7 @@ import * as signalR from '@microsoft/signalr';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { notificationApi } from '../api/notificationApi';
+import { API_BASE_URL } from '../api/axios';
 import type { Notification } from '../types/notification';
 import { NotificationContext } from './NotificationContextObject';
 import type { ToastType } from './ToastContextObject';
@@ -52,7 +53,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (!accessToken || !user) return;
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${import.meta.env.VITE_API_URL || 'http://localhost:5244'}/hubs/notifications`, {
+      .withUrl(`${API_BASE_URL}/hubs/notifications`, {
         accessTokenFactory: () => accessToken,
       })
       .withAutomaticReconnect()

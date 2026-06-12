@@ -36,7 +36,7 @@ const AdminSidebar = () => {
             {/* Logo Section */}
             <div className="p-8">
                 <Link to="/admin/dashboard" className="flex items-center gap-3 group">
-                    <img src="/assets/images/logo-new-transparent.png" alt="CareMate Admin" className="h-16 w-auto object-contain" />
+                    <img src="/assets/images/caremate-brand-logo.png" alt="CareMate Admin" className="h-16 w-auto object-contain" />
                 </Link>
             </div>
 

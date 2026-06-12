@@ -74,7 +74,7 @@ const Register = () => {
                     <div className="absolute inset-0 bg-brand/10 blur-[100px] opacity-30"></div>
                     <div className="relative z-10">
                         <Link to="/" className="flex items-center gap-3 group">
-                            <img src="/assets/images/logo-new-transparent.png" alt="CareMate Logo" className="h-28 w-auto object-contain transition-transform group-hover:scale-105" />
+                            <img src="/assets/images/caremate-brand-logo.png" alt="CareMate Logo" className="h-28 w-auto object-contain transition-transform group-hover:scale-105" />
                         </Link>
                         <div className="mt-24">
                             <h2 className="text-4xl font-black leading-tight">Bắt đầu hành trình <br /> chăm sóc chuyên nghiệp</h2>

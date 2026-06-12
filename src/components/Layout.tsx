@@ -89,13 +89,15 @@ const Layout = () => {
                     scrolled ? 'lg:bg-white/88 lg:py-2 lg:shadow-xl lg:shadow-slate-200/35' : 'lg:bg-white/70 lg:py-3 lg:shadow-none'
                 }`}
             >
-                <nav className="mx-auto flex w-full max-w-[1760px] items-center justify-between px-4 sm:px-6 lg:px-8 2xl:px-10">
-                    <div className="flex items-center gap-10">
+                <nav className="mx-auto grid w-full max-w-[1760px] grid-cols-[auto_1fr] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)_360px] lg:px-8 2xl:px-10">
+                    <div className="flex items-center justify-start">
                         <Link to="/" className="flex items-center gap-3 group">
-                            <img src="/assets/images/logo-new-transparent.png" alt="CareMate Logo" className="h-12 w-auto object-contain transition-transform group-hover:scale-105 sm:h-14 lg:h-16" />
+                            <img src="/assets/images/caremate-brand-logo.png" alt="CareMate Logo" className="h-12 w-auto object-contain transition-transform group-hover:scale-105 sm:h-14 lg:h-16" />
                         </Link>
+                    </div>
 
-                        <div className="hidden lg:flex items-center gap-9">
+                    <div className="hidden min-w-0 items-center justify-center lg:flex">
+                        <div className="flex items-center justify-center gap-9">
                             {navigation.map((item) => (
                                 item.name === 'Dịch vụ' ? (
                                     <div key={item.name} className="group relative">
@@ -211,7 +213,7 @@ const Layout = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center justify-end gap-6">
                         <button className="relative z-[120] shrink-0 rounded-xl p-2 text-[#10233F] hover:bg-slate-100 lg:hidden" onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu">
                             <Bars3Icon className="h-7 w-7" />
                         </button>
@@ -305,7 +307,7 @@ const Layout = () => {
                             <div className="absolute inset-y-0 right-0 flex w-full max-w-none flex-col overflow-hidden bg-white shadow-2xl sm:max-w-sm">
                                 <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-5 py-4">
                                     <Link to="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
-                                        <img src="/assets/images/logo-new-transparent.png" alt="CareMate Logo" className="h-12 w-auto object-contain" />
+                                        <img src="/assets/images/caremate-brand-logo.png" alt="CareMate Logo" className="h-12 w-auto object-contain" />
                                     </Link>
                                     <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-[#10233F]"><XMarkIcon className="h-7 w-7" /></button>
                                 </div>
@@ -404,7 +406,7 @@ const Layout = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
                         <div className="space-y-8">
                             <Link to="/" className="flex items-center gap-3 group">
-                                <img src="/assets/images/logo-new-transparent.png" alt="CareMate Logo" className="h-16 w-auto object-contain" />
+                                <img src="/assets/images/caremate-brand-logo.png" alt="CareMate Logo" className="h-16 w-auto object-contain" />
                             </Link>
                             <p className="text-slate-400 text-sm leading-relaxed font-medium max-w-xs">
                                 Định nghĩa lại tiêu chuẩn chăm sóc gia đình Việt với công nghệ và sự tận tâm từ trái tim.

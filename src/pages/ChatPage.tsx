@@ -8,6 +8,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline';
 import caremateApi from '../api/caremateApi';
+import { API_BASE_URL } from '../api/axios';
 import type { ChatMessage, Conversation } from '../api/frontend-api-contract';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
@@ -106,7 +107,7 @@ const ChatPage = () => {
     if (!accessToken || !activeConversation) return;
 
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${import.meta.env.VITE_API_URL || 'http://localhost:5244'}/hubs/chat`, {
+      .withUrl(`${API_BASE_URL}/hubs/chat`, {
         accessTokenFactory: () => accessToken,
       })
       .withAutomaticReconnect()
