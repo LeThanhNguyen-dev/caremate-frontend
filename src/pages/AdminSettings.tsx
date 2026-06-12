@@ -1,14 +1,17 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
-import type { ServiceDetailDto } from '../api/frontend-api-contract';
+import type { AdminOcrSettingsDto, ServiceDetailDto } from '../api/frontend-api-contract';
 import {
     Cog8ToothIcon,
     PencilSquareIcon,
     XMarkIcon,
     CheckIcon,
     ArrowPathIcon,
-    SparklesIcon
+    SparklesIcon,
+    DocumentMagnifyingGlassIcon,
+    ShieldCheckIcon,
+    ExclamationTriangleIcon
 } from '@heroicons/react/24/outline';
 
 const AdminSettings = () => {
@@ -28,12 +31,17 @@ const AdminSettings = () => {
         status: 'active'
     });
     const [loading, setLoading] = useState(true);
+    const [ocrSettings, setOcrSettings] = useState<AdminOcrSettingsDto | null>(null);
 
     const load = useCallback(async () => {
         try {
             setLoading(true);
-            const data = await caremateApi.getServices();
+            const [data, ocr] = await Promise.all([
+                caremateApi.getServices(),
+                caremateApi.getAdminOcrSettings()
+            ]);
             setServices(data);
+            setOcrSettings(ocr);
         } catch {
             showToast('Không thể tải danh sách.', 'error');
         } finally {
@@ -124,6 +132,62 @@ const AdminSettings = () => {
                     <ArrowPathIcon className="h-4 w-4" />
                     Làm mới
                 </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6">
+                <div className="bg-white rounded-xl border border-slate-50 p-8 shadow-xl shadow-slate-200/20">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                        <div className="flex items-start gap-5">
+                            <div className="h-14 w-14 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                                <DocumentMagnifyingGlassIcon className="h-7 w-7 text-emerald-600" />
+                            </div>
+                            <div>
+                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 mb-2">
+                                    FPT AI OCR
+                                </div>
+                                <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+                                    Nhận diện CCCD cho hồ sơ điều dưỡng
+                                </h2>
+                                <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">
+                                    Admin có thể kiểm tra trạng thái cấu hình OCR dùng cho bước quét CCCD trước khi điều dưỡng nộp hồ sơ xác minh.
+                                </p>
+                            </div>
+                        </div>
+                        <div className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${
+                            ocrSettings?.isConfigured
+                                ? 'bg-emerald-50 text-emerald-700'
+                                : 'bg-amber-50 text-amber-700'
+                        }`}>
+                            {ocrSettings?.isConfigured ? (
+                                <ShieldCheckIcon className="h-4 w-4" />
+                            ) : (
+                                <ExclamationTriangleIcon className="h-4 w-4" />
+                            )}
+                            {ocrSettings?.isConfigured ? 'Đã cấu hình' : 'Thiếu API key'}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-xl border border-slate-50 p-8 shadow-xl shadow-slate-200/20">
+                    <div className="space-y-5">
+                        <div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Provider</div>
+                            <div className="text-sm font-black text-slate-900">{ocrSettings?.provider ?? 'FPT AI'}</div>
+                        </div>
+                        <div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Endpoint</div>
+                            <div className="break-all rounded-xl bg-slate-50 px-4 py-3 text-xs font-bold text-slate-600">
+                                {ocrSettings?.idCardEndpoint ?? 'https://api.fpt.ai/vision/idr/vnm'}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">API key</div>
+                            <div className="rounded-xl bg-slate-50 px-4 py-3 text-xs font-bold text-slate-600">
+                                {ocrSettings?.maskedApiKey ?? 'Chưa cấu hình'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Services List */}

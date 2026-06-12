@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { adminApi } from '../api/adminApi';
-import type { DocumentDto, NurseProfileDetailDto } from '../types/nurse';
+import type { CccdOcrResultDto, DocumentDto, NurseProfileDetailDto } from '../types/nurse';
+import { getErrorMessage } from '../utils/apiError';
 import './AdminNurseDetail.css';
 
 const ChevronLeftIcon = () => (
@@ -23,6 +24,21 @@ const XIcon = () => (
   </svg>
 );
 
+const isIdCardDocument = (type: string) => type === 'id_card_front' || type === 'id_card_back';
+
+const ocrFields: Array<{ key: keyof CccdOcrResultDto; label: string }> = [
+  { key: 'idNumber', label: 'Số CCCD' },
+  { key: 'fullName', label: 'Họ tên' },
+  { key: 'dateOfBirth', label: 'Ngày sinh' },
+  { key: 'gender', label: 'Giới tính' },
+  { key: 'nationality', label: 'Quốc tịch' },
+  { key: 'placeOfOrigin', label: 'Quê quán' },
+  { key: 'placeOfResidence', label: 'Nơi thường trú' },
+  { key: 'dateOfIssue', label: 'Ngày cấp' },
+  { key: 'dateOfExpiry', label: 'Ngày hết hạn' },
+  { key: 'issuingAuthority', label: 'Nơi cấp' },
+];
+
 const AdminNurseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -33,6 +49,8 @@ const AdminNurseDetail = () => {
   const [reviewing, setReviewing] = useState(false);
   const [comment, setComment] = useState('');
   const [previewDoc, setPreviewDoc] = useState<DocumentDto | null>(null);
+  const [ocrLoadingId, setOcrLoadingId] = useState<number | null>(null);
+  const [ocrResults, setOcrResults] = useState<Record<number, CccdOcrResultDto>>({});
 
   const fetchNurseDetails = useCallback(async () => {
     try {
@@ -68,6 +86,20 @@ const AdminNurseDetail = () => {
       console.error(err);
     } finally {
       setReviewing(false);
+    }
+  };
+
+  const handleOcr = async (doc: DocumentDto) => {
+    setOcrLoadingId(doc.id);
+    setError('');
+    try {
+      const result = await adminApi.ocrNurseDocument(doc.id);
+      setOcrResults((current) => ({ ...current, [doc.id]: result }));
+    } catch (err) {
+      setError(getErrorMessage(err, 'Không thể OCR tài liệu CCCD. Vui lòng kiểm tra cấu hình FPT AI hoặc thử lại sau.'));
+      console.error(err);
+    } finally {
+      setOcrLoadingId(null);
     }
   };
 
@@ -120,9 +152,42 @@ const AdminNurseDetail = () => {
                   </div>
                   <div className="doc-details">
                     <span className="doc-type">{doc.type.replace(/_/g, ' ').toUpperCase()}</span>
-                    <button className="view-btn" onClick={() => setPreviewDoc(doc)}>Xem chi tiết ảnh</button>
+                    <div className="doc-actions-inline">
+                      <button className="view-btn" onClick={() => setPreviewDoc(doc)}>Xem chi tiết ảnh</button>
+                      {isIdCardDocument(doc.type) && (
+                        <button
+                          className="ocr-btn"
+                          onClick={() => void handleOcr(doc)}
+                          disabled={ocrLoadingId === doc.id}
+                        >
+                          {ocrLoadingId === doc.id ? 'Đang OCR...' : 'OCR CCCD'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <span className={`doc-status-tag ${doc.status}`}>{doc.status}</span>
+                  {ocrResults[doc.id] && (
+                    <div className="ocr-result-box">
+                      <div className="ocr-result-head">
+                        <span>FPT AI OCR</span>
+                        <strong>Độ tin cậy {ocrResults[doc.id].confidenceScore}%</strong>
+                      </div>
+                      {ocrResults[doc.id].warning && (
+                        <div className="ocr-warning">{ocrResults[doc.id].warning}</div>
+                      )}
+                      <div className="ocr-field-grid">
+                        {ocrFields
+                          .map((field) => ({ ...field, value: ocrResults[doc.id][field.key] }))
+                          .filter((field) => typeof field.value === 'string' && field.value.trim())
+                          .map((field) => (
+                            <div key={field.key} className="ocr-field">
+                              <span>{field.label}</span>
+                              <strong>{field.value}</strong>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )) : <p className="no-docs">Không có tài liệu nào được cung cấp.</p>}
             </div>

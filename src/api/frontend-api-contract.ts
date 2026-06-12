@@ -257,6 +257,14 @@ export type AdminPayoutDto = {
   nurseQrUrl: string | null;
 };
 
+export type AdminOcrSettingsDto = {
+  provider: string;
+  purpose: string;
+  idCardEndpoint: string;
+  isConfigured: boolean;
+  maskedApiKey: string | null;
+};
+
 export type BankOptionDto = {
   code: string;
   name: string;

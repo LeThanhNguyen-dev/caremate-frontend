@@ -2,6 +2,7 @@ import axiosInstance from './axios';
 import type {
   AdminBookingSummaryDto,
   AdminDashboardDto,
+  AdminOcrSettingsDto,
   AdminUserDto,
   AdminRefundDto,
   AdminPayoutDto,
@@ -121,6 +122,8 @@ export const caremateApi = {
     (await axiosInstance.get('/api/admin/payouts', { params: { payoutStatus } })).data,
   completeAdminPayout: async (payoutId: number, payload?: { adminNote?: string }): Promise<MessageResponse> =>
     (await axiosInstance.post(`/api/admin/payouts/${payoutId}/complete`, payload ?? {})).data,
+  getAdminOcrSettings: async (): Promise<AdminOcrSettingsDto> =>
+    (await axiosInstance.get('/api/admin/settings/ocr')).data,
 
   createBooking: async (payload: Record<string, unknown>): Promise<BookingDetailDto> => (await axiosInstance.post('/api/bookings', payload)).data,
   getMyCustomerBookings: async (): Promise<BookingDetailDto[]> => (await axiosInstance.get('/api/bookings/my/customer')).data,
