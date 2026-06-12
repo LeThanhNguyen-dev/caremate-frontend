@@ -8,6 +8,7 @@ import type {
   AdminPayoutDto,
   AvailabilitySlotDto,
   BookingDetailDto,
+  BookingStatusHistoryDto,
   ChatMessage,
   CommunityCommentDto,
   CommunityCommentLikerDto,
@@ -28,7 +29,11 @@ import type {
   ServiceDetailDto,
   PackageSessionDto,
   PackageProgressDto,
-  PayOSPaymentLink
+  PayOSPaymentLink,
+  PayOsWebhookLogDto,
+  TransactionHistoryItemDto,
+  AuditLogDto,
+  AdminFinanceAnalyticsDto
 } from './frontend-api-contract';
 
 type ApiRecord = Record<string, unknown>;
@@ -122,6 +127,16 @@ export const caremateApi = {
     (await axiosInstance.get('/api/admin/payouts', { params: { payoutStatus } })).data,
   completeAdminPayout: async (payoutId: number, payload?: { adminNote?: string }): Promise<MessageResponse> =>
     (await axiosInstance.post(`/api/admin/payouts/${payoutId}/complete`, payload ?? {})).data,
+  getAdminTransactions: async (params?: { type?: string; status?: string; userId?: number; bookingId?: number; from?: string; to?: string }): Promise<TransactionHistoryItemDto[]> =>
+    (await axiosInstance.get('/api/admin/transactions', { params })).data,
+  getAdminFinanceAnalytics: async (params?: { from?: string; to?: string }): Promise<AdminFinanceAnalyticsDto> =>
+    (await axiosInstance.get('/api/admin/finance/analytics', { params })).data,
+  getPayOsWebhookLogs: async (status?: string): Promise<PayOsWebhookLogDto[]> =>
+    (await axiosInstance.get('/api/admin/payments/webhook-logs', { params: { status } })).data,
+  retryPayOsWebhookLog: async (logId: string): Promise<MessageResponse> =>
+    (await axiosInstance.post(`/api/admin/payments/webhook-logs/${logId}/retry`)).data,
+  getAdminAuditLogs: async (params?: { actorUserId?: number; path?: string; from?: string; to?: string }): Promise<AuditLogDto[]> =>
+    (await axiosInstance.get('/api/admin/audit-logs', { params })).data,
   getAdminOcrSettings: async (): Promise<AdminOcrSettingsDto> =>
     (await axiosInstance.get('/api/admin/settings/ocr')).data,
 
@@ -129,6 +144,7 @@ export const caremateApi = {
   getMyCustomerBookings: async (): Promise<BookingDetailDto[]> => (await axiosInstance.get('/api/bookings/my/customer')).data,
   getMyNurseBookings: async (): Promise<BookingDetailDto[]> => (await axiosInstance.get('/api/bookings/my/nurse')).data,
   getBookingById: async (id: number): Promise<BookingDetailDto> => (await axiosInstance.get(`/api/bookings/${id}`)).data,
+  getBookingHistory: async (id: number): Promise<BookingStatusHistoryDto[]> => (await axiosInstance.get(`/api/bookings/${id}/history`)).data,
   updateBookingStatus: async (id: number, payload: { status: string; note?: string }): Promise<void> => {
     await axiosInstance.patch(`/api/bookings/${id}/status`, payload);
   },
@@ -297,7 +313,7 @@ export const caremateApi = {
 
   analyzeHealthCheckIn: async (payload: {
     sleepHours: number;
-    painLevel: number;
+    painLevel?: number | null;
     painLocation?: string;
     painType?: string;
     painDuration?: string;

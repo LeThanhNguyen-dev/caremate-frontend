@@ -1,4 +1,4 @@
-﻿import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { 
     Squares2X2Icon, 
@@ -8,7 +8,9 @@ import {
     ExclamationTriangleIcon,
     Cog6ToothIcon,
     ArrowRightOnRectangleIcon,
-    ChatBubbleLeftRightIcon
+    ChatBubbleLeftRightIcon,
+    BanknotesIcon,
+    ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
 
 const AdminSidebar = () => {
@@ -21,6 +23,8 @@ const AdminSidebar = () => {
         { label: 'Duyệt điều dưỡng', path: '/admin/pending-nurses', icon: ClipboardDocumentCheckIcon },
         { label: 'Quản lý người dùng', path: '/admin/users', icon: UserGroupIcon },
         { label: 'Tất cả lịch hẹn', path: '/admin/bookings', icon: CalendarIcon },
+        { label: 'Tài chính', path: '/admin/finance', icon: BanknotesIcon },
+        { label: 'Audit logs', path: '/admin/audit-logs', icon: ClipboardDocumentListIcon },
         { label: 'Tin nhắn hỗ trợ', path: '/admin/chat', icon: ChatBubbleLeftRightIcon },
         { label: 'Khiếu nại & Hỗ trợ', path: '/admin/reports', icon: ExclamationTriangleIcon },
         { label: 'Cài đặt hệ thống', path: '/admin/settings', icon: Cog6ToothIcon },

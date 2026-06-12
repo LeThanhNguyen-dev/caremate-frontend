@@ -17,6 +17,10 @@ const AdminHeader = () => {
                 return 'Quản lý người dùng';
             case '/admin/bookings':
                 return 'Quản lý lịch hẹn';
+            case '/admin/finance':
+                return 'Quản lý tài chính';
+            case '/admin/audit-logs':
+                return 'Audit logs';
             case '/admin/reports':
                 return 'Báo cáo và khiếu nại';
             case '/admin/settings':

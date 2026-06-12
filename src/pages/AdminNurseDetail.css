@@ -253,6 +253,55 @@
     opacity: 0.65;
 }
 
+.doc-approve-btn,
+.doc-reject-btn {
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.65rem;
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.doc-approve-btn {
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.doc-reject-btn {
+    border: 1px solid #fecaca;
+    background: #fff1f2;
+    color: #be123c;
+}
+
+.doc-approve-btn:disabled,
+.doc-reject-btn:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.ocr-log-chip {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.7rem;
+    background: #ecfdf5;
+    padding: 0.45rem 0.7rem;
+    color: #047857;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ocr-log-chip span {
+    color: #64748b;
+}
+
 .ocr-result-box {
     grid-column: 1 / -1;
     padding: 1rem;

@@ -1,7 +1,7 @@
 import { useEffect, useState, type ComponentType, type SVGProps } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
-import type { BookingDetailDto } from '../api/frontend-api-contract';
+import type { BookingDetailDto, BookingStatusHistoryDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
 import { 
     CalendarIcon, 
@@ -34,6 +34,7 @@ const BookingDetailPage = () => {
     const navigate = useNavigate();
     const { showToast } = useToast();
     const [detail, setDetail] = useState<BookingDetailDto | null>(null);
+    const [history, setHistory] = useState<BookingStatusHistoryDto[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -45,9 +46,13 @@ const BookingDetailPage = () => {
             try {
                 console.log(`[BookingDetail] Fetching booking ${id}...`);
                 setLoading(true);
-                const data = await caremateApi.getBookingById(Number(id));
+                const [data, statusHistory] = await Promise.all([
+                    caremateApi.getBookingById(Number(id)),
+                    caremateApi.getBookingHistory(Number(id)).catch(() => []),
+                ]);
                 console.log('[BookingDetail] Data received:', data);
                 setDetail(data);
+                setHistory(statusHistory);
             } catch (err) {
                 console.error('[BookingDetail] Error loading detail:', err);
                 showToast('Không thể tải chi tiết lịch hẹn. Vui lòng thử lại.', 'error');
@@ -61,8 +66,12 @@ const BookingDetailPage = () => {
 
     const refreshDetail = async () => {
         if (!id) return;
-        const data = await caremateApi.getBookingById(Number(id));
+        const [data, statusHistory] = await Promise.all([
+            caremateApi.getBookingById(Number(id)),
+            caremateApi.getBookingHistory(Number(id)).catch(() => []),
+        ]);
         setDetail(data);
+        setHistory(statusHistory);
     };
 
     if (loading) {
@@ -198,6 +207,27 @@ const BookingDetailPage = () => {
                                 booking={detail}
                                 onProgressChanged={() => void refreshDetail()}
                             />
+                        )}
+
+                        {history.length > 0 && (
+                            <div className="rounded-xl border border-slate-100 bg-white p-8 shadow-[0_20px_60px_rgba(15,23,42,0.04)]">
+                                <div className="mb-6 text-[10px] font-black uppercase tracking-[0.24em] text-slate-400">Lịch sử trạng thái</div>
+                                <div className="space-y-4">
+                                    {history.map((item) => (
+                                        <div key={item.id} className="flex gap-4 rounded-xl bg-slate-50 p-4">
+                                            <div className="mt-1 h-3 w-3 rounded-full bg-brand" />
+                                            <div className="min-w-0 flex-1">
+                                                <div className="text-sm font-black text-[#10233F]">{statusConfig[item.status]?.label ?? item.status}</div>
+                                                <div className="mt-1 text-xs font-bold text-slate-500">
+                                                    {new Date(item.createdAt).toLocaleString('vi-VN')}
+                                                    {item.changedByName ? ` · ${item.changedByName}` : ''}
+                                                </div>
+                                                {item.note && <p className="mt-2 text-xs font-semibold leading-5 text-slate-600">{item.note}</p>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         )}
                     </motion.div>
 

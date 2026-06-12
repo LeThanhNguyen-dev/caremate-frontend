@@ -54,6 +54,16 @@ export type BookingDetailDto = {
   completedSessions?: number;
 };
 
+export type BookingStatusHistoryDto = {
+  id: number;
+  bookingId: number;
+  status: string;
+  changedBy: number | null;
+  changedByName: string | null;
+  note: string | null;
+  createdAt: string;
+};
+
 export type AvailabilitySlotDto = {
   id: number;
   nurseProfileId: number;
@@ -257,6 +267,77 @@ export type AdminPayoutDto = {
   nurseQrUrl: string | null;
 };
 
+export type PayOsWebhookLogDto = {
+  id: string;
+  orderCode: string | null;
+  eventCode: string | null;
+  eventDescription: string | null;
+  isVerified: boolean;
+  isProcessed: boolean;
+  processingError: string | null;
+  retryCount: number;
+  receivedAt: string;
+  processedAt: string | null;
+};
+
+export type TransactionHistoryItemDto = {
+  id: string;
+  type: 'payment' | 'refund' | 'payout' | string;
+  bookingId: number;
+  userId: number | null;
+  userName: string | null;
+  serviceName: string | null;
+  amount: number;
+  status: string;
+  method: string | null;
+  transactionId: string | null;
+  createdAt: string;
+};
+
+export type FinanceDailyMetricDto = {
+  date: string;
+  revenue: number;
+  refunds: number;
+  payouts: number;
+  bookingCount: number;
+};
+
+export type NursePerformanceMetricDto = {
+  nurseId: number;
+  nurseName: string;
+  completedBookingCount: number;
+  revenue: number;
+  payoutAmount: number;
+};
+
+export type AdminFinanceAnalyticsDto = {
+  grossRevenue: number;
+  refundAmount: number;
+  payoutAmount: number;
+  platformFeeAmount: number;
+  paidPaymentCount: number;
+  refundCount: number;
+  pendingPayoutCount: number;
+  failedWebhookCount: number;
+  refundRatePercent: number;
+  bookingCompletionRatePercent: number;
+  dailyMetrics: FinanceDailyMetricDto[];
+  nursePerformance: NursePerformanceMetricDto[];
+};
+
+export type AuditLogDto = {
+  id: string;
+  actorUserId: number | null;
+  actorName: string | null;
+  method: string;
+  path: string;
+  queryString: string | null;
+  statusCode: number;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string;
+};
+
 export type AdminOcrSettingsDto = {
   provider: string;
   purpose: string;
@@ -412,13 +493,21 @@ export type HealthAnalysisResponse = {
   dataCoveragePercent: number;
   dataCoverageItems: string[];
   missingDataItems: string[];
+  followUpQuestions: FollowUpQuestionDto[];
+};
+
+export type FollowUpQuestionDto = {
+  key: string;
+  questionVi: string;
+  inputType: string;
+  unit: string | null;
 };
 
 export type HealthCheckInHistoryDto = {
   checkInId: string;
   createdAt: string;
   sleepHours: number;
-  painLevel: number;
+  painLevel: number | null;
   painLocation: string | null;
   painType: string | null;
   painDuration: string | null;
@@ -444,7 +533,7 @@ export type LatestHealthCheckInDto = {
   checkInId: string;
   createdAt: string;
   sleepHours: number;
-  painLevel: number;
+  painLevel: number | null;
   painLocation: string | null;
   painType: string | null;
   painDuration: string | null;

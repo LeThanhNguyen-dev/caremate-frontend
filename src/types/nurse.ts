@@ -8,6 +8,18 @@ export interface DocumentDto {
     status: DocumentStatus;
 }
 
+export interface NurseDocumentOcrLogDto {
+    id: string;
+    nurseDocumentId: number;
+    documentType: string;
+    ocrStatus: 'PASSED' | 'WARNING' | 'FAILED' | string;
+    warnings: string[];
+    attemptCount: number;
+    processedBy: string;
+    processedAt: string;
+    result?: CccdOcrResultDto | null;
+}
+
 export interface NurseProfileDetailDto {
     userId: number;
     fullName: string;
@@ -106,4 +118,9 @@ export interface CccdOcrResultDto {
 export interface ReviewNurseProfileDto {
     isApproved: boolean;
     comment: string;
+}
+
+export interface ReviewNurseDocumentDto {
+    reason?: string;
+    reasonCode?: string;
 }

@@ -1,5 +1,5 @@
 import axiosInstance from './axios';
-import type { CccdOcrResultDto, NurseProfileDetailDto, ReviewNurseProfileDto } from '../types/nurse';
+import type { CccdOcrResultDto, NurseDocumentOcrLogDto, NurseProfileDetailDto, ReviewNurseDocumentDto, ReviewNurseProfileDto } from '../types/nurse';
 
 export const adminApi = {
     getPendingNurses: async (): Promise<NurseProfileDetailDto[]> => {
@@ -19,6 +19,19 @@ export const adminApi = {
     ocrNurseDocument: async (documentId: number): Promise<CccdOcrResultDto> => {
         const response = await axiosInstance.post<CccdOcrResultDto>(`/api/admin/nurses/documents/${documentId}/ocr`);
         return response.data;
+    },
+
+    getOcrLogs: async (nurseUserId: number): Promise<NurseDocumentOcrLogDto[]> => {
+        const response = await axiosInstance.get<NurseDocumentOcrLogDto[]>(`/api/admin/ocr/logs/${nurseUserId}`);
+        return response.data;
+    },
+
+    approveNurseDocument: async (nurseUserId: number, documentId: number, data: ReviewNurseDocumentDto = {}): Promise<void> => {
+        await axiosInstance.put(`/api/admin/nurses/${nurseUserId}/documents/${documentId}/approve`, data);
+    },
+
+    rejectNurseDocument: async (nurseUserId: number, documentId: number, data: ReviewNurseDocumentDto): Promise<void> => {
+        await axiosInstance.put(`/api/admin/nurses/${nurseUserId}/documents/${documentId}/reject`, data);
     },
 };
 

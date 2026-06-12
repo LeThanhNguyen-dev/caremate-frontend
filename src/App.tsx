@@ -19,6 +19,8 @@ import AdminUsers from './pages/AdminUsers';
 import AdminBookings from './pages/AdminBookings';
 import AdminReports from './pages/AdminReports';
 import AdminSettings from './pages/AdminSettings';
+import AdminFinance from './pages/AdminFinance';
+import AdminAuditLogs from './pages/AdminAuditLogs';
 import DiscoverNursesPage from './pages/DiscoverNursesPage';
 import ServicesPage from './pages/ServicesPage';
 import ServiceDetailPage from './pages/ServiceDetailPage';
@@ -159,6 +161,8 @@ function App() {
                 <Route path="nurses/:id" element={<AdminNurseDetail />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="bookings" element={<AdminBookings />} />
+                <Route path="finance" element={<AdminFinance />} />
+                <Route path="audit-logs" element={<AdminAuditLogs />} />
                 <Route path="reports" element={<AdminReports />} />
                 <Route path="chat" element={<ChatPage />} />
                 <Route path="notifications" element={<NotificationsPage />} />

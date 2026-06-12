@@ -1,7 +1,7 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { adminApi } from '../api/adminApi';
-import type { CccdOcrResultDto, DocumentDto, NurseProfileDetailDto } from '../types/nurse';
+import type { CccdOcrResultDto, DocumentDto, NurseDocumentOcrLogDto, NurseProfileDetailDto } from '../types/nurse';
 import { getErrorMessage } from '../utils/apiError';
 import './AdminNurseDetail.css';
 
@@ -51,12 +51,23 @@ const AdminNurseDetail = () => {
   const [previewDoc, setPreviewDoc] = useState<DocumentDto | null>(null);
   const [ocrLoadingId, setOcrLoadingId] = useState<number | null>(null);
   const [ocrResults, setOcrResults] = useState<Record<number, CccdOcrResultDto>>({});
+  const [ocrLogs, setOcrLogs] = useState<NurseDocumentOcrLogDto[]>([]);
+  const [docActionId, setDocActionId] = useState<number | null>(null);
 
   const fetchNurseDetails = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await adminApi.getNurseDetails(Number(id));
+      const [data, logs] = await Promise.all([
+        adminApi.getNurseDetails(Number(id)),
+        adminApi.getOcrLogs(Number(id)).catch(() => []),
+      ]);
       setNurse(data);
+      setOcrLogs(logs);
+      setOcrResults(Object.fromEntries(
+        logs
+          .filter((log) => log.result)
+          .map((log) => [log.nurseDocumentId, log.result as CccdOcrResultDto])
+      ));
     } catch (err) {
       setError('Không thể tải thông tin điều dưỡng.');
       console.error(err);
@@ -95,11 +106,40 @@ const AdminNurseDetail = () => {
     try {
       const result = await adminApi.ocrNurseDocument(doc.id);
       setOcrResults((current) => ({ ...current, [doc.id]: result }));
+      if (id) {
+        setOcrLogs(await adminApi.getOcrLogs(Number(id)));
+      }
     } catch (err) {
       setError(getErrorMessage(err, 'Không thể OCR tài liệu CCCD. Vui lòng kiểm tra cấu hình FPT AI hoặc thử lại sau.'));
       console.error(err);
     } finally {
       setOcrLoadingId(null);
+    }
+  };
+
+  const handleDocumentStatus = async (doc: DocumentDto, status: 'approved' | 'rejected') => {
+    if (!id) return;
+
+    const reason = status === 'rejected'
+      ? window.prompt('Nhập lý do từ chối tài liệu này:', 'Ảnh không hợp lệ hoặc thông tin không khớp.')?.trim()
+      : '';
+
+    if (status === 'rejected' && !reason) return;
+
+    setDocActionId(doc.id);
+    setError('');
+    try {
+      if (status === 'approved') {
+        await adminApi.approveNurseDocument(Number(id), doc.id);
+      } else {
+        await adminApi.rejectNurseDocument(Number(id), doc.id, { reason, reasonCode: 'OTHER' });
+      }
+      await fetchNurseDetails();
+    } catch (err) {
+      setError(getErrorMessage(err, 'Không thể cập nhật trạng thái tài liệu.'));
+      console.error(err);
+    } finally {
+      setDocActionId(null);
     }
   };
 
@@ -163,9 +203,31 @@ const AdminNurseDetail = () => {
                           {ocrLoadingId === doc.id ? 'Đang OCR...' : 'OCR CCCD'}
                         </button>
                       )}
+                      <button
+                        className="doc-approve-btn"
+                        onClick={() => void handleDocumentStatus(doc, 'approved')}
+                        disabled={docActionId === doc.id}
+                      >
+                        Duyệt tài liệu
+                      </button>
+                      <button
+                        className="doc-reject-btn"
+                        onClick={() => void handleDocumentStatus(doc, 'rejected')}
+                        disabled={docActionId === doc.id}
+                      >
+                        Từ chối
+                      </button>
                     </div>
                   </div>
                   <span className={`doc-status-tag ${doc.status}`}>{doc.status}</span>
+                  {ocrLogs.find((log) => log.nurseDocumentId === doc.id) && (
+                    <div className="ocr-log-chip">
+                      OCR {ocrLogs.find((log) => log.nurseDocumentId === doc.id)?.ocrStatus}
+                      <span>
+                        Lần {ocrLogs.find((log) => log.nurseDocumentId === doc.id)?.attemptCount}
+                      </span>
+                    </div>
+                  )}
                   {ocrResults[doc.id] && (
                     <div className="ocr-result-box">
                       <div className="ocr-result-head">
