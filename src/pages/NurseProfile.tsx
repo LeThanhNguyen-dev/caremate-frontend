@@ -452,7 +452,7 @@ const NurseProfile = () => {
             </section>
 
             <section className="grid gap-12 lg:grid-cols-[1fr_0.9fr]">
-                <div className="luxury-card p-10 border-none shadow-xl bg-white">
+                <div data-tour="nurse-profile-form" className="luxury-card p-10 border-none shadow-xl bg-white">
                     <div className="mb-10 flex items-center justify-between">
                         <div>
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Kinh nghiệm chuyên môn</h3>
@@ -589,7 +589,7 @@ const NurseProfile = () => {
                 </div>
 
                 <div className="space-y-12">
-                    <div className="luxury-card p-10 border-none shadow-xl bg-white">
+                    <div data-tour="nurse-profile-documents" className="luxury-card p-10 border-none shadow-xl bg-white">
                         <div className="mb-10 flex items-center justify-between">
                             <div>
                                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">Xác minh danh tính</h3>

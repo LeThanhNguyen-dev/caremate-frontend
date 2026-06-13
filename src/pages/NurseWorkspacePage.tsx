@@ -117,7 +117,7 @@ const NurseWorkspacePage = () => {
                         <p className="mt-2 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
                             Theo dõi ca chăm sóc, lịch rảnh và thu nhập trong một bảng điều khiển gọn gàng.
                         </p>
-                        <div className="mt-5 flex flex-wrap gap-3">
+                        <div data-tour="nurse-overview-actions" className="mt-5 flex flex-wrap gap-3">
                             <Link to="/nurse/schedule" className="inline-flex h-10 items-center justify-center rounded-xl bg-[#10B981] px-5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:bg-emerald-600">Cập nhật lịch rảnh</Link>
                             <Link to="/nurse/bookings" className="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700">Danh sách lịch hẹn</Link>
                         </div>
@@ -143,7 +143,7 @@ const NurseWorkspacePage = () => {
                 </div>
             </section>
 
-            <section className="grid gap-3 md:grid-cols-3">
+            <section data-tour="nurse-overview-stats" className="grid gap-3 md:grid-cols-3">
                 {[
                     { label: 'Doanh thu hoàn thành', value: stats.grossRevenue, helper: 'Tổng tiền khách đã trả' },
                     { label: 'Phí nền tảng 15%', value: stats.platformFee, helper: 'CareMate giữ lại' },

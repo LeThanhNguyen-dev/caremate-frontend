@@ -184,7 +184,7 @@ const NurseServicesPage = () => {
 
             <section className="grid gap-12 lg:grid-cols-[1fr_1.1fr]">
                 {/* Form Section */}
-                <div className="luxury-card p-10 border-none shadow-xl bg-white">
+                <div data-tour="nurse-services-form" className="luxury-card p-10 border-none shadow-xl bg-white">
                     <div className="mb-10 flex items-center justify-between">
                         <div>
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Thêm dịch vụ mới</h3>
@@ -240,7 +240,7 @@ const NurseServicesPage = () => {
                 </div>
 
                 {/* List Section */}
-                <div className="luxury-card p-10 border-none shadow-xl bg-white overflow-hidden">
+                <div data-tour="nurse-services-list" className="luxury-card p-10 border-none shadow-xl bg-white overflow-hidden">
                     <div className="mb-10 flex items-center justify-between">
                         <div>
                             <h3 className="text-2xl font-black text-slate-900 tracking-tight">Dịch vụ của bạn</h3>

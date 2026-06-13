@@ -1,5 +1,6 @@
 import NurseSidebar from './nurse/NurseSidebar';
 import NurseHeader from './nurse/NurseHeader';
+import NurseActionTour from './nurse/NurseActionTour';
 import PageTransition from './PageTransition';
 
 const NurseLayout = () => {
@@ -24,6 +25,7 @@ const NurseLayout = () => {
                     </p>
                 </footer>
             </main>
+            <NurseActionTour />
         </div>
     );
 };

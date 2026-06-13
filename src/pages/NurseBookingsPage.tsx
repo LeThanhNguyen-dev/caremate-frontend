@@ -126,7 +126,7 @@ const NurseBookingsPage = () => {
             </div>
 
             {/* List */}
-            <div className="space-y-6">
+            <div data-tour="nurse-bookings-list" className="space-y-6">
                 <AnimatePresence mode="popLayout">
                     {bookings.length === 0 ? (
                         <motion.div 

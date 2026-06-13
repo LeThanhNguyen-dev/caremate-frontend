@@ -236,7 +236,7 @@ const NurseSchedulePage = () => {
                         <h1 className="mt-3 text-2xl font-black tracking-tight text-white sm:text-3xl">Lịch làm việc của bạn</h1>
                         <div className="mt-5 flex flex-wrap gap-3">
                             <button onClick={() => setAnchorDate(new Date())} className="h-10 rounded-xl border border-white/10 bg-white/10 px-5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-white/20">Hôm nay</button>
-                            <button onClick={() => setSlotModalOpen(true)} className="flex h-10 items-center gap-2 rounded-xl bg-[#10B981] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-95">
+                            <button data-tour="nurse-schedule-create" onClick={() => setSlotModalOpen(true)} className="flex h-10 items-center gap-2 rounded-xl bg-[#10B981] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-95">
                                 <PlusIcon className="h-4 w-4" /> Tạo slot rảnh
                             </button>
                         </div>
@@ -262,7 +262,7 @@ const NurseSchedulePage = () => {
                 </div>
             </section>
 
-            <section className="luxury-card overflow-hidden border-none p-0 shadow-lg">
+            <section data-tour="nurse-schedule-calendar" className="luxury-card overflow-hidden border-none p-0 shadow-lg">
                 <div className="flex flex-col gap-4 border-b border-slate-50 p-5 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-4">
                         <div className="flex gap-1">
