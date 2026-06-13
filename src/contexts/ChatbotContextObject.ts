@@ -3,6 +3,7 @@ import type { AiChatMessageDto } from '../api/frontend-api-contract';
 
 export type LocalAiChatMessage = AiChatMessageDto | {
   messageId: string;
+  conversationId: string | null;
   role: 'user';
   content: string;
   safetyFlag: false;

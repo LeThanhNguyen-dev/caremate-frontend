@@ -348,6 +348,9 @@ export const caremateApi = {
   sendAiChatMessage: async (conversationId: string, payload: { content: string }): Promise<AiChatMessageDto> =>
     (await axiosInstance.post(`/api/ai-chat/conversations/${conversationId}/messages`, payload)).data,
 
+  sendAiChatMessageNewConversation: async (payload: { content: string }): Promise<AiChatMessageDto> =>
+    (await axiosInstance.post('/api/ai-chat/messages', payload)).data,
+
   // === Package Session Tracking ===
   getPackageProgress: async (bookingId: number): Promise<PackageProgressDto> =>
     (await axiosInstance.get(`/api/bookings/${bookingId}/sessions`)).data,

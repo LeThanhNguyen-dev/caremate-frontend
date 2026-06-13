@@ -10,22 +10,13 @@ export const ChatbotProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ensureConversation = async () => {
-    if (conversationId) {
-      return conversationId;
-    }
-
-    const created = await caremateApi.createAiChatConversation();
-    setConversationId(created.conversationId);
-    return created.conversationId;
-  };
-
   const sendMessage = async (content: string) => {
     const trimmed = content.trim();
     if (!trimmed || isLoading) return;
 
     const localMessage: LocalAiChatMessage = {
       messageId: `local-${Date.now()}`,
+      conversationId,
       role: 'user',
       content: trimmed,
       safetyFlag: false,
@@ -41,8 +32,14 @@ export const ChatbotProvider = ({ children }: { children: ReactNode }) => {
     setError(null);
 
     try {
-      const id = await ensureConversation();
-      const response = await caremateApi.sendAiChatMessage(id, { content: trimmed });
+      const response = conversationId
+        ? await caremateApi.sendAiChatMessage(conversationId, { content: trimmed })
+        : await caremateApi.sendAiChatMessageNewConversation({ content: trimmed });
+
+      if (!conversationId && response.conversationId) {
+        setConversationId(response.conversationId);
+      }
+
       setMessages((prev) => [...prev, response]);
     } catch (err) {
       setError(getErrorMessage(err, 'CareMate AI đang tạm thời không phản hồi.'));

@@ -606,6 +606,7 @@ export type AiChatCreateResponse = {
 
 export type AiChatMessageDto = {
   messageId: string;
+  conversationId: string;
   role: 'user' | 'assistant' | string;
   content: string;
   safetyFlag: boolean;

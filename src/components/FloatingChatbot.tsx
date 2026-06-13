@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react';
 import { ChatBubbleLeftRightIcon, PaperAirplaneIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import { useChatbot } from '../hooks/useChatbot';
@@ -15,11 +15,24 @@ const FloatingChatbot = () => {
 
   if (!isAuthenticated) return null;
 
-  const submit = (event: FormEvent) => {
-    event.preventDefault();
-    const content = draft;
+  const sendDraft = () => {
+    const content = draft.trim();
+    if (!content || isLoading) return;
+
     setDraft('');
     void sendMessage(content);
+  };
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    sendDraft();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendDraft();
+    }
   };
 
   return (
@@ -48,7 +61,7 @@ const FloatingChatbot = () => {
             )}
             {messages.map((message) => (
               <div key={message.messageId} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[86%] rounded-2xl px-4 py-3 text-sm font-semibold leading-6 shadow-sm ${message.role === 'user' ? 'bg-slate-950 text-white' : message.safetyFlag ? 'bg-red-50 text-red-800 ring-1 ring-red-100' : 'bg-white text-slate-700'}`}>
+                <div className={`max-w-[86%] whitespace-pre-line rounded-2xl px-4 py-3 text-sm font-semibold leading-6 shadow-sm ${message.role === 'user' ? 'bg-slate-950 text-white' : message.safetyFlag ? 'bg-red-50 text-red-800 ring-1 ring-red-100' : 'bg-white text-slate-700'}`}>
                   {message.content}
                   {message.ctaAction === 'contact_nurse' && (
                     <a href="/my-bookings" className="mt-3 inline-flex rounded-full bg-red-600 px-3 py-1.5 text-xs font-black text-white">
@@ -71,6 +84,7 @@ const FloatingChatbot = () => {
             <textarea
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={handleKeyDown}
               rows={1}
               maxLength={800}
               placeholder="Nhập câu hỏi..."
