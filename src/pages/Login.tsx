@@ -1,10 +1,13 @@
 ﻿import { useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { getErrorMessage } from '../utils/apiError';
+
+const rememberedLoginKey = 'caremateRememberedLogin';
 
 const Login = () => {
     const { login } = useAuth();
@@ -15,6 +18,29 @@ const Login = () => {
         email: '',
         password: '',
     });
+    const [rememberPassword, setRememberPassword] = useState(false);
+
+    useEffect(() => {
+        const rememberedLogin = localStorage.getItem(rememberedLoginKey);
+
+        if (!rememberedLogin) {
+            return;
+        }
+
+        try {
+            const parsed = JSON.parse(rememberedLogin) as Partial<typeof form>;
+
+            if (typeof parsed.email === 'string' && typeof parsed.password === 'string') {
+                setForm({
+                    email: parsed.email,
+                    password: parsed.password,
+                });
+                setRememberPassword(true);
+            }
+        } catch {
+            localStorage.removeItem(rememberedLoginKey);
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -24,6 +50,13 @@ const Login = () => {
                 ...form,
                 username: form.email,
             });
+
+            if (rememberPassword) {
+                localStorage.setItem(rememberedLoginKey, JSON.stringify(form));
+            } else {
+                localStorage.removeItem(rememberedLoginKey);
+            }
+
             showToast(`Chào mừng ${user.username} quay trở lại!`, 'success');
 
             if (user.role === 'admin') {
@@ -87,8 +120,19 @@ const Login = () => {
                                     </div>
                                     <div className="relative group">
                                         <LockClosedIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300 group-focus-within:text-brand transition-colors" />
-                                        <input type="password" className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+                                        <input type="password" autoComplete="current-password" className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
                                     </div>
+                                </div>
+                                <div className="flex items-center justify-between gap-4">
+                                    <label className="flex min-w-0 cursor-pointer items-center gap-3 text-[11px] font-black uppercase tracking-widest text-slate-400 transition-colors hover:text-brand">
+                                        <input
+                                            type="checkbox"
+                                            checked={rememberPassword}
+                                            onChange={(e) => setRememberPassword(e.target.checked)}
+                                            className="h-4 w-4 rounded border-slate-200 text-brand focus:ring-brand/20"
+                                        />
+                                        <span>Lưu mật khẩu</span>
+                                    </label>
                                 </div>
                             </div>
                             <button type="submit" disabled={loading} className="btn-primary w-full !py-5 !rounded-xl !text-[11px] !font-black !uppercase !tracking-[0.2em] shadow-2xl shadow-pink-500/20 flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-95">

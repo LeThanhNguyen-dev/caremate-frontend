@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, type ComponentType, type SVGProps } from 'react';
+import { useEffect, useState, useCallback, useMemo, type ComponentType, type SVGProps } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
@@ -57,12 +57,34 @@ const statusConfig: Record<string, { label: string; class: string; icon: IconCom
     },
 };
 
+const filterOptions = [
+    { value: 'all', label: 'Tất cả' },
+    { value: 'pending_confirm', label: 'Chờ xác nhận' },
+    { value: 'confirmed', label: 'Đã xác nhận' },
+    { value: 'in_progress', label: 'Đang thực hiện' },
+    { value: 'completed', label: 'Hoàn thành' },
+    { value: 'cancelled', label: 'Đã hủy' },
+    { value: 'rejected', label: 'Từ chối' },
+] as const;
+
+type BookingFilter = typeof filterOptions[number]['value'];
+
+const isSameLocalDay = (value: string, date = new Date()) => {
+    const bookingDate = new Date(value);
+    return bookingDate.getFullYear() === date.getFullYear()
+        && bookingDate.getMonth() === date.getMonth()
+        && bookingDate.getDate() === date.getDate();
+};
+
 const NurseBookingsPage = () => {
     const { user } = useAuth();
     const { showToast } = useToast();
 
     const [bookings, setBookings] = useState<BookingDetailDto[]>([]);
     const [loading, setLoading] = useState(true);
+    const [statusFilter, setStatusFilter] = useState<BookingFilter>('all');
+    const [todayOnly, setTodayOnly] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const load = useCallback(async () => {
         try {
@@ -90,6 +112,49 @@ const NurseBookingsPage = () => {
         }
     };
 
+    const bookingStats = useMemo(() => {
+        const today = bookings.filter((booking) => isSameLocalDay(booking.startTime)).length;
+        const needsAction = bookings.filter((booking) => booking.status === 'pending_confirm' || booking.status === 'in_progress').length;
+        const upcoming = bookings.filter((booking) => {
+            const startTime = new Date(booking.startTime).getTime();
+            return startTime >= Date.now() && booking.status !== 'cancelled' && booking.status !== 'rejected';
+        }).length;
+
+        return { today, needsAction, upcoming };
+    }, [bookings]);
+
+    const filteredBookings = useMemo(() => {
+        const keyword = searchTerm.trim().toLocaleLowerCase('vi-VN');
+
+        return bookings
+            .filter((booking) => statusFilter === 'all' || booking.status === statusFilter)
+            .filter((booking) => !todayOnly || isSameLocalDay(booking.startTime))
+            .filter((booking) => {
+                if (!keyword) return true;
+                const haystack = [
+                    booking.id,
+                    booking.serviceName,
+                    booking.address,
+                    booking.notes,
+                    booking.status,
+                ].join(' ').toLocaleLowerCase('vi-VN');
+                return haystack.includes(keyword);
+            })
+            .sort((a, b) => {
+                const priority: Record<string, number> = {
+                    pending_confirm: 0,
+                    in_progress: 1,
+                    confirmed: 2,
+                    completed: 3,
+                    cancelled: 4,
+                    rejected: 5,
+                };
+                const statusPriority = (priority[a.status] ?? 9) - (priority[b.status] ?? 9);
+                if (statusPriority !== 0) return statusPriority;
+                return new Date(a.startTime).getTime() - new Date(b.startTime).getTime();
+            });
+    }, [bookings, searchTerm, statusFilter, todayOnly]);
+
     if (user?.role !== 'nurse_confirmed') {
         return <NursePendingApproval />;
     }
@@ -115,31 +180,84 @@ const NurseBookingsPage = () => {
                     </div>
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Lịch hẹn điều dưỡng</h1>
                     <p className="text-slate-500 font-medium text-lg">
-                        Bạn có <span className="text-[#10B981] font-black">{bookings.length}</span> lịch hẹn chăm sóc trong danh sách.
+                        Bạn có <span className="text-[#10B981] font-black">{bookingStats.needsAction}</span> lịch hẹn cần xử lý và <span className="text-[#10B981] font-black">{bookingStats.upcoming}</span> ca sắp tới.
                     </p>
                 </div>
                 
-                <div className="flex rounded-xl bg-white p-1.5 shadow-sm border border-slate-50">
-                    <button className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest shadow-lg">Tất cả</button>
-                    <button className="px-6 py-2.5 rounded-xl text-slate-400 hover:text-[#10B981] transition-all text-[10px] font-black uppercase tracking-widest">Hôm nay</button>
+                <div className="flex flex-col gap-3 md:min-w-[340px]">
+                    <input
+                        value={searchTerm}
+                        onChange={(event) => setSearchTerm(event.target.value)}
+                        placeholder="Tìm theo mã, dịch vụ, địa chỉ..."
+                        className="h-11 rounded-xl border border-slate-100 bg-white px-4 text-sm font-bold text-slate-700 outline-none transition focus:border-emerald-200 focus:ring-4 focus:ring-emerald-500/5"
+                    />
+                    <div className="flex rounded-xl bg-white p-1.5 shadow-sm border border-slate-50">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setStatusFilter('all');
+                                setTodayOnly(false);
+                            }}
+                            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                                statusFilter === 'all' && !todayOnly
+                                    ? 'bg-slate-900 text-white shadow-lg'
+                                    : 'text-slate-400 hover:text-[#10B981]'
+                            }`}
+                        >
+                            Tất cả
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setTodayOnly((value) => !value)}
+                            className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                                todayOnly
+                                    ? 'bg-[#10B981] text-white shadow-lg shadow-emerald-600/20'
+                                    : 'text-slate-400 hover:text-[#10B981]'
+                            }`}
+                        >
+                            Hôm nay ({bookingStats.today})
+                        </button>
+                    </div>
                 </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+                {filterOptions.map((option) => {
+                    const count = option.value === 'all'
+                        ? bookings.length
+                        : bookings.filter((booking) => booking.status === option.value).length;
+                    return (
+                        <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setStatusFilter(option.value)}
+                            className={`rounded-xl border px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                                statusFilter === option.value
+                                    ? 'border-emerald-200 bg-emerald-50 text-[#10B981]'
+                                    : 'border-slate-100 bg-white text-slate-400 hover:border-emerald-100 hover:text-[#10B981]'
+                            }`}
+                        >
+                            {option.label} ({count})
+                        </button>
+                    );
+                })}
             </div>
 
             {/* List */}
             <div className="space-y-6">
                 <AnimatePresence mode="popLayout">
-                    {bookings.length === 0 ? (
+                    {filteredBookings.length === 0 ? (
                         <motion.div 
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             className="bg-white rounded-xl p-24 text-center border border-slate-50 shadow-xl shadow-slate-200/20"
                         >
                             <InboxStackIcon className="h-16 w-16 mx-auto text-slate-100 mb-8" />
-                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Hộp thư lịch hẹn trống</h3>
-                            <p className="text-slate-400 text-lg font-medium">Bạn hiện không có yêu cầu đặt lịch nào cần xử lý.</p>
+                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Không có lịch hẹn phù hợp</h3>
+                            <p className="text-slate-400 text-lg font-medium">Thử đổi bộ lọc hoặc từ khóa để xem các lịch hẹn khác.</p>
                         </motion.div>
                     ) : (
-                        bookings.map((booking, idx) => {
+                        filteredBookings.map((booking, idx) => {
                             const config = statusConfig[booking.status] || statusConfig.rejected;
                             const isPackage = booking.serviceKind === 'package' || Boolean(booking.packageDays && booking.packageDays > 0);
                             return (

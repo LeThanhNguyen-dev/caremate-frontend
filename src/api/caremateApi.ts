@@ -33,7 +33,9 @@ import type {
   PayOsWebhookLogDto,
   TransactionHistoryItemDto,
   AuditLogDto,
-  AdminFinanceAnalyticsDto
+  AdminFinanceAnalyticsDto,
+  AnalyzeHealthCheckInPayload,
+  HealthCheckInFollowUpPreviewResponse
 } from './frontend-api-contract';
 
 type ApiRecord = Record<string, unknown>;
@@ -311,28 +313,11 @@ export const caremateApi = {
     });
   },
 
-  analyzeHealthCheckIn: async (payload: {
-    sleepHours: number;
-    painLevel?: number | null;
-    painLocation?: string;
-    painType?: string;
-    painDuration?: string;
-    painTrend?: string;
-    symptoms?: string[];
-    medicalHistory?: string[];
-    contextData?: Record<string, string>;
-    motherAge?: number;
-    systolicBloodPressure?: number;
-    diastolicBloodPressure?: number;
-    temperatureCelsius?: number;
-    tookMedicationToday?: boolean;
-    medicationNote?: string;
-    mood: string;
-    milkStatus: string;
-    babyFeeding: string;
-    babySleep: string;
-    note?: string;
-  }): Promise<HealthAnalysisResponse> => (await axiosInstance.post('/api/health-checkins/analyze', payload)).data,
+  previewHealthCheckInFollowUp: async (payload: AnalyzeHealthCheckInPayload): Promise<HealthCheckInFollowUpPreviewResponse> =>
+    (await axiosInstance.post('/api/health-checkins/follow-up-preview', payload)).data,
+
+  analyzeHealthCheckIn: async (payload: AnalyzeHealthCheckInPayload): Promise<HealthAnalysisResponse> =>
+    (await axiosInstance.post('/api/health-checkins/analyze', payload)).data,
 
   getLatestHealthCheckIn: async (): Promise<LatestHealthCheckInDto> =>
     (await axiosInstance.get('/api/health-checkins/latest')).data,

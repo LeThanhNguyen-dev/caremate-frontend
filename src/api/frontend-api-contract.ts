@@ -503,6 +503,47 @@ export type FollowUpQuestionDto = {
   unit: string | null;
 };
 
+export type AnalyzeHealthCheckInPayload = {
+  sleepHours: number;
+  painLevel?: number | null;
+  painLocation?: string | null;
+  painType?: string | null;
+  painDuration?: string | null;
+  painTrend?: string | null;
+  symptoms?: string[];
+  medicalHistory?: string[];
+  contextData?: Record<string, string>;
+  motherAge?: number | null;
+  systolicBloodPressure?: number | null;
+  diastolicBloodPressure?: number | null;
+  temperatureCelsius?: number | null;
+  tookMedicationToday?: boolean;
+  medicationNote?: string | null;
+  mood: string;
+  milkStatus: string;
+  babyFeeding: string;
+  babySleep: string;
+  note?: string | null;
+};
+
+export type HealthCheckInRiskPreviewDto = {
+  warningLevel: string;
+  riskScore: number;
+  confidenceScore: number;
+  summary: string;
+  urgencyAction: string;
+  riskFactors: RiskFactorDto[];
+};
+
+export type HealthCheckInFollowUpPreviewResponse = {
+  dataCoveragePercent: number;
+  dataCoverageItems: string[];
+  missingDataItems: string[];
+  followUpQuestions: FollowUpQuestionDto[];
+  estimatedRiskPreview: HealthCheckInRiskPreviewDto;
+  engineVersion: string;
+};
+
 export type HealthCheckInHistoryDto = {
   checkInId: string;
   createdAt: string;

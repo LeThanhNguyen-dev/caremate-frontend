@@ -69,6 +69,7 @@ const addDays = (date: Date, amount: number) => {
 
 const formatDateValue = (date: Date) => date.toLocaleDateString('en-CA');
 const formatTimeValue = (hour: number) => `${String(hour).padStart(2, '0')}:00`;
+const rangesOverlap = (startA: Date, endA: Date, startB: Date, endB: Date) => startA < endB && startB < endA;
 
 const NurseSchedulePage = () => {
     const { user } = useAuth();
@@ -147,6 +148,28 @@ const NurseSchedulePage = () => {
 
     const createSlot = async (event: React.FormEvent) => {
         event.preventDefault();
+        const startTime = new Date(`${slotForm.date}T${slotForm.startTime}:00`);
+        const endTime = new Date(`${slotForm.date}T${slotForm.endTime}:00`);
+
+        if (endTime <= startTime) {
+            showToast('Giờ kết thúc phải sau giờ bắt đầu.', 'error');
+            return;
+        }
+
+        if (startTime.getTime() < Date.now()) {
+            showToast('Không thể tạo slot rảnh trong quá khứ.', 'error');
+            return;
+        }
+
+        const hasOverlap = slots.some((slot) =>
+            rangesOverlap(startTime, endTime, new Date(slot.startTime), new Date(slot.endTime)),
+        );
+
+        if (hasOverlap) {
+            showToast('Khung giờ này đang trùng với slot đã có.', 'error');
+            return;
+        }
+
         try {
             await caremateApi.createAvailability({
                 startTime: `${slotForm.date}T${slotForm.startTime}:00`,
@@ -303,17 +326,25 @@ const NurseSchedulePage = () => {
                                                 <button key={`${day.toISOString()}-${hour}`} type="button" onClick={() => openSlotModal(day, hour)} className="block w-full border-b border-slate-200 bg-white hover:bg-emerald-50/60 transition-colors" style={{ height: `${HOUR_HEIGHT}px` }} />
                                             ))}
                                             {events.slots.map((slot) => (
-                                                <div key={slot.id} className="group/slot absolute left-1.5 right-1.5 rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-[11px] text-emerald-700 shadow-sm transition-all hover:border-emerald-300 hover:shadow-md" style={getSlotStyle(slot.startTime, slot.endTime)}>
+                                                <div key={slot.id} className={`group/slot absolute left-1.5 right-1.5 rounded-lg border p-2 text-[11px] shadow-sm transition-all hover:shadow-md ${
+                                                    slot.isAvailable
+                                                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:border-emerald-300'
+                                                        : 'border-slate-200 bg-slate-100 text-slate-500'
+                                                }`} style={getSlotStyle(slot.startTime, slot.endTime)}>
                                                     <div className="flex items-start justify-between">
                                                         <div>
-                                                            <div className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Khung rảnh</div>
+                                                            <div className={`text-[9px] font-black uppercase tracking-widest ${slot.isAvailable ? 'text-emerald-500' : 'text-slate-400'}`}>
+                                                                {slot.isAvailable ? 'Khung rảnh' : 'Đã được đặt'}
+                                                            </div>
                                                             <div className="mt-0.5 font-black">
                                                                 {new Date(slot.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                                                                 {' - '}
                                                                 {new Date(slot.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                                                             </div>
                                                         </div>
-                                                        <button type="button" onClick={(e) => { e.stopPropagation(); void deleteSlot(slot.id); }} className="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover/slot:opacity-100"><XMarkIcon className="h-4 w-4" /></button>
+                                                        {slot.isAvailable && (
+                                                            <button type="button" onClick={(e) => { e.stopPropagation(); void deleteSlot(slot.id); }} className="text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover/slot:opacity-100"><XMarkIcon className="h-4 w-4" /></button>
+                                                        )}
                                                     </div>
                                                 </div>
                                             ))}
