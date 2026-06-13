@@ -35,7 +35,12 @@ import type {
   AuditLogDto,
   AdminFinanceAnalyticsDto,
   AnalyzeHealthCheckInPayload,
-  HealthCheckInFollowUpPreviewResponse
+  HealthCheckInFollowUpPreviewResponse,
+  CarePlanRecommendRequest,
+  CarePlanResponse,
+  AiChatConversationDto,
+  AiChatCreateResponse,
+  AiChatMessageDto
 } from './frontend-api-contract';
 
 type ApiRecord = Record<string, unknown>;
@@ -319,11 +324,29 @@ export const caremateApi = {
   analyzeHealthCheckIn: async (payload: AnalyzeHealthCheckInPayload): Promise<HealthAnalysisResponse> =>
     (await axiosInstance.post('/api/health-checkins/analyze', payload)).data,
 
+  recommendCarePlan: async (payload: CarePlanRecommendRequest): Promise<CarePlanResponse> =>
+    (await axiosInstance.post('/api/care-plans/recommend', payload)).data,
+
+  generateBookingCarePlan: async (bookingId: number): Promise<CarePlanResponse> =>
+    (await axiosInstance.post(`/api/bookings/${bookingId}/care-plan/generate`)).data,
+
+  getBookingCarePlan: async (bookingId: number): Promise<CarePlanResponse> =>
+    (await axiosInstance.get(`/api/bookings/${bookingId}/care-plan`)).data,
+
   getLatestHealthCheckIn: async (): Promise<LatestHealthCheckInDto> =>
     (await axiosInstance.get('/api/health-checkins/latest')).data,
 
   getHealthCheckInHistory: async (params?: { page?: number; pageSize?: number }): Promise<HealthCheckInHistoryDto[]> =>
     (await axiosInstance.get('/api/health-checkins/history', { params })).data,
+
+  createAiChatConversation: async (): Promise<AiChatCreateResponse> =>
+    (await axiosInstance.post('/api/ai-chat/conversations')).data,
+
+  getAiChatConversations: async (): Promise<AiChatConversationDto[]> =>
+    (await axiosInstance.get('/api/ai-chat/conversations')).data,
+
+  sendAiChatMessage: async (conversationId: string, payload: { content: string }): Promise<AiChatMessageDto> =>
+    (await axiosInstance.post(`/api/ai-chat/conversations/${conversationId}/messages`, payload)).data,
 
   // === Package Session Tracking ===
   getPackageProgress: async (bookingId: number): Promise<PackageProgressDto> =>

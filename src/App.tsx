@@ -38,14 +38,17 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import HealthCheckInsPage from './pages/HealthCheckInsPage';
 import PaymentResultPage from './pages/PaymentResultPage';
 import ChatPage from './pages/ChatPage';
+import FloatingChatbot from './components/FloatingChatbot';
 
 import { NotificationProvider } from './contexts/NotificationProvider';
+import { ChatbotProvider } from './contexts/ChatbotProvider';
 
 function App() {
   return (
     <AuthProvider>
       <ToastProvider>
         <NotificationProvider>
+          <ChatbotProvider>
           <BrowserRouter>
             <ScrollToTop />
             <Routes>
@@ -170,7 +173,9 @@ function App() {
                 <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
               </Route>
             </Routes>
+            <FloatingChatbot />
           </BrowserRouter>
+          </ChatbotProvider>
         </NotificationProvider>
       </ToastProvider>
     </AuthProvider>

@@ -130,6 +130,8 @@ export type NurseDiscoveryDto = {
   distanceSource?: string | null;
   matchScore?: number;
   matchReasons?: string[];
+  aiMatchSummary?: string | null;
+  aiSummaryFallback?: boolean;
   completedBookings?: number;
   totalReviews?: number;
   nextAvailableAt?: string | null;
@@ -542,6 +544,76 @@ export type HealthCheckInFollowUpPreviewResponse = {
   followUpQuestions: FollowUpQuestionDto[];
   estimatedRiskPreview: HealthCheckInRiskPreviewDto;
   engineVersion: string;
+};
+
+export type GeoPointDto = {
+  lat: number;
+  lng: number;
+};
+
+export type RecommendedCareServiceDto = {
+  serviceId: number;
+  name: string;
+  reason: string;
+  sessionCount: number | null;
+  estimatedPrice: number;
+};
+
+export type CarePlanTimelineItemDto = {
+  sessionNumber: number;
+  scheduledDate: string;
+  focus: string;
+  activities: string[];
+  notes: string;
+  durationMinutes: number;
+};
+
+export type CarePlanResponse = {
+  carePlanId: string;
+  planType: 'by_booking' | 'recommend_package' | string;
+  status: string;
+  safetyLevel: 'normal' | 'watch' | 'urgent' | string;
+  safetyNotice: string | null;
+  summary: string;
+  recommendedServices: RecommendedCareServiceDto[];
+  planItems: CarePlanTimelineItemDto[];
+  recommendedNurses: NurseDiscoveryDto[];
+  disclaimer: string;
+  aiModel: string | null;
+  fallbackMode: boolean;
+  createdAt: string;
+};
+
+export type CarePlanRecommendRequest = {
+  healthCheckInId?: string | null;
+  checkIn?: AnalyzeHealthCheckInPayload | null;
+  userLocation?: GeoPointDto | null;
+};
+
+export type AiChatConversationDto = {
+  id: string;
+  title: string | null;
+  status: string;
+  messageCount: number;
+  createdAt: string;
+  lastMessageAt: string | null;
+};
+
+export type AiChatCreateResponse = {
+  conversationId: string;
+  createdAt: string;
+};
+
+export type AiChatMessageDto = {
+  messageId: string;
+  role: 'user' | 'assistant' | string;
+  content: string;
+  safetyFlag: boolean;
+  safetyTriggeredBy: string | null;
+  ctaAction: string | null;
+  disclaimer: string;
+  fallbackMode: boolean;
+  createdAt: string;
 };
 
 export type HealthCheckInHistoryDto = {
