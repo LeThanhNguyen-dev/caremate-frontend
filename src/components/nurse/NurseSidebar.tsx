@@ -19,12 +19,12 @@ const NurseSidebar = () => {
     const { user, logout } = useAuth();
 
     const items = [
-        { label: 'Tổng quan', path: '/nurse/overview', icon: Squares2X2Icon, requiresApproval: true },
-        { label: 'Lịch làm việc', path: '/nurse/schedule', icon: CalendarIcon, requiresApproval: true },
-        { label: 'Quản lý lịch hẹn', path: '/nurse/bookings', icon: ClipboardDocumentListIcon, requiresApproval: true },
-        { label: 'Tin nhắn', path: '/nurse/chat', icon: ChatBubbleLeftRightIcon, requiresApproval: true },
-        { label: 'Dịch vụ của tôi', path: '/nurse/services', icon: BriefcaseIcon, requiresApproval: true },
-        { label: 'Hồ sơ cá nhân', path: '/nurse/profile', icon: UserCircleIcon, requiresApproval: false },
+        { label: 'Tổng quan', path: '/nurse/overview', icon: Squares2X2Icon, requiresApproval: true, tour: 'nurse-nav-overview' },
+        { label: 'Lịch làm việc', path: '/nurse/schedule', icon: CalendarIcon, requiresApproval: true, tour: 'nurse-nav-schedule' },
+        { label: 'Quản lý lịch hẹn', path: '/nurse/bookings', icon: ClipboardDocumentListIcon, requiresApproval: true, tour: 'nurse-nav-bookings' },
+        { label: 'Tin nhắn', path: '/nurse/chat', icon: ChatBubbleLeftRightIcon, requiresApproval: true, tour: 'nurse-nav-chat' },
+        { label: 'Dịch vụ của tôi', path: '/nurse/services', icon: BriefcaseIcon, requiresApproval: true, tour: 'nurse-nav-services' },
+        { label: 'Hồ sơ cá nhân', path: '/nurse/profile', icon: UserCircleIcon, requiresApproval: false, tour: 'nurse-nav-profile' },
     ];
 
     const handleLogout = async () => {
@@ -75,6 +75,7 @@ const NurseSidebar = () => {
                         return (
                             <div 
                                 key={item.path}
+                                data-tour={item.tour}
                                 className="flex items-center justify-between px-6 py-4 rounded-xl text-slate-300 cursor-not-allowed opacity-60"
                             >
                                 <div className="flex items-center gap-4">
@@ -90,6 +91,7 @@ const NurseSidebar = () => {
                         <Link 
                             key={item.path} 
                             to={item.path} 
+                            data-tour={item.tour}
                             className={`flex items-center gap-4 px-6 py-4 rounded-xl text-sm font-bold transition-all group ${
                                 isActive 
                                 ? 'bg-[#10B981] text-white shadow-xl shadow-emerald-600/20' 
