@@ -167,14 +167,14 @@ const GoongAddressMap = ({
 
   if (!GOONG_MAPTILES_KEY) {
     return (
-      <div className="flex min-h-[220px] items-center justify-center rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm font-semibold leading-6 text-slate-400">
+      <div className="flex min-h-[220px] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm font-semibold leading-6 text-slate-400">
         Them VITE_GOONG_MAPTILES_KEY de bat ban do Goong.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-[24px] border border-slate-100 bg-slate-50 shadow-inner">
+    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 shadow-inner">
       <div className="relative">
         <div ref={containerRef} className={`${heightClassName} w-full`} />
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-full">

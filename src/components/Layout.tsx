@@ -114,7 +114,7 @@ const Layout = () => {
 
                                         {!location.pathname.startsWith('/services') && (
                                         <div className="pointer-events-none absolute left-0 top-full z-[120] w-[min(860px,calc(100vw-2rem))] pt-5 opacity-0 transition duration-200 group-hover:pointer-events-auto group-hover:opacity-100">
-                                            <div className="rounded-3xl border border-slate-100 bg-white p-3 shadow-2xl shadow-slate-900/10">
+                                            <div className="rounded-2xl border border-slate-100 bg-white p-3 shadow-2xl shadow-slate-900/10">
                                                 <div className="grid grid-cols-[300px_minmax(0,1fr)] gap-3">
                                                     <div className="rounded-2xl bg-slate-50 p-2">
                                                         <Link
@@ -145,7 +145,7 @@ const Layout = () => {
 
                                                                     <div className="invisible absolute left-full top-0 z-[130] w-[540px] pl-3 opacity-0 transition duration-150 group-hover/category:visible group-hover/category:opacity-100">
                                                                         <div className="absolute bottom-0 left-0 top-0 w-3" />
-                                                                        <div className="rounded-3xl border border-slate-100 bg-white p-4 shadow-2xl shadow-slate-900/10">
+                                                                        <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-2xl shadow-slate-900/10">
                                                                             <div className="mb-3 px-2 text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">{group.title}</div>
                                                                             <div className="max-h-[460px] overflow-y-auto pr-1">
                                                                                 <div className="grid gap-1.5">

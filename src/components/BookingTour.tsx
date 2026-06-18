@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { QuestionMarkCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 type TourStep = {
   selector: string;
@@ -110,15 +110,15 @@ const isCenteredEnough = (rect: DOMRect) =>
   rect.top >= 96 && rect.bottom <= window.innerHeight - 96;
 
 const getTooltipPosition = (rect: DOMRect | null) => {
+  const tooltipWidth = Math.min(360, window.innerWidth - 32);
+
   if (!rect) {
     return {
-      left: '50%',
-      top: '50%',
-      transform: 'translate(-50%, -50%)',
+      left: `${(window.innerWidth - tooltipWidth) / 2}px`,
+      top: 'max(16px, calc(50vh - 130px))',
     };
   }
 
-  const tooltipWidth = Math.min(360, window.innerWidth - 32);
   const left = Math.min(Math.max(16, rect.left), window.innerWidth - tooltipWidth - 16);
   const belowTop = rect.bottom + 16;
   const top = belowTop + 220 < window.innerHeight ? belowTop : Math.max(16, rect.top - 236);
@@ -126,7 +126,6 @@ const getTooltipPosition = (rect: DOMRect | null) => {
   return {
     left: `${left}px`,
     top: `${top}px`,
-    transform: 'none',
   };
 };
 
@@ -241,11 +240,12 @@ const BookingTour = () => {
       <button
         type="button"
         onClick={restart}
-        className="group fixed bottom-24 left-4 z-[80] overflow-hidden rounded-full bg-[#10233F] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-slate-900/20 ring-1 ring-white/20 transition hover:bg-brand sm:left-6 lg:bottom-6"
+        className="group fixed bottom-24 left-4 z-[80] flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-[#10233F] text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-slate-900/20 ring-1 ring-white/20 transition hover:bg-brand sm:left-6 sm:h-auto sm:w-auto sm:px-5 sm:py-3.5 lg:bottom-6"
       >
         <span className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.16)_38%,rgba(255,255,255,0.72)_50%,rgba(255,255,255,0.16)_62%,transparent_100%)] animate-[booking-tour-shine_2.8s_ease-in-out_infinite]" />
         <span className="pointer-events-none absolute inset-0 rounded-full shadow-[inset_0_0_18px_rgba(255,255,255,0.16),0_0_22px_rgba(236,72,153,0.18)]" />
-        <span className="relative">Hướng dẫn đặt lịch</span>
+        <QuestionMarkCircleIcon className="relative h-6 w-6 sm:hidden" />
+        <span className="relative hidden sm:inline">Hướng dẫn đặt lịch</span>
       </button>
 
       <AnimatePresence>

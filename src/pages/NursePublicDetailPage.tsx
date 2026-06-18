@@ -373,9 +373,9 @@ const NursePublicDetailPage = () => {
       <div className="min-h-[80vh] bg-[linear-gradient(180deg,#fbfaf8_0%,#ffffff_55%,#fff7fb_100%)] px-5 py-32">
         <div className="mx-auto grid max-w-[1280px] gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-8">
-            <div className="animate-pulse rounded-[28px] bg-white p-10 shadow-xl shadow-slate-200/60">
+            <div className="animate-pulse rounded-2xl bg-white p-10 shadow-xl shadow-slate-200/60">
               <div className="flex gap-8">
-                <div className="h-44 w-44 rounded-3xl bg-slate-100" />
+                <div className="h-44 w-44 rounded-2xl bg-slate-100" />
                 <div className="flex-1 space-y-4">
                   <div className="h-4 w-40 rounded bg-slate-100" />
                   <div className="h-10 w-2/3 rounded bg-slate-100" />
@@ -384,14 +384,14 @@ const NursePublicDetailPage = () => {
                 </div>
               </div>
             </div>
-            <div className="animate-pulse rounded-[28px] bg-white p-8 shadow-xl shadow-slate-200/60">
+            <div className="animate-pulse rounded-2xl bg-white p-8 shadow-xl shadow-slate-200/60">
               <div className="h-8 w-56 rounded bg-slate-100" />
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 {Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-28 rounded-2xl bg-slate-100" />)}
               </div>
             </div>
           </div>
-          <div className="animate-pulse rounded-[28px] bg-white p-8 shadow-xl shadow-slate-200/60">
+          <div className="animate-pulse rounded-2xl bg-white p-8 shadow-xl shadow-slate-200/60">
             <div className="h-4 w-36 rounded bg-slate-100" />
             <div className="mt-5 h-8 w-2/3 rounded bg-slate-100" />
             <div className="mt-8 h-24 rounded-2xl bg-slate-100" />
@@ -419,7 +419,7 @@ const NursePublicDetailPage = () => {
           <div className="space-y-10">
             <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="luxury-card flex flex-col items-start gap-8 p-6 sm:flex-row sm:gap-14 sm:p-10">
               <div className="relative shrink-0">
-                <div className="h-32 w-32 overflow-hidden rounded-[1.75rem] border-[6px] border-white bg-[#FDF2F8] shadow-2xl shadow-slate-200 sm:h-48 sm:w-48 sm:border-[8px]">
+                <div className="h-32 w-32 overflow-hidden rounded-2xl border-[6px] border-white bg-[#FDF2F8] shadow-2xl shadow-slate-200 sm:h-48 sm:w-48 sm:border-[8px]">
                   {nurseCard.avatar ? (
                     <img src={nurseCard.avatar} alt={profile.fullName} className="h-full w-full object-cover" />
                   ) : (

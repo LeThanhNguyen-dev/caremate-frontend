@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useChatbot } from '../hooks/useChatbot';
 
 const FloatingChatbot = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { isOpen, open, close, messages, isLoading, error, sendMessage } = useChatbot();
   const [draft, setDraft] = useState('');
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -13,7 +13,7 @@ const FloatingChatbot = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading, isOpen]);
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || !user || user.role !== 'customer') return null;
 
   const sendDraft = () => {
     const content = draft.trim();

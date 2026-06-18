@@ -112,7 +112,7 @@ const ServiceDetailPage = () => {
             </div>
           </div>
 
-          <div data-tour="service-detail-info" className="rounded-[2rem] border border-slate-100 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
+          <div data-tour="service-detail-info" className="rounded-2xl border border-slate-100 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
             <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Thông tin từ hệ thống</div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <DataTile label="Mã dịch vụ" value={`#${service.id}`} />
@@ -120,7 +120,7 @@ const ServiceDetailPage = () => {
               <DataTile label="Số buổi" value={`${service.packageDays ?? 1}`} />
               <DataTile label="Thời lượng" value={`${service.estimatedDurationMinutes} phút/buổi`} />
             </div>
-            <div className="mt-5 rounded-3xl bg-brand-soft p-5">
+            <div className="mt-5 rounded-2xl bg-brand-soft p-5">
               <div className="text-xs font-black uppercase tracking-[0.16em] text-brand/70">Chi phí từ</div>
               <div className="mt-1 text-4xl font-black text-brand">{formatCurrency(service.basePrice)}</div>
             </div>
@@ -250,7 +250,7 @@ const ServiceDetailPage = () => {
           )}
         </div>
 
-        <aside className="h-fit rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-24">
+        <aside className="h-fit rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-24">
           <div className="text-sm font-black text-[#10233F]">{service.name}</div>
           <div className="mt-4 text-xs font-bold text-slate-400">Tổng chi phí từ</div>
           <div className="mt-1 text-4xl font-black text-brand">{formatCurrency(service.basePrice)}</div>
@@ -299,7 +299,7 @@ const ServiceDetailPage = () => {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.05)]">
+    <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_18px_55px_rgba(15,23,42,0.05)]">
       <h2 className="mb-4 text-xl font-black text-[#10233F]">{title}</h2>
       {children}
     </section>

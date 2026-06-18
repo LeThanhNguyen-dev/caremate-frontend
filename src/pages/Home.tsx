@@ -151,7 +151,7 @@ const Home = () => {
                             initial={{ opacity: 0, scale: 0.96, y: 24 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ duration: 0.8, delay: 0.1 }}
-                            className="relative overflow-hidden rounded-[2rem] border-[10px] border-white bg-white shadow-2xl shadow-slate-200"
+                            className="relative overflow-hidden rounded-2xl border-[10px] border-white bg-white shadow-2xl shadow-slate-200"
                         >
                             <img
                                 src="https://images.unsplash.com/photo-1609220136736-443140cffec6?q=80&w=1300&auto=format&fit=crop"
@@ -228,7 +228,7 @@ const Home = () => {
                     <div className="grid gap-6 md:grid-cols-3">
                         {featuredServices.map((service, index) => (
                             <Link key={service.title} to="/services" className={`group ${index === 1 ? 'md:mt-16' : index === 2 ? 'md:mt-8' : ''}`}>
-                                <div className="relative overflow-hidden rounded-[1.6rem] bg-slate-100 shadow-xl shadow-slate-200/60">
+                                <div className="relative overflow-hidden rounded-2xl bg-slate-100 shadow-xl shadow-slate-200/60">
                                     <img src={service.image} alt={service.title} className="h-80 w-full object-cover transition duration-700 group-hover:scale-105" />
                                     <div className="absolute inset-0 bg-gradient-to-t from-[#10233F]/60 via-transparent to-transparent opacity-60 transition group-hover:opacity-85" />
                                     <div className="absolute bottom-5 left-5 translate-y-2 text-white opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100">
@@ -265,7 +265,7 @@ const Home = () => {
                 <img
                     src="https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?q=80&w=1400&auto=format&fit=crop"
                     alt="Mẹ và bé"
-                    className="absolute left-0 top-16 hidden h-[420px] w-[35vw] rounded-r-[2rem] object-cover opacity-30 lg:block"
+                    className="absolute left-0 top-16 hidden h-[420px] w-[35vw] rounded-r-3xl object-cover opacity-30 lg:block"
                 />
                 <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1fr]">
                     <div className="pt-24">
@@ -302,7 +302,7 @@ const Home = () => {
                             <Link
                                 key={card.title}
                                 to={card.link}
-                                className={`group relative overflow-hidden rounded-[1.6rem] bg-slate-100 shadow-xl shadow-slate-200/50 ${index === 0 ? 'md:col-span-2' : ''}`}
+                                className={`group relative overflow-hidden rounded-2xl bg-slate-100 shadow-xl shadow-slate-200/50 ${index === 0 ? 'md:col-span-2' : ''}`}
                             >
                                 <img src={card.image} alt={card.title} className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-[#10233F]/78 via-[#10233F]/20 to-transparent transition group-hover:from-brand/80" />
@@ -320,7 +320,7 @@ const Home = () => {
                 <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[0.95fr_1fr]">
                     <div className="relative">
                         <div className="absolute -inset-8 rounded-full bg-brand/10 blur-3xl" />
-                        <div className="relative overflow-hidden rounded-[2rem] border-[10px] border-white shadow-2xl shadow-slate-200">
+                        <div className="relative overflow-hidden rounded-2xl border-[10px] border-white shadow-2xl shadow-slate-200">
                             <img src="https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=1400&auto=format&fit=crop" alt="Expert Nurse" className="h-[560px] w-full object-cover" />
                         </div>
                     </div>
@@ -361,7 +361,7 @@ const Home = () => {
 
             <section className="bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-6 py-24 lg:px-8">
                 <div className="mx-auto max-w-7xl">
-                    <div className="relative overflow-hidden rounded-[48px] bg-[#0B2341] p-10 text-white shadow-2xl shadow-slate-200 md:p-16 lg:p-20">
+                    <div className="relative overflow-hidden rounded-2xl bg-[#0B2341] p-10 text-white shadow-2xl shadow-slate-200 md:p-16 lg:p-20">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_52%_18%,rgba(236,72,153,0.18),transparent_28%)]" />
                     <div className="relative">
                     <div className="mx-auto max-w-3xl text-center">
@@ -407,7 +407,7 @@ const Home = () => {
             </section>
 
             <section className="bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-6 py-24 lg:px-8">
-                <div className="mx-auto max-w-7xl overflow-hidden rounded-[48px] bg-[#0B2341] text-center text-white shadow-2xl shadow-slate-200">
+                <div className="mx-auto max-w-7xl overflow-hidden rounded-2xl bg-[#0B2341] text-center text-white shadow-2xl shadow-slate-200">
                     <div className="relative p-10 md:p-16">
                         <img
                             src="https://images.unsplash.com/photo-1609220136736-443140cffec6?q=80&w=1800&auto=format&fit=crop"

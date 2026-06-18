@@ -369,7 +369,7 @@ const CommunityPage = () => {
                         {comment.avatar ? <img src={comment.avatar} alt={comment.author} className="h-full w-full object-cover" /> : getInitial(comment.author)}
                     </div>
                     <div className="min-w-0 flex-1">
-                        <div className="relative inline-block max-w-[calc(100%-1.25rem)] rounded-[18px] bg-slate-50 px-4 py-2.5 text-left ring-1 ring-slate-100">
+                        <div className="relative inline-block max-w-[calc(100%-1.25rem)] rounded-2xl bg-slate-50 px-4 py-2.5 text-left ring-1 ring-slate-100">
                             <div className="truncate pr-4 text-sm font-black leading-5 text-[#10233F]">{comment.author}</div>
                             <p className="whitespace-pre-line pr-2 text-[14px] font-medium leading-6 text-slate-600">{comment.content}</p>
                             {comment.likes > 0 && (
@@ -487,7 +487,7 @@ const CommunityPage = () => {
             <div id="community-feed" className="mx-auto w-full max-w-7xl scroll-mt-28 space-y-6 px-5 pb-14 pt-8 sm:px-8 lg:px-10">
                 <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
                     <main className="space-y-6">
-                        <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                        <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
                             <div className="flex flex-col gap-4 md:flex-row md:items-center">
                                 <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#10233F] text-xl font-black text-white">
                                     {getInitial(currentUserName)}
@@ -521,7 +521,7 @@ const CommunityPage = () => {
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.96, y: 12 }}
                                     animate={{ opacity: 1, scale: 1, y: 0 }}
-                                    className="flex max-h-[calc(100vh-48px)] w-full max-w-[760px] flex-col overflow-hidden rounded-[1.75rem] bg-white shadow-[0_28px_80px_rgba(15,23,42,0.25)]"
+                                    className="flex max-h-[calc(100vh-48px)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_28px_80px_rgba(15,23,42,0.25)]"
                                 >
                                     <div className="relative border-b border-slate-100 px-6 py-5 text-center">
                                         <h2 className="text-2xl font-black leading-none text-[#10233F]">Tạo bài viết</h2>
@@ -618,7 +618,7 @@ const CommunityPage = () => {
                             </div>
                         )}
 
-                        <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                        <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
                             <div className="relative">
                                 <MagnifyingGlassIcon className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
                                 <input
@@ -643,7 +643,7 @@ const CommunityPage = () => {
                                     initial={{ opacity: 0, y: 16 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: idx * 0.04 }}
-                                    className="rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35 transition duration-300 hover:-translate-y-0.5 hover:border-brand/20 hover:shadow-2xl hover:shadow-slate-200/75"
+                                    className="rounded-2xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35 transition duration-300 hover:-translate-y-0.5 hover:border-brand/20 hover:shadow-2xl hover:shadow-slate-200/75"
                                 >
                                     <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                                         <div className="flex items-center gap-4">
@@ -738,7 +738,7 @@ const CommunityPage = () => {
                                     </div>
 
                                     {commentsOpen && (
-                                        <div className="mt-6 space-y-4 rounded-[1.5rem] bg-slate-50 px-4 py-5 ring-1 ring-slate-100">
+                                        <div className="mt-6 space-y-4 rounded-2xl bg-slate-50 px-4 py-5 ring-1 ring-slate-100">
                                             {post.comments.map((comment) => renderComment(post.id, comment))}
 
                                             <div className="flex items-center gap-3">
@@ -771,14 +771,14 @@ const CommunityPage = () => {
                         })}
 
                         {loading && (
-                            <div className="rounded-[1.75rem] border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-200/35">
+                            <div className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-200/35">
                                 <div className="mx-auto h-10 w-10 animate-spin rounded-full border-[3px] border-brand border-t-transparent"></div>
                                 <h2 className="mt-5 text-sm font-black uppercase tracking-[0.2em] text-slate-400">Đang tải cộng đồng...</h2>
                             </div>
                         )}
 
                         {!loading && filteredPosts.length === 0 && (
-                            <div className="rounded-[1.75rem] border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-200/35">
+                            <div className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-200/35">
                                 <h2 className="text-lg font-black text-[#10233F]">Không tìm thấy bài viết</h2>
                                 <p className="mt-2 text-sm font-semibold text-slate-400">Thử tìm bằng từ khóa khác hoặc tạo bài viết mới.</p>
                             </div>
@@ -786,7 +786,7 @@ const CommunityPage = () => {
                     </main>
 
                     <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
-                        <div className="rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35">
+                        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35">
                             <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Quy tắc cộng đồng</div>
                             <h3 className="mt-3 text-2xl font-black leading-tight text-[#10233F]">Tôn trọng và chia sẻ có trách nhiệm.</h3>
                             <div className="mt-5 space-y-3 text-sm font-semibold leading-7 text-slate-500">
@@ -795,7 +795,7 @@ const CommunityPage = () => {
                             </div>
                         </div>
 
-                        <div className="rounded-[1.75rem] bg-[#0B2341] p-6 text-white shadow-xl shadow-slate-300/40">
+                        <div className="rounded-2xl bg-[#0B2341] p-6 text-white shadow-xl shadow-slate-300/40">
                             <div className="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Gợi ý đăng bài</div>
                             <div className="mt-4 space-y-3 text-sm font-semibold leading-7 text-white/75">
                                 <p>Đặt tiêu đề rõ ý, thêm chủ đề bằng dấu phẩy và mô tả bối cảnh để mọi người dễ hỗ trợ hơn.</p>
@@ -807,7 +807,7 @@ const CommunityPage = () => {
 
             {editingPost && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 py-6">
-                    <div className="w-full max-w-2xl overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+                    <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
                         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
                             <h3 className="text-lg font-black text-[#10233F]">Chỉnh sửa bài viết</h3>
                             <button
@@ -869,7 +869,7 @@ const CommunityPage = () => {
 
             {likersDialog && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">
-                    <div className="w-full max-w-sm overflow-hidden rounded-[1.5rem] bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
+                    <div className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
                         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
                             <h3 className="text-base font-black text-[#10233F]">Người đã thích</h3>
                             <button

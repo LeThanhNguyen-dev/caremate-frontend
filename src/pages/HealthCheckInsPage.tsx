@@ -317,7 +317,7 @@ function CarePlanErrorCard({
   onRetry: () => Promise<void>;
 }) {
   return (
-    <div className="mt-5 rounded-[1.25rem] border border-amber-200 bg-amber-50/80 p-5 shadow-sm">
+    <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50/80 p-5 shadow-sm">
       <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-800">
         <ExclamationTriangleIcon className="h-4 w-4" />
         AI cần xác nhận thêm
@@ -354,7 +354,7 @@ function SafetyNoticeCard({ level, notice }: { level: string; notice: string | n
 
 function CarePlanSummaryCard({ plan }: { plan: CarePlanResponse }) {
   return (
-    <div className="rounded-[1.25rem] border border-teal-100 bg-[linear-gradient(180deg,#f2fffb_0%,#ecfdf7_100%)] p-5 shadow-sm">
+    <div className="rounded-xl border border-teal-100 bg-[linear-gradient(180deg,#f2fffb_0%,#ecfdf7_100%)] p-5 shadow-sm">
       <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-teal-700">
         <SparklesIcon className="h-4 w-4" />
         Tóm tắt CareMate AI
@@ -373,7 +373,7 @@ function RecommendedServicesCard({ services }: { services: RecommendedCareServic
           <Link
             key={service.serviceId}
             to={`/services/${service.serviceId}`}
-            className="rounded-[1.1rem] bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-teal-50"
+            className="rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-teal-50"
           >
             <div className="text-sm font-black text-slate-950">{service.name}</div>
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{service.reason}</p>

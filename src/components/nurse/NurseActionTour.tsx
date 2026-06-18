@@ -122,15 +122,15 @@ const isCenteredEnough = (rect: DOMRect) =>
   rect.top >= 96 && rect.bottom <= window.innerHeight - 96;
 
 const getTooltipPosition = (rect: DOMRect | null) => {
+  const tooltipWidth = Math.min(380, window.innerWidth - 32);
+
   if (!rect) {
     return {
-      left: '50%',
-      top: '50%',
-      transform: 'translate(-50%, -50%)',
+      left: `${(window.innerWidth - tooltipWidth) / 2}px`,
+      top: 'max(16px, calc(50vh - 130px))',
     };
   }
 
-  const tooltipWidth = Math.min(380, window.innerWidth - 32);
   const left = Math.min(Math.max(16, rect.left), window.innerWidth - tooltipWidth - 16);
   const belowTop = rect.bottom + 16;
   const top = belowTop + 240 < window.innerHeight ? belowTop : Math.max(16, rect.top - 256);
@@ -138,7 +138,6 @@ const getTooltipPosition = (rect: DOMRect | null) => {
   return {
     left: `${left}px`,
     top: `${top}px`,
-    transform: 'none',
   };
 };
 
@@ -256,11 +255,11 @@ const NurseActionTour = () => {
       <button
         type="button"
         onClick={restart}
-        className="group fixed bottom-5 right-5 z-[90] inline-flex items-center gap-2 overflow-hidden rounded-full bg-[#10B981] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-emerald-700/20 ring-1 ring-white/30 transition hover:bg-emerald-600 sm:bottom-6 sm:right-6"
+        className="group fixed bottom-24 right-4 z-[90] flex h-14 w-14 items-center justify-center gap-2 overflow-hidden rounded-full bg-[#10B981] text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-emerald-700/20 ring-1 ring-white/30 transition hover:bg-emerald-600 sm:bottom-6 sm:right-6 sm:h-auto sm:w-auto sm:px-5 sm:py-3.5"
       >
         <span className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.14)_38%,rgba(255,255,255,0.58)_50%,rgba(255,255,255,0.14)_62%,transparent_100%)] animate-[booking-tour-shine_2.8s_ease-in-out_infinite]" />
-        <QuestionMarkCircleIcon className="relative h-4 w-4" />
-        <span className="relative">Hướng dẫn thao tác</span>
+        <QuestionMarkCircleIcon className="relative h-6 w-6 sm:h-4 sm:w-4" />
+        <span className="relative hidden sm:inline">Hướng dẫn thao tác</span>
       </button>
 
       <AnimatePresence>

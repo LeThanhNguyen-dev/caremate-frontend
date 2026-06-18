@@ -177,7 +177,7 @@ const DiscoverNursesPage = () => {
             <div className="min-h-[520px] bg-[#fbfaf8] px-5 py-8 lg:px-8">
                 <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-2 xl:grid-cols-3">
                     {Array.from({ length: 6 }).map((_, index) => (
-                        <div key={index} className="animate-pulse rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/40">
+                        <div key={index} className="animate-pulse rounded-2xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/40">
                             <div className="flex items-center gap-4">
                                 <div className="h-16 w-16 rounded-2xl bg-slate-100" />
                                 <div className="flex-1 space-y-3">
@@ -204,7 +204,7 @@ const DiscoverNursesPage = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 16 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="rounded-[2rem] border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/55 sm:p-10"
+                        className="rounded-2xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/55 sm:p-10"
                     >
                         <div className="accent-label">Bước 2</div>
                         <h1 className="mt-4 font-heading text-4xl font-black leading-tight tracking-tight text-[#10233F] md:text-5xl">
@@ -222,7 +222,7 @@ const DiscoverNursesPage = () => {
                                 initial={{ opacity: 0, y: 14 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.06 }}
-                                className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/45 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-200/70 sm:p-6"
+                                className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/45 transition duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-slate-200/70 sm:p-6"
                             >
                                 <div className="flex items-center justify-between gap-4">
                                     <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">{card.label}</div>
@@ -236,7 +236,7 @@ const DiscoverNursesPage = () => {
                     </div>
                 </section>
 
-                <section data-tour="nurse-filters" className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                <section data-tour="nurse-filters" className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Dịch vụ đã khóa</div>
@@ -251,7 +251,7 @@ const DiscoverNursesPage = () => {
                     </div>
                 </section>
 
-                <section className="rounded-[1.5rem] border border-brand/10 bg-[#FDF2F8] p-5 shadow-lg shadow-slate-200/25 sm:p-6">
+                <section className="rounded-2xl border border-brand/10 bg-[#FDF2F8] p-5 shadow-lg shadow-slate-200/25 sm:p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <div className="text-xs font-black uppercase tracking-[0.24em] text-brand">
@@ -276,7 +276,7 @@ const DiscoverNursesPage = () => {
                     </div>
                 </section>
 
-                <section className="rounded-[1.5rem] border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
+                <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
                     <div className="grid gap-4 lg:grid-cols-[1fr_220px_240px]">
                         <div className="relative">
                             <MagnifyingGlassIcon className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-brand" />
@@ -335,7 +335,7 @@ const DiscoverNursesPage = () => {
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: 6 }}
                                     transition={{ delay: Math.min(index * 0.015, 0.08), duration: 0.18 }}
-                                    className="group flex h-full flex-col rounded-[1.75rem] border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35 transition duration-300 hover:-translate-y-1 hover:border-brand/20 hover:shadow-2xl hover:shadow-slate-200/80"
+                                    className="group flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35 transition duration-300 hover:-translate-y-1 hover:border-brand/20 hover:shadow-2xl hover:shadow-slate-200/80"
                                 >
                                     <div className="flex items-start justify-between gap-3">
                                         <div className="flex min-w-0 items-center gap-4">

@@ -201,7 +201,7 @@ const AboutUs = () => {
                         { title: 'Minh bạch', desc: 'Giá cả và thông tin y tá luôn rõ ràng, công khai trên hệ thống.', icon: CheckBadgeIcon },
                         { title: 'Đúng giờ', desc: 'Quản lý lịch làm việc để gia đình dễ chọn khung giờ phù hợp.', icon: ClockIcon },
                     ].map((value) => (
-                        <div key={value.title} className="rounded-[1.5rem] border border-white bg-white/90 p-7 text-center shadow-xl shadow-slate-200/55 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-200/80">
+                        <div key={value.title} className="rounded-2xl border border-white bg-white/90 p-7 text-center shadow-xl shadow-slate-200/55 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-200/80">
                             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#10233F] text-white shadow-lg shadow-[#10233F]/10">
                                 <value.icon className="h-8 w-8" />
                             </div>

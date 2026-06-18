@@ -27,7 +27,7 @@ class RenderErrorBoundary extends Component<RenderErrorBoundaryProps, RenderErro
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-slate-50 px-6 py-20">
-          <div className="mx-auto max-w-2xl rounded-[32px] border border-slate-100 bg-white p-8 text-center shadow-xl shadow-slate-200/60">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-slate-100 bg-white p-8 text-center shadow-xl shadow-slate-200/60">
             <p className="text-sm font-black uppercase tracking-[0.2em] text-pink-500">Caremate</p>
             <h1 className="mt-4 text-3xl font-black text-[#0B1F3A]">Trang vừa gặp lỗi hiển thị.</h1>
             <p className="mt-3 text-sm font-semibold leading-6 text-slate-500">

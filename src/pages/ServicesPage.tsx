@@ -120,7 +120,7 @@ const ServicesPage = () => {
               Mỗi dịch vụ được tách thành một trang chi tiết riêng để gia đình xem rõ gói gồm gì, lịch trình ra sao và chi phí trước khi tìm điều dưỡng.
             </p>
 
-            <div data-tour="service-search" className="mt-8 flex max-w-2xl flex-col gap-3 rounded-[1.25rem] border border-slate-200 bg-white p-3 shadow-[0_20px_50px_rgba(15,23,42,0.08)] sm:flex-row">
+            <div data-tour="service-search" className="mt-8 flex max-w-2xl flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_20px_50px_rgba(15,23,42,0.08)] sm:flex-row">
               <div className="relative flex-1">
                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                 <input
@@ -137,19 +137,19 @@ const ServicesPage = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="hidden lg:block">
-            <div className="rounded-[2rem] border border-pink-100 bg-white p-8 shadow-[0_30px_80px_rgba(236,72,153,0.12)]">
+            <div className="rounded-2xl border border-pink-100 bg-white p-8 shadow-[0_30px_80px_rgba(236,72,153,0.12)]">
               <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Dữ liệu hiện có</div>
               <div className="mt-5 grid grid-cols-2 gap-4">
-                <div className="rounded-3xl bg-brand-soft p-5">
+                <div className="rounded-2xl bg-brand-soft p-5">
                   <div className="text-4xl font-black text-brand">{services.length}</div>
                   <div className="mt-2 text-sm font-black text-[#10233F]">dịch vụ đang hoạt động</div>
                 </div>
-                <div className="rounded-3xl bg-slate-50 p-5">
+                <div className="rounded-2xl bg-slate-50 p-5">
                   <div className="text-4xl font-black text-[#10233F]">{Math.max(0, categories.length - 1)}</div>
                   <div className="mt-2 text-sm font-black text-[#10233F]">nhóm dịch vụ</div>
                 </div>
               </div>
-              <div className="mt-5 rounded-3xl bg-[#10233F] p-5 text-white">
+              <div className="mt-5 rounded-2xl bg-[#10233F] p-5 text-white">
                 <div className="text-sm font-black">Quy trình</div>
                 <div className="mt-2 text-sm font-semibold text-white/75">Chọn dịch vụ, xem chi tiết thật từ hệ thống, rồi chọn điều dưỡng.</div>
               </div>
@@ -197,12 +197,12 @@ const ServicesPage = () => {
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className="group overflow-hidden rounded-[1.35rem] border border-slate-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(236,72,153,0.16)]"
+                className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(236,72,153,0.16)]"
               >
                 <Link to={`/services/${service.id}`} data-tour="service-card" className="block">
                   <div className="relative h-40 overflow-hidden bg-[linear-gradient(135deg,#fdf2f8,#ffffff_55%,#ecfdf5)]">
                     <div className="absolute inset-0 p-5">
-                      <div className="flex h-full items-end rounded-[1.1rem] border border-white/80 bg-white/70 p-4">
+                      <div className="flex h-full items-end rounded-xl border border-white/80 bg-white/70 p-4">
                         <div className="text-2xl font-black leading-tight text-[#10233F]">{service.packageDays ?? 1} buổi</div>
                       </div>
                     </div>
@@ -253,7 +253,7 @@ const ServicesPage = () => {
           })}
         </div>
 
-        <div className="mt-12 grid gap-3 rounded-[1.5rem] bg-brand-soft p-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-3 rounded-2xl bg-brand-soft p-5 sm:grid-cols-2 lg:grid-cols-4">
           {trustItems.map((item) => (
             <div key={item} className="rounded-2xl bg-white px-4 py-4 text-center text-sm font-black text-[#10233F] shadow-sm">
               {item}

@@ -105,7 +105,7 @@ const NurseWorkspacePage = () => {
 
     return (
         <div className="space-y-5">
-            <section className="overflow-hidden rounded-[1.35rem] border border-emerald-100 bg-white shadow-[0_18px_60px_rgba(15,118,110,0.08)]">
+            <section className="overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_18px_60px_rgba(15,118,110,0.08)]">
                 <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_360px]">
                     <div className="p-5 sm:p-6 lg:p-7">
                         <div className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.16em] text-emerald-700">
@@ -158,7 +158,7 @@ const NurseWorkspacePage = () => {
             </section>
 
             <section className="grid gap-5 lg:grid-cols-[0.88fr_1.12fr]">
-                <div className="rounded-[1.15rem] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] lg:p-6">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] lg:p-6">
                     <div className="mb-5 flex items-center justify-between">
                         <div>
                             <h3 className="text-lg font-black tracking-tight text-slate-950">Thống kê trạng thái</h3>
@@ -197,7 +197,7 @@ const NurseWorkspacePage = () => {
                     </div>
                 </div>
 
-                <div className="rounded-[1.15rem] border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] lg:p-6">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] lg:p-6">
                     <div className="mb-5 flex items-center justify-between gap-4">
                         <div>
                             <h3 className="text-lg font-black tracking-tight text-slate-950">Ca chăm sóc sắp tới</h3>

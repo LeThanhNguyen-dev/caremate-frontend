@@ -307,7 +307,7 @@ const AdminDashboard = () => {
 
     return (
         <div className="space-y-10">
-            <section className="overflow-hidden rounded-[1.75rem] border border-slate-100 bg-[linear-gradient(135deg,#0f172a_0%,#102f56_55%,#0ea5a4_140%)] p-8 shadow-2xl shadow-slate-300/30">
+            <section className="overflow-hidden rounded-2xl border border-slate-100 bg-[linear-gradient(135deg,#0f172a_0%,#102f56_55%,#0ea5a4_140%)] p-8 shadow-2xl shadow-slate-300/30">
                 <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
                     <div>
                         <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-cyan-100">
@@ -341,7 +341,7 @@ const AdminDashboard = () => {
                         </div>
                     </div>
 
-                    <div className="rounded-[1.5rem] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-slate-950/20">
+                    <div className="rounded-2xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-slate-950/20">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <div className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-600">Yêu cầu phân tích</div>
@@ -399,7 +399,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {aiInsight && (
-                    <div className="mt-8 rounded-[1.5rem] border border-white/10 bg-white/95 p-6 shadow-2xl shadow-slate-950/20">
+                    <div className="mt-8 rounded-2xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-slate-950/20">
                         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                             <div>
                                 <div className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-600">Kết quả AI</div>
