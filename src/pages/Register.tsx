@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
@@ -61,7 +61,7 @@ const Register = () => {
     };
 
     return (
-        <div className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden">
+        <div className="relative min-h-[90vh] flex items-center justify-center px-4 sm:px-6 py-10 lg:py-20 overflow-hidden">
             <div className="absolute top-0 right-1/2 translate-x-1/2 w-[1000px] h-[800px] bg-brand/5 rounded-full blur-[120px] -z-10"></div>
 
             <motion.div
@@ -93,15 +93,18 @@ const Register = () => {
                     </div>
                 </div>
 
-                <div className="p-10 sm:p-16 bg-white">
+                <div className="p-6 sm:p-10 lg:p-16 bg-white">
                     <div className="max-w-sm mx-auto">
-                        <h1 className="text-3xl font-black text-slate-900">Tạo tài khoản</h1>
+                        <Link to="/" className="lg:hidden flex items-center justify-center mb-8">
+                            <img src="/assets/images/logo.png" alt="CareMate" className="h-12 w-auto object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                        </Link>
+                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Tạo tài khoản</h1>
                         <p className="mt-3 text-sm font-bold text-slate-500">
                             Bạn đã có tài khoản?{' '}
                             <Link to="/login" className="text-brand font-black hover:underline">Đăng nhập</Link>
                         </p>
 
-                        <form onSubmit={handleSubmit} className="mt-10 space-y-6">
+                        <form onSubmit={handleSubmit} className="mt-8 sm:mt-10 space-y-5 sm:space-y-6">
                             <div>
                                 <label className="form-label">Bạn là ai?</label>
                                 <div className="mt-2 grid grid-cols-2 gap-3">
@@ -129,7 +132,7 @@ const Register = () => {
                                 <input type="tel" className="form-input" placeholder="09xx xxx xxx" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
                                 <div>
                                     <label className="form-label">Mật khẩu</label>
                                     <input type="password" className="form-input" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />

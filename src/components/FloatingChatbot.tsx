@@ -36,7 +36,7 @@ const FloatingChatbot = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[160]">
+    <div className="fixed bottom-24 right-4 z-[160] sm:right-6 lg:bottom-6">
       {isOpen ? (
         <section className="flex h-[min(640px,calc(100vh-48px))] w-[min(390px,calc(100vw-48px))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 sm:h-[520px]">
           <header className="flex items-center justify-between border-b border-slate-100 px-4 py-3">

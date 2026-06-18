@@ -75,9 +75,9 @@ const ServiceDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#fbfcff]">
+    <div className="min-h-screen bg-[#fbfcff] pb-24 lg:pb-0">
       <section className="border-b border-slate-100 bg-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_500px] lg:px-8 lg:py-12">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8 lg:py-12">
           <div>
             <button
               type="button"
@@ -128,7 +128,7 @@ const ServiceDetailPage = () => {
         </div>
       </section>
 
-      <main className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
+      <main className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
         <div className="space-y-6">
           <Section title="Dịch vụ bao gồm">
             {included.length > 0 ? (
@@ -171,7 +171,7 @@ const ServiceDetailPage = () => {
           <Section title="Điều dưỡng phù hợp">
             {previewNurses.length > 0 ? (
               <>
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
                   {previewNurses.map((nurse) => (
                     <article key={nurse.userId} className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
                       <div className="flex items-start gap-3">
@@ -275,6 +275,24 @@ const ServiceDetailPage = () => {
           </div>
         </aside>
       </main>
+
+      {/* Mobile Fixed Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:hidden">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <div>
+            <div className="text-xs font-bold text-slate-400">Tổng chi phí từ</div>
+            <div className="mt-0.5 text-lg font-black text-brand">{formatCurrency(service.basePrice)}</div>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate(`/find-nurse?serviceId=${service.id}`)}
+            className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-brand px-6 text-sm font-black text-white shadow-lg shadow-pink-200 transition active:scale-95 sm:flex-none sm:px-10"
+          >
+            Đặt lịch ngay
+            <ArrowRightIcon className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

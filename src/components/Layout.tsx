@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -435,7 +435,7 @@ const Layout = () => {
                         <div>
                             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Văn phòng</h4>
                             <div className="text-sm font-bold space-y-4 text-slate-400">
-                                <p>HCM: Khu Công nghệ cao, Quận 9</p>
+                                <p>Khu đô thị FPT, Da Nang, Vietnam</p>
                                 <p>Hotline: 1900 6789</p>
                                 <p className="text-brand">support@caremate.vn</p>
                             </div>

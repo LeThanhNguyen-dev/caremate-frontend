@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -74,7 +74,7 @@ const Login = () => {
     };
 
     return (
-        <div className="relative min-h-[90vh] flex items-center justify-center px-6 py-20 overflow-hidden">
+        <div className="relative min-h-[90vh] flex items-center justify-center px-4 sm:px-6 py-10 lg:py-20 overflow-hidden">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[800px] bg-brand/5 rounded-full blur-[120px] -z-10"></div>
 
             <motion.div
@@ -99,12 +99,15 @@ const Login = () => {
                     </div>
                 </div>
 
-                <div className="p-10 sm:p-20 bg-white">
+                <div className="p-6 sm:p-10 lg:p-20 bg-white">
                     <div className="max-w-sm mx-auto">
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Đăng nhập</h1>
+                        <Link to="/" className="lg:hidden flex items-center justify-center mb-8">
+                            <img src="/assets/images/logo.png" alt="CareMate" className="h-12 w-auto object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                        </Link>
+                        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Đăng nhập</h1>
                         <p className="mt-4 text-sm font-bold text-slate-400">Chưa có tài khoản? <Link to="/register" className="text-brand font-black hover:underline">Đăng ký ngay</Link></p>
 
-                        <form onSubmit={handleSubmit} className="mt-12 space-y-10">
+                        <form onSubmit={handleSubmit} className="mt-8 sm:mt-12 space-y-8 sm:space-y-10">
                             <div className="space-y-6">
                                 <div className="space-y-3">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Email tài khoản</label>

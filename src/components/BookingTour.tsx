@@ -241,7 +241,7 @@ const BookingTour = () => {
       <button
         type="button"
         onClick={restart}
-        className="group fixed bottom-5 left-5 z-[80] overflow-hidden rounded-full bg-[#10233F] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-slate-900/20 ring-1 ring-white/20 transition hover:bg-brand sm:bottom-6 sm:left-6"
+        className="group fixed bottom-24 left-4 z-[80] overflow-hidden rounded-full bg-[#10233F] px-4 py-3 text-[11px] font-black uppercase tracking-[0.14em] text-white shadow-xl shadow-slate-900/20 ring-1 ring-white/20 transition hover:bg-brand sm:left-6 lg:bottom-6"
       >
         <span className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.16)_38%,rgba(255,255,255,0.72)_50%,rgba(255,255,255,0.16)_62%,transparent_100%)] animate-[booking-tour-shine_2.8s_ease-in-out_infinite]" />
         <span className="pointer-events-none absolute inset-0 rounded-full shadow-[inset_0_0_18px_rgba(255,255,255,0.16),0_0_22px_rgba(236,72,153,0.18)]" />

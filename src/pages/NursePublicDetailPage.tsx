@@ -417,33 +417,33 @@ const NursePublicDetailPage = () => {
 
         <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
           <div className="space-y-10">
-            <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="luxury-card flex flex-col items-start gap-10 p-10 sm:flex-row sm:gap-14">
+            <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="luxury-card flex flex-col items-start gap-8 p-6 sm:flex-row sm:gap-14 sm:p-10">
               <div className="relative shrink-0">
-                <div className="h-48 w-48 overflow-hidden rounded-[1.75rem] border-[8px] border-white bg-[#FDF2F8] shadow-2xl shadow-slate-200">
+                <div className="h-32 w-32 overflow-hidden rounded-[1.75rem] border-[6px] border-white bg-[#FDF2F8] shadow-2xl shadow-slate-200 sm:h-48 sm:w-48 sm:border-[8px]">
                   {nurseCard.avatar ? (
                     <img src={nurseCard.avatar} alt={profile.fullName} className="h-full w-full object-cover" />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-5xl font-black text-[#EC4899]">
+                    <div className="flex h-full w-full items-center justify-center text-4xl font-black text-[#EC4899] sm:text-5xl">
                       {profile.fullName.charAt(0)}
                     </div>
                   )}
                 </div>
-                <div className="absolute -bottom-2 -right-2 flex h-10 w-10 items-center justify-center rounded-xl bg-[#EC4899] text-white shadow-lg">
-                  <CheckBadgeIcon className="h-6 w-6" />
+                <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-xl bg-[#EC4899] text-white shadow-lg sm:h-10 sm:w-10">
+                  <CheckBadgeIcon className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
               </div>
 
               <div className="min-w-0 flex-1 pt-1">
-                <div className="flex flex-wrap items-center gap-3">
-                  <div className="inline-flex h-10 items-center rounded-full bg-[#FDF2F8] px-5 text-[10px] font-black uppercase leading-none tracking-[0.22em] text-[#DB2777] ring-1 ring-[#FBCFE8]">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                  <div className="inline-flex h-8 items-center rounded-full bg-[#FDF2F8] px-4 text-[9px] font-black uppercase leading-none tracking-[0.22em] text-[#DB2777] ring-1 ring-[#FBCFE8] sm:h-10 sm:px-5 sm:text-[10px]">
                     Hồ sơ y tá chuyên nghiệp
                   </div>
-                  <div className="inline-flex h-10 items-center gap-2 rounded-full bg-emerald-50 px-5 text-[10px] font-black uppercase leading-none tracking-[0.22em] text-emerald-600 ring-1 ring-emerald-100">
-                    <CheckBadgeIcon className="h-3.5 w-3.5 shrink-0" />
+                  <div className="inline-flex h-8 items-center gap-1.5 rounded-full bg-emerald-50 px-4 text-[9px] font-black uppercase leading-none tracking-[0.22em] text-emerald-600 ring-1 ring-emerald-100 sm:h-10 sm:gap-2 sm:px-5 sm:text-[10px]">
+                    <CheckBadgeIcon className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
                     <span>Đã xác minh</span>
                   </div>
                 </div>
-                <h1 className="mt-4 break-words text-3xl font-black leading-[1.08] text-[#10233F] sm:text-4xl">{profile.fullName}</h1>
+                <h1 className="mt-4 break-words text-2xl font-black leading-[1.1] text-[#10233F] sm:text-4xl">{profile.fullName}</h1>
                 <div className="mt-4 flex flex-wrap gap-4 text-sm font-bold text-[#6B7280]">
                   <div className="flex items-center gap-2 rounded-xl border border-[#F3E8FF] bg-white px-4 py-2">
                     <AcademicCapIcon className="h-5 w-5 text-[#EC4899]" />
@@ -468,10 +468,10 @@ const NursePublicDetailPage = () => {
               </div>
             </motion.section>
 
-            <section data-tour="booking-schedule" className="luxury-card p-8">
+            <section data-tour="booking-schedule" className="luxury-card p-6 sm:p-8">
               <div className="mb-8 flex items-center justify-between">
                 <div>
-                  <h2 className="text-[24px] font-black text-[#10233F]">
+                  <h2 className="text-xl font-black text-[#10233F] sm:text-[24px]">
                     {isPackage ? 'Chọn lịch cho từng ngày trong gói' : 'Chọn lịch phù hợp'}
                   </h2>
                   <p className="mt-2 text-[16px] leading-[1.7] text-[#6B7280]">
@@ -654,10 +654,10 @@ const NursePublicDetailPage = () => {
               )}
             </section>
 
-            <section className="luxury-card p-10">
-              <div className="mb-10 flex items-center justify-between">
+            <section className="luxury-card p-6 sm:p-10">
+              <div className="mb-8 flex items-center justify-between sm:mb-10">
                 <div>
-                  <h2 className="text-2xl font-black text-[#10233F]">Đánh giá từ khách hàng</h2>
+                  <h2 className="text-xl font-black text-[#10233F] sm:text-2xl">Đánh giá từ khách hàng</h2>
                   <p className="mt-1 text-sm font-bold text-[#6B7280]">Cảm nhận thực tế của các gia đình đã sử dụng dịch vụ.</p>
                 </div>
                 <ChatBubbleBottomCenterTextIcon className="h-10 w-10 text-[#EC4899]/30" />
@@ -696,9 +696,9 @@ const NursePublicDetailPage = () => {
           </div>
 
           <aside className="space-y-6 lg:sticky lg:top-32">
-            <section className="luxury-card border-none bg-white p-8 shadow-[0_20px_50px_rgba(15,23,42,0.06)]">
+            <section className="luxury-card border-none bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)] sm:p-8">
               <div className="accent-label !bg-[#FDF2F8] !text-[#DB2777]">Thông tin dịch vụ</div>
-              <h2 className="text-[24px] font-black text-[#10233F]">{service.name}</h2>
+              <h2 className="text-xl font-black text-[#10233F] sm:text-[24px]">{service.name}</h2>
               <p className="mt-3 text-[15px] leading-[1.7] text-[#6B7280]">
                 {isPackage ? 'Gói dịch vụ được tính theo toàn bộ lộ trình chăm sóc.' : 'Chi phí được tính theo thời lượng dịch vụ đã chọn.'}
               </p>
@@ -826,11 +826,11 @@ const NursePublicDetailPage = () => {
       </div>
       {isAuthenticated && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/60 bg-white/90 backdrop-blur">
-          <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-5 py-4 lg:px-6">
-            <div className="min-w-0">
-              <div className="text-[13px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF]">Tiến độ đặt lịch</div>
-              <div className="mt-1 text-[16px] font-bold text-[#10233F]">
-                {canSubmit ? 'Bạn đã sẵn sàng để tiếp tục đặt lịch' : 'Chọn lịch và điền địa chỉ để tiếp tục'}
+          <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:py-4 lg:px-6">
+            <div className="min-w-0 text-center sm:text-left">
+              <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF] sm:text-[13px]">Tiến độ đặt lịch</div>
+              <div className="mt-0.5 text-[14px] font-bold text-[#10233F] sm:mt-1 sm:text-[16px]">
+                {canSubmit ? 'Sẵn sàng để tiếp tục' : 'Chọn lịch và địa chỉ để tiếp tục'}
               </div>
             </div>
             <button
@@ -838,7 +838,7 @@ const NursePublicDetailPage = () => {
               data-tour="booking-submit"
               disabled={!canSubmit || booking}
               onClick={() => document.querySelector('form')?.requestSubmit()}
-              className="shrink-0 rounded-2xl bg-[#EC4899] px-6 py-4 text-[14px] font-black text-white shadow-[0_18px_30px_rgba(236,72,153,0.22)] transition hover:bg-[#db2777] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+              className="w-full shrink-0 rounded-xl bg-[#EC4899] px-6 py-3.5 text-[14px] font-black text-white shadow-[0_18px_30px_rgba(236,72,153,0.22)] transition hover:bg-[#db2777] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none sm:w-auto sm:rounded-2xl sm:py-4"
             >
               {booking ? 'Đang xử lý...' : 'Tiếp tục đặt lịch'}
             </button>

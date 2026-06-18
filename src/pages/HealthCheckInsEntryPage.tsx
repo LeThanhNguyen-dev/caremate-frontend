@@ -16,7 +16,7 @@ const HealthCheckInsEntryPage = () => {
             <div className="mb-2 inline-flex rounded-full bg-teal-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-teal-700 ring-1 ring-teal-100">
               AI clinical triage
             </div>
-            <h3 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">Trung tâm phân tích sức khỏe mẹ và bé</h3>
+            <h3 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">Phân tích tình trạng sức khỏe để đưa ra gói chăm sóc phù hợp</h3>
             <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-600">
               Chấm điểm rủi ro, đọc xu hướng 7 lần gần nhất, ưu tiên dấu hiệu cần theo dõi và đề xuất kế hoạch chăm sóc tiếp theo ngay trong CareMate.
             </p>

@@ -172,7 +172,7 @@ const Home = () => {
                         {[
                             { title: 'Điều dưỡng đã xác minh', sub: 'Chứng chỉ + CCCD', icon: CheckBadgeIcon, pos: '-left-5 top-12' },
                             { title: 'Có mặt trong 30 phút', sub: 'Khung giờ gần nhất', icon: BoltIcon, pos: '-right-4 top-44' },
-                            { title: 'Theo dõi sức khỏe AI', sub: 'Gợi ý dịch vụ phù hợp', icon: CpuChipIcon, pos: 'left-8 -bottom-6' },
+                            { title: 'Phân tích tình trạng sức khỏe', sub: 'Đưa ra gói chăm sóc phù hợp', icon: CpuChipIcon, pos: 'left-8 -bottom-6' },
                         ].map((card, index) => (
                             <motion.div
                                 key={card.title}
