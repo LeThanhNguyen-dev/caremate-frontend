@@ -1,5 +1,6 @@
-import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+﻿import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import {
   CalendarDaysIcon,
   ClipboardDocumentCheckIcon,
@@ -8,7 +9,11 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import caremateApi from '../api/caremateApi';
-import type { AnalyzeHealthCheckInPayload, CarePlanResponse, RecommendedCareServiceDto } from '../api/frontend-api-contract';
+import type {
+  AnalyzeHealthCheckInPayload,
+  CarePlanResponse,
+  RecommendedCareServiceDto,
+} from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
 
 type FormState = {
@@ -55,21 +60,29 @@ const HealthCheckInsPage = () => {
   const { showToast } = useToast();
   const [form, setForm] = useState<FormState>(initialForm);
   const [carePlan, setCarePlan] = useState<CarePlanResponse | null>(null);
+  const [carePlanError, setCarePlanError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const payload = useMemo(() => buildPayload(form), [form]);
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
+  const runRecommendation = async () => {
     try {
       setSubmitting(true);
+      setCarePlanError(null);
       const result = await caremateApi.recommendCarePlan({ checkIn: payload });
       setCarePlan(result);
+      setCarePlanError(null);
       showToast('Đã tạo lộ trình chăm sóc cá nhân hóa.', 'success');
-    } catch {
-      showToast('Không thể tạo lộ trình lúc này. Vui lòng thử lại sau.', 'error');
+    } catch (error) {
+      setCarePlan(null);
+      setCarePlanError(getCarePlanErrorMessage(error));
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    await runRecommendation();
   };
 
   return (
@@ -88,7 +101,9 @@ const HealthCheckInsPage = () => {
                 </p>
               </div>
             </div>
-            <span className="rounded-full bg-teal-50 px-3 py-1.5 text-xs font-black text-teal-700">Không chẩn đoán, không kê đơn</span>
+            <span className="rounded-full bg-teal-50 px-3 py-1.5 text-xs font-black text-teal-700">
+              Không chẩn đoán, không kê đơn
+            </span>
           </div>
 
           <form onSubmit={submit} className="mt-6 space-y-6">
@@ -97,12 +112,16 @@ const HealthCheckInsPage = () => {
                 <NumberInput value={form.postpartumDay} min={0} max={365} unit="ngày" onChange={(postpartumDay) => setForm((prev) => ({ ...prev, postpartumDay }))} />
               </Field>
               <Field label="Kiểu sinh">
-                <Select value={form.deliveryMethod} options={[
-                  ['', 'Chưa chọn'],
-                  ['Vaginal', 'Sinh thường'],
-                  ['CSection', 'Sinh mổ'],
-                  ['Assisted', 'Sinh có hỗ trợ'],
-                ]} onChange={(deliveryMethod) => setForm((prev) => ({ ...prev, deliveryMethod }))} />
+                <Select
+                  value={form.deliveryMethod}
+                  options={[
+                    ['', 'Chưa chọn'],
+                    ['Vaginal', 'Sinh thường'],
+                    ['CSection', 'Sinh mổ'],
+                    ['Assisted', 'Sinh có hỗ trợ'],
+                  ]}
+                  onChange={(deliveryMethod) => setForm((prev) => ({ ...prev, deliveryMethod }))}
+                />
               </Field>
               <Field label="Số giờ ngủ trong 24h">
                 <NumberInput value={form.sleepHours} min={0} max={24} step={0.5} unit="giờ" onChange={(sleepHours) => setForm((prev) => ({ ...prev, sleepHours }))} />
@@ -111,15 +130,19 @@ const HealthCheckInsPage = () => {
                 <NumberInput value={form.painLevel} min={1} max={10} unit="/10" onChange={(painLevel) => setForm((prev) => ({ ...prev, painLevel }))} />
               </Field>
               <Field label="Vị trí đau">
-                <Select value={form.painLocation} options={[
-                  ['', 'Không rõ/chưa có'],
-                  ['bụng dưới', 'Bụng dưới'],
-                  ['vết mổ/khâu', 'Vết mổ/khâu'],
-                  ['tầng sinh môn', 'Tầng sinh môn'],
-                  ['ngực/sữa', 'Ngực/sữa'],
-                  ['bắp chân', 'Bắp chân'],
-                  ['lưng', 'Lưng'],
-                ]} onChange={(painLocation) => setForm((prev) => ({ ...prev, painLocation }))} />
+                <Select
+                  value={form.painLocation}
+                  options={[
+                    ['', 'Không rõ/chưa có'],
+                    ['bung duoi', 'Bụng dưới'],
+                    ['vet mo/khau', 'Vết mổ/khâu'],
+                    ['tang sinh mon', 'Tầng sinh môn'],
+                    ['nguc/sua', 'Ngực/sữa'],
+                    ['bap chan', 'Bắp chân'],
+                    ['lung', 'Lưng'],
+                  ]}
+                  onChange={(painLocation) => setForm((prev) => ({ ...prev, painLocation }))}
+                />
               </Field>
               <Field label="Nhiệt độ">
                 <NumberInput value={form.temperatureCelsius} min={30} max={45} step={0.1} unit="°C" onChange={(temperatureCelsius) => setForm((prev) => ({ ...prev, temperatureCelsius }))} />
@@ -131,69 +154,97 @@ const HealthCheckInsPage = () => {
                 </div>
               </Field>
               <Field label="Sản dịch/ra máu">
-                <Select value={form.bleedingLevel} options={[
-                  ['', 'Chưa chọn'],
-                  ['Normal', 'Bình thường'],
-                  ['Light', 'Ít'],
-                  ['Heavy', 'Nhiều/bất thường'],
-                ]} onChange={(bleedingLevel) => setForm((prev) => ({ ...prev, bleedingLevel }))} />
+                <Select
+                  value={form.bleedingLevel}
+                  options={[
+                    ['', 'Chưa chọn'],
+                    ['Normal', 'Bình thường'],
+                    ['Light', 'Ít'],
+                    ['Heavy', 'Nhiều/bất thường'],
+                  ]}
+                  onChange={(bleedingLevel) => setForm((prev) => ({ ...prev, bleedingLevel }))}
+                />
               </Field>
               <Field label="Vết mổ/vết khâu">
-                <Select value={form.incisionStatus} options={[
-                  ['', 'Không có/chưa rõ'],
-                  ['Normal', 'Bình thường'],
-                  ['Painful', 'Đau'],
-                  ['RedSwollen', 'Sưng đỏ'],
-                  ['Discharge', 'Chảy dịch'],
-                ]} onChange={(incisionStatus) => setForm((prev) => ({ ...prev, incisionStatus }))} />
+                <Select
+                  value={form.incisionStatus}
+                  options={[
+                    ['', 'Không có/chưa rõ'],
+                    ['Normal', 'Bình thường'],
+                    ['Painful', 'Đau'],
+                    ['RedSwollen', 'Sưng đỏ'],
+                    ['Discharge', 'Chảy dịch'],
+                  ]}
+                  onChange={(incisionStatus) => setForm((prev) => ({ ...prev, incisionStatus }))}
+                />
               </Field>
             </section>
 
             <section className="grid gap-4 lg:grid-cols-2">
               <Field label="Tình trạng sữa">
-                <Select value={form.milkStatus} options={[
-                  ['Normal', 'Bình thường'],
-                  ['Low', 'Ít sữa'],
-                  ['Painful', 'Đau/tắc sữa'],
-                  ['Improving', 'Đang cải thiện'],
-                ]} onChange={(milkStatus) => setForm((prev) => ({ ...prev, milkStatus }))} />
+                <Select
+                  value={form.milkStatus}
+                  options={[
+                    ['Normal', 'Bình thường'],
+                    ['Low', 'Ít sữa'],
+                    ['Painful', 'Đau/tắc sữa'],
+                    ['Improving', 'Đang cải thiện'],
+                  ]}
+                  onChange={(milkStatus) => setForm((prev) => ({ ...prev, milkStatus }))}
+                />
               </Field>
               <Field label="Tâm trạng">
-                <Select value={form.mood} options={[
-                  ['Calm', 'Bình tĩnh'],
-                  ['Tired', 'Mệt'],
-                  ['Stressed', 'Căng thẳng'],
-                  ['Anxious', 'Lo âu'],
-                  ['Overwhelmed', 'Quá tải'],
-                ]} onChange={(mood) => setForm((prev) => ({ ...prev, mood }))} />
+                <Select
+                  value={form.mood}
+                  options={[
+                    ['Calm', 'Bình tĩnh'],
+                    ['Tired', 'Mệt'],
+                    ['Stressed', 'Căng thẳng'],
+                    ['Anxious', 'Lo âu'],
+                    ['Overwhelmed', 'Quá tải'],
+                  ]}
+                  onChange={(mood) => setForm((prev) => ({ ...prev, mood }))}
+                />
               </Field>
               <Field label="Bé bú">
-                <Select value={form.babyFeeding} options={[
-                  ['Normal', 'Bú bình thường'],
-                  ['LessThanUsual', 'Bú ít hơn'],
-                  ['RefusesFeeding', 'Từ chối bú'],
-                  ['FrequentFeeding', 'Bú nhiều lần'],
-                ]} onChange={(babyFeeding) => setForm((prev) => ({ ...prev, babyFeeding }))} />
+                <Select
+                  value={form.babyFeeding}
+                  options={[
+                    ['Normal', 'Bú bình thường'],
+                    ['LessThanUsual', 'Bú ít hơn'],
+                    ['RefusesFeeding', 'Từ chối bú'],
+                    ['FrequentFeeding', 'Bú nhiều lần'],
+                  ]}
+                  onChange={(babyFeeding) => setForm((prev) => ({ ...prev, babyFeeding }))}
+                />
               </Field>
               <Field label="Giấc ngủ của bé">
-                <Select value={form.babySleep} options={[
-                  ['Normal', 'Ngủ bình thường'],
-                  ['CryingOften', 'Hay quấy khóc'],
-                  ['WakingFrequently', 'Thức giấc nhiều'],
-                  ['SleepingLonger', 'Ngủ lâu hơn'],
-                ]} onChange={(babySleep) => setForm((prev) => ({ ...prev, babySleep }))} />
+                <Select
+                  value={form.babySleep}
+                  options={[
+                    ['Normal', 'Ngủ bình thường'],
+                    ['CryingOften', 'Hay quấy khóc'],
+                    ['WakingFrequently', 'Thức giấc nhiều'],
+                    ['SleepingLonger', 'Ngủ lâu hơn'],
+                  ]}
+                  onChange={(babySleep) => setForm((prev) => ({ ...prev, babySleep }))}
+                />
               </Field>
               <Field label="Tã ướt trong 24h">
                 <NumberInput value={form.babyWetDiapers} min={0} max={20} unit="tã" onChange={(babyWetDiapers) => setForm((prev) => ({ ...prev, babyWetDiapers }))} />
               </Field>
               <Field label="Hoạt động của bé">
-                <Select value={form.babyActivity} options={[
-                  ['', 'Chưa chọn'],
-                  ['Normal', 'Tỉnh táo bình thường'],
-                  ['Sleepy', 'Ngủ nhiều hơn'],
-                  ['Lethargic', 'Lừ đừ/yếu'],
-                  ['Irritable', 'Khó chịu/quấy nhiều'],
-                ]} onChange={(babyActivity) => setForm((prev) => ({ ...prev, babyActivity }))} />
+                <Select
+                  value={form.babyActivity}
+                  options={[
+                    ['', 'Chưa chọn'],
+                    ['Normal', 'Tỉnh táo bình thường'],
+                    ['Sleepy', 'Ngủ nhiều hơn'],
+                    ['Lethargic', 'Lừ đừ/yếu'],
+                    ['Irritable', 'Khó chịu/quấy nhiều'],
+                  ]}
+                  onChange={(babyActivity) => setForm((prev) => ({ ...prev, babyActivity }))}
+                />
               </Field>
             </section>
 
@@ -213,6 +264,7 @@ const HealthCheckInsPage = () => {
                 CareMate AI tạo lộ trình tham khảo. Nếu có dấu hiệu bất thường, hãy liên hệ bác sĩ hoặc y tá.
               </p>
               <button
+                type="submit"
                 disabled={submitting}
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-slate-950 px-5 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50"
               >
@@ -226,7 +278,9 @@ const HealthCheckInsPage = () => {
         <aside className="space-y-5">
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <SectionTitle icon={<CalendarDaysIcon className="h-5 w-5" />} title="Kết quả lộ trình" />
-            {carePlan ? (
+            {carePlanError ? (
+              <CarePlanErrorCard message={carePlanError} submitting={submitting} onRetry={runRecommendation} />
+            ) : carePlan ? (
               <CarePlanResult plan={carePlan} />
             ) : (
               <p className="mt-5 rounded-md border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
@@ -246,18 +300,49 @@ function CarePlanResult({ plan }: { plan: CarePlanResponse }) {
       <SafetyNoticeCard level={plan.safetyLevel} notice={plan.safetyNotice} />
       <CarePlanSummaryCard plan={plan} />
       {plan.recommendedServices.length > 0 && <RecommendedServicesCard services={plan.recommendedServices} />}
-      <p className="rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3 text-xs font-semibold leading-6 text-amber-900">{plan.disclaimer}</p>
+      <p className="rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3 text-xs font-semibold leading-6 text-amber-900">
+        {plan.disclaimer}
+      </p>
     </div>
   );
 }
 
-
+function CarePlanErrorCard({
+  message,
+  submitting,
+  onRetry,
+}: {
+  message: string;
+  submitting: boolean;
+  onRetry: () => Promise<void>;
+}) {
+  return (
+    <div className="mt-5 rounded-[1.25rem] border border-amber-200 bg-amber-50/80 p-5 shadow-sm">
+      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-800">
+        <ExclamationTriangleIcon className="h-4 w-4" />
+        AI cần xác nhận thêm
+      </div>
+      <p className="mt-3 text-sm font-semibold leading-6 text-amber-950">{message}</p>
+      <button
+        type="button"
+        onClick={() => void onRetry()}
+        disabled={submitting}
+        className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-amber-900 px-4 text-sm font-black text-white transition hover:bg-amber-800 disabled:opacity-50"
+      >
+        {submitting ? 'Đang thử lại...' : 'Thử lại'}
+      </button>
+    </div>
+  );
+}
 
 function SafetyNoticeCard({ level, notice }: { level: string; notice: string | null }) {
   if (level === 'normal' && !notice) return null;
   const urgent = level === 'urgent';
+
   return (
-    <div className={`rounded-md border p-3 text-sm font-bold leading-6 ${urgent ? 'border-red-200 bg-red-50 text-red-800' : 'border-amber-200 bg-amber-50 text-amber-800'}`}>
+    <div
+      className={`rounded-md border p-3 text-sm font-bold leading-6 ${urgent ? 'border-red-200 bg-red-50 text-red-800' : 'border-amber-200 bg-amber-50 text-amber-800'}`}
+    >
       <div className="mb-1 flex items-center gap-2 font-black">
         <ExclamationTriangleIcon className="h-5 w-5" />
         {urgent ? 'Cần liên hệ y tế' : 'Cần chú ý thêm'}
@@ -279,19 +364,22 @@ function CarePlanSummaryCard({ plan }: { plan: CarePlanResponse }) {
   );
 }
 
-
-
 function RecommendedServicesCard({ services }: { services: RecommendedCareServiceDto[] }) {
   return (
     <div>
       <SectionLabel>Gói dịch vụ phù hợp</SectionLabel>
       <div className="mt-3 grid gap-2">
         {services.map((service) => (
-          <Link key={service.serviceId} to={`/services/${service.serviceId}`} className="rounded-[1.1rem] bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-teal-50">
+          <Link
+            key={service.serviceId}
+            to={`/services/${service.serviceId}`}
+            className="rounded-[1.1rem] bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-teal-50"
+          >
             <div className="text-sm font-black text-slate-950">{service.name}</div>
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{service.reason}</p>
             <div className="mt-3 inline-flex rounded-full bg-teal-50 px-3 py-1.5 text-xs font-black text-teal-700">
-              {service.sessionCount ? `${service.sessionCount} buổi • ` : ''}{service.estimatedPrice.toLocaleString('vi-VN')}đ
+              {service.sessionCount ? `${service.sessionCount} buổi | ` : ''}
+              {service.estimatedPrice.toLocaleString('vi-VN')}đ
             </div>
           </Link>
         ))}
@@ -310,7 +398,12 @@ function SectionTitle({ icon, title }: { icon: ReactNode; title: string }) {
 }
 
 function SectionLabel({ children }: { children: ReactNode }) {
-  return <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500"><UserGroupIcon className="h-4 w-4" />{children}</div>;
+  return (
+    <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-slate-500">
+      <UserGroupIcon className="h-4 w-4" />
+      {children}
+    </div>
+  );
 }
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
@@ -322,7 +415,21 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function NumberInput({ value, min, max, step, unit, onChange }: { value: string; min: number; max: number; step?: number; unit?: string; onChange: (value: string) => void }) {
+function NumberInput({
+  value,
+  min,
+  max,
+  step,
+  unit,
+  onChange,
+}: {
+  value: string;
+  min: number;
+  max: number;
+  step?: number;
+  unit?: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <div className="relative">
       <input
@@ -339,14 +446,26 @@ function NumberInput({ value, min, max, step, unit, onChange }: { value: string;
   );
 }
 
-function Select({ value, options, onChange }: { value: string; options: Array<[string, string]>; onChange: (value: string) => void }) {
+function Select({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: Array<[string, string]>;
+  onChange: (value: string) => void;
+}) {
   return (
     <select
       value={value}
       onChange={(event) => onChange(event.target.value)}
       className="h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-bold text-slate-900 outline-none transition focus:border-teal-400 focus:ring-3 focus:ring-teal-50"
     >
-      {options.map(([optionValue, label]) => <option key={`${optionValue}-${label}`} value={optionValue}>{label}</option>)}
+      {options.map(([optionValue, label]) => (
+        <option key={`${optionValue}-${label}`} value={optionValue}>
+          {label}
+        </option>
+      ))}
     </select>
   );
 }
@@ -380,11 +499,16 @@ function buildPayload(form: FormState): AnalyzeHealthCheckInPayload {
 }
 
 function addContext(target: Record<string, string>, key: string, value: string) {
-  if (value.trim()) target[key] = value.trim();
+  if (value.trim()) {
+    target[key] = value.trim();
+  }
 }
 
 function toNumber(value: string): number | null {
-  if (!value.trim()) return null;
+  if (!value.trim()) {
+    return null;
+  }
+
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -392,6 +516,17 @@ function toNumber(value: string): number | null {
 function emptyToNull(value: string): string | null {
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function getCarePlanErrorMessage(error: unknown): string {
+  if (axios.isAxiosError(error)) {
+    const message = (error.response?.data as { message?: string } | undefined)?.message?.trim();
+    if (message) {
+      return message;
+    }
+  }
+
+  return 'CareMate AI chưa thể tạo gợi ý đủ chính xác lúc này. Vui lòng thử lại.';
 }
 
 export default HealthCheckInsPage;
