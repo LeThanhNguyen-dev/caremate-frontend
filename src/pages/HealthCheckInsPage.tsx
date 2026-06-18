@@ -2,15 +2,13 @@ import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CalendarDaysIcon,
-  CheckCircleIcon,
   ClipboardDocumentCheckIcon,
   ExclamationTriangleIcon,
-  MapPinIcon,
   SparklesIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import caremateApi from '../api/caremateApi';
-import type { AnalyzeHealthCheckInPayload, CarePlanResponse, CarePlanTimelineItemDto, NurseDiscoveryDto, RecommendedCareServiceDto } from '../api/frontend-api-contract';
+import type { AnalyzeHealthCheckInPayload, CarePlanResponse, RecommendedCareServiceDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
 
 type FormState = {
@@ -86,7 +84,7 @@ const HealthCheckInsPage = () => {
               <div>
                 <h1 className="text-xl font-black text-slate-950">Lộ trình chăm sóc của bạn</h1>
                 <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
-                  Nhập tình trạng mẹ và bé để CareMate tạo lộ trình chăm sóc, gợi ý gói dịch vụ và y tá phù hợp.
+                  Nhập tình trạng mẹ và bé để CareMate gợi ý gói dịch vụ chăm sóc phù hợp.
                 </p>
               </div>
             </div>
@@ -247,13 +245,13 @@ function CarePlanResult({ plan }: { plan: CarePlanResponse }) {
     <div className="mt-5 space-y-5">
       <SafetyNoticeCard level={plan.safetyLevel} notice={plan.safetyNotice} />
       <CarePlanSummaryCard plan={plan} />
-      {plan.planItems.length > 0 && <PlanItemsTimeline items={plan.planItems} />}
       {plan.recommendedServices.length > 0 && <RecommendedServicesCard services={plan.recommendedServices} />}
-      {plan.recommendedNurses.length > 0 && <TopNursesCard nurses={plan.recommendedNurses} />}
-      <p className="rounded-md bg-amber-50 px-3 py-2 text-xs font-semibold leading-5 text-amber-800">{plan.disclaimer}</p>
+      <p className="rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3 text-xs font-semibold leading-6 text-amber-900">{plan.disclaimer}</p>
     </div>
   );
 }
+
+
 
 function SafetyNoticeCard({ level, notice }: { level: string; notice: string | null }) {
   if (level === 'normal' && !notice) return null;
@@ -271,84 +269,30 @@ function SafetyNoticeCard({ level, notice }: { level: string; notice: string | n
 
 function CarePlanSummaryCard({ plan }: { plan: CarePlanResponse }) {
   return (
-    <div className="rounded-md bg-teal-50 p-4">
-      <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.16em] text-teal-700">
+    <div className="rounded-[1.25rem] border border-teal-100 bg-[linear-gradient(180deg,#f2fffb_0%,#ecfdf7_100%)] p-5 shadow-sm">
+      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-teal-700">
         <SparklesIcon className="h-4 w-4" />
         Tóm tắt CareMate AI
       </div>
-      <p className="mt-2 text-sm font-semibold leading-6 text-teal-950">{plan.summary}</p>
+      <p className="mt-3 text-[15px] font-semibold leading-7 text-slate-800">{plan.summary}</p>
     </div>
   );
 }
 
-function PlanItemsTimeline({ items }: { items: CarePlanTimelineItemDto[] }) {
-  return (
-    <div>
-      <SectionLabel>Lộ trình theo buổi</SectionLabel>
-      <div className="mt-3 space-y-3">
-        {items.map((item) => (
-          <article key={`${item.sessionNumber}-${item.scheduledDate}`} className="rounded-md border border-slate-200 bg-white p-3">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-sm font-black text-slate-950">Buổi {item.sessionNumber}: {item.focus}</div>
-                <div className="mt-1 text-xs font-bold text-slate-500">{formatDateTime(item.scheduledDate)} • {item.durationMinutes} phút</div>
-              </div>
-              <CheckCircleIcon className="h-5 w-5 shrink-0 text-teal-600" />
-            </div>
-            <div className="mt-3 grid gap-2">
-              {item.activities.slice(0, 3).map((activity) => (
-                <p key={activity} className="rounded-md bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-600">{activity}</p>
-              ))}
-            </div>
-            <p className="mt-3 text-xs font-semibold leading-5 text-slate-500">{item.notes}</p>
-          </article>
-        ))}
-      </div>
-    </div>
-  );
-}
+
 
 function RecommendedServicesCard({ services }: { services: RecommendedCareServiceDto[] }) {
   return (
     <div>
       <SectionLabel>Gói dịch vụ phù hợp</SectionLabel>
       <div className="mt-3 grid gap-2">
-        {services.slice(0, 3).map((service) => (
-          <Link key={service.serviceId} to={`/services/${service.serviceId}`} className="rounded-md bg-white p-3 shadow-sm ring-1 ring-slate-100 transition hover:bg-teal-50">
+        {services.map((service) => (
+          <Link key={service.serviceId} to={`/services/${service.serviceId}`} className="rounded-[1.1rem] bg-white p-4 shadow-sm ring-1 ring-slate-100 transition hover:-translate-y-0.5 hover:bg-teal-50">
             <div className="text-sm font-black text-slate-950">{service.name}</div>
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{service.reason}</p>
-            <div className="mt-2 text-xs font-black text-teal-700">
+            <div className="mt-3 inline-flex rounded-full bg-teal-50 px-3 py-1.5 text-xs font-black text-teal-700">
               {service.sessionCount ? `${service.sessionCount} buổi • ` : ''}{service.estimatedPrice.toLocaleString('vi-VN')}đ
             </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function TopNursesCard({ nurses }: { nurses: NurseDiscoveryDto[] }) {
-  return (
-    <div>
-      <SectionLabel>Y tá phù hợp gần bạn</SectionLabel>
-      <div className="mt-3 grid gap-2">
-        {nurses.slice(0, 3).map((nurse) => (
-          <Link key={nurse.userId} to={`/nurses/${nurse.userId}`} className="rounded-md bg-white p-3 shadow-sm ring-1 ring-slate-100 transition hover:bg-slate-50">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="truncate text-sm font-black text-slate-950">{nurse.fullName}</div>
-                <div className="mt-1 flex items-center gap-2 text-xs font-bold text-slate-500">
-                  <MapPinIcon className="h-4 w-4" />
-                  {nurse.distanceKm != null ? `${nurse.distanceKm.toFixed(1)} km` : `Bán kính ${nurse.serviceRadiusKm} km`}
-                </div>
-              </div>
-              <div className="rounded-full bg-teal-50 px-2 py-1 text-xs font-black text-teal-700">{nurse.matchScore ?? 0}%</div>
-            </div>
-            {nurse.aiMatchSummary && (
-              <p className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-xs font-semibold leading-5 text-slate-600">
-                <span className="font-black text-slate-800">CareMate AI gợi ý: </span>{nurse.aiMatchSummary}
-              </p>
-            )}
           </Link>
         ))}
       </div>
@@ -448,16 +392,6 @@ function toNumber(value: string): number | null {
 function emptyToNull(value: string): string | null {
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
-}
-
-function formatDateTime(value: string) {
-  return new Date(value).toLocaleString('vi-VN', {
-    hour: '2-digit',
-    minute: '2-digit',
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
 }
 
 export default HealthCheckInsPage;

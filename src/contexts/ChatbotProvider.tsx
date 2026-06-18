@@ -2,8 +2,10 @@ import { useState, type ReactNode } from 'react';
 import caremateApi from '../api/caremateApi';
 import { ChatbotContext, type LocalAiChatMessage } from './ChatbotContextObject';
 import { getErrorMessage } from '../utils/apiError';
+import { useAuth } from '../hooks/useAuth';
 
 export const ChatbotProvider = ({ children }: { children: ReactNode }) => {
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<LocalAiChatMessage[]>([]);
@@ -13,6 +15,11 @@ export const ChatbotProvider = ({ children }: { children: ReactNode }) => {
   const sendMessage = async (content: string) => {
     const trimmed = content.trim();
     if (!trimmed || isLoading) return;
+
+    if (isAuthLoading || !isAuthenticated) {
+      setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục sử dụng CareMate AI.');
+      return;
+    }
 
     const localMessage: LocalAiChatMessage = {
       messageId: `local-${Date.now()}`,
@@ -42,7 +49,12 @@ export const ChatbotProvider = ({ children }: { children: ReactNode }) => {
 
       setMessages((prev) => [...prev, response]);
     } catch (err) {
-      setError(getErrorMessage(err, 'CareMate AI đang tạm thời không phản hồi.'));
+      const message = getErrorMessage(err, 'CareMate AI dang tam thoi khong phan hoi.');
+      setError(
+        message.includes('401')
+          ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục sử dụng CareMate AI.'
+          : message,
+      );
     } finally {
       setIsLoading(false);
     }

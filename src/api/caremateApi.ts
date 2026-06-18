@@ -40,7 +40,9 @@ import type {
   CarePlanResponse,
   AiChatConversationDto,
   AiChatCreateResponse,
-  AiChatMessageDto
+  AiChatMessageDto,
+  AdminAiInsightRequest,
+  AdminAiInsightResponse
 } from './frontend-api-contract';
 
 type ApiRecord = Record<string, unknown>;
@@ -350,6 +352,9 @@ export const caremateApi = {
 
   sendAiChatMessageNewConversation: async (payload: { content: string }): Promise<AiChatMessageDto> =>
     (await axiosInstance.post('/api/ai-chat/messages', payload)).data,
+
+  generateAdminAiInsight: async (payload: AdminAiInsightRequest): Promise<AdminAiInsightResponse> =>
+    (await axiosInstance.post('/api/admin/ai-insights/generate', payload)).data,
 
   // === Package Session Tracking ===
   getPackageProgress: async (bookingId: number): Promise<PackageProgressDto> =>

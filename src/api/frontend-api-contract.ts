@@ -581,6 +581,13 @@ export type CarePlanResponse = {
   disclaimer: string;
   aiModel: string | null;
   fallbackMode: boolean;
+  isAiReasoned?: boolean;
+  urgentActions?: {
+    priority: number;
+    type: string;
+    label: string;
+    value: string;
+  }[] | null;
   createdAt: string;
 };
 
@@ -613,6 +620,53 @@ export type AiChatMessageDto = {
   safetyTriggeredBy: string | null;
   ctaAction: string | null;
   disclaimer: string;
+  fallbackMode: boolean;
+  createdAt: string;
+};
+
+export type AdminAiInsightDateRangeDto = {
+  from?: string | null;
+  to?: string | null;
+};
+
+export type AdminAiInsightRequest = {
+  useCase: 'personalized_care_plan' | 'health_summary' | 'service_optimization' | string;
+  prompt: string;
+  customerId?: number | null;
+  bookingId?: number | null;
+  healthCheckInId?: string | null;
+  dateRange?: AdminAiInsightDateRangeDto | null;
+};
+
+export type AdminAiInsightActionDto = {
+  label: string;
+  reason: string;
+  priority: number;
+};
+
+export type AdminAiInsightMetricDto = {
+  label: string;
+  value: string;
+  trend: string | null;
+  note: string | null;
+};
+
+export type AdminAiInsightEntityDto = {
+  type: string;
+  id: string;
+  label: string;
+};
+
+export type AdminAiInsightResponse = {
+  useCase: string;
+  title: string;
+  summary: string;
+  insights: string[];
+  recommendedActions: AdminAiInsightActionDto[];
+  metrics: AdminAiInsightMetricDto[];
+  relatedEntities: AdminAiInsightEntityDto[];
+  disclaimer: string;
+  aiModel: string | null;
   fallbackMode: boolean;
   createdAt: string;
 };
