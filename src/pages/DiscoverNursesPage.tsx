@@ -52,17 +52,11 @@ const DiscoverNursesPage = () => {
         longitude: number | null;
     } | null>(null);
     const shouldUseCustomerCoordinates = selectedDistrict !== 'all' || sortBy === 'nearest';
-    const matchingLocation = selectedDistrict === 'all'
-        ? {
-            latitude: shouldUseCustomerCoordinates ? customerAddress?.latitude ?? undefined : undefined,
-            longitude: shouldUseCustomerCoordinates ? customerAddress?.longitude ?? undefined : undefined,
-            district: undefined,
-        }
-        : {
-            latitude: shouldUseCustomerCoordinates ? customerAddress?.latitude ?? undefined : undefined,
-            longitude: shouldUseCustomerCoordinates ? customerAddress?.longitude ?? undefined : undefined,
-            district: selectedDistrict,
-        };
+    const matchingLocation = {
+        latitude: shouldUseCustomerCoordinates ? customerAddress?.latitude ?? undefined : undefined,
+        longitude: shouldUseCustomerCoordinates ? customerAddress?.longitude ?? undefined : undefined,
+        district: selectedDistrict === 'all' ? customerAddress?.district ?? undefined : selectedDistrict,
+    };
 
     useEffect(() => {
         const loadCustomerAddress = async () => {
@@ -383,11 +377,7 @@ const DiscoverNursesPage = () => {
                                                 ))}
                                             </div>
                                         )}
-                                        {nurse.aiMatchSummary && (
-                                            <p className="mt-3 rounded-xl bg-white/80 px-3 py-2 text-xs font-semibold leading-5 text-slate-600">
-                                                <span className="font-black text-[#10233F]">CareMate AI gợi ý: </span>{nurse.aiMatchSummary}
-                                            </p>
-                                        )}
+
                                     </div>
 
                                     <p className="mt-5 flex-1 overflow-hidden text-sm font-medium leading-7 text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">

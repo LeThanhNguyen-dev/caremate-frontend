@@ -195,7 +195,6 @@ const CustomerProfilePage = () => {
                 .autocomplete(input, goongSessionTokenRef.current, abortController.signal)
                 .then((suggestions) => {
                     setAddressSuggestions(suggestions);
-                    setAddressSuggestionsOpen(suggestions.length > 0);
                     setAddressLookupError(suggestions.length === 0 ? 'Không tìm thấy gợi ý địa chỉ phù hợp.' : '');
                 })
                 .catch((error: unknown) => {

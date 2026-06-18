@@ -17,16 +17,17 @@ import {
 import { motion } from 'framer-motion';
 import PackageProgressTracker from '../components/PackageProgressTracker';
 import SingleServiceProgressTracker from '../components/SingleServiceProgressTracker';
+import { STATUS_LABELS } from '../constants/booking';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 
 const statusConfig: Record<string, { label: string; color: string; icon: IconComponent }> = {
-    pending_confirm: { label: 'Chờ xác nhận', color: 'bg-amber-50 text-amber-600', icon: ClockIcon },
-    confirmed: { label: 'Đã xác nhận', color: 'bg-blue-50 text-blue-600', icon: CheckCircleIcon },
-    in_progress: { label: 'Đang thực hiện', color: 'bg-green-50 text-green-600', icon: ClockIcon },
-    completed: { label: 'Hoàn thành', color: 'bg-green-100 text-green-700', icon: CheckCircleIcon },
-    cancelled: { label: 'Đã hủy', color: 'bg-red-50 text-red-600', icon: XCircleIcon },
-    rejected: { label: 'Bị từ chối', color: 'bg-red-100 text-red-700', icon: XCircleIcon },
+    pending_confirm: { label: STATUS_LABELS.pending_confirm, color: 'bg-amber-50 text-amber-600', icon: ClockIcon },
+    confirmed: { label: STATUS_LABELS.confirmed, color: 'bg-blue-50 text-blue-600', icon: CheckCircleIcon },
+    in_progress: { label: STATUS_LABELS.in_progress, color: 'bg-green-50 text-green-600', icon: ClockIcon },
+    completed: { label: STATUS_LABELS.completed, color: 'bg-green-100 text-green-700', icon: CheckCircleIcon },
+    cancelled: { label: STATUS_LABELS.cancelled, color: 'bg-red-50 text-red-600', icon: XCircleIcon },
+    rejected: { label: STATUS_LABELS.rejected, color: 'bg-red-100 text-red-700', icon: XCircleIcon },
 };
 
 const BookingDetailPage = () => {

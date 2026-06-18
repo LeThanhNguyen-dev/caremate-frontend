@@ -158,7 +158,6 @@ const NurseProfile = () => {
                 .autocomplete(input, goongSessionTokenRef.current, abortController.signal)
                 .then((suggestions) => {
                     setAddressSuggestions(suggestions);
-                    setAddressSuggestionsOpen(suggestions.length > 0);
                     setAddressLookupError(suggestions.length === 0 ? 'Không tìm thấy gợi ý địa chỉ phù hợp.' : '');
                 })
                 .catch((error: unknown) => {
@@ -794,6 +793,62 @@ const NurseProfile = () => {
                     <div className="rounded-2xl border-2 border-dashed border-slate-100 bg-slate-50/40 py-14 text-center">
                         <SolidStarIcon className="mx-auto h-10 w-10 text-slate-200" />
                         <p className="mt-4 text-sm font-bold text-slate-400">Chưa có đánh giá nào trong danh mục này.</p>
+                    </div>
+                )}
+            </section>
+
+            <section className="luxury-card border-none bg-white p-10 shadow-xl">
+                <div className="mb-8">
+                    <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-[#10B981]">
+                        <AcademicCapIcon className="h-4 w-4" />
+                        Thống kê hiệu suất
+                    </div>
+                    <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">Tổng quan hoạt động</h3>
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="rounded-2xl bg-slate-50 p-6">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đánh giá</div>
+                        <div className="mt-2 flex items-center gap-2">
+                            <SolidStarIcon className="h-6 w-6 text-amber-400" />
+                            <span className="text-3xl font-black text-slate-900">{averageRating.toFixed(1)}</span>
+                        </div>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 p-6">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Lượt đánh giá</div>
+                        <div className="mt-2 text-3xl font-black text-slate-900">{reviews.length}</div>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 p-6">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Kinh nghiệm</div>
+                        <div className="mt-2 text-3xl font-black text-slate-900">{profile?.yearsExperience ?? 0} <span className="text-lg font-black text-slate-400">năm</span></div>
+                    </div>
+                    <div className="rounded-2xl bg-slate-50 p-6">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Hồ sơ</div>
+                        <div className="mt-2 text-3xl font-black text-slate-900">{profile?.documents?.length ?? 0} <span className="text-lg font-black text-slate-400">tệp</span></div>
+                    </div>
+                </div>
+
+                {profile?.ratingDistribution && Object.keys(profile.ratingDistribution).length > 0 && (
+                    <div className="mt-8">
+                        <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Phân bổ đánh giá</div>
+                        <div className="space-y-2">
+                            {[5, 4, 3, 2, 1].map((star) => {
+                                const dist = profile.ratingDistribution as Record<string, number>;
+                                const count = dist[String(star)] ?? 0;
+                                const maxCount = Math.max(...Object.values(dist), 1);
+                                const pct = (count / maxCount) * 100;
+                                return (
+                                    <div key={star} className="flex items-center gap-3">
+                                        <span className="w-8 text-right text-sm font-black text-slate-500">{star}</span>
+                                        <SolidStarIcon className="h-4 w-4 text-amber-400" />
+                                        <div className="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden">
+                                            <div className="h-full rounded-full bg-amber-400 transition-all" style={{ width: `${pct}%` }}></div>
+                                        </div>
+                                        <span className="w-6 text-right text-xs font-bold text-slate-400">{count}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
             </section>

@@ -16,22 +16,12 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import NursePendingApproval from '../components/nurse/NursePendingApproval';
+import { getPlatformFee, STATUS_LABELS } from '../constants/booking';
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Legend, Tooltip);
 
-const PLATFORM_FEE_RATE = 0.15;
-const getPlatformFee = (totalPrice: number) => Math.round(totalPrice * PLATFORM_FEE_RATE);
 const getNursePayout = (booking: BookingDetailDto) =>
     booking.nursePayoutAmount ?? booking.totalPrice - getPlatformFee(booking.totalPrice);
-
-const bookingLabels: Record<string, string> = {
-    pending_confirm: 'Chờ xác nhận',
-    confirmed: 'Đã xác nhận',
-    in_progress: 'Đang thực hiện',
-    completed: 'Hoàn thành',
-    cancelled: 'Đã hủy',
-    rejected: 'Bị từ chối',
-};
 
 const NurseWorkspacePage = () => {
     const { user } = useAuth();
@@ -171,7 +161,7 @@ const NurseWorkspacePage = () => {
                     <div className="relative h-[240px]">
                         <Doughnut 
                             data={{
-                                labels: statusSummary.map(([status]) => bookingLabels[status] ?? status),
+                                labels: statusSummary.map(([status]) => STATUS_LABELS[status] ?? status),
                                 datasets: [{
                                     data: statusSummary.map(([, count]) => count),
                                     backgroundColor: ['#10B981', '#059669', '#34D399', '#A7F3D0', '#ECFDF5', '#064E3B'],
@@ -236,7 +226,7 @@ const NurseWorkspacePage = () => {
                                         <div className={`w-fit rounded-full border border-slate-100 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] ${
                                             booking.status === 'confirmed' ? 'text-[#10B981]' : 'text-slate-400'
                                         }`}>
-                                            {bookingLabels[booking.status] ?? booking.status}
+                                            {STATUS_LABELS[booking.status] ?? booking.status}
                                         </div>
                                     </div>
                                     <div className="mt-4 border-t border-slate-100 pt-4 text-xs font-medium italic leading-relaxed text-slate-500">

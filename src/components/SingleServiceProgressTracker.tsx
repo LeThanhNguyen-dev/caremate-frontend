@@ -5,6 +5,7 @@ import type { BookingDetailDto } from '../api/frontend-api-contract';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { useState } from 'react';
+import { formatDateTime, formatTime, formatDurationMinutes, QUICK_FEEDBACK_TAGS } from '../constants/booking';
 
 type Props = {
   booking: BookingDetailDto;
@@ -29,22 +30,6 @@ const timelineStatusLabels: Record<string, string> = {
   in_progress: 'Đang chăm sóc',
   completed: 'Hoàn thành',
 };
-
-const formatDateTime = (value?: string | null) =>
-  value ? new Date(value).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Chưa có';
-
-const formatTime = (value?: string | null) =>
-  value ? new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Chưa có';
-
-const formatDuration = (minutes?: number | null) => {
-  if (!minutes && minutes !== 0) return 'Chưa có';
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  if (hours <= 0) return `${mins} phút`;
-  return mins > 0 ? `${hours} giờ ${mins} phút` : `${hours} giờ`;
-};
-
-const quickFeedbackTags = ['Đúng giờ', 'Thái độ tốt', 'Chăm sóc kỹ', 'Tư vấn dễ hiểu', 'Bé/mẹ thoải mái', 'Cần cải thiện giao tiếp', 'Chưa đúng mong đợi'];
 
 const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => {
   const { user } = useAuth();
@@ -190,7 +175,7 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-5">
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Tổng thời gian thực tế</div>
-            <div className="mt-2 text-sm font-black text-slate-900">{formatDuration(booking.actualDurationMinutes)}</div>
+            <div className="mt-2 text-sm font-black text-slate-900">{formatDurationMinutes(booking.actualDurationMinutes)}</div>
           </div>
         </div>
 
@@ -288,7 +273,7 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
               })}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {quickFeedbackTags.map((tag) => {
+              {QUICK_FEEDBACK_TAGS.map((tag) => {
                 const active = reviewForm.tags.includes(tag);
                 return (
                   <button

@@ -199,7 +199,6 @@ const NursePublicDetailPage = () => {
         .autocomplete(input, goongSessionTokenRef.current, abortController.signal)
         .then((suggestions) => {
           setAddressSuggestions(suggestions);
-          setAddressSuggestionsOpen(suggestions.length > 0);
         })
         .catch((error: unknown) => {
           if (!(error instanceof DOMException && error.name === 'AbortError')) {

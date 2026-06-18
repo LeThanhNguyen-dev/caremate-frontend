@@ -16,20 +16,21 @@ import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
 import type { BookingDetailDto, Dispute } from '../api/frontend-api-contract';
+import { STATUS_LABELS, REFUND_STATUS_LABELS } from '../constants/booking';
 
 const statusConfig: Record<string, { label: string; className: string; icon: typeof ClockIcon }> = {
-    pending_confirm: { label: 'Chờ xác nhận', className: 'bg-amber-50 text-amber-600 border-amber-100', icon: ClockIcon },
-    confirmed: { label: 'Đã xác nhận', className: 'bg-blue-50 text-blue-600 border-blue-100', icon: CheckBadgeIcon },
-    in_progress: { label: 'Đang thực hiện', className: 'bg-brand/5 text-brand border-brand/10', icon: ArrowPathIcon },
-    completed: { label: 'Hoàn thành', className: 'bg-green-50 text-green-600 border-green-100', icon: CheckBadgeIcon },
-    cancelled: { label: 'Đã hủy', className: 'bg-slate-50 text-slate-400 border-slate-100', icon: ExclamationTriangleIcon },
-    rejected: { label: 'Bị từ chối', className: 'bg-red-50 text-red-600 border-red-100', icon: ExclamationTriangleIcon },
+    pending_confirm: { label: STATUS_LABELS.pending_confirm, className: 'bg-amber-50 text-amber-600 border-amber-100', icon: ClockIcon },
+    confirmed: { label: STATUS_LABELS.confirmed, className: 'bg-blue-50 text-blue-600 border-blue-100', icon: CheckBadgeIcon },
+    in_progress: { label: STATUS_LABELS.in_progress, className: 'bg-brand/5 text-brand border-brand/10', icon: ArrowPathIcon },
+    completed: { label: STATUS_LABELS.completed, className: 'bg-green-50 text-green-600 border-green-100', icon: CheckBadgeIcon },
+    cancelled: { label: STATUS_LABELS.cancelled, className: 'bg-slate-50 text-slate-400 border-slate-100', icon: ExclamationTriangleIcon },
+    rejected: { label: STATUS_LABELS.rejected, className: 'bg-red-50 text-red-600 border-red-100', icon: ExclamationTriangleIcon },
 };
 
 const refundStatusConfig: Record<string, { label: string; className: string }> = {
-    pending: { label: 'Chờ hoàn tiền', className: 'bg-amber-50 text-amber-700 border-amber-100' },
-    completed: { label: 'Đã hoàn tiền', className: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-    failed: { label: 'Hoàn tiền lỗi', className: 'bg-red-50 text-red-700 border-red-100' },
+    pending: { label: REFUND_STATUS_LABELS.pending, className: 'bg-amber-50 text-amber-700 border-amber-100' },
+    completed: { label: REFUND_STATUS_LABELS.completed, className: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
+    failed: { label: REFUND_STATUS_LABELS.failed, className: 'bg-red-50 text-red-700 border-red-100' },
 };
 
 const CustomerBookingsPage = () => {

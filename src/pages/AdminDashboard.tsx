@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
-import type { AdminAiInsightResponse, AdminBookingSummaryDto, AdminDashboardDto, AdminUserDto, NurseProfileDetailDto } from '../api/frontend-api-contract';
+import type { AdminBookingSummaryDto, AdminDashboardDto, AdminUserDto, NurseProfileDetailDto } from '../api/frontend-api-contract';
 import {
     ArcElement,
     BarElement,
@@ -24,11 +24,8 @@ import {
     CheckBadgeIcon,
     ClockIcon,
     BanknotesIcon,
-    SparklesIcon
 } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
-import { useToast } from '../hooks/useToast';
-
 ChartJS.register(
     ArcElement,
     BarElement,
@@ -84,39 +81,12 @@ const isSameDay = (left: Date, right: Date) =>
     left.getMonth() === right.getMonth() &&
     left.getDate() === right.getDate();
 
-const aiUseCases = [
-    {
-        id: 'personalized_care_plan',
-        title: 'Cá nhân hóa lộ trình chăm sóc',
-        description: 'Dựa vào booking và dữ liệu sẵn có để đề xuất bước chăm sóc tiếp theo.',
-        prompt: 'Hãy đánh giá booking này và đề xuất lộ trình chăm sóc tiếp theo phù hợp cho mẹ và bé.'
-    },
-    {
-        id: 'health_summary',
-        title: 'Miêu tả tình hình sức khỏe mẹ & bé',
-        description: 'Tóm tắt nhanh tình trạng mẹ và bé để admin theo dõi và điều phối.',
-        prompt: 'Hãy tóm tắt tình hình sức khỏe mẹ và bé từ dữ liệu hiện có, nêu rõ điểm cần theo dõi thêm.'
-    },
-    {
-        id: 'service_optimization',
-        title: 'Tối ưu hóa vận hành dịch vụ',
-        description: 'Phân tích booking và doanh thu để gợi ý cách tối ưu vận hành.',
-        prompt: 'Hãy phân tích vận hành 30 ngày gần nhất và đề xuất các hành động tối ưu hóa dịch vụ.'
-    }
-] as const;
-
 const AdminDashboard = () => {
-    const { showToast } = useToast();
     const [summary, setSummary] = useState<AdminDashboardDto | null>(null);
     const [users, setUsers] = useState<AdminUserDto[]>([]);
     const [pendingNurses, setPendingNurses] = useState<NurseProfileDetailDto[]>([]);
     const [bookings, setBookings] = useState<AdminBookingSummaryDto[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedUseCase, setSelectedUseCase] = useState<(typeof aiUseCases)[number]['id']>('service_optimization');
-    const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
-    const [aiPrompt, setAiPrompt] = useState<string>(aiUseCases[2].prompt);
-    const [aiLoading, setAiLoading] = useState(false);
-    const [aiInsight, setAiInsight] = useState<AdminAiInsightResponse | null>(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -140,13 +110,6 @@ const AdminDashboard = () => {
         };
         void loadData();
     }, []);
-
-    useEffect(() => {
-        if (!selectedBookingId && bookings.length > 0) {
-            const latestBooking = [...bookings].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())[0];
-            setSelectedBookingId(latestBooking?.id ?? null);
-        }
-    }, [bookings, selectedBookingId]);
 
     const stats = useMemo(() => ([
         { label: 'Tổng người dùng', value: summary?.totalUsers ?? users.length, icon: UsersIcon, color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -198,53 +161,31 @@ const AdminDashboard = () => {
         [bookings]
     );
 
-    const selectedBooking = useMemo(() =>
-        bookings.find((booking) => booking.id === selectedBookingId) ?? null,
-        [bookings, selectedBookingId]
+    const dayOfWeekData = useMemo(() => {
+        const labels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        const values = Array(7).fill(0);
+        bookings.forEach(b => { const d = new Date(b.startTime); values[d.getDay()]++; });
+        return { labels, values };
+    }, [bookings]);
+
+    const nurseLeaderboard = useMemo(() =>
+        users
+            .filter(u => (u.role === 'nurse' || u.role === 'nurse_confirmed') && (u.bookingCount ?? 0) > 0)
+            .sort((a, b) => (b.bookingCount ?? 0) - (a.bookingCount ?? 0))
+            .slice(0, 5),
+        [users]
     );
 
-    const recentBookingOptions = useMemo(() =>
-        [...bookings]
-            .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
-            .slice(0, 8),
-        [bookings]
-    );
-
-    const runAiInsight = async () => {
-        if (!aiPrompt.trim()) {
-            showToast('Hãy nhập yêu cầu cho AI trước khi phân tích.', 'error');
-            return;
-        }
-
-        if (selectedUseCase !== 'service_optimization' && !selectedBooking) {
-            showToast('Hãy chọn một booking để AI có ngữ cảnh phân tích.', 'error');
-            return;
-        }
-
-        try {
-            setAiLoading(true);
-            const result = await caremateApi.generateAdminAiInsight({
-                useCase: selectedUseCase,
-                prompt: aiPrompt.trim(),
-                bookingId: selectedUseCase === 'personalized_care_plan' ? selectedBooking?.id ?? null : null,
-                customerId: selectedUseCase !== 'service_optimization' ? selectedBooking?.customerId ?? null : null,
-                dateRange: selectedUseCase === 'service_optimization'
-                    ? {
-                        from: new Date(Date.now() - 29 * 24 * 60 * 60 * 1000).toISOString(),
-                        to: new Date().toISOString()
-                    }
-                    : null
-            });
-            setAiInsight(result);
-            showToast('Đã tạo insight AI cho admin.', 'success');
-        } catch (error: any) {
-            console.error('Failed to generate admin AI insight', error);
-            setAiInsight(null);
-            showToast(error?.response?.data?.message || 'Không thể tạo insight AI lúc này.', 'error');
-        } finally {
-            setAiLoading(false);
-        }
-    };
+    const funnelData = useMemo(() => {
+        const total = bookings.length;
+        const completed = bookings.filter(b => b.status === 'completed').length;
+        const cancelled = bookings.filter(b => b.status === 'cancelled').length;
+        const inProgress = bookings.filter(b => b.status === 'in_progress').length;
+        const confirmed = bookings.filter(b => b.status === 'confirmed').length;
+        const pending = bookings.filter(b => b.status === 'pending_confirm').length;
+        const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+        return { total, completed, cancelled, inProgress, confirmed, pending, completionRate };
+    }, [bookings]);
 
     const chartOptions = {
         responsive: true,
@@ -307,177 +248,84 @@ const AdminDashboard = () => {
 
     return (
         <div className="space-y-10">
-            <section className="overflow-hidden rounded-2xl border border-slate-100 bg-[linear-gradient(135deg,#0f172a_0%,#102f56_55%,#0ea5a4_140%)] p-8 shadow-2xl shadow-slate-300/30">
-                <div className="grid gap-8 xl:grid-cols-[1.1fr_0.9fr]">
-                    <div>
-                        <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.24em] text-cyan-100">
-                            <SparklesIcon className="h-4 w-4" />
-                            AI Operations Studio
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <section className="lg:col-span-1 bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20 flex flex-col justify-center">
+                    <div className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-500 mb-2">Tỷ lệ hoàn thành</div>
+                    <div className="text-5xl font-black text-slate-900 tracking-tight">{funnelData.completionRate}%</div>
+                    <div className="mt-4 flex items-center gap-2 text-sm font-bold text-slate-400">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500"></span>
+                        {funnelData.completed}/{funnelData.total} hoàn thành
+                    </div>
+                    <div className="mt-6 h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="h-full rounded-full bg-emerald-500 transition-all" style={{ width: `${funnelData.completionRate}%` }}></div>
+                    </div>
+                    <div className="mt-6 grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <div className="text-lg font-black text-slate-900">{funnelData.pending + funnelData.confirmed + funnelData.inProgress}</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đang xử lý</div>
                         </div>
-                        <h2 className="mt-5 max-w-2xl text-3xl font-black tracking-tight text-white md:text-4xl">
-                            Phân tích vận hành CareMate bằng 3 luồng AI dành cho admin.
-                        </h2>
-                        <p className="mt-3 max-w-2xl text-sm font-semibold leading-7 text-slate-200/80">
-                            Chọn đúng use case, thêm yêu cầu của bạn và để hệ thống tự ghép booking, khách hàng hoặc dữ liệu vận hành liên quan trước khi tạo insight.
-                        </p>
-
-                        <div className="mt-7 grid gap-3 md:grid-cols-3">
-                            {aiUseCases.map((item) => (
-                                <button
-                                    key={item.id}
-                                    type="button"
-                                    onClick={() => {
-                                        setSelectedUseCase(item.id);
-                                        setAiPrompt(item.prompt);
-                                    }}
-                                    className={`rounded-2xl border p-4 text-left transition ${selectedUseCase === item.id ? 'border-cyan-300 bg-white text-slate-950 shadow-xl' : 'border-white/10 bg-white/8 text-white hover:bg-white/12'}`}
-                                >
-                                    <div className="text-sm font-black leading-5">{item.title}</div>
-                                    <div className={`mt-2 text-xs font-semibold leading-5 ${selectedUseCase === item.id ? 'text-slate-500' : 'text-slate-200/70'}`}>
-                                        {item.description}
-                                    </div>
-                                </button>
-                            ))}
+                        <div>
+                            <div className="text-lg font-black text-slate-900">{funnelData.cancelled}</div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đã hủy</div>
                         </div>
                     </div>
+                </section>
 
-                    <div className="rounded-2xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-slate-950/20">
-                        <div className="flex items-start justify-between gap-4">
-                            <div>
-                                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-600">Yêu cầu phân tích</div>
-                                <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-950">Tạo insight ngay</h3>
-                            </div>
-                            <div className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                {selectedUseCase.replaceAll('_', ' ')}
-                            </div>
-                        </div>
-
-                        <div className="mt-5 space-y-4">
-                            <label className="block">
-                                <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Booking ngữ cảnh</span>
-                                <select
-                                    value={selectedBookingId ?? ''}
-                                    onChange={(event) => setSelectedBookingId(event.target.value ? Number(event.target.value) : null)}
-                                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-cyan-400 focus:ring-4 focus:ring-cyan-50"
-                                >
-                                    <option value="">Chọn booking gần đây</option>
-                                    {recentBookingOptions.map((booking) => (
-                                        <option key={booking.id} value={booking.id}>
-                                            #{booking.id} • {statusLabels[booking.status] ?? booking.status} • {new Date(booking.startTime).toLocaleDateString('vi-VN')}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            <label className="block">
-                                <span className="mb-2 block text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Prompt cho AI</span>
-                                <textarea
-                                    value={aiPrompt}
-                                    onChange={(event) => setAiPrompt(event.target.value)}
-                                    rows={5}
-                                    placeholder="Ví dụ: phân tích vì sao tỷ lệ hoàn thành booking tuần này giảm và nên xử lý thế nào."
-                                    className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-cyan-400 focus:ring-4 focus:ring-cyan-50"
-                                />
-                            </label>
-
-                            {selectedBooking && (
-                                <div className="rounded-2xl bg-slate-50 px-4 py-3 text-xs font-bold leading-6 text-slate-600">
-                                    Ngữ cảnh hiện tại: booking #{selectedBooking.id}, khách hàng #{selectedBooking.customerId}, trạng thái {statusLabels[selectedBooking.status] ?? selectedBooking.status}, giá trị {moneyFormatter.format(selectedBooking.totalPrice)}.
-                                </div>
-                            )}
-
-                            <button
-                                type="button"
-                                onClick={() => void runAiInsight()}
-                                disabled={aiLoading}
-                                className="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-5 py-4 text-sm font-black text-white transition hover:bg-cyan-600 disabled:opacity-50"
-                            >
-                                {aiLoading ? 'Đang tạo insight...' : 'Tạo insight cho admin'}
-                            </button>
-                        </div>
+                <section className="lg:col-span-1 bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20">
+                    <div className="mb-6">
+                        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-indigo-500 mb-2">Phân bổ</div>
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Thứ trong tuần</h3>
                     </div>
-                </div>
-
-                {aiInsight && (
-                    <div className="mt-8 rounded-2xl border border-white/10 bg-white/95 p-6 shadow-2xl shadow-slate-950/20">
-                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                            <div>
-                                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-cyan-600">Kết quả AI</div>
-                                <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-950">{aiInsight.title}</h3>
-                                <p className="mt-3 max-w-3xl text-sm font-semibold leading-7 text-slate-600">{aiInsight.summary}</p>
-                            </div>
-                            <div className="space-y-2 text-right">
-                                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">{aiInsight.aiModel ?? 'rule_engine'}</div>
-                                <div className={`inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${aiInsight.fallbackMode ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
-                                    {aiInsight.fallbackMode ? 'Fallback mode' : 'AI parsed'}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-                            <div className="space-y-6">
-                                <div>
-                                    <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Metrics</div>
-                                    <div className="mt-3 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-                                        {aiInsight.metrics.map((metric) => (
-                                            <div key={`${metric.label}-${metric.value}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                                                <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{metric.label}</div>
-                                                <div className="mt-2 text-2xl font-black tracking-tight text-slate-950">{metric.value}</div>
-                                                {metric.note && <div className="mt-2 text-xs font-semibold leading-5 text-slate-500">{metric.note}</div>}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Liên kết dữ liệu</div>
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        {aiInsight.relatedEntities.map((entity) => (
-                                            <span key={`${entity.type}-${entity.id}`} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-black text-slate-600">
-                                                {entity.label}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div>
-                                    <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Insights</div>
-                                    <div className="mt-3 space-y-3">
-                                        {aiInsight.insights.map((insight) => (
-                                            <div key={insight} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold leading-6 text-slate-700">
-                                                {insight}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-500">Hành động khuyến nghị</div>
-                                    <div className="mt-3 space-y-3">
-                                        {aiInsight.recommendedActions.map((action) => (
-                                            <div key={`${action.label}-${action.priority}`} className="rounded-2xl bg-slate-950 px-4 py-4 text-white">
-                                                <div className="flex items-center justify-between gap-3">
-                                                    <div className="text-sm font-black">{action.label}</div>
-                                                    <div className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-cyan-100">
-                                                        Priority {action.priority}
-                                                    </div>
-                                                </div>
-                                                <div className="mt-2 text-sm font-semibold leading-6 text-slate-200">{action.reason}</div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="mt-6 rounded-2xl bg-amber-50 px-4 py-3 text-xs font-semibold leading-6 text-amber-800">
-                            {aiInsight.disclaimer}
-                        </div>
+                    <div className="h-64">
+                        <Bar
+                            options={{
+                                ...chartOptions,
+                                indexAxis: 'y' as const,
+                                scales: {
+                                    ...chartOptions.scales,
+                                    y: { grid: { display: false }, ticks: { color: '#94a3b8', font: { weight: 800 } } }
+                                }
+                            }}
+                            data={{
+                                labels: dayOfWeekData.labels,
+                                datasets: [{ label: 'Lịch hẹn', data: dayOfWeekData.values, backgroundColor: '#6366f1', borderRadius: 6, barThickness: 26 }]
+                            }}
+                        />
                     </div>
-                )}
-            </section>
+                </section>
+
+                <section className="lg:col-span-2 bg-white rounded-xl p-8 border border-slate-50 shadow-xl shadow-slate-200/20">
+                    <div className="mb-6">
+                        <div className="text-[10px] font-black uppercase tracking-[0.25em] text-amber-500 mb-2">Xếp hạng</div>
+                        <h3 className="text-2xl font-black text-slate-900 tracking-tight">Điều dưỡng năng suất nhất</h3>
+                    </div>
+                    <div className="space-y-4">
+                        {nurseLeaderboard.length > 0 ? (
+                            nurseLeaderboard.map((nurse, idx) => (
+                                <div key={nurse.userId} className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-all">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 rounded-xl bg-white flex items-center justify-center font-black text-slate-900 shadow-sm">{idx + 1}</div>
+                                        <div>
+                                            <div className="text-sm font-black text-slate-900">{nurse.fullName}</div>
+                                            <div className="text-[10px] font-bold text-slate-400">{nurse.bookingCount} lượt</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        {nurse.averageRating != null && (
+                                            <span className="text-sm font-black text-amber-500">{nurse.averageRating.toFixed(1)}</span>
+                                        )}
+                                        <span className="text-[10px] font-bold text-slate-400">sao</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="py-12 text-center rounded-xl bg-slate-50">
+                                <p className="text-sm font-bold text-slate-400">Chưa có dữ liệu điều dưỡng.</p>
+                            </div>
+                        )}
+                    </div>
+                </section>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, idx) => (

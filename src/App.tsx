@@ -1,56 +1,65 @@
 import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthProvider';
 import { ToastProvider } from './contexts/ToastProvider';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
-import AboutUs from './pages/AboutUs';
-import CommunityPage from './pages/CommunityPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import NurseProfile from './pages/NurseProfile';
-import AdminLayout from './components/AdminLayout';
-import NurseLayout from './components/NurseLayout';
-import AdminDashboard from './pages/AdminDashboard';
-import AdminPendingNurses from './pages/AdminPendingNurses';
-import AdminNurseDetail from './pages/AdminNurseDetail';
-import AdminUsers from './pages/AdminUsers';
-import AdminBookings from './pages/AdminBookings';
-import AdminReports from './pages/AdminReports';
-import AdminSettings from './pages/AdminSettings';
-import AdminFinance from './pages/AdminFinance';
-import AdminAuditLogs from './pages/AdminAuditLogs';
-import DiscoverNursesPage from './pages/DiscoverNursesPage';
-import ServicesPage from './pages/ServicesPage';
-import ServiceDetailPage from './pages/ServiceDetailPage';
-import CustomerBookingsPage from './pages/CustomerBookingsPage';
-import NurseSchedulePage from './pages/NurseSchedulePage';
-import NurseBookingsPage from './pages/NurseBookingsPage';
-import NurseServicesPage from './pages/NurseServicesPage';
-import NotificationsPage from './pages/NotificationsPage';
-import NursePublicDetailPage from './pages/NursePublicDetailPage';
-import BookingDetailPage from './pages/BookingDetailPage';
-import NurseWorkspacePage from './pages/NurseWorkspacePage';
-import CustomerProfilePage from './pages/CustomerProfilePage';
-import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import HealthCheckInsPage from './pages/HealthCheckInsPage';
-import PaymentResultPage from './pages/PaymentResultPage';
-import ChatPage from './pages/ChatPage';
 import FloatingChatbot from './components/FloatingChatbot';
+
+const AdminLayout = lazy(() => import('./components/AdminLayout'));
+const NurseLayout = lazy(() => import('./components/NurseLayout'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminPendingNurses = lazy(() => import('./pages/AdminPendingNurses'));
+const AdminNurseDetail = lazy(() => import('./pages/AdminNurseDetail'));
+const AdminUsers = lazy(() => import('./pages/AdminUsers'));
+const AdminBookings = lazy(() => import('./pages/AdminBookings'));
+const AdminReports = lazy(() => import('./pages/AdminReports'));
+const AdminSettings = lazy(() => import('./pages/AdminSettings'));
+const AdminFinance = lazy(() => import('./pages/AdminFinance'));
+const AdminAuditLogs = lazy(() => import('./pages/AdminAuditLogs'));
+const AboutUs = lazy(() => import('./pages/AboutUs'));
+const CommunityPage = lazy(() => import('./pages/CommunityPage'));
+const NurseProfile = lazy(() => import('./pages/NurseProfile'));
+const DiscoverNursesPage = lazy(() => import('./pages/DiscoverNursesPage'));
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage'));
+const CustomerBookingsPage = lazy(() => import('./pages/CustomerBookingsPage'));
+const NurseSchedulePage = lazy(() => import('./pages/NurseSchedulePage'));
+const NurseBookingsPage = lazy(() => import('./pages/NurseBookingsPage'));
+const NurseServicesPage = lazy(() => import('./pages/NurseServicesPage'));
+const NotificationsPage = lazy(() => import('./pages/NotificationsPage'));
+const NursePublicDetailPage = lazy(() => import('./pages/NursePublicDetailPage'));
+const BookingDetailPage = lazy(() => import('./pages/BookingDetailPage'));
+const NurseWorkspacePage = lazy(() => import('./pages/NurseWorkspacePage'));
+const CustomerProfilePage = lazy(() => import('./pages/CustomerProfilePage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const HealthCheckInsPage = lazy(() => import('./pages/HealthCheckInsPage'));
+const PaymentResultPage = lazy(() => import('./pages/PaymentResultPage'));
+const ChatPage = lazy(() => import('./pages/ChatPage'));
 
 import { NotificationProvider } from './contexts/NotificationProvider';
 import { ChatbotProvider } from './contexts/ChatbotProvider';
 
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { staleTime: 1000 * 60 * 5, retry: 2 } },
+});
+
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <ToastProvider>
         <NotificationProvider>
           <ChatbotProvider>
           <BrowserRouter>
             <ScrollToTop />
+            <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-white"><div className="h-10 w-10 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" /></div>}>
             <Routes>
               {/* Public Layout */}
               <Route path="/" element={<Layout />}>
@@ -173,12 +182,14 @@ function App() {
                 <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
               </Route>
             </Routes>
+            </Suspense>
             <FloatingChatbot />
           </BrowserRouter>
           </ChatbotProvider>
         </NotificationProvider>
       </ToastProvider>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }
 

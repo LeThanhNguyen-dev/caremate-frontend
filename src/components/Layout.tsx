@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -26,31 +27,19 @@ const Layout = () => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-    const [services, setServices] = useState<ServiceDetailDto[]>([]);
+
+    const { data: services = [] } = useQuery({
+        queryKey: ['services'],
+        queryFn: async () => {
+            const data = await caremateApi.getServices();
+            return data.filter((s) => s.status === 'active');
+        },
+    });
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
-
-    useEffect(() => {
-        let mounted = true;
-        const loadServices = async () => {
-            try {
-                const data = await caremateApi.getServices();
-                if (mounted) {
-                    setServices(data.filter((service) => service.status === 'active'));
-                }
-            } catch {
-                if (mounted) setServices([]);
-            }
-        };
-
-        void loadServices();
-        return () => {
-            mounted = false;
-        };
     }, []);
 
     const handleLogout = async () => {

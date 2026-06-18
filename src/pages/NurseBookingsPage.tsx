@@ -17,41 +17,40 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import NursePendingApproval from '../components/nurse/NursePendingApproval';
+import { getPlatformFee, STATUS_LABELS } from '../constants/booking';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
-const PLATFORM_FEE_RATE = 0.15;
-const getPlatformFee = (totalPrice: number) => Math.round(totalPrice * PLATFORM_FEE_RATE);
 const getNursePayout = (booking: BookingDetailDto) =>
     booking.nursePayoutAmount ?? booking.totalPrice - getPlatformFee(booking.totalPrice);
 
 const statusConfig: Record<string, { label: string; class: string; icon: IconComponent }> = {
     pending_confirm: { 
-        label: 'Chờ xác nhận', 
+        label: STATUS_LABELS.pending_confirm, 
         class: 'bg-amber-50 text-amber-600 border-amber-100',
         icon: ClockIcon 
     },
     confirmed: { 
-        label: 'Đã xác nhận', 
+        label: STATUS_LABELS.confirmed, 
         class: 'bg-emerald-50 text-[#10B981] border-emerald-100',
         icon: CheckBadgeIcon 
     },
     in_progress: { 
-        label: 'Đang thực hiện', 
+        label: STATUS_LABELS.in_progress, 
         class: 'bg-blue-50 text-blue-600 border-blue-100',
         icon: PlayIcon 
     },
     completed: { 
-        label: 'Hoàn thành', 
+        label: STATUS_LABELS.completed, 
         class: 'bg-emerald-100 text-emerald-800 border-emerald-200',
         icon: CheckIcon 
     },
     cancelled: { 
-        label: 'Đã hủy', 
+        label: STATUS_LABELS.cancelled, 
         class: 'bg-red-50 text-red-600 border-red-100',
         icon: XCircleIcon 
     },
     rejected: { 
-        label: 'Bị từ chối', 
+        label: STATUS_LABELS.rejected, 
         class: 'bg-slate-50 text-slate-500 border-slate-200',
         icon: XCircleIcon 
     },

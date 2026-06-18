@@ -21,13 +21,22 @@ axiosInstance.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// Response interceptor - handle 401 + token refresh
+// Response interceptor - handle 401 + token refresh + retry 5xx
 axiosInstance.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        const status = error.response?.status;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Retry up to 2 times on server errors (5xx) with exponential backoff
+        if (status >= 500 && status < 600 && (!originalRequest._retryCount || originalRequest._retryCount < 2)) {
+            originalRequest._retryCount = (originalRequest._retryCount ?? 0) + 1;
+            const delay = Math.min(1000 * Math.pow(2, originalRequest._retryCount), 4000);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            return axiosInstance(originalRequest);
+        }
+
+        if (status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
             try {

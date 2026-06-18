@@ -5,6 +5,7 @@ import caremateApi from '../api/caremateApi';
 import type { PackageProgressDto } from '../api/frontend-api-contract';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
+import { formatDateTime, formatTime, formatDuration, QUICK_FEEDBACK_TAGS } from '../constants/booking';
 
 type Props = {
     bookingId: number;
@@ -16,21 +17,6 @@ type Props = {
     onProgressChanged?: () => void;
 };
 
-const formatDateTime = (value?: string | null) =>
-    value ? new Date(value).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Chưa có';
-
-const formatTime = (value?: string | null) =>
-    value ? new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Chưa có';
-
-const formatDuration = (start?: string | null, end?: string | null) => {
-    if (!start || !end) return 'Chưa có';
-    const minutes = Math.max(0, Math.round((new Date(end).getTime() - new Date(start).getTime()) / 60000));
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours <= 0) return `${mins} phút`;
-    return mins > 0 ? `${hours} giờ ${mins} phút` : `${hours} giờ`;
-};
-
 const resolveSessionStatus = (session: PackageProgressDto['sessions'][number]) => {
     const isLate = session.status === 'pending' && new Date(session.sessionDate).getTime() < Date.now();
     if (session.status === 'completed') return { label: 'Hoàn thành', tone: 'bg-emerald-50 text-emerald-600', phase: 'completed' };
@@ -38,8 +24,6 @@ const resolveSessionStatus = (session: PackageProgressDto['sessions'][number]) =
     if (isLate) return { label: 'Trễ giờ', tone: 'bg-amber-50 text-amber-700', phase: 'late' };
     return { label: 'Chưa bắt đầu', tone: 'bg-slate-50 text-slate-400', phase: 'pending' };
 };
-
-const quickFeedbackTags = ['Đúng giờ', 'Thái độ tốt', 'Chăm sóc kỹ', 'Tư vấn dễ hiểu', 'Bé/mẹ thoải mái', 'Cần cải thiện giao tiếp', 'Chưa đúng mong đợi'];
 
 const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, finalReviewRating, finalReviewComment, finalReviewCreatedAt, onProgressChanged }) => {
     const { user } = useAuth();
@@ -469,7 +453,7 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, fin
                                                     })}
                                                 </div>
                                                 <div className="mt-3 flex flex-wrap gap-2">
-                                                    {quickFeedbackTags.map((tag) => {
+                                                    {QUICK_FEEDBACK_TAGS.map((tag) => {
                                                         const active = (reviewForms[session.id]?.tags ?? []).includes(tag);
                                                         return (
                                                             <button
