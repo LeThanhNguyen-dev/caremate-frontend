@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
+import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -269,7 +269,7 @@ const HealthCheckInsPage = () => {
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-slate-950 px-5 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50"
               >
                 <ClipboardDocumentCheckIcon className="h-4 w-4" />
-                {submitting ? 'Đang tạo lộ trình...' : 'Tạo lộ trình chăm sóc'}
+                {submitting ? 'Đang gợi ý lộ trình...' : 'Gợi ý lộ trình chăm sóc'}
               </button>
             </div>
           </form>

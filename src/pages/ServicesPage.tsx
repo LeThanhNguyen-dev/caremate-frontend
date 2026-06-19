@@ -106,28 +106,31 @@ const ServicesPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="relative overflow-hidden border-b border-pink-100 bg-[linear-gradient(115deg,#fff7fb_0%,#ffffff_48%,#eefdf8_100%)]">
-        <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_520px] lg:px-8 lg:py-16">
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-pink-100 bg-white px-4 py-2 text-xs font-black uppercase tracking-[0.2em] text-brand shadow-sm">
+      <section className="relative overflow-hidden bg-[#10233F] border-b border-white/10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(236,72,153,0.24),transparent_32%),radial-gradient(circle_at_84%_22%,rgba(16,185,129,0.12),transparent_30%)]" />
+        <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_520px] lg:px-8 lg:py-16">
+          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-brand shadow-sm">
               <SparklesIcon className="h-4 w-4" />
               Dịch vụ CareMate
             </div>
-            <h1 className="mt-6 max-w-2xl text-4xl font-black leading-tight tracking-tight text-[#10233F] sm:text-5xl lg:text-6xl">
-              Chọn dịch vụ <span className="text-brand">chăm sóc phù hợp</span> cho gia đình bạn
+            <h1 className="mt-6 text-[38px] font-black leading-[1.1] tracking-tight text-white sm:text-[48px] lg:text-[58px]">
+              Chọn dịch vụ
+              <span className="mt-2 block font-semibold italic text-brand sm:mt-3">chăm sóc phù hợp</span>
+              cho gia đình bạn
             </h1>
-            <p className="mt-5 max-w-xl text-base font-semibold leading-8 text-slate-600">
+            <p className="mt-6 max-w-xl text-[16px] font-semibold leading-[1.8] text-white/80">
               Mỗi dịch vụ được tách thành một trang chi tiết riêng để gia đình xem rõ gói gồm gì, lịch trình ra sao và chi phí trước khi tìm điều dưỡng.
             </p>
 
-            <div data-tour="service-search" className="mt-8 flex max-w-2xl flex-col gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-[0_20px_50px_rgba(15,23,42,0.08)] sm:flex-row">
+            <div data-tour="service-search" className="mt-8 flex max-w-2xl flex-col gap-3 rounded-xl border border-white/10 bg-white/10 p-3 shadow-2xl backdrop-blur-md sm:flex-row">
               <div className="relative flex-1">
-                <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/50" />
                 <input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Bạn cần dịch vụ gì?"
-                  className="h-12 w-full rounded-2xl border border-slate-100 bg-slate-50 pl-12 pr-4 text-sm font-bold text-[#10233F] outline-none transition focus:border-brand/30 focus:bg-white focus:ring-4 focus:ring-brand/10"
+                  className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-sm font-bold text-white placeholder-white/50 outline-none transition focus:border-brand/30 focus:bg-white/20 focus:ring-4 focus:ring-brand/10"
                 />
               </div>
               <a href="#service-list" className="inline-flex h-12 items-center justify-center rounded-2xl bg-brand px-7 text-sm font-black text-white shadow-lg shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-brand-deep">
@@ -137,21 +140,21 @@ const ServicesPage = () => {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="hidden lg:block">
-            <div className="rounded-2xl border border-pink-100 bg-white p-8 shadow-[0_30px_80px_rgba(236,72,153,0.12)]">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Dữ liệu hiện có</div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">Dữ liệu hiện có</div>
               <div className="mt-5 grid grid-cols-2 gap-4">
-                <div className="rounded-2xl bg-brand-soft p-5">
+                <div className="rounded-2xl bg-brand/10 border border-brand/20 p-5">
                   <div className="text-4xl font-black text-brand">{services.length}</div>
-                  <div className="mt-2 text-sm font-black text-[#10233F]">dịch vụ đang hoạt động</div>
+                  <div className="mt-2 text-sm font-black text-white">dịch vụ đang hoạt động</div>
                 </div>
-                <div className="rounded-2xl bg-slate-50 p-5">
-                  <div className="text-4xl font-black text-[#10233F]">{Math.max(0, categories.length - 1)}</div>
-                  <div className="mt-2 text-sm font-black text-[#10233F]">nhóm dịch vụ</div>
+                <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
+                  <div className="text-4xl font-black text-white">{Math.max(0, categories.length - 1)}</div>
+                  <div className="mt-2 text-sm font-black text-white">nhóm dịch vụ</div>
                 </div>
               </div>
-              <div className="mt-5 rounded-2xl bg-[#10233F] p-5 text-white">
-                <div className="text-sm font-black">Quy trình</div>
-                <div className="mt-2 text-sm font-semibold text-white/75">Chọn dịch vụ, xem chi tiết thật từ hệ thống, rồi chọn điều dưỡng.</div>
+              <div className="mt-5 rounded-2xl bg-white/5 border border-white/10 p-5 text-white">
+                <div className="text-sm font-black text-brand">Quy trình</div>
+                <div className="mt-2 text-sm font-semibold text-white/70">Chọn dịch vụ, xem chi tiết thật từ hệ thống, rồi chọn điều dưỡng.</div>
               </div>
             </div>
           </motion.div>

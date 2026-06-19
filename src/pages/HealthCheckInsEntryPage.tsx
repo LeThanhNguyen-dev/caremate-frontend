@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ChartBarSquareIcon, HeartIcon, ShieldCheckIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
 const HealthCheckInsEntryPage = () => {
   return (
@@ -13,23 +13,10 @@ const HealthCheckInsEntryPage = () => {
           </div>
 
           <div className="min-w-0">
-            <div className="mb-2 inline-flex rounded-full bg-teal-50 px-3 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-teal-700 ring-1 ring-teal-100">
-              AI clinical triage
-            </div>
             <h3 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">Phân tích tình trạng sức khỏe để đưa ra gói chăm sóc phù hợp</h3>
             <p className="mt-2 max-w-2xl text-sm font-medium leading-6 text-slate-600">
-              Chấm điểm rủi ro, đọc xu hướng 7 lần gần nhất, ưu tiên dấu hiệu cần theo dõi và đề xuất kế hoạch chăm sóc tiếp theo ngay trong CareMate.
+              Ưu tiên dấu hiệu cần theo dõi và đề xuất kế hoạch chăm sóc tiếp theo ngay trong CareMate.
             </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-black text-slate-700 shadow-sm ring-1 ring-slate-100">
-                <ShieldCheckIcon className="h-4 w-4 text-teal-600" />
-                Risk score
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-black text-slate-700 shadow-sm ring-1 ring-slate-100">
-                <ChartBarSquareIcon className="h-4 w-4 text-teal-600" />
-                Trend insight
-              </span>
-            </div>
           </div>
         </div>
 
