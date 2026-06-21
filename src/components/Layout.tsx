@@ -74,19 +74,19 @@ const Layout = () => {
     return (
         <div className="min-h-screen flex flex-col bg-white font-sans">
             <header
-                className={`fixed top-0 left-0 right-0 z-[100] bg-white/95 py-2 shadow-sm shadow-slate-200/50 backdrop-blur-2xl transition-all duration-500 ${
-                    scrolled ? 'lg:bg-white/88 lg:py-2 lg:shadow-xl lg:shadow-slate-200/35' : 'lg:bg-white/70 lg:py-3 lg:shadow-none'
+                className={`fixed top-0 left-0 right-0 z-[100] bg-white/95 shadow-sm shadow-slate-200/50 backdrop-blur-2xl transition-all duration-500 ${
+                    scrolled ? 'lg:bg-white/88 lg:shadow-xl lg:shadow-slate-200/35' : 'lg:bg-white/70 lg:shadow-none'
                 }`}
             >
-                <nav className="mx-auto grid w-full max-w-[1760px] grid-cols-[auto_1fr] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[280px_minmax(0,1fr)_360px] lg:px-8 2xl:px-10">
-                    <div className="flex items-center justify-start">
+                <nav className="mx-auto grid w-full max-w-[1760px] grid-cols-[auto_1fr] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[360px_1fr_360px] lg:px-8 2xl:px-10 h-20">
+                    <div className="flex h-full items-center justify-start">
                         <Link to="/" className="flex items-center gap-3 group">
                             <img src="/assets/images/caremate-brand-logo.png" alt="CareMate Logo" className="h-12 w-auto object-contain transition-transform group-hover:scale-105 sm:h-14 lg:h-16" />
                         </Link>
                     </div>
 
-                    <div className="hidden min-w-0 items-center justify-center lg:flex">
-                        <div className="flex items-center justify-center gap-9">
+                    <div className="hidden min-w-0 h-full items-center justify-center lg:flex">
+                        <div className="flex h-full items-center justify-center gap-9">
                             {navigation.map((item) => (
                                 item.name === 'Dịch vụ' ? (
                                     <div key={item.name} className="group relative">
@@ -191,7 +191,7 @@ const Layout = () => {
                                     <Link
                                         key={item.name}
                                         to={item.href}
-                                        className={`text-[17px] font-extrabold tracking-[0.01em] transition-colors ${
+                                        className={`inline-flex items-center text-[17px] font-extrabold tracking-[0.01em] transition-colors ${
                                             location.pathname === item.href ? 'text-brand' : 'text-slate-500 hover:text-brand'
                                         }`}
                                     >
@@ -202,7 +202,7 @@ const Layout = () => {
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-end gap-6">
+                    <div className="flex h-full items-center justify-end gap-6">
                         <button className="relative z-[120] shrink-0 rounded-xl p-2 text-[#10233F] hover:bg-slate-100 lg:hidden" onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu">
                             <Bars3Icon className="h-7 w-7" />
                         </button>
@@ -275,8 +275,8 @@ const Layout = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="hidden lg:flex items-center gap-6">
-                                <Link to="/login" className="text-[17px] font-extrabold tracking-[0.01em] text-[#10233F] transition hover:text-brand">Đăng nhập</Link>
+                            <div className="hidden lg:flex h-full items-center gap-6">
+                                <Link to="/login" className="inline-flex items-center text-[17px] font-extrabold tracking-[0.01em] text-[#10233F] transition hover:text-brand">Đăng nhập</Link>
                                 <Link to="/register" className="rounded-full bg-[#10233F] px-10 py-[18px] text-[15px] font-black uppercase tracking-[0.1em] text-white shadow-xl shadow-[#10233F]/15 transition hover:bg-brand hover:shadow-brand/20">Bắt đầu ngay</Link>
                             </div>
                         )}

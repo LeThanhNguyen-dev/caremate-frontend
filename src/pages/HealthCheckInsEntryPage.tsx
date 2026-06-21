@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { HeartIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 const HealthCheckInsEntryPage = () => {
   return (
@@ -22,10 +22,10 @@ const HealthCheckInsEntryPage = () => {
 
         <Link
           to="/health-checkins"
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition hover:-translate-y-0.5 hover:bg-teal-700 hover:shadow-teal-200"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-slate-950 px-6 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition hover:-translate-y-0.5 hover:bg-teal-700 hover:shadow-teal-200"
         >
-          <HeartIcon className="h-5 w-5" />
-          Mở check-in ngay
+          <SparklesIcon className="h-5 w-5" />
+          Gợi ý dịch vụ phù hợp
         </Link>
       </div>
     </div>

@@ -7,8 +7,7 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ScrollToTop from './components/ScrollToTop';
 import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import AuthPage from './pages/AuthPage';
 import FloatingChatbot from './components/FloatingChatbot';
 
 const AdminLayout = lazy(() => import('./components/AdminLayout'));
@@ -66,8 +65,8 @@ function App() {
                 <Route index element={<Home />} />
                 <Route path="about" element={<AboutUs />} />
                 <Route path="community" element={<CommunityPage />} />
-                <Route path="login" element={<Login />} />
-                <Route path="register" element={<Register />} />
+                <Route path="login" element={<AuthPage />} />
+                <Route path="register" element={<AuthPage />} />
                 <Route path="find-nurse" element={<DiscoverNursesPage />} />
                 <Route path="services" element={<ServicesPage />} />
                 <Route path="services/:serviceId" element={<ServiceDetailPage />} />
