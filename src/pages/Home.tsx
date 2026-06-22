@@ -19,108 +19,59 @@ import {
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 
-const stats = [
-    { label: 'Khách hàng', value: '1,900+', sub: 'Gia đình tin tưởng' },
-    { label: 'Y tá chuyên môn', value: '500+', sub: 'Xác minh 100%' },
-    { label: 'Hài lòng', value: '99%', sub: 'Đánh giá tích cực' },
-    { label: 'Đánh giá', value: '4.9/5', sub: 'Sao trung bình' },
-];
 
-const featuredServices = [
-    {
-        title: 'Chăm sóc sau sinh',
-        price: 'Tại nhà',
-        image: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-        title: 'Tư vấn nhanh',
-        price: '15 phút',
-        image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop',
-    },
-    {
-        title: 'Theo dõi mẹ & bé',
-        price: 'Gợi ý AI',
-        image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop',
-    },
-];
-
-const steps = [
-    { step: '01', title: 'Chọn dịch vụ', desc: 'Duyệt qua danh mục dịch vụ chăm sóc đa dạng từ CareMate.', icon: CursorArrowRaysIcon },
-    { step: '02', title: 'Tìm y tá ưng ý', desc: 'Xem hồ sơ, kinh nghiệm và đánh giá thực tế của y tá.', icon: UserPlusIcon },
-    { step: '03', title: 'Đặt lịch hẹn', desc: 'Lựa chọn thời gian phù hợp với lịch sinh hoạt của gia đình.', icon: CalendarDaysIcon },
-    { step: '04', title: 'Tận hưởng chăm sóc', desc: 'Điều dưỡng đến nhà thực hiện quy trình chuyên môn.', icon: HandRaisedIcon },
-];
-
-const archiveCards = [
-    {
-        title: 'Cộng đồng CareMate',
-        desc: 'Thảo luận và chia sẻ kinh nghiệm cùng các mẹ bỉm.',
-        image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1400&auto=format&fit=crop',
-        link: '/community',
-    },
-    {
-        title: 'Tiêu chuẩn y khoa',
-        desc: 'Quy trình đào tạo và kiểm soát chất lượng.',
-        image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1400&auto=format&fit=crop',
-        link: '/about',
-    },
-    {
-        title: 'Gói chăm sóc dài ngày',
-        desc: 'Theo dõi nhiều buổi, rõ tiến độ từng phiên.',
-        image: 'https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1400&auto=format&fit=crop',
-        link: '/services',
-    },
-    {
-        title: 'Hồ sơ y tá',
-        desc: 'Ảnh đại diện, chứng chỉ, CCCD và đánh giá.',
-        image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=1400&auto=format&fit=crop',
-        link: '/find-nurse',
-    },
-    {
-        title: 'Gợi ý dịch vụ',
-        desc: 'Phân tích tình trạng và đề xuất dịch vụ phù hợp.',
-        image: 'https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?q=80&w=1400&auto=format&fit=crop',
-        link: '/health-checkins',
-    },
-];
-
-const values = [
-    { title: 'Y tá chuyên nghiệp', desc: '100% điều dưỡng có bằng cấp và chứng chỉ hành nghề chính quy.', icon: ShieldCheckIcon },
-    { title: 'Dịch vụ tận tâm', desc: 'Luôn lắng nghe và chăm sóc mẹ bé như người thân trong gia đình.', icon: HeartIcon },
-    { title: 'Minh bạch & An toàn', desc: 'Giá cả công khai, hồ sơ y tá được kiểm định nghiêm ngặt.', icon: SparklesIcon },
-];
-
-const trustBadges = ['Xác minh hồ sơ', 'Chứng chỉ điều dưỡng', 'Hồ sơ CCCD rõ ràng'];
-
-const assuranceStats = [
-    { value: '1,900+', label: 'gia đình tin dùng' },
-    { value: '4.9/5', label: 'điểm hài lòng' },
-    { value: '500+', label: 'y tá xác minh' },
-];
-
-const testimonials = [
-    {
-        name: 'Chị Phương Thảo',
-        meta: 'Mẹ bé Bắp - Quận 2',
-        image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=900&auto=format&fit=crop',
-        quote: 'Dịch vụ của CareMate thực sự chuyên nghiệp. Y tá rất tận tâm, tay nghề cao. Gia đình mình rất an tâm khi sử dụng dịch vụ tại đây.',
-    },
-    {
-        name: 'Chị Minh Hạnh',
-        meta: 'Gói chăm sóc sau sinh',
-        image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=900&auto=format&fit=crop',
-        quote: 'Mình thích nhất là có thể xem hồ sơ, chứng chỉ và đánh giá trước khi đặt lịch. Mọi thứ rõ ràng nên quyết định rất nhanh.',
-    },
-    {
-        name: 'Anh Quân',
-        meta: 'Tư vấn chăm bé',
-        image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=900&auto=format&fit=crop',
-        quote: 'Gói tư vấn nhanh giúp gia đình xử lý các câu hỏi nhỏ kịp thời mà không cần đưa bé đi xa.',
-    },
-];
 
 const Home = () => {
     const { t } = useTranslation();
+
+    const stats = [
+        { value: '1,900+', label: t('home.stats.customers'), sub: t('home.stats.families') },
+        { value: '500+', label: t('home.stats.nurses'), sub: t('home.stats.verified') },
+        { value: '99%', label: t('home.stats.satisfied'), sub: t('home.stats.positiveReviews') },
+        { value: '4.9/5', label: t('home.stats.rating'), sub: t('home.stats.avgStars') },
+    ];
+
+    const featuredServices = [
+        { title: t('home.services.postpartum'), price: t('home.services.atHome'), image: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=1200&auto=format&fit=crop' },
+        { title: t('home.services.quickConsult'), price: t('home.services.15min'), image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop' },
+        { title: t('home.services.monitoring'), price: t('home.services.aiCheckin'), image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop' },
+    ];
+
+    const steps = [
+        { step: '01', title: t('home.steps.selectService'), desc: t('home.steps.selectServiceDesc'), icon: CursorArrowRaysIcon },
+        { step: '02', title: t('home.steps.findNurse'), desc: t('home.steps.findNurseDesc'), icon: UserPlusIcon },
+        { step: '03', title: t('home.steps.bookAppointment'), desc: t('home.steps.bookAppointmentDesc'), icon: CalendarDaysIcon },
+        { step: '04', title: t('home.steps.enjoyCare'), desc: t('home.steps.enjoyCareDesc'), icon: HandRaisedIcon },
+    ];
+
+    const archiveCards = [
+        { title: t('home.archive.community'), desc: t('home.archive.communityDesc'), image: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1400&auto=format&fit=crop', link: '/community' },
+        { title: t('home.archive.medicalStandards'), desc: t('home.archive.medicalStandardsDesc'), image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1400&auto=format&fit=crop', link: '/about' },
+        { title: t('home.archive.longTermPackages'), desc: t('home.archive.longTermPackagesDesc'), image: 'https://images.unsplash.com/photo-1584515933487-779824d29309?q=80&w=1400&auto=format&fit=crop', link: '/services' },
+        { title: t('home.archive.nurseProfiles'), desc: t('home.archive.nurseProfilesDesc'), image: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?q=80&w=1400&auto=format&fit=crop', link: '/find-nurse' },
+        { title: t('home.archive.healthCheckins'), desc: t('home.archive.healthCheckinsDesc'), image: 'https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?q=80&w=1400&auto=format&fit=crop', link: '/health-checkins' },
+    ];
+
+    const valuesData = [
+        { title: t('home.values.professionalNurses'), desc: t('home.values.professionalNursesDesc'), icon: ShieldCheckIcon },
+        { title: t('home.values.dedicatedService'), desc: t('home.values.dedicatedServiceDesc'), icon: HeartIcon },
+        { title: t('home.values.transparentSafe'), desc: t('home.values.transparentSafeDesc'), icon: SparklesIcon },
+    ];
+
+    const trustBadges = [t('home.badges.verifiedProfile'), t('home.badges.nursingCertificate'), t('home.badges.clearId')];
+
+    const assuranceStats = [
+        { value: '1,900+', label: t('home.assurance.families') },
+        { value: '4.9/5', label: t('home.assurance.satisfaction') },
+        { value: '500+', label: t('home.assurance.verifiedNurses') },
+    ];
+
+    const testimonials = [
+        { name: t('home.testimonials.name1'), meta: t('home.testimonials.meta1'), image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=900&auto=format&fit=crop', quote: t('home.testimonials.quote1') },
+        { name: t('home.testimonials.name2'), meta: t('home.testimonials.meta2'), image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=900&auto=format&fit=crop', quote: t('home.testimonials.quote2') },
+        { name: t('home.testimonials.name3'), meta: t('home.testimonials.meta3'), image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=900&auto=format&fit=crop', quote: t('home.testimonials.quote3') },
+    ];
+
     const heroRef = useRef(null);
     const { scrollYProgress: heroProgress } = useScroll({
         target: heroRef,
@@ -165,7 +116,7 @@ const Home = () => {
                             transition={{ duration: 0.4, delay: 0.1 }}
                             className="mb-6 text-[10px] font-black uppercase tracking-[0.42em] text-brand"
                         >
-                            CareMate • Chăm sóc mẹ bé tại nhà
+                            {t('home.hero.subtitle')}
                         </motion.div>
                         <h1 className="max-w-3xl text-6xl font-black leading-[0.96] tracking-tight text-[#0B1F3A] md:text-8xl">
                             <motion.span
@@ -173,7 +124,7 @@ const Home = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: 0.2 }}
                             >
-                                Chăm sóc{' '}
+                                {t('home.hero.title')}{' '}
                             </motion.span>
                             <motion.span
                                 initial={{ opacity: 0, y: 20 }}
@@ -181,7 +132,7 @@ const Home = () => {
                                 transition={{ duration: 0.5, delay: 0.35 }}
                                 className="block font-serif italic font-medium text-slate-500"
                             >
-                                tại nhà.
+                                {t('home.hero.titleHighlight')}
                             </motion.span>
                         </h1>
                         <motion.p
@@ -190,7 +141,7 @@ const Home = () => {
                             transition={{ duration: 0.4, delay: 0.45 }}
                             className="mt-6 max-w-lg text-xl font-black leading-8 text-slate-800"
                         >
-                            Để mẹ được nghỉ ngơi, bé được chăm đúng cách, và gia đình luôn biết bước tiếp theo.
+                            {t('home.hero.description')}
                         </motion.p>
                         <motion.p
                             initial={{ opacity: 0, y: 12 }}
@@ -198,7 +149,7 @@ const Home = () => {
                             transition={{ duration: 0.4, delay: 0.55 }}
                             className="mt-4 max-w-xl text-base font-semibold leading-[1.75] text-slate-500"
                         >
-                            Mang tiêu chuẩn y khoa đến ngôi nhà của bạn. CareMate giúp gia đình đặt lịch y tá, xem hồ sơ, đánh giá và chi phí một cách minh bạch.
+                            {t('home.hero.subtext')}
                         </motion.p>
                         <motion.div
                             initial={{ opacity: 0, y: 12 }}
@@ -208,12 +159,12 @@ const Home = () => {
                         >
                             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
                                 <Link to="/services" className="block rounded-full bg-[#0B1F3A] px-9 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#0B1F3A]/15 transition hover:bg-brand">
-                                    Khám phá dịch vụ
+                                    {t('home.hero.exploreServices')}
                                 </Link>
                             </motion.div>
                             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
                                 <Link to="/find-nurse" className="block rounded-full border border-slate-200 bg-white px-9 py-4 text-xs font-black uppercase tracking-widest text-[#0B1F3A] shadow-sm transition hover:border-brand hover:text-brand">
-                                    Tìm y tá
+                                    {t('home.hero.findNurse')}
                                 </Link>
                             </motion.div>
                         </motion.div>
@@ -234,7 +185,7 @@ const Home = () => {
                         >
                             <img
                                 src="https://images.unsplash.com/photo-1609220136736-443140cffec6?q=80&w=1300&auto=format&fit=crop"
-                                alt="Y tá chăm sóc mẹ và bé tại nhà"
+                                alt={t('home.hero.subtitle')}
                                 className="h-[560px] w-full object-cover"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#10233F]/60 via-transparent to-transparent pointer-events-none" />
@@ -249,9 +200,9 @@ const Home = () => {
                             </div>
                         </motion.div>
                         {[
-                            { title: 'Điều dưỡng đã xác minh', sub: 'Chứng chỉ + CCCD', icon: CheckBadgeIcon, pos: '-left-5 top-12' },
-                            { title: 'Có mặt trong 30 phút', sub: 'Khung giờ gần nhất', icon: BoltIcon, pos: '-right-4 top-44' },
-                            { title: 'Phân tích tình trạng sức khỏe', sub: 'Đưa ra gói chăm sóc phù hợp', icon: CpuChipIcon, pos: 'left-8 -bottom-6' },
+                            { title: t('home.hero.tag1'), sub: t('home.hero.tag1Sub'), icon: CheckBadgeIcon, pos: '-left-5 top-12' },
+                            { title: t('home.hero.tag2'), sub: t('home.hero.tag2Sub'), icon: BoltIcon, pos: '-right-4 top-44' },
+                            { title: t('home.hero.tag3'), sub: t('home.hero.tag3Sub'), icon: CpuChipIcon, pos: 'left-8 -bottom-6' },
                         ].map((card, index) => (
                             <motion.div
                                 key={card.title}
@@ -302,12 +253,12 @@ const Home = () => {
                         className="mb-10 flex items-end justify-between gap-6"
                     >
                         <div>
-                            <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">Dịch vụ nổi bật</div>
-                            <h2 className="text-4xl font-black tracking-tight text-[#10233F]">Dịch vụ cho những ngày gia đình cần thêm một đôi tay.</h2>
-                            <p className="mt-4 max-w-md text-sm font-semibold leading-7 text-slate-500">Từ chăm sóc sau sinh, tư vấn nhanh đến theo dõi sức khỏe mẹ và bé hằng ngày.</p>
+                            <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">{t('home.featured.label')}</div>
+                            <h2 className="text-4xl font-black tracking-tight text-[#10233F]">{t('home.featured.title')}</h2>
+                            <p className="mt-4 max-w-md text-sm font-semibold leading-7 text-slate-500">{t('home.featured.desc')}</p>
                         </div>
                         <Link to="/services" className="group hidden items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand sm:flex">
-                            Xem tất cả{' '}
+                            {t('home.featured.viewAll')}{' '}
                             <motion.span
                                 animate={{ x: 0 }}
                                 whileHover={{ x: 4 }}
@@ -356,12 +307,11 @@ const Home = () => {
                     className="mx-auto max-w-7xl"
                 >
                     <div className="mb-10 max-w-3xl">
-                        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">Tính năng mới cho mẹ sau sinh</div>
-                        <h2 className="text-4xl font-black leading-tight tracking-tight text-[#10233F]">
-                            Một góc riêng để mẹ <span className="text-brand">gợi ý dịch vụ phù hợp mỗi ngày</span>
+                        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">{t('home.health.label')}</div>
+                        <h2 className="text-4xl font-black leading-tight tracking-tight text-[#10233F]" dangerouslySetInnerHTML={{ __html: t('home.health.title') }}>
                         </h2>
                         <p className="mt-4 text-sm font-semibold leading-7 text-slate-500">
-                            CareMate giúp mẹ ghi lại tình trạng của bản thân và em bé, sau đó AI tóm tắt rủi ro, đưa khuyến nghị và gợi ý dịch vụ hỗ trợ phù hợp ngay lập tức.
+                            {t('home.health.desc')}
                         </p>
                     </div>
                     <motion.div
@@ -390,9 +340,9 @@ const Home = () => {
                         transition={{ duration: 0.6 }}
                         className="pt-24"
                     >
-                        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">Quy trình dịch vụ</div>
-                        <h2 className="max-w-sm text-4xl font-black leading-tight tracking-tight text-[#10233F]">Bắt đầu hành trình an tâm.</h2>
-                        <p className="mt-5 max-w-sm text-sm font-semibold leading-7 text-slate-500">Chỉ với 4 bước đơn giản để nhận được sự chăm sóc tốt nhất.</p>
+                        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">{t('home.stepsSection.label')}</div>
+                        <h2 className="max-w-sm text-4xl font-black leading-tight tracking-tight text-[#10233F]">{t('home.stepsSection.title')}</h2>
+                        <p className="mt-5 max-w-sm text-sm font-semibold leading-7 text-slate-500">{t('home.stepsSection.desc')}</p>
                     </motion.div>
                     <div className="space-y-8">
                         {steps.map((item, index) => (
@@ -443,8 +393,8 @@ const Home = () => {
                     transition={{ duration: 0.6 }}
                     className="mx-auto max-w-7xl"
                 >
-                    <h2 className="text-4xl font-black tracking-tight text-[#10233F]">Không gian hỗ trợ của CareMate.</h2>
-                    <p className="mt-3 max-w-md text-sm font-semibold leading-7 text-slate-500">Nơi gia đình tìm cộng đồng, hồ sơ y tá, gói chăm sóc và công cụ gợi ý dịch vụ thông minh.</p>
+                    <h2 className="text-4xl font-black tracking-tight text-[#10233F]">{t('home.archiveSection.title')}</h2>
+                    <p className="mt-3 max-w-md text-sm font-semibold leading-7 text-slate-500">{t('home.archiveSection.desc')}</p>
                     <div className="mt-10 grid auto-rows-[230px] grid-cols-1 gap-5 md:grid-cols-3">
                         {archiveCards.map((card, index) => (
                             <motion.div
@@ -497,8 +447,8 @@ const Home = () => {
                         viewport={{ once: true, margin: '-80px' }}
                         transition={{ duration: 0.6 }}
                     >
-                        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">Giá trị cốt lõi</div>
-                        <h2 className="text-4xl font-black leading-tight tracking-tight text-[#10233F] lg:text-6xl">Vì sao hàng ngàn mẹ tin chọn CareMate?</h2>
+                        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">{t('home.valuesSection.label')}</div>
+                        <h2 className="text-4xl font-black leading-tight tracking-tight text-[#10233F] lg:text-6xl">{t('home.valuesSection.title')}</h2>
                         <motion.div
                             initial={{ opacity: 0, y: 12 }}
                             whileInView={{ opacity: 1, y: 0 }}
@@ -528,7 +478,7 @@ const Home = () => {
                             ))}
                         </div>
                         <div className="mt-12 space-y-8">
-                            {values.map((item, index) => (
+                            {valuesData.map((item, index) => (
                                 <motion.div
                                     key={item.title}
                                     initial={{ opacity: 0, x: index % 2 === 0 ? -16 : 16, y: 16 }}
@@ -568,8 +518,8 @@ const Home = () => {
                     />
                     <div className="relative">
                     <div className="mx-auto max-w-3xl text-center">
-                        <h2 className="text-4xl font-black leading-tight tracking-tight md:text-5xl">Chăm sóc tận tâm cho những điều quan trọng nhất.</h2>
-                        <p className="mx-auto mt-5 max-w-xl text-sm font-semibold leading-7 text-white/55">Không chỉ là một lịch hẹn, CareMate tạo cảm giác rõ ràng từ lúc chọn dịch vụ đến khi ca chăm sóc hoàn thành.</p>
+                        <h2 className="text-4xl font-black leading-tight tracking-tight md:text-5xl">{t('home.testimonialsSection.title')}</h2>
+                        <p className="mx-auto mt-5 max-w-xl text-sm font-semibold leading-7 text-white/55">{t('home.testimonialsSection.desc')}</p>
                     </div>
                     <div className="mt-12 grid gap-4 md:grid-cols-3">
                         {assuranceStats.map((item, i) => (
@@ -587,7 +537,7 @@ const Home = () => {
                             </motion.div>
                         ))}
                     </div>
-                    <h3 className="mt-16 text-center text-4xl font-semibold italic text-white/80">Khách hàng nói gì.</h3>
+                    <h3 className="mt-16 text-center text-4xl font-semibold italic text-white/80">{t('home.testimonialsSection.header')}</h3>
                     <div className="mt-14 grid gap-5 md:grid-cols-3">
                         {testimonials.map((item, index) => (
                             <motion.div
@@ -652,7 +602,7 @@ const Home = () => {
                             >
                                 <EnvelopeIcon className="mx-auto h-10 w-10 text-brand" />
                             </motion.div>
-                            <h2 className="mt-6 text-4xl font-black leading-tight tracking-tight md:text-5xl">Nhận kiến thức hữu ích từ chuyên gia</h2>
+                            <h2 className="mt-6 text-4xl font-black leading-tight tracking-tight md:text-5xl">{t('home.newsletter.title')}</h2>
                             <motion.form
                                 initial={{ opacity: 0, y: 16, scale: 0.96 }}
                                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -660,13 +610,13 @@ const Home = () => {
                                 transition={{ duration: 0.5, delay: 0.5 }}
                                 className="mt-8 flex flex-col gap-3 rounded-full border border-white/10 bg-white/10 p-2 backdrop-blur sm:flex-row"
                             >
-                                <input type="email" placeholder="Nhập email của bạn..." className="min-w-0 flex-1 rounded-full border-none bg-transparent px-5 py-3 text-sm font-bold text-white outline-none placeholder:text-white/40" />
+                                <input type="email" placeholder={t('home.newsletter.placeholder')} className="min-w-0 flex-1 rounded-full border-none bg-transparent px-5 py-3 text-sm font-bold text-white outline-none placeholder:text-white/40" />
                                 <motion.button
                                     whileHover={{ scale: 1.03 }}
                                     whileTap={{ scale: 0.97 }}
                                     className="rounded-full bg-[#EC4899] px-8 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-brand/20"
                                 >
-                                    Nhận cẩm nang chăm sóc
+                                    {t('home.newsletter.button')}
                                 </motion.button>
                             </motion.form>
                         </motion.div>
