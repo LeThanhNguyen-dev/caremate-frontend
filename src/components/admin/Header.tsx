@@ -1,34 +1,37 @@
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import NotificationDropdown from '../NotificationDropdown';
+import LanguageSwitcher from '../LanguageSwitcher';
 import { useAuth } from '../../hooks/useAuth';
 
 const AdminHeader = () => {
     const location = useLocation();
     const { user } = useAuth();
+    const { t } = useTranslation();
 
     const getPageTitle = (path: string) => {
         switch (path) {
             case '/admin/dashboard':
-                return 'Tổng quan hệ thống';
+                return t('admin.dashboardTitle');
             case '/admin/pending-nurses':
-                return 'Phê duyệt hồ sơ';
+                return t('admin.pendingNursesTitle');
             case '/admin/users':
-                return 'Quản lý người dùng';
+                return t('admin.usersTitle');
             case '/admin/bookings':
-                return 'Quản lý lịch hẹn';
+                return t('admin.bookingsTitle');
             case '/admin/finance':
-                return 'Quản lý tài chính';
+                return t('admin.financeTitle');
             case '/admin/audit-logs':
-                return 'Audit logs';
+                return t('admin.auditLogs');
             case '/admin/reports':
-                return 'Báo cáo và khiếu nại';
+                return t('admin.reportsTitle');
             case '/admin/settings':
-                return 'Cài đặt hệ thống';
+                return t('admin.settings');
             case '/admin/notifications':
-                return 'Thông báo';
+                return t('admin.notificationsTitle');
             default:
-                return 'Quản trị viên';
+                return 'Admin';
         }
     };
 
@@ -37,13 +40,13 @@ const AdminHeader = () => {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="max-w-xl flex-1">
                     <div className="mb-2 inline-flex items-center gap-2 rounded-xl bg-blue-50 px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-[#3B82F6] shadow-sm">
-                        Bảng điều khiển quản trị viên
+                        {t('admin.adminBadge')}
                     </div>
                     <h1 className="text-3xl font-black tracking-tight text-slate-900">
                         {getPageTitle(location.pathname)}
                     </h1>
                     <p className="mt-1 text-sm font-medium text-slate-500">
-                        Giám sát và điều phối toàn bộ hoạt động của nền tảng CareMate.
+                        {t('admin.adminSubtitle')}
                     </p>
                 </div>
 
@@ -52,12 +55,13 @@ const AdminHeader = () => {
                         <MagnifyingGlassIcon className="absolute left-4 h-5 w-5 text-slate-400 transition-colors group-focus-within:text-[#3B82F6]" />
                         <input
                             type="text"
-                            placeholder="Tìm kiếm người dùng, đơn hàng..."
+                            placeholder={t('admin.searchPlaceholder')}
                             className="w-80 rounded-xl border-none bg-slate-50 py-3 pl-12 pr-6 text-sm font-medium outline-none transition-all focus:bg-white focus:ring-4 focus:ring-blue-500/5"
                         />
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <LanguageSwitcher />
                         <NotificationDropdown
                             key={location.pathname}
                             accentClassName="bg-blue-50 text-[#3B82F6]"

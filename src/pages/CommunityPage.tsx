@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
     ChatBubbleLeftRightIcon,
@@ -19,14 +20,14 @@ import type { CommunityCommentDto, CommunityCommentLikerDto, CommunityPostDto } 
 import { useToast } from '../hooks/useToast';
 import { getErrorMessage } from '../utils/apiError';
 
-const getRelativeTime = (value: string) => {
+const getRelativeTime = (value: string, t: any) => {
     const timestamp = new Date(value).getTime();
     const diffMs = Date.now() - timestamp;
     const minutes = Math.max(1, Math.floor(diffMs / 60000));
-    if (minutes < 60) return `${minutes} phút trước`;
+    if (minutes < 60) return t('community.time.minsAgo', { mins: minutes });
     const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} giờ trước`;
-    return `${Math.floor(hours / 24)} ngày trước`;
+    if (hours < 24) return t('community.time.hoursAgo', { hours });
+    return t('community.time.daysAgo', { days: Math.floor(hours / 24) });
 };
 
 const getInitial = (name: string) => name.trim().charAt(0).toUpperCase() || 'U';
@@ -87,18 +88,19 @@ const isGeneratedTitle = (title: string, content: string) => {
 const getVisiblePostTitle = (post: CommunityPostDto) =>
     isGeneratedTitle(post.title, post.content) ? '' : post.title.trim();
 
-const getCommunityRoleLabel = (role: string) => {
+const getCommunityRoleLabel = (role: string, t: any) => {
     const normalized = role.trim().toLowerCase();
     if (normalized === 'admin' || normalized.includes('quản trị') || normalized.includes('quan tri')) {
-        return 'Quản trị viên';
+        return t('community.roles.admin');
     }
     if (normalized === 'nurse_confirmed' || normalized.includes('chuyên gia') || normalized.includes('chuyen gia')) {
-        return 'Chuyên gia CareMate';
+        return t('community.roles.expert');
     }
-    return 'Thành viên CareMate';
+    return t('community.roles.member');
 };
 
 const CommunityPage = () => {
+    const { t } = useTranslation();
     const { user, isAuthenticated } = useAuth();
     const { showToast } = useToast();
     const [posts, setPosts] = useState<CommunityPostDto[]>([]);
@@ -128,7 +130,7 @@ const CommunityPage = () => {
         loading: boolean;
     } | null>(null);
 
-    const currentUserName = user?.username || 'Thành viên CareMate';
+    const currentUserName = user?.username || t('community.defaultMember');
     const currentUserId = user?.userId ?? null;
     const currentUserIsAdmin = user?.role === 'admin';
 
@@ -139,7 +141,7 @@ const CommunityPage = () => {
                 const data = await caremateApi.getCommunityPosts();
                 setPosts(data);
             } catch {
-                showToast('Không thể tải bài viết cộng đồng.', 'error');
+                showToast(t('community.toastLoadError'), 'error');
             } finally {
                 setLoading(false);
             }
@@ -172,7 +174,7 @@ const CommunityPage = () => {
         if (isSubmittingPost) return;
 
         if (!isAuthenticated) {
-            showToast('Vui lòng đăng nhập để tạo bài viết.', 'error');
+            showToast(t('community.toastLoginCreate'), 'error');
             return;
         }
 
@@ -196,7 +198,7 @@ const CommunityPage = () => {
             setIsComposerOpen(false);
             setExpandedPostId(newPost.id);
         } catch (error) {
-            showToast(getErrorMessage(error, 'Đăng bài viết không thành công.'), 'error');
+            showToast(getErrorMessage(error, t('community.toastPostError')), 'error');
         } finally {
             setIsSubmittingPost(false);
         }
@@ -204,7 +206,7 @@ const CommunityPage = () => {
 
     const handleToggleLike = async (postId: number) => {
         if (!isAuthenticated) {
-            showToast('Vui lòng đăng nhập để thích bài viết.', 'error');
+            showToast(t('community.toastLoginLike'), 'error');
             return;
         }
 
@@ -212,7 +214,7 @@ const CommunityPage = () => {
             const updatedPost = await caremateApi.toggleCommunityPostLike(postId);
             setPosts((prev) => prev.map((post) => post.id === postId ? updatedPost : post));
         } catch {
-            showToast('Không thể cập nhật lượt thích.', 'error');
+            showToast(t('community.toastLikeError'), 'error');
         }
     };
 
@@ -220,11 +222,11 @@ const CommunityPage = () => {
         if (deletingPostId) return;
 
         if (!isAuthenticated) {
-            showToast('Vui lòng đăng nhập để xóa bài viết.', 'error');
+            showToast(t('community.toastLoginDelete'), 'error');
             return;
         }
 
-        const confirmed = window.confirm('Xóa bài viết này? Hành động này không thể hoàn tác.');
+        const confirmed = window.confirm(t('community.deleteConfirm'));
         if (!confirmed) return;
 
         try {
@@ -232,9 +234,9 @@ const CommunityPage = () => {
             await caremateApi.deleteCommunityPost(postId);
             setPosts((prev) => prev.filter((post) => post.id !== postId));
             setExpandedPostId((prev) => (prev === postId ? null : prev));
-            showToast('Đã xóa bài viết.', 'success');
+            showToast(t('community.toastDeleteSuccess'), 'success');
         } catch {
-            showToast('Không thể xóa bài viết.', 'error');
+            showToast(t('community.toastDeleteError'), 'error');
         } finally {
             setDeletingPostId(null);
         }
@@ -262,7 +264,7 @@ const CommunityPage = () => {
         const title = editTitle.trim();
         const content = editContent.trim();
         if (!content && !editingPost.imageUrl) {
-            showToast('Vui lòng nhập nội dung bài viết.', 'error');
+            showToast(t('community.toastContentRequired'), 'error');
             return;
         }
 
@@ -275,9 +277,9 @@ const CommunityPage = () => {
             });
             setPosts((prev) => prev.map((post) => post.id === updatedPost.id ? updatedPost : post));
             closeEditPost();
-            showToast('Đã cập nhật bài viết.', 'success');
+            showToast(t('community.toastUpdateSuccess'), 'success');
         } catch (error) {
-            showToast(getErrorMessage(error, 'Không thể cập nhật bài viết.'), 'error');
+            showToast(getErrorMessage(error, t('community.toastUpdateError')), 'error');
         } finally {
             setIsSubmittingEdit(false);
         }
@@ -285,7 +287,7 @@ const CommunityPage = () => {
 
     const handleCreateComment = async (postId: number, parentCommentId?: number) => {
         if (!isAuthenticated) {
-            showToast('Vui lòng đăng nhập để bình luận.', 'error');
+            showToast(t('community.toastLoginComment'), 'error');
             return;
         }
 
@@ -319,13 +321,13 @@ const CommunityPage = () => {
             }
             setExpandedPostId(postId);
         } catch {
-            showToast('Không thể gửi bình luận.', 'error');
+            showToast(t('community.toastCommentError'), 'error');
         }
     };
 
     const handleToggleCommentLike = async (postId: number, commentId: number) => {
         if (!isAuthenticated) {
-            showToast('Vui lòng đăng nhập để thích bình luận.', 'error');
+            showToast(t('community.toastLoginCommentLike'), 'error');
             return;
         }
 
@@ -339,21 +341,21 @@ const CommunityPage = () => {
                 )
             );
         } catch {
-            showToast('Không thể cập nhật lượt thích bình luận.', 'error');
+            showToast(t('community.toastCommentLikeError'), 'error');
         }
     };
 
     const handleOpenCommentLikers = async (postId: number, comment: CommunityCommentDto) => {
         if (comment.likes <= 0) return;
 
-        const title = `Người đã thích bình luận của ${comment.author}`;
+        const title = t('community.likedBy');
         setLikersDialog({ title, users: [], loading: true });
         try {
             const users = await caremateApi.getCommunityCommentLikers(postId, comment.id);
             setLikersDialog({ title, users, loading: false });
         } catch {
             setLikersDialog(null);
-            showToast('Không thể tải danh sách người thích.', 'error');
+            showToast(t('community.toastLikersError'), 'error');
         }
     };
 
@@ -387,20 +389,20 @@ const CommunityPage = () => {
                             )}
                         </div>
                         <div className="mt-1.5 flex items-center gap-3 pl-4 text-xs font-black text-slate-400">
-                            <span>{getRelativeTime(comment.createdAt)}</span>
+                            <span>{getRelativeTime(comment.createdAt, t)}</span>
                             <button
                                 type="button"
                                 onClick={() => handleToggleCommentLike(postId, comment.id)}
                                 className={`transition hover:text-brand ${comment.likedByMe ? 'text-brand' : ''}`}
                             >
-                                Thích
+                                {t('community.like')}
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setReplyingToCommentId(replyingToCommentId === comment.id ? null : comment.id)}
                                 className="transition hover:text-brand"
                             >
-                                Trả lời
+                                {t('community.reply')}
                             </button>
                         </div>
                     </div>
@@ -417,7 +419,7 @@ const CommunityPage = () => {
                             onKeyDown={(event) => {
                                 if (event.key === 'Enter') handleCreateComment(postId, comment.id);
                             }}
-                            placeholder={`Trả lời ${comment.author}...`}
+                            placeholder={t('community.replyTo', { name: comment.author })}
                             className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                         />
                         <button
@@ -456,17 +458,17 @@ const CommunityPage = () => {
                 >
                     <div className="max-w-3xl">
                         <div className="mb-5 w-fit rounded-full border border-slate-200 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-brand shadow-sm">
-                            Cộng đồng CareMate
+                            {t('community.title')}
                         </div>
                         <h1 className="text-[54px] font-black leading-[1.04] tracking-tight text-[#0B1F3A] sm:text-[70px] lg:text-[88px]">
-                            Chia sẻ
-                            <span className="mt-2 block font-semibold italic text-brand sm:mt-3">kinh nghiệm.</span>
+                            {t('community.heading')}
+                            <span className="mt-2 block font-semibold italic text-brand sm:mt-3">{t('community.headingHighlight')}</span>
                         </h1>
                         <p className="mt-6 max-w-2xl text-[18px] font-black leading-8 text-[#0B1F3A]">
-                            Đặt câu hỏi, lưu lại trải nghiệm thực tế và tìm những gợi ý gần gũi từ các gia đình đang đồng hành cùng CareMate.
+                            {t('community.desc1')}
                         </p>
                         <p className="mt-4 max-w-2xl text-[15px] font-semibold leading-[1.8] text-slate-500">
-                            Cùng trao đổi về chăm sóc mẹ và bé, lịch sinh hoạt, phục hồi sau sinh và những tình huống thường gặp tại nhà.
+                            {t('community.desc2')}
                         </p>
                         <div className="mt-9 flex flex-wrap gap-4">
                             <button
@@ -474,10 +476,10 @@ const CommunityPage = () => {
                                 onClick={() => setIsComposerOpen(true)}
                                 className="rounded-full bg-[#0B1F3A] px-9 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#0B1F3A]/15 transition hover:-translate-y-0.5 hover:bg-brand hover:shadow-brand/20"
                             >
-                                Tạo bài viết
+                                {t('community.createPost')}
                             </button>
                             <a href="#community-feed" className="rounded-full border border-slate-200 bg-white px-9 py-4 text-xs font-black uppercase tracking-widest text-[#0B1F3A] shadow-sm transition hover:-translate-y-0.5 hover:border-brand hover:text-brand hover:shadow-lg hover:shadow-slate-200/70">
-                                Xem thảo luận
+                                {t('community.viewDiscussions')}
                             </a>
                         </div>
                     </div>
@@ -497,7 +499,7 @@ const CommunityPage = () => {
                                     onClick={() => setIsComposerOpen(true)}
                                     className="flex min-h-14 flex-1 items-center rounded-2xl border border-slate-200 bg-white px-5 text-left text-sm font-bold text-slate-400 shadow-sm transition hover:border-brand/30 hover:text-[#10233F] hover:shadow-lg hover:shadow-brand/10"
                                 >
-                                    {currentUserName}, bạn muốn chia sẻ điều gì?
+                                    {t('community.whatsOnYourMind', { name: currentUserName })}
                                 </button>
                                 <label className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl bg-brand/10 text-brand transition hover:bg-brand hover:text-white" aria-label="Thêm ảnh">
                                     <PhotoIcon className="h-6 w-6" />
@@ -524,7 +526,7 @@ const CommunityPage = () => {
                                     className="flex max-h-[calc(100vh-48px)] w-full max-w-[760px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_28px_80px_rgba(15,23,42,0.25)]"
                                 >
                                     <div className="relative border-b border-slate-100 px-6 py-5 text-center">
-                                        <h2 className="text-2xl font-black leading-none text-[#10233F]">Tạo bài viết</h2>
+                                        <h2 className="text-2xl font-black leading-none text-[#10233F]">{t('community.createPost')}</h2>
                                         <button
                                             type="button"
                                             onClick={() => setIsComposerOpen(false)}
@@ -547,7 +549,7 @@ const CommunityPage = () => {
                                                     className="mt-1 inline-flex items-center gap-1 rounded-full bg-brand/10 px-3 py-1.5 text-xs font-black text-brand"
                                                 >
                                                     <GlobeAltIcon className="h-4 w-4" />
-                                                    Công khai
+                                                    {t('community.public')}
                                                 </button>
                                             </div>
                                         </div>
@@ -555,21 +557,21 @@ const CommunityPage = () => {
                                         <input
                                             value={draftTitle}
                                             onChange={(event) => setDraftTitle(event.target.value)}
-                                            placeholder="Tiêu đề bài viết"
+                                            placeholder={t('community.postTitlePlaceholder')}
                                             className="mb-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-black text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                                         />
 
                                         <textarea
                                             value={draftContent}
                                             onChange={(event) => setDraftContent(event.target.value)}
-                                            placeholder={`${currentUserName}, bạn đang nghĩ gì thế?`}
+                                            placeholder={t('community.postContentPlaceholder', { name: currentUserName })}
                                             className="min-h-[170px] w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-4 text-base font-semibold leading-7 text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                                         />
 
                                         <input
                                             value={draftTags}
                                             onChange={(event) => setDraftTags(event.target.value)}
-                                            placeholder="Chủ đề, phân tách bằng dấu phẩy"
+                                            placeholder={t('community.tagsPlaceholder')}
                                             className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                                         />
 
@@ -588,7 +590,7 @@ const CommunityPage = () => {
                                         )}
 
                                         <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl border border-slate-200 px-5 py-4">
-                                            <span className="text-sm font-black text-[#10233F]">Thêm vào bài viết</span>
+                                            <span className="text-sm font-black text-[#10233F]">{t('community.addToPost')}</span>
                                             <label className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-2xl bg-brand/10 text-brand transition hover:bg-brand hover:text-white" aria-label="Chọn ảnh">
                                                 <PhotoIcon className="h-6 w-6" />
                                                 <input
@@ -611,7 +613,7 @@ const CommunityPage = () => {
                                             disabled={isSubmittingPost || (!draftContent.trim() && !selectedImage)}
                                             className="w-full rounded-2xl bg-[#10233F] px-6 py-4 text-xs font-black uppercase tracking-widest text-white transition hover:bg-brand disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                                         >
-                                            {isSubmittingPost ? 'Đang đăng...' : 'Đăng bài'}
+                                            {isSubmittingPost ? t('community.posting') : t('community.postButton')}
                                         </button>
                                     </div>
                                 </motion.div>
@@ -625,7 +627,7 @@ const CommunityPage = () => {
                                     type="text"
                                     value={searchQuery}
                                     onChange={(event) => setSearchQuery(event.target.value)}
-                                    placeholder="Tìm kiếm bài viết, chủ đề..."
+                                    placeholder={t('community.searchPlaceholder')}
                                     className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-14 pr-5 text-sm font-bold text-[#10233F] shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                                 />
                             </div>
@@ -653,7 +655,7 @@ const CommunityPage = () => {
                                             <div>
                                                 <div className="text-[16px] font-black leading-tight text-[#10233F]">{post.author}</div>
                                                 <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
-                                                    {getCommunityRoleLabel(post.role)} · {getRelativeTime(post.createdAt)}
+                                                    {getCommunityRoleLabel(post.role, t)} · {getRelativeTime(post.createdAt, t)}
                                                 </div>
                                             </div>
                                         </div>
@@ -687,7 +689,7 @@ const CommunityPage = () => {
                                                                 className="flex w-full items-center gap-3 px-4 py-2.5 text-left transition hover:bg-slate-50 hover:text-[#10233F]"
                                                             >
                                                                 <PencilSquareIcon className="h-4 w-4" />
-                                                                Chỉnh sửa
+                                                                {t('community.editPost')}
                                                             </button>
                                                             <button
                                                                 type="button"
@@ -699,7 +701,7 @@ const CommunityPage = () => {
                                                                 className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-red-500 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                                                             >
                                                                 <TrashIcon className="h-4 w-4" />
-                                                                Xóa bài viết
+                                                                {t('community.toastDeleteSuccess').replace('Đã xóa bài viết.', 'Xóa bài viết')}
                                                             </button>
                                                         </div>
                                                     )}
@@ -751,7 +753,7 @@ const CommunityPage = () => {
                                                     onKeyDown={(event) => {
                                                         if (event.key === 'Enter') handleCreateComment(post.id);
                                                     }}
-                                                    placeholder="Viết bình luận..."
+                                                    placeholder={t('community.writeComment')}
                                                     className="min-w-0 flex-1 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                                                 />
                                                 <button
@@ -773,32 +775,32 @@ const CommunityPage = () => {
                         {loading && (
                             <div className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-200/35">
                                 <div className="mx-auto h-10 w-10 animate-spin rounded-full border-[3px] border-brand border-t-transparent"></div>
-                                <h2 className="mt-5 text-sm font-black uppercase tracking-[0.2em] text-slate-400">Đang tải cộng đồng...</h2>
+                                <h2 className="mt-5 text-sm font-black uppercase tracking-[0.2em] text-slate-400">{t('community.loading')}</h2>
                             </div>
                         )}
 
                         {!loading && filteredPosts.length === 0 && (
                             <div className="rounded-2xl border border-slate-100 bg-white px-6 py-14 text-center shadow-lg shadow-slate-200/35">
-                                <h2 className="text-lg font-black text-[#10233F]">Không tìm thấy bài viết</h2>
-                                <p className="mt-2 text-sm font-semibold text-slate-400">Thử tìm bằng từ khóa khác hoặc tạo bài viết mới.</p>
+                                <h2 className="text-lg font-black text-[#10233F]">{t('community.noPosts')}</h2>
+                                <p className="mt-2 text-sm font-semibold text-slate-400">{t('community.noPostsDesc')}</p>
                             </div>
                         )}
                     </main>
 
                     <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
                         <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-lg shadow-slate-200/35">
-                            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Quy tắc cộng đồng</div>
-                            <h3 className="mt-3 text-2xl font-black leading-tight text-[#10233F]">Tôn trọng và chia sẻ có trách nhiệm.</h3>
+                            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">{t('community.rulesTitle')}</div>
+                            <h3 className="mt-3 text-2xl font-black leading-tight text-[#10233F]">{t('community.rulesHeading')}</h3>
                             <div className="mt-5 space-y-3 text-sm font-semibold leading-7 text-slate-500">
-                                <p>Chia sẻ trải nghiệm thật, tôn trọng khác biệt và tránh đưa lời khuyên y khoa thay cho bác sĩ.</p>
-                                <p>Khi cần hỗ trợ khẩn cấp, hãy liên hệ cơ sở y tế gần nhất.</p>
+                                <p>{t('community.rule1')}</p>
+                                <p>{t('community.rule2')}</p>
                             </div>
                         </div>
 
                         <div className="rounded-2xl bg-[#0B2341] p-6 text-white shadow-xl shadow-slate-300/40">
-                            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">Gợi ý đăng bài</div>
+                            <div className="text-[11px] font-black uppercase tracking-[0.24em] text-white/45">{t('community.tipsTitle')}</div>
                             <div className="mt-4 space-y-3 text-sm font-semibold leading-7 text-white/75">
-                                <p>Đặt tiêu đề rõ ý, thêm chủ đề bằng dấu phẩy và mô tả bối cảnh để mọi người dễ hỗ trợ hơn.</p>
+                                <p>{t('community.tipsDesc')}</p>
                             </div>
                         </div>
                     </aside>
@@ -809,7 +811,7 @@ const CommunityPage = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 py-6">
                     <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
                         <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-                            <h3 className="text-lg font-black text-[#10233F]">Chỉnh sửa bài viết</h3>
+                            <h3 className="text-lg font-black text-[#10233F]">{t('community.editPost')}</h3>
                             <button
                                 type="button"
                                 onClick={closeEditPost}
@@ -823,20 +825,20 @@ const CommunityPage = () => {
                             <input
                                 value={editTitle}
                                 onChange={(event) => setEditTitle(event.target.value)}
-                                placeholder="Tiêu đề bài viết"
-                                className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
+                                placeholder={t('community.postTitlePlaceholder')}
+                                className="w-full rounded-2xl border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                             />
                             <textarea
                                 value={editContent}
                                 onChange={(event) => setEditContent(event.target.value)}
-                                placeholder="Nội dung bài viết"
+                                placeholder={t('community.editContentPlaceholder')}
                                 rows={7}
                                 className="mt-4 w-full resize-none rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold leading-7 text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                             />
                             <input
                                 value={editTags}
                                 onChange={(event) => setEditTags(event.target.value)}
-                                placeholder="Chủ đề, phân tách bằng dấu phẩy"
+                                placeholder={t('community.tagsPlaceholder')}
                                 className="mt-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-[#10233F] outline-none placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
                             />
                             {editingPost.imageUrl && (
@@ -852,7 +854,7 @@ const CommunityPage = () => {
                                 disabled={isSubmittingEdit}
                                 className="rounded-2xl border border-slate-200 px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-500 transition hover:border-slate-300 hover:text-[#10233F] disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Hủy
+                                {t('community.cancel')}
                             </button>
                             <button
                                 type="button"
@@ -860,7 +862,7 @@ const CommunityPage = () => {
                                 disabled={isSubmittingEdit || (!editContent.trim() && !editingPost.imageUrl)}
                                 className="rounded-2xl bg-[#10233F] px-5 py-3 text-xs font-black uppercase tracking-widest text-white transition hover:bg-brand disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
                             >
-                                {isSubmittingEdit ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                {isSubmittingEdit ? t('community.saving') : t('community.saveChanges')}
                             </button>
                         </div>
                     </div>
@@ -871,7 +873,7 @@ const CommunityPage = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4">
                     <div className="w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-[0_24px_70px_rgba(15,23,42,0.22)]">
                         <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
-                            <h3 className="text-base font-black text-[#10233F]">Người đã thích</h3>
+                            <h3 className="text-base font-black text-[#10233F]">{t('community.likedBy')}</h3>
                             <button
                                 type="button"
                                 onClick={() => setLikersDialog(null)}
@@ -883,7 +885,7 @@ const CommunityPage = () => {
                         </div>
                         <div className="max-h-[360px] overflow-y-auto p-3">
                             {likersDialog.loading ? (
-                                <div className="px-3 py-8 text-center text-sm font-bold text-slate-400">Đang tải...</div>
+                                <div className="px-3 py-8 text-center text-sm font-bold text-slate-400">{t('community.loadingLikes')}</div>
                             ) : (
                                 <div className="space-y-1">
                                     {likersDialog.users.map((liker) => (
@@ -900,7 +902,7 @@ const CommunityPage = () => {
                                         </div>
                                     ))}
                                     {likersDialog.users.length === 0 && (
-                                        <div className="px-3 py-8 text-center text-sm font-bold text-slate-400">Chưa có lượt thích.</div>
+                                        <div className="px-3 py-8 text-center text-sm font-bold text-slate-400">{t('community.noLikes')}</div>
                                     )}
                                 </div>
                             )}

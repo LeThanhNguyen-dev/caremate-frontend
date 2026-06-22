@@ -2,11 +2,13 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { EnvelopeIcon, ArrowLeftIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import authApi from '../api/authApi';
 import { useToast } from '../hooks/useToast';
 
 const ForgotPasswordPage = () => {
     const { showToast } = useToast();
+    const { t } = useTranslation();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [sent, setSent] = useState(false);
@@ -19,9 +21,9 @@ const ForgotPasswordPage = () => {
             setLoading(true);
             await authApi.forgotPassword(email);
             setSent(true);
-            showToast('Hướng dẫn đặt lại mật khẩu đã được gửi đến email của bạn.', 'success');
+            showToast(t('toast.forgotPasswordSuccess'), 'success');
         } catch {
-            showToast('Không thể gửi yêu cầu. Vui lòng kiểm tra lại email.', 'error');
+            showToast(t('toast.forgotPasswordError'), 'error');
         } finally {
             setLoading(false);
         }
@@ -40,31 +42,31 @@ const ForgotPasswordPage = () => {
                             <div className="h-20 w-20 rounded-xl bg-emerald-50 flex items-center justify-center mx-auto mb-8">
                                 <CheckCircleIcon className="h-10 w-10 text-emerald-500" />
                             </div>
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">Đã gửi email!</h2>
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">{t('forgotPassword.emailSent')}</h2>
                             <p className="text-slate-400 font-medium mb-10 leading-relaxed">
-                                Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu đến <br />
-                                <span className="text-brand font-black">{email}</span>. 
-                                Vui lòng kiểm tra hộp thư (bao gồm cả thư rác).
+                                <span dangerouslySetInnerHTML={{ __html: t('forgotPassword.instructionSent') }}></span>
+                                <span className="text-brand font-black">{email}</span>.<br />
+                                {t('forgotPassword.checkSpam')}
                             </p>
                             <Link to="/login" className="btn-primary !px-12">
-                                Quay lại đăng nhập
+                                {t('forgotPassword.backToLogin')}
                             </Link>
                         </div>
                     ) : (
                         <>
                             <Link to="/login" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand transition-colors mb-8">
                                 <ArrowLeftIcon className="h-3 w-3" />
-                                Quay lại
+                                {t('forgotPassword.back')}
                             </Link>
 
-                            <h1 className="text-3xl font-black text-slate-900 mb-4">Quên mật khẩu?</h1>
+                            <h1 className="text-3xl font-black text-slate-900 mb-4">{t('forgotPassword.title')}</h1>
                             <p className="text-slate-400 font-medium mb-10 leading-relaxed">
-                                Nhập email đã đăng ký để nhận hướng dẫn đặt lại mật khẩu.
+                                {t('forgotPassword.description')}
                             </p>
 
                             <form onSubmit={handleSubmit} className="space-y-8">
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Email đăng ký</label>
+                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('forgotPassword.emailLabel')}</label>
                                     <div className="relative group">
                                         <EnvelopeIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-brand transition-colors" />
                                         <input
@@ -86,10 +88,10 @@ const ForgotPasswordPage = () => {
                                     {loading ? (
                                         <span className="flex items-center justify-center gap-3">
                                             <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
-                                            Đang gửi...
+                                            {t('forgotPassword.sending')}
                                         </span>
                                     ) : (
-                                        'Gửi yêu cầu đặt lại'
+                                        t('forgotPassword.sendBtn')
                                     )}
                                 </button>
                             </form>

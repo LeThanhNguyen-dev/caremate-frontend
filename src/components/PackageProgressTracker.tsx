@@ -5,7 +5,8 @@ import caremateApi from '../api/caremateApi';
 import type { PackageProgressDto } from '../api/frontend-api-contract';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { formatDateTime, formatTime, formatDuration, QUICK_FEEDBACK_TAGS } from '../constants/booking';
+import { formatDateTime, formatTime, formatDuration, getQuickFeedbackTags } from '../constants/booking';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
     bookingId: number;
@@ -17,15 +18,16 @@ type Props = {
     onProgressChanged?: () => void;
 };
 
-const resolveSessionStatus = (session: PackageProgressDto['sessions'][number]) => {
+const resolveSessionStatus = (session: PackageProgressDto['sessions'][number], t: (key: string) => string) => {
     const isLate = session.status === 'pending' && new Date(session.sessionDate).getTime() < Date.now();
-    if (session.status === 'completed') return { label: 'Hoàn thành', tone: 'bg-emerald-50 text-emerald-600', phase: 'completed' };
-    if (session.status === 'checked_in') return { label: 'Đang chăm sóc', tone: 'bg-brand/10 text-brand', phase: 'active' };
-    if (isLate) return { label: 'Trễ giờ', tone: 'bg-amber-50 text-amber-700', phase: 'late' };
-    return { label: 'Chưa bắt đầu', tone: 'bg-slate-50 text-slate-400', phase: 'pending' };
+    if (session.status === 'completed') return { label: t('packageTracker.completed'), tone: 'bg-emerald-50 text-emerald-600', phase: 'completed' };
+    if (session.status === 'checked_in') return { label: t('packageTracker.inProgress'), tone: 'bg-brand/10 text-brand', phase: 'active' };
+    if (isLate) return { label: t('packageTracker.late'), tone: 'bg-amber-50 text-amber-700', phase: 'late' };
+    return { label: t('packageTracker.pending'), tone: 'bg-slate-50 text-slate-400', phase: 'pending' };
 };
 
 const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, finalReviewRating, finalReviewComment, finalReviewCreatedAt, onProgressChanged }) => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { showToast } = useToast();
     const [progress, setProgress] = useState<PackageProgressDto | null>(null);
@@ -63,10 +65,10 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, fin
             setNurseNote('');
             await fetchProgress();
             onProgressChanged?.();
-            showToast('Đã check-in buổi chăm sóc hôm nay.', 'success');
+            showToast(t('packageTracker.checkinSuccess'), 'success');
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };
-            showToast(error.response?.data?.message || 'Không thể check-in buổi chăm sóc.', 'error');
+            showToast(error.response?.data?.message || t('packageTracker.checkinError'), 'error');
         } finally {
             setActionLoading(false);
         }
@@ -79,10 +81,10 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, fin
             setNurseNote('');
             await fetchProgress();
             onProgressChanged?.();
-            showToast('Đã check-out và đánh dấu hoàn thành buổi hôm nay.', 'success');
+            showToast(t('packageTracker.checkoutSuccess'), 'success');
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };
-            showToast(error.response?.data?.message || 'Không thể check-out buổi chăm sóc.', 'error');
+            showToast(error.response?.data?.message || t('packageTracker.checkoutError'), 'error');
         } finally {
             setActionLoading(false);
         }
@@ -119,10 +121,10 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, fin
                 tags: form.tags,
             });
             await fetchProgress();
-            showToast('Đã lưu đánh giá cho buổi chăm sóc.', 'success');
+            showToast(t('packageTracker.ratingSessionSuccess'), 'success');
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };
-            showToast(error.response?.data?.message || 'Không thể lưu đánh giá buổi chăm sóc.', 'error');
+            showToast(error.response?.data?.message || t('packageTracker.ratingSessionError'), 'error');
         } finally {
             setReviewLoadingId(null);
         }
@@ -136,11 +138,11 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, fin
                 rating: finalReviewForm.rating,
                 comment: finalReviewForm.comment.trim() || undefined,
             });
-            showToast('Đã lưu đánh giá tổng kết gói dịch vụ.', 'success');
+            showToast(t('packageTracker.ratingPackageSuccess'), 'success');
             onProgressChanged?.();
         } catch (err: unknown) {
             const error = err as { response?: { data?: { message?: string } } };
-            showToast(error.response?.data?.message || 'Không thể lưu đánh giá tổng kết gói.', 'error');
+            showToast(error.response?.data?.message || t('packageTracker.ratingPackageError'), 'error');
         } finally {
             setFinalReviewLoading(false);
         }
@@ -350,7 +352,7 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, fin
 
                     <div className="space-y-8 relative">
                         {progress.sessions.map((session, index) => {
-                            const status = resolveSessionStatus(session);
+                            const status = resolveSessionStatus(session, t);
                             const isCompleted = status.phase === 'completed';
                             const isCurrent = status.phase === 'active' || status.phase === 'late' || (!isCompleted && index === progress.completedSessions);
                             const isPending = status.phase === 'pending' && !isCurrent;
@@ -389,19 +391,19 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, fin
                                         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
                                             <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
                                                 <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Giờ dự kiến</div>
-                                                <div className="mt-2 text-xs font-black text-slate-900">{formatDateTime(session.sessionDate)}</div>
+                                                <div className="mt-2 text-xs font-black text-slate-900">{formatDateTime(t, session.sessionDate)}</div>
                                             </div>
                                             <div className="rounded-xl border border-slate-100 bg-white p-4">
                                                 <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Check-in</div>
-                                                <div className="mt-2 text-xs font-black text-slate-900">{formatTime(session.checkInTime)}</div>
+                                                <div className="mt-2 text-xs font-black text-slate-900">{formatTime(t, session.checkInTime)}</div>
                                             </div>
                                             <div className="rounded-xl border border-slate-100 bg-white p-4">
                                                 <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Check-out</div>
-                                                <div className="mt-2 text-xs font-black text-slate-900">{formatTime(session.checkOutTime)}</div>
+                                                <div className="mt-2 text-xs font-black text-slate-900">{formatTime(t, session.checkOutTime)}</div>
                                             </div>
                                             <div className="rounded-xl border border-slate-100 bg-white p-4">
                                                 <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Thời gian thực tế</div>
-                                                <div className="mt-2 text-xs font-black text-slate-900">{formatDuration(session.checkInTime, session.checkOutTime)}</div>
+                                                <div className="mt-2 text-xs font-black text-slate-900">{formatDuration(t, session.checkInTime, session.checkOutTime)}</div>
                                             </div>
                                         </div>
                                         {session.nurseNote && (
@@ -453,7 +455,7 @@ const PackageProgressTracker: React.FC<Props> = ({ bookingId, bookingStatus, fin
                                                     })}
                                                 </div>
                                                 <div className="mt-3 flex flex-wrap gap-2">
-                                                    {QUICK_FEEDBACK_TAGS.map((tag) => {
+                                                    {getQuickFeedbackTags(t).map((tag: string) => {
                                                         const active = (reviewForms[session.id]?.tags ?? []).includes(tag);
                                                         return (
                                                             <button

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
@@ -45,20 +46,21 @@ const formatDate = (value: string) => new Date(`${value}T00:00:00`).toLocaleDate
 const formatTime = (value: string) => new Date(value).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 const pendingBookingStorageKey = 'caremate_pending_booking';
 
-const formatRelativeDate = (value: string | null) => {
-  if (!value) return 'Gần đây';
+const formatRelativeDate = (value: string | null, t: any) => {
+  if (!value) return t('nurseDetail.time.recently');
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Gần đây';
+  if (Number.isNaN(date.getTime())) return t('nurseDetail.time.recently');
 
   const diffDays = Math.max(0, Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24)));
-  if (diffDays === 0) return 'Hôm nay';
-  if (diffDays === 1) return '1 ngày trước';
-  if (diffDays < 7) return `${diffDays} ngày trước`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} tuần trước`;
+  if (diffDays === 0) return t('nurseDetail.time.today');
+  if (diffDays === 1) return t('nurseDetail.time.oneDayAgo');
+  if (diffDays < 7) return t('nurseDetail.time.daysAgo', { days: diffDays });
+  if (diffDays < 30) return t('nurseDetail.time.weeksAgo', { weeks: Math.floor(diffDays / 7) });
   return date.toLocaleDateString('vi-VN');
 };
 
 const NursePublicDetailPage = () => {
+  const { t, i18n } = useTranslation();
   const { userId } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -94,10 +96,10 @@ const NursePublicDetailPage = () => {
 
   useEffect(() => {
     if (!serviceIdFromUrl) {
-      showToast('Hãy chọn dịch vụ trước khi xem hồ sơ y tá.', 'warning');
+      showToast(t('nurseDetail.toastNoService'), 'warning');
       navigate('/services');
     }
-  }, [navigate, serviceIdFromUrl, showToast]);
+  }, [navigate, serviceIdFromUrl, showToast, t]);
 
   useEffect(() => {
     const load = async () => {
@@ -115,7 +117,7 @@ const NursePublicDetailPage = () => {
 
         const match = matchingNurses.find((item) => item.userId === Number(userId));
         if (!match) {
-          showToast('Y tá này không cung cấp dịch vụ bạn đã chọn.', 'warning');
+          showToast(t('nurseDetail.toastNoMatch'), 'warning');
           navigate('/services');
           return;
         }
@@ -130,14 +132,14 @@ const NursePublicDetailPage = () => {
           setSelectedDate(toDateInputValue(new Date()));
         }
       } catch {
-        showToast('Không thể tải thông tin y tá.', 'error');
+        showToast(t('nurseDetail.toastError'), 'error');
       } finally {
         setLoading(false);
       }
     };
 
     void load();
-  }, [navigate, serviceIdFromUrl, showToast, userId]);
+  }, [i18n.language, navigate, serviceIdFromUrl, showToast, userId]);
 
   const slotsByDate = useMemo(() => {
     return slots.reduce<Record<string, AvailabilitySlotDto[]>>((accumulator, slot) => {
@@ -361,7 +363,7 @@ const NursePublicDetailPage = () => {
       window.location.href = paymentLink.checkoutUrl;
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { message?: string } } };
-      showToast(axiosError.response?.data?.message || 'Không thể đặt lịch. Vui lòng kiểm tra lại thông tin.', 'error');
+      showToast(axiosError.response?.data?.message || t('nurseDetail.bookError'), 'error');
     } finally {
       setBooking(false);
     }
@@ -411,7 +413,7 @@ const NursePublicDetailPage = () => {
           className="group mb-12 flex items-center gap-2 text-sm font-black uppercase tracking-widest text-[#6B7280] transition-colors hover:text-[#EC4899]"
         >
           <ChevronLeftIcon className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
-          Quay lại
+          {t('nurseDetail.back')}
         </button>
 
         <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -435,34 +437,34 @@ const NursePublicDetailPage = () => {
               <div className="min-w-0 flex-1 pt-1">
                 <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                   <div className="inline-flex h-8 items-center rounded-full bg-[#FDF2F8] px-4 text-[9px] font-black uppercase leading-none tracking-[0.22em] text-[#DB2777] ring-1 ring-[#FBCFE8] sm:h-10 sm:px-5 sm:text-[10px]">
-                    Hồ sơ y tá chuyên nghiệp
+                    {t('nurseDetail.professionalProfile')}
                   </div>
                   <div className="inline-flex h-8 items-center gap-1.5 rounded-full bg-emerald-50 px-4 text-[9px] font-black uppercase leading-none tracking-[0.22em] text-emerald-600 ring-1 ring-emerald-100 sm:h-10 sm:gap-2 sm:px-5 sm:text-[10px]">
                     <CheckBadgeIcon className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
-                    <span>Đã xác minh</span>
+                    <span>{t('nurseDetail.verified')}</span>
                   </div>
                 </div>
                 <h1 className="mt-4 break-words text-2xl font-black leading-[1.1] text-[#10233F] sm:text-4xl">{profile.fullName}</h1>
                 <div className="mt-4 flex flex-wrap gap-4 text-sm font-bold text-[#6B7280]">
                   <div className="flex items-center gap-2 rounded-xl border border-[#F3E8FF] bg-white px-4 py-2">
                     <AcademicCapIcon className="h-5 w-5 text-[#EC4899]" />
-                    {profile.yearsExperience} năm kinh nghiệm
+                    {t('nurseDetail.yearsExp', { years: profile.yearsExperience })}
                   </div>
                   <div className="flex items-center gap-2 rounded-xl border border-[#F3E8FF] bg-white px-4 py-2">
                     <StarSolidIcon className="h-5 w-5 text-yellow-400" />
-                    {nurseCard.averageRating.toFixed(1)} đánh giá
+                    {t('nurseDetail.reviews', { rating: nurseCard.averageRating.toFixed(1) })}
                   </div>
                   {(profile.address || profile.defaultAddress?.fullAddress || profile.district) && (
                     <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[#F3E8FF] bg-white px-4 py-2">
                       <MapPinIcon className="h-5 w-5 shrink-0 text-[#EC4899]" />
                       <span className="truncate">
-                        {profile.address || profile.defaultAddress?.fullAddress || `Khu vực ${profile.district}`}
+                        {profile.address || profile.defaultAddress?.fullAddress || t('nurseDetail.area', { district: profile.district })}
                       </span>
                     </div>
                   )}
                 </div>
                 <p className="mt-8 text-[18px] italic leading-[1.75] text-[#6B7280]">
-                  "{profile.bio || 'Tôi cam kết mang lại sự chăm sóc tận tâm và an toàn cho gia đình bạn.'}"
+                  "{profile.bio || t('nurseDetail.defaultBio')}"
                 </p>
               </div>
             </motion.section>
@@ -471,12 +473,12 @@ const NursePublicDetailPage = () => {
               <div className="mb-8 flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-black text-[#10233F] sm:text-[24px]">
-                    {isPackage ? 'Chọn lịch cho từng ngày trong gói' : 'Chọn lịch phù hợp'}
+                    {isPackage ? t('nurseDetail.schedulePackageTitle') : t('nurseDetail.scheduleSingleTitle')}
                   </h2>
                   <p className="mt-2 text-[16px] leading-[1.7] text-[#6B7280]">
                     {isPackage
-                      ? 'Chọn ngày bắt đầu rồi chọn một khung giờ khả dụng cho từng ngày.'
-                      : 'Chỉ hiển thị các khung giờ còn nhận lịch để bạn chọn nhanh hơn.'}
+                      ? t('nurseDetail.schedulePackageDesc')
+                      : t('nurseDetail.scheduleSingleDesc')}
                   </p>
                 </div>
                 <CalendarIcon className="h-10 w-10 text-[#EC4899]/30" />
@@ -487,7 +489,7 @@ const NursePublicDetailPage = () => {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
-                        Ngày bắt đầu
+                        {t('nurseDetail.startDate')}
                       </label>
                       <input
                         type="date"
@@ -499,15 +501,15 @@ const NursePublicDetailPage = () => {
                     </div>
                     <div>
                       <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
-                        Tiến độ chọn giờ
+                        {t('nurseDetail.progress')}
                       </label>
                       <div className="rounded-2xl bg-[#F9FAFB] p-5">
                         <div className="text-2xl font-black text-[#10233F]">
                           {Object.keys(packageSessionStarts).length}/{packageDates.length}
                         </div>
-                        <div className="mt-1 text-[15px] leading-[1.7] text-[#6B7280]">ngày đã chọn đủ giờ chăm sóc</div>
+                        <div className="mt-1 text-[15px] leading-[1.7] text-[#6B7280]">{t('nurseDetail.daysSelected')}</div>
                         <div className="mt-4 inline-flex rounded-full bg-[#FDF2F8] px-3 py-2 text-[12px] font-bold text-[#DB2777]">
-                          Chỉ hiển thị slot khả dụng
+                          {t('nurseDetail.showAvailable')}
                         </div>
                       </div>
                     </div>
@@ -515,7 +517,7 @@ const NursePublicDetailPage = () => {
 
                   {packageDates.length === 0 || packageAvailableSlotsByDate.every((item) => item.slots.length === 0) ? (
                     <div className="rounded-2xl bg-[#F9FAFB] p-8 text-center text-[15px] leading-[1.7] text-[#6B7280]">
-                      Y tá chưa mở slot phù hợp trong các ngày của gói. Vui lòng chọn ngày bắt đầu khác.
+                      {t('nurseDetail.noPackageSlots')}
                     </div>
                   ) : (
                     <div className="grid gap-4 md:grid-cols-2">
@@ -526,11 +528,11 @@ const NursePublicDetailPage = () => {
                           <div key={date} className="rounded-2xl bg-[#F9FAFB] p-5">
                             <div className="mb-4 flex items-start justify-between gap-4">
                               <div>
-                                <div className="text-[13px] font-medium text-[#9CA3AF]">Ngày {index + 1}</div>
+                                <div className="text-[13px] font-medium text-[#9CA3AF]">{t('nurseDetail.day', { index: index + 1 })}</div>
                                 <div className="mt-1 text-[20px] font-bold text-[#10233F]">{formatDate(date)}</div>
                               </div>
                               {packageSessionStarts[date] && (
-                                <div className="rounded-full bg-[#FDF2F8] px-3 py-1.5 text-[12px] font-bold text-[#DB2777]">Đã chọn</div>
+                                <div className="rounded-full bg-[#FDF2F8] px-3 py-1.5 text-[12px] font-bold text-[#DB2777]">{t('nurseDetail.selected')}</div>
                               )}
                             </div>
 
@@ -564,43 +566,43 @@ const NursePublicDetailPage = () => {
                   )}
 
                   <div className="rounded-2xl bg-[#FFF7FA] p-5 text-[15px] leading-[1.7] text-[#6B7280]">
-                    Mỗi ngày chỉ cần chọn một khung giờ phù hợp. Hệ thống sẽ giữ đúng lịch bạn chọn cho toàn bộ gói.
+                    {t('nurseDetail.packageNote')}
                   </div>
                 </div>
               ) : singleAvailableSlotsByDate.length === 0 ? (
                 <div className="rounded-2xl bg-[#F9FAFB] py-16 text-center">
                   <ClockIcon className="mx-auto mb-4 h-10 w-10 text-[#9CA3AF]" />
-                  <p className="text-[15px] leading-[1.7] text-[#6B7280]">Y tá hiện không còn lịch trống cho dịch vụ này.</p>
+                  <p className="text-[15px] leading-[1.7] text-[#6B7280]">{t('nurseDetail.noSingleSlots')}</p>
                 </div>
               ) : (
                 <div className="space-y-8">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
                       <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
-                        Lịch đã chọn
+                        {t('nurseDetail.selectedSchedule')}
                       </label>
                       <div className="rounded-2xl bg-[#F9FAFB] p-5">
                         <div className="text-2xl font-black text-[#10233F]">
-                          {bookingForm.startTime ? formatDate(new Date(bookingForm.startTime).toLocaleDateString('en-CA')) : 'Chưa chọn'}
+                          {bookingForm.startTime ? formatDate(new Date(bookingForm.startTime).toLocaleDateString('en-CA')) : t('nurseDetail.notSelected')}
                         </div>
                         <div className="mt-1 text-[15px] leading-[1.7] text-[#6B7280]">
                           {bookingForm.startTime
                             ? `${formatTime(bookingForm.startTime)} - ${formatTime(bookingForm.endTime)}`
-                            : 'Chọn một khung giờ khả dụng bên dưới'}
+                            : t('nurseDetail.selectBelow')}
                         </div>
                       </div>
                     </div>
                     <div>
                       <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">
-                        Lịch khả dụng
+                        {t('nurseDetail.availableSchedule')}
                       </label>
                       <div className="rounded-2xl bg-[#F9FAFB] p-5">
                         <div className="text-2xl font-black text-[#10233F]">
                           {singleAvailableSlotsByDate.length}
                         </div>
-                        <div className="mt-1 text-[15px] leading-[1.7] text-[#6B7280]">ngày còn khung giờ trống</div>
+                        <div className="mt-1 text-[15px] leading-[1.7] text-[#6B7280]">{t('nurseDetail.daysAvailable')}</div>
                         <div className="mt-4 inline-flex rounded-full bg-[#FDF2F8] px-3 py-2 text-[12px] font-bold text-[#DB2777]">
-                          Chỉ hiện khung giờ có thể đặt
+                          {t('nurseDetail.showBookable')}
                         </div>
                       </div>
                     </div>
@@ -635,7 +637,7 @@ const NursePublicDetailPage = () => {
                                 >
                                   <div className="text-[16px] font-bold">{formatTime(slot.startTime)}</div>
                                   <div className={`mt-1 text-[13px] ${active ? 'text-white/80' : 'text-[#9CA3AF]'}`}>
-                                    {service.estimatedDurationMinutes} phút, đến {formatTime(addMinutesIso(slot.startTime, service.estimatedDurationMinutes))}
+                                    {t('nurseDetail.durationTo', { mins: service.estimatedDurationMinutes, time: formatTime(addMinutesIso(slot.startTime, service.estimatedDurationMinutes)) })}
                                   </div>
                                 </button>
                               );
@@ -647,7 +649,7 @@ const NursePublicDetailPage = () => {
                   </div>
 
                   <div className="rounded-2xl bg-[#FFF7FA] p-5 text-[15px] leading-[1.7] text-[#6B7280]">
-                    Chỉ còn các khung giờ y tá thật sự có thể nhận lịch, nên bạn không cần lọc thêm các slot không mở.
+                    {t('nurseDetail.singleNote')}
                   </div>
                 </div>
               )}
@@ -656,14 +658,14 @@ const NursePublicDetailPage = () => {
             <section className="luxury-card p-6 sm:p-10">
               <div className="mb-8 flex items-center justify-between sm:mb-10">
                 <div>
-                  <h2 className="text-xl font-black text-[#10233F] sm:text-2xl">Đánh giá từ khách hàng</h2>
-                  <p className="mt-1 text-sm font-bold text-[#6B7280]">Cảm nhận thực tế của các gia đình đã sử dụng dịch vụ.</p>
+                  <h2 className="text-xl font-black text-[#10233F] sm:text-2xl">{t('nurseDetail.customerReviewsTitle')}</h2>
+                  <p className="mt-1 text-sm font-bold text-[#6B7280]">{t('nurseDetail.customerReviewsDesc')}</p>
                 </div>
                 <ChatBubbleBottomCenterTextIcon className="h-10 w-10 text-[#EC4899]/30" />
               </div>
 
               {reviews.length === 0 ? (
-                <p className="py-10 text-center text-sm font-bold text-[#6B7280]">Chưa có đánh giá nào cho dịch vụ này.</p>
+                <p className="py-10 text-center text-sm font-bold text-[#6B7280]">{t('nurseDetail.noReviews')}</p>
               ) : (
                 <div className="space-y-6">
                   {reviews.map((review) => (
@@ -674,8 +676,8 @@ const NursePublicDetailPage = () => {
                             {review.customerName?.charAt(0) || 'C'}
                           </div>
                           <div>
-                            <div className="text-[15px] font-black text-[#10233F]">{review.customerName || 'Khách hàng ẩn danh'}</div>
-                            <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">{formatRelativeDate(review.createdAt)}</div>
+                            <div className="text-[15px] font-black text-[#10233F]">{review.customerName || t('nurseDetail.anonymous')}</div>
+                            <div className="mt-1 text-[10px] font-bold uppercase tracking-widest text-[#9CA3AF]">{formatRelativeDate(review.createdAt, t)}</div>
                           </div>
                         </div>
                         <div className="rounded-full bg-amber-50 px-3 py-2">
@@ -686,7 +688,7 @@ const NursePublicDetailPage = () => {
                           </div>
                         </div>
                       </div>
-                      <p className="mt-6 text-[15px] font-medium leading-[1.75] text-[#6B7280]">{review.comment || 'Không có nhận xét chi tiết.'}</p>
+                      <p className="mt-6 text-[15px] font-medium leading-[1.75] text-[#6B7280]">{review.comment || t('nurseDetail.noComment')}</p>
                     </div>
                   ))}
                 </div>
@@ -696,37 +698,37 @@ const NursePublicDetailPage = () => {
 
           <aside className="space-y-6 lg:sticky lg:top-32">
             <section className="luxury-card border-none bg-white p-6 shadow-[0_20px_50px_rgba(15,23,42,0.06)] sm:p-8">
-              <div className="accent-label !bg-[#FDF2F8] !text-[#DB2777]">Thông tin dịch vụ</div>
+              <div className="accent-label !bg-[#FDF2F8] !text-[#DB2777]">{t('nurseDetail.serviceInfo')}</div>
               <h2 className="text-xl font-black text-[#10233F] sm:text-[24px]">{service.name}</h2>
               <p className="mt-3 text-[15px] leading-[1.7] text-[#6B7280]">
-                {isPackage ? 'Gói dịch vụ được tính theo toàn bộ lộ trình chăm sóc.' : 'Chi phí được tính theo thời lượng dịch vụ đã chọn.'}
+                {isPackage ? t('nurseDetail.packagePricing') : t('nurseDetail.singlePricing')}
               </p>
 
               <div className="mt-8 space-y-3">
                 <div className="flex items-center justify-between rounded-2xl bg-[#F9FAFB] p-5">
                   <div className="flex items-center gap-3">
                     <CurrencyDollarIcon className="h-6 w-6 text-[#EC4899]" />
-                    <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#9CA3AF]">Chi phí dự kiến</span>
+                    <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#9CA3AF]">{t('nurseDetail.estimatedCost')}</span>
                   </div>
                   <span className="text-[24px] font-black text-[#EC4899]">{(nurseCard.servicePrice ?? service.basePrice).toLocaleString('vi-VN')}đ</span>
                 </div>
                 <div className="flex items-center justify-between rounded-2xl bg-[#F9FAFB] p-5">
                   <div className="flex items-center gap-3">
                     <ClockIcon className="h-6 w-6 text-[#EC4899]" />
-                    <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#9CA3AF]">{isPackage ? 'Lộ trình' : 'Thời lượng'}</span>
+                    <span className="text-[13px] font-bold uppercase tracking-[0.12em] text-[#9CA3AF]">{isPackage ? t('nurseDetail.durationLabelPackage') : t('nurseDetail.durationLabelSingle')}</span>
                   </div>
-                  <span className="text-[20px] font-black text-[#10233F]">{isPackage ? `${service.packageDays} ngày` : `${service.estimatedDurationMinutes} phút`}</span>
+                  <span className="text-[20px] font-black text-[#10233F]">{isPackage ? t('nurseDetail.packageDays', { days: service.packageDays }) : t('nurseDetail.singleMins', { mins: service.estimatedDurationMinutes })}</span>
                 </div>
               </div>
 
               <form onSubmit={submitBooking} className="mt-8 space-y-5">
                 <div data-tour="booking-address">
-                  <label className="ml-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Địa chỉ phục vụ</label>
+                  <label className="ml-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">{t('nurseDetail.addressLabel')}</label>
                   <div className="relative mt-2">
                     <MapPinIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#9CA3AF]" />
                     <input
                       type="text"
-                      placeholder="Số nhà, tên đường, quận..."
+                      placeholder={t('nurseDetail.addressPlaceholder')}
                       className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-4 text-[15px] font-semibold text-[#10233F] shadow-sm placeholder:text-[#9CA3AF] focus:border-[#EC4899]/30 focus:bg-white focus:ring-4 focus:ring-[#EC4899]/10"
                       value={bookingForm.address}
                       onBlur={() => window.setTimeout(() => setAddressSuggestionsOpen(false), 150)}
@@ -768,7 +770,7 @@ const NursePublicDetailPage = () => {
                       latitude={bookingLocation?.latitude}
                       longitude={bookingLocation?.longitude}
                       heightClassName="h-[220px]"
-                      helperText="Kéo bản đồ hoặc click để chọn vị trí dưới ghim."
+                      helperText={t('nurseDetail.mapHelper')}
                       onSelectLocation={(location) => void handleMapLocationSelect(location)}
                     />
                   </div>
@@ -779,11 +781,11 @@ const NursePublicDetailPage = () => {
                   )}
                 </div>
                 <div>
-                  <label className="ml-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">Ghi chú cho y tá</label>
+                  <label className="ml-1 text-[11px] font-black uppercase tracking-[0.2em] text-[#9CA3AF]">{t('nurseDetail.notesLabel')}</label>
                   <div className="relative mt-2">
                     <ChatBubbleBottomCenterTextIcon className="absolute left-4 top-4 h-5 w-5 text-[#9CA3AF]" />
                     <textarea
-                      placeholder="Lưu ý đặc biệt nếu có..."
+                      placeholder={t('nurseDetail.notesPlaceholder')}
                       rows={3}
                       className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-12 pr-4 text-[15px] font-semibold text-[#10233F] shadow-sm placeholder:text-[#9CA3AF] focus:border-[#EC4899]/30 focus:bg-white focus:ring-4 focus:ring-[#EC4899]/10"
                       value={bookingForm.notes}
@@ -794,18 +796,18 @@ const NursePublicDetailPage = () => {
 
                 {!isAuthenticated ? (
                   <button type="button" data-tour="booking-submit" onClick={() => navigate('/login')} className="btn-primary w-full rounded-2xl !bg-[#10233F] py-5 text-[15px] font-black !text-white shadow-xl shadow-[#10233F]/10 hover:!bg-slate-800">
-                    Đăng nhập để đặt lịch
+                    {t('nurseDetail.loginToBook')}
                   </button>
                 ) : (
                   <button type="submit" data-tour="booking-submit" disabled={booking || !canSubmit} className="btn-primary w-full rounded-2xl !bg-[#EC4899] py-5 text-[15px] font-black !text-white shadow-[0_18px_30px_rgba(236,72,153,0.25)] disabled:opacity-30 disabled:shadow-none">
-                    {booking ? 'Đang xử lý...' : 'Tiếp tục đặt lịch'}
+                    {booking ? t('nurseDetail.processing') : t('nurseDetail.continueBooking')}
                   </button>
                 )}
               </form>
 
               <div className="mt-8 flex items-center gap-3 pt-2 text-[11px] font-black uppercase tracking-[0.16em] text-[#9CA3AF]">
                 <ShieldCheckIcon className="h-5 w-5 text-[#EC4899]" />
-                Thanh toán an toàn và bảo mật
+                {t('nurseDetail.securePayment')}
               </div>
             </section>
 
@@ -815,8 +817,8 @@ const NursePublicDetailPage = () => {
                   <HeartIcon className="h-6 w-6" />
                 </div>
                 <div>
-                  <div className="text-[15px] font-black text-[#10233F]">Chăm sóc 24/7</div>
-                  <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-[#6B7280]">Hỗ trợ khẩn cấp</div>
+                  <div className="text-[15px] font-black text-[#10233F]">{t('nurseDetail.support247')}</div>
+                  <div className="text-[12px] font-medium uppercase tracking-[0.12em] text-[#6B7280]">{t('nurseDetail.emergencySupport')}</div>
                 </div>
               </div>
             </div>
@@ -827,9 +829,9 @@ const NursePublicDetailPage = () => {
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/60 bg-white/90 backdrop-blur">
           <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:py-4 lg:px-6">
             <div className="min-w-0 text-center sm:text-left">
-              <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF] sm:text-[13px]">Tiến độ đặt lịch</div>
+              <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF] sm:text-[13px]">{t('nurseDetail.progressLabel')}</div>
               <div className="mt-0.5 text-[14px] font-bold text-[#10233F] sm:mt-1 sm:text-[16px]">
-                {canSubmit ? 'Sẵn sàng để tiếp tục' : 'Chọn lịch và địa chỉ để tiếp tục'}
+                {canSubmit ? t('nurseDetail.readyToContinue') : t('nurseDetail.selectToContinue')}
               </div>
             </div>
             <button
@@ -839,7 +841,7 @@ const NursePublicDetailPage = () => {
               onClick={() => document.querySelector('form')?.requestSubmit()}
               className="w-full shrink-0 rounded-xl bg-[#EC4899] px-6 py-3.5 text-[14px] font-black text-white shadow-[0_18px_30px_rgba(236,72,153,0.22)] transition hover:bg-[#db2777] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none sm:w-auto sm:rounded-2xl sm:py-4"
             >
-              {booking ? 'Đang xử lý...' : 'Tiếp tục đặt lịch'}
+              {booking ? t('nurseDetail.processing') : t('nurseDetail.continueBooking')}
             </button>
           </div>
         </div>

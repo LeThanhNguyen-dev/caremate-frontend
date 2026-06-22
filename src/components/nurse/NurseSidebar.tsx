@@ -1,4 +1,5 @@
-﻿import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { 
     Squares2X2Icon, 
@@ -17,14 +18,15 @@ const NurseSidebar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { t } = useTranslation();
 
     const items = [
-        { label: 'Tổng quan', path: '/nurse/overview', icon: Squares2X2Icon, requiresApproval: true, tour: 'nurse-nav-overview' },
-        { label: 'Lịch làm việc', path: '/nurse/schedule', icon: CalendarIcon, requiresApproval: true, tour: 'nurse-nav-schedule' },
-        { label: 'Quản lý lịch hẹn', path: '/nurse/bookings', icon: ClipboardDocumentListIcon, requiresApproval: true, tour: 'nurse-nav-bookings' },
-        { label: 'Tin nhắn', path: '/nurse/chat', icon: ChatBubbleLeftRightIcon, requiresApproval: true, tour: 'nurse-nav-chat' },
-        { label: 'Dịch vụ của tôi', path: '/nurse/services', icon: BriefcaseIcon, requiresApproval: true, tour: 'nurse-nav-services' },
-        { label: 'Hồ sơ cá nhân', path: '/nurse/profile', icon: UserCircleIcon, requiresApproval: false, tour: 'nurse-nav-profile' },
+        { label: t('nurse.overview'), path: '/nurse/overview', icon: Squares2X2Icon, requiresApproval: true, tour: 'nurse-nav-overview' },
+        { label: t('nurse.schedule'), path: '/nurse/schedule', icon: CalendarIcon, requiresApproval: true, tour: 'nurse-nav-schedule' },
+        { label: t('nurse.bookings'), path: '/nurse/bookings', icon: ClipboardDocumentListIcon, requiresApproval: true, tour: 'nurse-nav-bookings' },
+        { label: t('nurse.chat'), path: '/nurse/chat', icon: ChatBubbleLeftRightIcon, requiresApproval: true, tour: 'nurse-nav-chat' },
+        { label: t('nurse.services'), path: '/nurse/services', icon: BriefcaseIcon, requiresApproval: true, tour: 'nurse-nav-services' },
+        { label: t('nurse.profile'), path: '/nurse/profile', icon: UserCircleIcon, requiresApproval: false, tour: 'nurse-nav-profile' },
     ];
 
     const handleLogout = async () => {
@@ -48,10 +50,10 @@ const NurseSidebar = () => {
                     <div className="relative z-10">
                         <div className="flex items-center gap-2 mb-3">
                             <ShieldCheckIcon className={`h-4 w-4 ${user?.role === 'nurse_confirmed' ? 'text-[#10B981]' : 'text-amber-400'}`} />
-                            <span className="text-[9px] font-black uppercase tracking-widest text-white/50">Trạng thái hồ sơ</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest text-white/50">{t('nurse.profileStatus')}</span>
                         </div>
                         <div className="text-sm font-bold text-white mb-2">
-                            {user?.role === 'nurse_confirmed' ? 'Đã xác minh chuyên môn' : 'Đang chờ phê duyệt'}
+                            {user?.role === 'nurse_confirmed' ? t('nurse.verified') : t('nurse.pending')}
                         </div>
                         <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                             <motion.div 
@@ -66,7 +68,7 @@ const NurseSidebar = () => {
 
             {/* Navigation */}
             <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
-                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Danh mục quản lý</div>
+                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('nurse.managementMenu')}</div>
                 {items.map((item) => {
                     const isActive = location.pathname === item.path;
                     const isRestricted = item.requiresApproval && user?.role !== 'nurse_confirmed';
@@ -121,7 +123,7 @@ const NurseSidebar = () => {
                     className="flex w-full items-center justify-center gap-3 py-4 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-red-600 transition-all active:scale-95 shadow-sm"
                 >
                     <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                    Đăng xuất
+                    {t('auth.logout')}
                 </button>
             </div>
         </aside>

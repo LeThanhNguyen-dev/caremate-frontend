@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { adminApi } from '../api/adminApi';
@@ -42,6 +43,7 @@ const ocrFields: Array<{ key: keyof CccdOcrResultDto; label: string }> = [
 const AdminNurseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [nurse, setNurse] = useState<NurseProfileDetailDto | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ const AdminNurseDetail = () => {
           .map((log) => [log.nurseDocumentId, log.result as CccdOcrResultDto])
       ));
     } catch (err) {
-      setError('Không thể tải thông tin điều dưỡng.');
+      setError(t('adminNurseDetail.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -83,17 +85,17 @@ const AdminNurseDetail = () => {
   const handleReview = async (isApproved: boolean) => {
     if (!id) return;
     if (!isApproved && !comment) {
-      alert('Vui lòng nhập lý do từ chối.');
+      alert(t('adminNurseDetail.rejectReasonAlert'));
       return;
     }
 
     setReviewing(true);
     try {
       await adminApi.reviewNurse(Number(id), { isApproved, comment });
-      alert(isApproved ? 'Hồ sơ đã được duyệt thành công!' : 'Đã từ chối hồ sơ.');
+      alert(isApproved ? t('adminNurseDetail.approvalSuccess') : t('adminNurseDetail.rejectionSuccess'));
       navigate('/admin/pending-nurses');
     } catch (err) {
-      setError('Quá trình duyệt hồ sơ thất bại.');
+      setError(t('adminNurseDetail.reviewError'));
       console.error(err);
     } finally {
       setReviewing(false);
@@ -110,7 +112,7 @@ const AdminNurseDetail = () => {
         setOcrLogs(await adminApi.getOcrLogs(Number(id)));
       }
     } catch (err) {
-      setError(getErrorMessage(err, 'Không thể OCR tài liệu CCCD. Vui lòng kiểm tra cấu hình FPT AI hoặc thử lại sau.'));
+      setError(getErrorMessage(err, t('adminNurseDetail.ocrError')));
       console.error(err);
     } finally {
       setOcrLoadingId(null);
@@ -121,7 +123,7 @@ const AdminNurseDetail = () => {
     if (!id) return;
 
     const reason = status === 'rejected'
-      ? window.prompt('Nhập lý do từ chối tài liệu này:', 'Ảnh không hợp lệ hoặc thông tin không khớp.')?.trim()
+      ? window.prompt(t('adminNurseDetail.docRejectPrompt'), t('adminNurseDetail.docRejectDefault'))?.trim()
       : '';
 
     if (status === 'rejected' && !reason) return;
@@ -136,15 +138,15 @@ const AdminNurseDetail = () => {
       }
       await fetchNurseDetails();
     } catch (err) {
-      setError(getErrorMessage(err, 'Không thể cập nhật trạng thái tài liệu.'));
+      setError(getErrorMessage(err, t('adminNurseDetail.docStatusError')));
       console.error(err);
     } finally {
       setDocActionId(null);
     }
   };
 
-  if (loading) return <div className="admin-loading">Đang tải chi tiết hồ sơ...</div>;
-  if (!nurse) return <div className="admin-error">Không tìm thấy thông tin điều dưỡng.</div>;
+  if (loading) return <div className="admin-loading">{t('adminNurseDetail.loading')}</div>;
+  if (!nurse) return <div className="admin-error">{t('adminNurseDetail.notFound')}</div>;
 
   return (
     <div className="admin-detail-container">

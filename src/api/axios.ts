@@ -1,4 +1,5 @@
 import axios from 'axios';
+import i18n from '../i18n/i18n';
 
 export const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -9,13 +10,14 @@ export const axiosInstance = axios.create({
     },
 });
 
-// Request interceptor - attach token
+// Request interceptor - attach token + language
 axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('accessToken');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
+        config.headers['Accept-Language'] = i18n.language || 'vi';
         return config;
     },
     (error) => Promise.reject(error)

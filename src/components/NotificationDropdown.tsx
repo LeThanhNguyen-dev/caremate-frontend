@@ -8,6 +8,7 @@ import {
     TrashIcon,
 } from '@heroicons/react/24/outline';
 import { useNotifications } from '../hooks/useNotifications';
+import { useTranslation } from 'react-i18next';
 
 type NotificationDropdownProps = {
     accentClassName: string;
@@ -35,6 +36,7 @@ const NotificationDropdown = ({
         markAllAsRead,
         deleteNotification,
     } = useNotifications();
+    const { t } = useTranslation();
 
     const displayNotifications = notifications.slice(0, 6);
 
@@ -60,7 +62,7 @@ const NotificationDropdown = ({
                 onClick={() => setOpen((prev) => !prev)}
                 className={buttonClassName}
                 aria-expanded={open}
-                aria-label="Mở thông báo"
+                aria-label={t('common.notification.title')}
             >
                 <BellIcon className="h-6 w-6 transition-transform group-hover:rotate-12" />
                 {unreadCount > 0 && (
@@ -78,11 +80,11 @@ const NotificationDropdown = ({
                     >
                         <div className="mb-6 flex items-center justify-between gap-4">
                             <div>
-                                <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-900">Thông báo</h4>
-                                <p className="mt-1 text-xs font-bold text-slate-400">Cập nhật mới từ hệ thống và cuộc hẹn của bạn</p>
+                                <h4 className="text-sm font-black uppercase tracking-[0.2em] text-slate-900">{t('common.notification.title')}</h4>
+                                <p className="mt-1 text-xs font-bold text-slate-400">{t('common.notification.subtitle')}</p>
                             </div>
                             <span className={`rounded-xl px-3 py-2 text-[10px] font-black uppercase tracking-widest ${accentClassName}`}>
-                                {unreadCount} mới
+                                {t('common.notification.newCount', { count: unreadCount })}
                             </span>
                         </div>
 
@@ -122,7 +124,7 @@ const NotificationDropdown = ({
                                                     type="button"
                                                     onClick={() => void deleteNotification(notif.id)}
                                                     className="flex h-10 w-10 flex-none items-center justify-center rounded-xl text-slate-300 transition-all hover:bg-red-50 hover:text-red-500"
-                                                    title="Xóa thông báo"
+                                                    title={t('common.notification.delete')}
                                                 >
                                                     <TrashIcon className="h-4 w-4" />
                                                 </button>
@@ -138,21 +140,21 @@ const NotificationDropdown = ({
                                         className="flex items-center justify-center gap-2 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-600 transition-all hover:border-slate-200 hover:bg-white"
                                     >
                                         <CheckCircleIcon className="h-4 w-4" />
-                                        Đọc tất cả
+                                        {t('common.notification.markAllRead')}
                                     </button>
                                     <Link
                                         to="/notifications"
                                         className="flex items-center justify-center rounded-xl bg-slate-900 px-4 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-white transition-all hover:opacity-90"
                                     >
-                                        Xem chi tiết
+                                        {t('common.notification.viewAll')}
                                     </Link>
                                 </div>
                             </>
                         ) : (
                             <div className="rounded-xl border border-dashed border-slate-100 px-6 py-12 text-center">
                                 <InboxStackIcon className={`mx-auto mb-4 h-10 w-10 ${emptyIconClassName}`} />
-                                <p className="text-sm font-black text-slate-800">Chưa có thông báo mới</p>
-                                <p className="mt-2 text-xs font-medium text-slate-400">Các cập nhật mới sẽ xuất hiện ngay tại đây.</p>
+                                <p className="text-sm font-black text-slate-800">{t('common.notification.empty')}</p>
+                                <p className="mt-2 text-xs font-medium text-slate-400">{t('common.notification.emptyDesc')}</p>
                             </div>
                         )}
                     </motion.div>

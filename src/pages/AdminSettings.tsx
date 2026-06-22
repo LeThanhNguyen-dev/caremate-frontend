@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '../hooks/useToast';
 import caremateApi from '../api/caremateApi';
 import type { AdminOcrSettingsDto, ServiceDetailDto } from '../api/frontend-api-contract';
@@ -16,6 +17,7 @@ import {
 
 const AdminSettings = () => {
     const { showToast } = useToast();
+    const { t } = useTranslation();
     const [services, setServices] = useState<ServiceDetailDto[]>([]);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [form, setForm] = useState({
@@ -43,7 +45,7 @@ const AdminSettings = () => {
             setServices(data);
             setOcrSettings(ocr);
         } catch {
-            showToast('Không thể tải danh sách.', 'error');
+            showToast(t('adminSettings.loadError'), 'error');
         } finally {
             setLoading(false);
         }
@@ -70,7 +72,7 @@ const AdminSettings = () => {
                 status: s.status
             });
         } catch {
-            showToast('Không thể tải dịch vụ.', 'error');
+            showToast(t('adminSettings.serviceLoadError'), 'error');
         }
     };
 

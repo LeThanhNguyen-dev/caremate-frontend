@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next';
 import type { PackageScheduleEntryDto, ServiceDetailDto } from '../api/frontend-api-contract';
 
 export const categoryLabels: Record<string, string> = {
@@ -25,15 +26,18 @@ export const includedServiceLabels: Record<string, string> = {
 
 export const formatCurrency = (value: number) => `${value.toLocaleString('vi-VN')}đ`;
 
-export const getCategoryLabel = (category?: string | null) => {
-  if (!category) return 'Dịch vụ';
-  return categoryLabels[category] ?? category;
+export const getCategoryLabel = (t: TFunction, category?: string | null) => {
+  if (!category) return t('common.categories.default', { defaultValue: 'Dịch vụ' });
+  return t(`common.categories.${category}`, { defaultValue: categoryLabels[category] ?? category });
 };
 
-export const getIncludedServiceLabels = (service: ServiceDetailDto) =>
+export const getIncludedServiceLabels = (t: TFunction, service: ServiceDetailDto) =>
   service.includedServiceKeys
     ?.split(',')
-    .map((key) => includedServiceLabels[key.trim()] ?? key.trim())
+    .map((key) => {
+        const trimmed = key.trim();
+        return t(`common.includedServices.${trimmed}`, { defaultValue: includedServiceLabels[trimmed] ?? trimmed });
+    })
     .filter(Boolean) ?? [];
 
 export const getVisiblePackageSchedule = (service?: ServiceDetailDto | null): PackageScheduleEntryDto[] => {

@@ -9,12 +9,14 @@ import {
     QrCodeIcon,
     ClockIcon
 } from '@heroicons/react/24/outline';
-import { getPlatformFee, STATUS_LABELS } from '../constants/booking';
+import { getPlatformFee, getStatusLabel } from '../constants/booking';
+import { useTranslation } from 'react-i18next';
 
 const getNursePayout = (booking: AdminBookingSummaryDto) =>
     booking.nursePayoutAmount ?? booking.totalPrice - getPlatformFee(booking.totalPrice);
 
 const AdminBookings = () => {
+    const { t } = useTranslation();
     const [bookings, setBookings] = useState<AdminBookingSummaryDto[]>([]);
     const [refunds, setRefunds] = useState<AdminRefundDto[]>([]);
     const [payouts, setPayouts] = useState<import('../api/frontend-api-contract').AdminPayoutDto[]>([]);
@@ -170,7 +172,7 @@ const AdminBookings = () => {
                                                 booking.status === 'pending_confirm' ? 'bg-amber-50 text-amber-600' :
                                                 booking.status === 'cancelled' ? 'bg-red-50 text-red-600' : 'bg-slate-100 text-slate-500'
                                             }`}>
-                                                {STATUS_LABELS[booking.status] ?? booking.status}
+                                                {getStatusLabel(t, booking.status)}
                                             </span>
                                         </td>
                                     </tr>
@@ -205,7 +207,7 @@ const AdminBookings = () => {
                                         <div className="text-lg font-black text-slate-900">Booking #{refund.bookingId} • {refund.serviceName}</div>
                                         <div className="text-sm font-bold text-slate-500">Khách: {refund.customerName} • Y tá: {refund.nurseName}</div>
                                         <div className="text-sm font-bold text-slate-500">
-                                            Trạng thái booking: {STATUS_LABELS[refund.bookingStatus] ?? refund.bookingStatus}
+                                            Trạng thái booking: {getStatusLabel(t, refund.bookingStatus)}
                                         </div>
                                         <div className="text-sm font-bold text-slate-500">
                                             Hoàn: {refund.refundAmount.toLocaleString('vi-VN')}đ

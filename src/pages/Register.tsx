@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRightIcon, UserGroupIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { getErrorMessage } from '../utils/apiError';
@@ -9,6 +10,7 @@ import { getErrorMessage } from '../utils/apiError';
 const Register = () => {
     const { register } = useAuth();
     const { showToast } = useToast();
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
@@ -23,7 +25,7 @@ const Register = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (form.password !== form.confirmPassword) {
-            showToast('Mật khẩu xác nhận không khớp.', 'error');
+            showToast(t('toast.passwordMismatch'), 'error');
             return;
         }
 
@@ -51,10 +53,10 @@ const Register = () => {
                       };
 
             await register(payload, form.role);
-            showToast('Đăng ký thành công! Hãy đăng nhập.', 'success');
+            showToast(t('toast.registerSuccess'), 'success');
             navigate('/login');
         } catch (err) {
-            showToast(getErrorMessage(err, 'Email đã tồn tại hoặc có lỗi xảy ra.'), 'error');
+            showToast(getErrorMessage(err, t('toast.registerError')), 'error');
         } finally {
             setLoading(false);
         }
@@ -77,18 +79,18 @@ const Register = () => {
                             <img src="/assets/images/caremate-brand-logo.png" alt="CareMate Logo" className="h-28 w-auto object-contain transition-transform group-hover:scale-105" />
                         </Link>
                         <div className="mt-24">
-                            <h2 className="text-4xl font-black leading-tight">Bắt đầu hành trình <br /> chăm sóc chuyên nghiệp</h2>
+                            <h2 className="text-4xl font-black leading-tight" dangerouslySetInnerHTML={{ __html: t('register.welcomeTitle') }}></h2>
                             <p className="mt-6 text-white/50 font-medium leading-relaxed max-w-sm">
-                                Gia nhập cộng đồng CareMate để trải nghiệm dịch vụ chăm sóc mẹ và bé tận tâm nhất Việt Nam.
+                                {t('register.welcomeDesc')}
                             </p>
                         </div>
                     </div>
                     <div className="relative z-10 flex gap-6">
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40">
-                            <UserGroupIcon className="h-5 w-5 text-brand" /> 10k+ Khách hàng
+                            <UserGroupIcon className="h-5 w-5 text-brand" /> {t('register.customersCount')}
                         </div>
                         <div className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-white/40">
-                            <ShieldCheckIcon className="h-5 w-5 text-brand" /> Xác minh 100%
+                            <ShieldCheckIcon className="h-5 w-5 text-brand" /> {t('register.verified')}
                         </div>
                     </div>
                 </div>
@@ -98,53 +100,53 @@ const Register = () => {
                         <Link to="/" className="lg:hidden flex items-center justify-center mb-8">
                             <img src="/assets/images/logo.png" alt="CareMate" className="h-12 w-auto object-contain" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                         </Link>
-                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900">Tạo tài khoản</h1>
+                        <h1 className="text-2xl sm:text-3xl font-black text-slate-900">{t('register.title')}</h1>
                         <p className="mt-3 text-sm font-bold text-slate-500">
-                            Bạn đã có tài khoản?{' '}
-                            <Link to="/login" className="text-brand font-black hover:underline">Đăng nhập</Link>
+                            {t('register.hasAccount')}{' '}
+                            <Link to="/login" className="text-brand font-black hover:underline">{t('register.loginNow')}</Link>
                         </p>
 
                         <form onSubmit={handleSubmit} className="mt-8 sm:mt-10 space-y-5 sm:space-y-6">
                             <div>
-                                <label className="form-label">Bạn là ai?</label>
+                                <label className="form-label">{t('register.whoAreYou')}</label>
                                 <div className="mt-2 grid grid-cols-2 gap-3">
                                     <button type="button" onClick={() => setForm({ ...form, role: 'customer' })} className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'customer' ? 'bg-brand text-white shadow-lg shadow-pink-500/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
-                                        Khách hàng
+                                        {t('register.customerRole')}
                                     </button>
                                     <button type="button" onClick={() => setForm({ ...form, role: 'nurse' })} className={`py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${form.role === 'nurse' ? 'bg-brand text-white shadow-lg shadow-pink-500/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}>
-                                        Y tá / Điều dưỡng
+                                        {t('register.nurseRole')}
                                     </button>
                                 </div>
                             </div>
 
                             <div>
-                                <label className="form-label">Họ và tên</label>
+                                <label className="form-label">{t('register.fullNameLabel')}</label>
                                 <input type="text" className="form-input" placeholder="Nguyễn Văn A" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} required />
                             </div>
 
                             <div>
-                                <label className="form-label">Email</label>
+                                <label className="form-label">{t('register.emailLabel')}</label>
                                 <input type="email" className="form-input" placeholder="your@email.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
                             </div>
 
                             <div>
-                                <label className="form-label">Số điện thoại</label>
+                                <label className="form-label">{t('register.phoneLabel')}</label>
                                 <input type="tel" className="form-input" placeholder="09xx xxx xxx" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} required />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-4">
                                 <div>
-                                    <label className="form-label">Mật khẩu</label>
+                                    <label className="form-label">{t('register.passwordLabel')}</label>
                                     <input type="password" className="form-input" placeholder="••••••••" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
                                 </div>
                                 <div>
-                                    <label className="form-label">Xác nhận</label>
+                                    <label className="form-label">{t('register.confirmPasswordLabel')}</label>
                                     <input type="password" className="form-input" placeholder="••••••••" value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} required />
                                 </div>
                             </div>
 
                             <button type="submit" disabled={loading} className="btn-primary w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-pink-500/20 flex items-center justify-center gap-3">
-                                {loading ? 'Đang xử lý...' : 'Đăng ký ngay'}
+                                {loading ? t('register.processing') : t('register.registerBtn')}
                                 {!loading && <ArrowRightIcon className="h-4 w-4" />}
                             </button>
                         </form>

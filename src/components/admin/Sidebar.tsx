@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../hooks/useAuth';
 import { 
     Squares2X2Icon, 
@@ -17,17 +18,18 @@ const AdminSidebar = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { t } = useTranslation();
 
     const menuItems = [
-        { label: 'Tổng quan', path: '/admin/dashboard', icon: Squares2X2Icon },
-        { label: 'Duyệt điều dưỡng', path: '/admin/pending-nurses', icon: ClipboardDocumentCheckIcon },
-        { label: 'Quản lý người dùng', path: '/admin/users', icon: UserGroupIcon },
-        { label: 'Tất cả lịch hẹn', path: '/admin/bookings', icon: CalendarIcon },
-        { label: 'Tài chính', path: '/admin/finance', icon: BanknotesIcon },
-        { label: 'Audit logs', path: '/admin/audit-logs', icon: ClipboardDocumentListIcon },
-        { label: 'Tin nhắn hỗ trợ', path: '/admin/chat', icon: ChatBubbleLeftRightIcon },
-        { label: 'Khiếu nại & Hỗ trợ', path: '/admin/reports', icon: ExclamationTriangleIcon },
-        { label: 'Cài đặt hệ thống', path: '/admin/settings', icon: Cog6ToothIcon },
+        { label: t('admin.dashboard'), path: '/admin/dashboard', icon: Squares2X2Icon },
+        { label: t('admin.pendingNurses'), path: '/admin/pending-nurses', icon: ClipboardDocumentCheckIcon },
+        { label: t('admin.users'), path: '/admin/users', icon: UserGroupIcon },
+        { label: t('admin.bookings'), path: '/admin/bookings', icon: CalendarIcon },
+        { label: t('admin.finance'), path: '/admin/finance', icon: BanknotesIcon },
+        { label: t('admin.auditLogs'), path: '/admin/audit-logs', icon: ClipboardDocumentListIcon },
+        { label: t('admin.chat'), path: '/admin/chat', icon: ChatBubbleLeftRightIcon },
+        { label: t('admin.reports'), path: '/admin/reports', icon: ExclamationTriangleIcon },
+        { label: t('admin.settings'), path: '/admin/settings', icon: Cog6ToothIcon },
     ];
 
     const handleLogout = async () => {
@@ -46,7 +48,7 @@ const AdminSidebar = () => {
 
             {/* Navigation */}
             <nav className="flex-1 px-4 mt-4 space-y-2 overflow-y-auto custom-scrollbar">
-                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Menu hệ thống</div>
+                <div className="px-4 mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('admin.systemMenu')}</div>
                 {menuItems.map((item) => {
                     const isActive = location.pathname === item.path;
                     return (
@@ -74,7 +76,7 @@ const AdminSidebar = () => {
                     </div>
                     <div className="min-w-0">
                         <div className="text-sm font-black text-slate-900 truncate">{user?.username || 'System Admin'}</div>
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">Quản trị viên hệ thống</div>
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{t('admin.systemAdmin')}</div>
                     </div>
                 </div>
                 <button 
@@ -82,7 +84,7 @@ const AdminSidebar = () => {
                     className="flex w-full items-center justify-center gap-3 py-4 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-[#3B82F6] transition-all active:scale-95 shadow-sm"
                 >
                     <ArrowRightOnRectangleIcon className="h-4 w-4" />
-                    Đăng xuất hệ thống
+                    {t('admin.logoutSystem')}
                 </button>
             </div>
         </aside>

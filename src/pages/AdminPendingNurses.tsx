@@ -10,10 +10,12 @@ import {
     AcademicCapIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '../hooks/useToast';
 
 const AdminPendingNurses = () => {
     const { showToast } = useToast();
+    const { t } = useTranslation();
     const [pendingNurses, setPendingNurses] = useState<NurseProfileDetailDto[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -23,7 +25,7 @@ const AdminPendingNurses = () => {
             const data = await caremateApi.getPendingNurses();
             setPendingNurses(data);
         } catch (err) {
-            showToast('Không thể tải danh sách điều dưỡng chờ duyệt.', 'error');
+            showToast(t('adminPendingNurses.loadError'), 'error');
             console.error(err);
         } finally {
             setLoading(false);

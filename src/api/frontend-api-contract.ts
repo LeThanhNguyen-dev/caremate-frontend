@@ -154,6 +154,8 @@ export type ServiceDetailDto = {
   name: string;
   category: string;
   description: string | null;
+  nameEn: string | null;
+  descriptionEn: string | null;
   basePrice: number;
   estimatedDurationMinutes: number;
   serviceKind: 'single' | 'package' | string;
@@ -218,6 +220,12 @@ export type CommunityPostDto = {
   likedByMe: boolean;
   createdAt: string;
   comments: CommunityCommentDto[];
+};
+
+export type NurseRatingDto = {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: Record<number, number>;
 };
 
 export type AdminUserDto = {

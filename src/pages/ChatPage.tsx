@@ -12,6 +12,7 @@ import { API_BASE_URL } from '../api/axios';
 import type { ChatMessage, Conversation } from '../api/frontend-api-contract';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
+import { useTranslation } from 'react-i18next';
 
 type TokenClaims = {
   sub?: string;
@@ -35,6 +36,7 @@ const getUserIdFromToken = (token: string | null) => {
 };
 
 const ChatPage = () => {
+  const { t } = useTranslation();
   const { bookingId } = useParams<{ bookingId?: string }>();
   const { user, accessToken } = useAuth();
   const { showToast } = useToast();
@@ -76,7 +78,7 @@ const ChatPage = () => {
         }
       } catch (error) {
         console.error('Failed to load chat', error);
-        showToast('Không thể tải tin nhắn.', 'error');
+        showToast(t('chat.toastError'), 'error');
       } finally {
         setLoading(false);
       }
@@ -152,14 +154,14 @@ const ChatPage = () => {
       setMessages((prev) => prev.some((item) => item.id === message.id) ? prev : [...prev, message]);
     } catch (error) {
       console.error('Failed to send message', error);
-      showToast('Hội thoại đặt lịch đã kết thúc hoặc không thể gửi tin.', 'warning');
+      showToast(t('chat.toastWarning'), 'warning');
       setDraft(content);
     }
   };
 
   const title = activeConversation?.type === 'support'
-    ? 'Hỗ trợ CareMate'
-    : `Lịch hẹn #CM-${activeConversation?.bookingId ?? ''}`;
+    ? t('chat.supportTitle')
+    : t('chat.bookingTitle', { id: activeConversation?.bookingId ?? '' });
 
   return (
     <div className="bg-slate-50 px-4 py-8 lg:px-8">
@@ -170,16 +172,16 @@ const ChatPage = () => {
               <ChatBubbleLeftRightIcon className="h-6 w-6" />
             </div>
             <div>
-              <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-900">Tin nhắn</div>
-              <div className="text-xs font-bold text-slate-400">Realtime CareMate</div>
+              <div className="text-sm font-black uppercase tracking-[0.18em] text-slate-900">{t('chat.sidebarTitle')}</div>
+              <div className="text-xs font-bold text-slate-400">{t('chat.sidebarSubtitle')}</div>
             </div>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-3">
             {loading ? (
-              <div className="p-6 text-sm font-bold text-slate-400">Đang tải...</div>
+              <div className="p-6 text-sm font-bold text-slate-400">{t('chat.loading')}</div>
             ) : conversations.length === 0 ? (
-              <div className="p-6 text-sm font-bold text-slate-400">Chưa có hội thoại.</div>
+              <div className="p-6 text-sm font-bold text-slate-400">{t('chat.emptyState')}</div>
             ) : conversations.map((conversation) => (
               <button
                 key={conversation.id}
@@ -197,10 +199,10 @@ const ChatPage = () => {
                 </div>
                 <div className="min-w-0">
                   <div className="truncate text-sm font-black">
-                    {conversation.type === 'support' ? (isAdmin ? conversation.peerName || 'Người dùng' : 'Admin CareMate') : conversation.peerName || `Booking #${conversation.bookingId}`}
+                    {conversation.type === 'support' ? (isAdmin ? conversation.peerName || t('chat.defaultUser') : t('chat.defaultAdmin')) : conversation.peerName || t('chat.bookingPrefix', { id: conversation.bookingId })}
                   </div>
                   <div className={`mt-1 truncate text-xs font-bold ${activeConversation?.id === conversation.id ? 'text-white/60' : 'text-slate-400'}`}>
-                    {conversation.lastMessage || (conversation.canSend ? 'Sẵn sàng nhắn tin' : 'Hội thoại đã đóng')}
+                    {conversation.lastMessage || (conversation.canSend ? t('chat.statusReady') : t('chat.statusClosed'))}
                   </div>
                 </div>
               </button>
@@ -213,7 +215,7 @@ const ChatPage = () => {
             <div>
               <h1 className="text-xl font-black text-slate-900">{title}</h1>
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-                {activeConversation?.canSend ? 'Đang mở' : 'Chỉ xem lịch sử'}
+                {activeConversation?.canSend ? t('chat.stateOpen') : t('chat.stateReadonly')}
               </p>
             </div>
           </div>
@@ -240,7 +242,7 @@ const ChatPage = () => {
           <div className="border-t border-slate-100 bg-white p-4">
             {!activeConversation?.canSend ? (
               <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm font-bold text-amber-700">
-                Hội thoại với y tá chỉ mở trong phiên đặt. Bạn vẫn có thể xem lại lịch sử tin nhắn.
+                {t('chat.warningReadonly')}
               </div>
             ) : (
               <div className="flex items-end gap-3">
@@ -255,13 +257,13 @@ const ChatPage = () => {
                     }
                   }}
                   className="block h-12 flex-1 rounded-xl border border-slate-200 px-4 text-sm font-semibold text-slate-800 shadow-sm outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20"
-                  placeholder="Nhập tin nhắn..."
+                  placeholder={t('chat.placeholder')}
                 />
                 <button
                   onClick={() => void sendMessage()}
                   disabled={!draft.trim()}
                   className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 text-white transition hover:bg-brand disabled:cursor-not-allowed disabled:bg-slate-200"
-                  title="Gửi tin nhắn"
+                  title={t('chat.btnSend')}
                 >
                   <PaperAirplaneIcon className="h-5 w-5" />
                 </button>

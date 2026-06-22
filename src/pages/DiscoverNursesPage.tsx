@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -14,15 +15,15 @@ import caremateApi from '../api/caremateApi';
 import type { NurseDiscoveryDto, ServiceDetailDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
 
-const daNangDistricts = [
-    { value: 'all', label: 'Tất cả Đà Nẵng', latitude: 16.0544, longitude: 108.2022 },
-    { value: 'Hải Châu', label: 'Hải Châu', latitude: 16.0678, longitude: 108.2208 },
-    { value: 'Thanh Khê', label: 'Thanh Khê', latitude: 16.0707, longitude: 108.1906 },
-    { value: 'Sơn Trà', label: 'Sơn Trà', latitude: 16.1062, longitude: 108.2529 },
-    { value: 'Ngũ Hành Sơn', label: 'Ngũ Hành Sơn', latitude: 16.0037, longitude: 108.2647 },
-    { value: 'Liên Chiểu', label: 'Liên Chiểu', latitude: 16.0744, longitude: 108.1491 },
-    { value: 'Cẩm Lệ', label: 'Cẩm Lệ', latitude: 16.0169, longitude: 108.2047 },
-    { value: 'Hòa Vang', label: 'Hòa Vang', latitude: 16.0390, longitude: 108.1135 },
+const daNangDistrictsBase = [
+    { value: 'all', key: 'all', latitude: 16.0544, longitude: 108.2022 },
+    { value: 'Hải Châu', key: 'haiChau', latitude: 16.0678, longitude: 108.2208 },
+    { value: 'Thanh Khê', key: 'thanhKhe', latitude: 16.0707, longitude: 108.1906 },
+    { value: 'Sơn Trà', key: 'sonTra', latitude: 16.1062, longitude: 108.2529 },
+    { value: 'Ngũ Hành Sơn', key: 'nguHanhSon', latitude: 16.0037, longitude: 108.2647 },
+    { value: 'Liên Chiểu', key: 'lienChieu', latitude: 16.0744, longitude: 108.1491 },
+    { value: 'Cẩm Lệ', key: 'camLe', latitude: 16.0169, longitude: 108.2047 },
+    { value: 'Hòa Vang', key: 'hoaVang', latitude: 16.0390, longitude: 108.1135 },
 ];
 
 const toCoordinate = (value: unknown): number | null => {
@@ -32,10 +33,13 @@ const toCoordinate = (value: unknown): number | null => {
 };
 
 const DiscoverNursesPage = () => {
+    const { t, i18n } = useTranslation();
     const [searchParams] = useSearchParams();
     const serviceId = searchParams.get('serviceId');
     const navigate = useNavigate();
     const { showToast } = useToast();
+
+    const daNangDistricts = useMemo(() => daNangDistrictsBase.map(d => ({ ...d, label: t(`discoverNurses.districts.${d.key}`) })), [t]);
 
     const [nurses, setNurses] = useState<NurseDiscoveryDto[]>([]);
     const [services, setServices] = useState<ServiceDetailDto[]>([]);
@@ -88,7 +92,7 @@ const DiscoverNursesPage = () => {
 
     useEffect(() => {
         if (!serviceId) {
-            showToast('Hãy chọn dịch vụ trước khi tìm y tá.', 'warning');
+            showToast(t('discoverNurses.toastNoService'), 'warning');
             navigate('/services');
         }
     }, [navigate, serviceId, showToast]);
@@ -114,14 +118,14 @@ const DiscoverNursesPage = () => {
                 setNurses(nurseData);
                 setServices(serviceData);
             } catch {
-                showToast('Không thể tải danh sách y tá theo dịch vụ đã chọn.', 'error');
+                showToast(t('discoverNurses.toastError'), 'error');
             } finally {
                 if (isInitialLoad) setLoading(false);
             }
         };
 
         void load();
-    }, [customerAddressLoaded, matchingLocation.district, matchingLocation.latitude, matchingLocation.longitude, serviceId, showToast, sortBy]);
+    }, [customerAddressLoaded, i18n.language, matchingLocation.district, matchingLocation.latitude, matchingLocation.longitude, serviceId, showToast, sortBy]);
 
     const selectedService = useMemo(
         () => services.find((item) => item.id === Number(serviceId)),
@@ -154,13 +158,13 @@ const DiscoverNursesPage = () => {
     }, [nurses, search, sortBy]);
 
     const statCards = [
-        { label: 'Dịch vụ đang chọn', value: selectedService?.name || 'Đang tải...', icon: AdjustmentsHorizontalIcon },
-        { label: 'Y tá phù hợp', value: filtered.length, icon: UserGroupIcon },
+        { label: t('discoverNurses.stat1'), value: selectedService?.name || t('discoverNurses.loading'), icon: AdjustmentsHorizontalIcon },
+        { label: t('discoverNurses.stat2'), value: filtered.length, icon: UserGroupIcon },
         {
-            label: 'Mức giá từ',
+            label: t('discoverNurses.stat3'),
             value: filtered.length
                 ? `${Math.min(...filtered.map((item) => item.servicePrice ?? 0)).toLocaleString('vi-VN')} VND`
-                : 'N/A',
+                : t('discoverNurses.na'),
             icon: WalletIcon,
         },
     ];
@@ -200,12 +204,12 @@ const DiscoverNursesPage = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="rounded-2xl border border-slate-100 bg-white p-8 shadow-xl shadow-slate-200/55 sm:p-10"
                     >
-                        <div className="accent-label">Bước 2</div>
+                        <div className="accent-label">{t('discoverNurses.step2')}</div>
                         <h1 className="mt-4 font-heading text-4xl font-black leading-tight tracking-tight text-[#10233F] md:text-5xl">
-                            Danh sách y tá đã lọc theo đúng dịch vụ bạn vừa chọn.
+                            {t('discoverNurses.title')}
                         </h1>
                         <p className="mt-4 max-w-2xl text-sm font-semibold leading-7 text-slate-500">
-                            Chỉ hiển thị những y tá có mở dịch vụ này, giúp bạn xem đúng hồ sơ, đúng giá và đặt lịch nhanh hơn.
+                            {t('discoverNurses.desc')}
                         </p>
                     </motion.div>
 
@@ -233,14 +237,14 @@ const DiscoverNursesPage = () => {
                 <section data-tour="nurse-filters" className="rounded-2xl border border-slate-100 bg-white p-5 shadow-lg shadow-slate-200/35 sm:p-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
-                            <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">Dịch vụ đã khóa</div>
+                            <div className="text-xs font-bold uppercase tracking-[0.24em] text-slate-400">{t('discoverNurses.lockedService')}</div>
                             <div className="mt-2 font-heading text-2xl font-bold text-[#10233F]">{selectedService?.name}</div>
                             <div className="mt-1 text-sm text-slate-600">
-                                Cần đổi dịch vụ? Quay lại bước 1 để tìm đúng nhóm y tá tương ứng.
+                                {t('discoverNurses.changeService')}
                             </div>
                         </div>
                         <Link to="/services" className="btn-secondary btn-sm transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-brand/10">
-                            Quay lại chọn dịch vụ
+                            {t('discoverNurses.back')}
                         </Link>
                     </div>
                 </section>
@@ -249,23 +253,23 @@ const DiscoverNursesPage = () => {
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <div className="text-xs font-black uppercase tracking-[0.24em] text-brand">
-                                {isFilteringByDistrict ? 'Đang lọc theo khu vực' : 'Đang hiển thị toàn Đà Nẵng'}
+                                {isFilteringByDistrict ? t('discoverNurses.filterDistrict') : t('discoverNurses.allDaNang')}
                             </div>
                             <div className="mt-2 text-xl font-black text-[#10233F]">
                                 {isFilteringByDistrict
                                     ? daNangDistricts.find((item) => item.value === selectedDistrict)?.label
-                                    : 'Tất cả y tá có dịch vụ này'}
+                                    : t('discoverNurses.allNurses')}
                             </div>
                             <p className="mt-2 text-sm font-semibold leading-6 text-slate-500">
                                 {isFilteringByDistrict
-                                    ? 'Danh sách đang được lọc theo quận bạn chọn ở ô bên dưới.'
+                                    ? t('discoverNurses.filterDescDistrict')
                                     : sortBy === 'nearest' && customerAddress?.fullAddress
-                                        ? `Đang sắp xếp theo địa chỉ hồ sơ của bạn: ${customerAddress.fullAddress}.`
-                                        : 'Đang hiển thị toàn bộ y tá có mở dịch vụ này tại Đà Nẵng.'}
+                                        ? t('discoverNurses.filterDescNearest', { address: customerAddress.fullAddress })
+                                        : t('discoverNurses.filterDescAll')}
                             </p>
                         </div>
                         <Link to="/profile" className="rounded-full bg-white px-6 py-3 text-xs font-black uppercase tracking-widest text-brand shadow-sm transition hover:-translate-y-0.5 hover:bg-brand hover:text-white">
-                            Cập nhật địa chỉ
+                            {t('discoverNurses.updateAddress')}
                         </Link>
                     </div>
                 </section>
@@ -277,7 +281,7 @@ const DiscoverNursesPage = () => {
                             <input
                                 type="text"
                                 className="w-full rounded-2xl border border-slate-200 bg-white py-4 pl-14 pr-5 text-sm font-bold text-[#10233F] shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand/40 focus:ring-4 focus:ring-brand/10"
-                                placeholder="Tìm theo tên, bio, chuyên môn..."
+                                placeholder={t('discoverNurses.searchPlaceholder')}
                                 value={search}
                                 onChange={(event) => setSearch(event.target.value)}
                             />
@@ -302,12 +306,12 @@ const DiscoverNursesPage = () => {
                                 value={sortBy}
                                 onChange={(event) => setSortBy(event.target.value)}
                             >
-                                <option value="bestMatch">Phù hợp nhất</option>
-                                <option value="nearest">Gần khách hàng nhất</option>
-                                <option value="rating">Đánh giá cao nhất</option>
-                                <option value="experience">Kinh nghiệm nhiều nhất</option>
-                                <option value="price">Giá hợp lý nhất</option>
-                                <option value="name">Tên A-Z</option>
+                                <option value="bestMatch">{t('discoverNurses.sortBestMatch')}</option>
+                                <option value="nearest">{t('discoverNurses.sortNearest')}</option>
+                                <option value="rating">{t('discoverNurses.sortRating')}</option>
+                                <option value="experience">{t('discoverNurses.sortExperience')}</option>
+                                <option value="price">{t('discoverNurses.sortPrice')}</option>
+                                <option value="name">{t('discoverNurses.sortName')}</option>
                             </select>
                             <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400">⌄</div>
                         </div>
@@ -316,8 +320,8 @@ const DiscoverNursesPage = () => {
 
                 {filtered.length === 0 ? (
                     <div className="empty-state">
-                        <div className="empty-state-title">Không tìm thấy y tá phù hợp</div>
-                        <div className="empty-state-text">Thử đổi từ khóa tìm kiếm hoặc quay lại chọn một dịch vụ khác.</div>
+                        <div className="empty-state-title">{t('discoverNurses.emptyTitle')}</div>
+                        <div className="empty-state-text">{t('discoverNurses.emptyDesc')}</div>
                     </div>
                 ) : (
                     <motion.div className="grid min-h-[760px] grid-cols-1 content-start gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -346,7 +350,7 @@ const DiscoverNursesPage = () => {
                                             <div className="min-w-0">
                                                 <div className="truncate font-heading text-[22px] font-black leading-tight text-[#10233F]">{nurse.fullName}</div>
                                                 <div className="mt-1 truncate text-sm font-semibold text-slate-500">
-                                                    {nurse.specialization || 'Chuyên viên chăm sóc tại nhà'}
+                                                    {nurse.specialization || t('discoverNurses.defaultSpec')}
                                                 </div>
                                             </div>
                                         </div>
@@ -359,12 +363,12 @@ const DiscoverNursesPage = () => {
                                     <div className="mt-5 rounded-2xl bg-[#FDF2F8] p-4 ring-1 ring-brand/10">
                                         <div className="flex items-center justify-between gap-3">
                                             <div>
-                                                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-brand">Điểm gợi ý</div>
-                                                <div className="mt-1 text-2xl font-black leading-none text-[#10233F]">{nurse.matchScore ?? 0}% phù hợp</div>
+                                                <div className="text-[10px] font-black uppercase tracking-[0.18em] text-brand">{t('discoverNurses.matchScore')}</div>
+                                                <div className="mt-1 text-2xl font-black leading-none text-[#10233F]">{t('discoverNurses.matchLabel', { score: nurse.matchScore ?? 0 })}</div>
                                             </div>
                                             {nurse.distanceKm != null && (
                                                 <div className="rounded-full bg-white px-3 py-1.5 text-[11px] font-black text-slate-600 shadow-sm">
-                                                    {nurse.distanceKm.toFixed(1)} km đường thẳng
+                                                    {t('discoverNurses.distance', { km: nurse.distanceKm.toFixed(1) })}
                                                 </div>
                                             )}
                                         </div>
@@ -381,12 +385,12 @@ const DiscoverNursesPage = () => {
                                     </div>
 
                                     <p className="mt-5 flex-1 overflow-hidden text-sm font-medium leading-7 text-slate-600 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]">
-                                        {nurse.bio || 'Hồ sơ đang được bổ sung mô tả chi tiết về kinh nghiệm chăm sóc.'}
+                                        {nurse.bio || t('discoverNurses.noBio')}
                                     </p>
 
                                     <div className="mt-6 grid grid-cols-2 gap-3">
                                         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Số sao</div>
+                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{t('discoverNurses.stars')}</div>
                                             <div className="mt-2 flex items-center gap-1 text-amber-400">
                                                 {Array.from({ length: 5 }, (_, starIndex) => (
                                                     <StarSolidIcon
@@ -397,17 +401,17 @@ const DiscoverNursesPage = () => {
                                             </div>
                                         </div>
                                         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Trình độ</div>
+                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{t('discoverNurses.spec')}</div>
                                             <div className="mt-2 truncate text-sm font-black text-[#10233F]">
-                                                {nurse.specialization || 'Điều dưỡng chăm sóc'}
+                                                {nurse.specialization || t('discoverNurses.defaultSpecShort')}
                                             </div>
                                         </div>
                                         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Kinh nghiệm</div>
-                                            <div className="mt-2 text-sm font-black text-[#10233F]">{nurse.yearsExperience} năm</div>
+                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{t('discoverNurses.exp')}</div>
+                                            <div className="mt-2 text-sm font-black text-[#10233F]">{t('discoverNurses.years', { years: nurse.yearsExperience })}</div>
                                         </div>
                                         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-3">
-                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">Giá dịch vụ</div>
+                                            <div className="text-[10px] font-black uppercase tracking-[0.16em] text-slate-400">{t('discoverNurses.price')}</div>
                                             <div className="mt-2 text-sm font-black text-[#10233F]">
                                                 {(nurse.servicePrice ?? 0).toLocaleString('vi-VN')} VND
                                             </div>
@@ -416,7 +420,7 @@ const DiscoverNursesPage = () => {
 
                                     <div className="mt-5 flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-emerald-600">
                                         <CheckBadgeIcon className="h-4 w-4" />
-                                        Đã xác minh hồ sơ
+                                        {t('discoverNurses.verified')}
                                         <StarIcon className="ml-auto h-4 w-4 text-brand" />
                                     </div>
 
@@ -425,7 +429,7 @@ const DiscoverNursesPage = () => {
                                         data-tour="nurse-card"
                                         className="btn-primary mt-6 w-full justify-between transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-brand/20"
                                     >
-                                        Xem hồ sơ và đặt lịch
+                                        {t('discoverNurses.viewAndBook')}
                                         <span className="text-lg leading-none">→</span>
                                     </Link>
                                 </motion.div>

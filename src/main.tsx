@@ -4,6 +4,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App';
 import RenderErrorBoundary from './components/RenderErrorBoundary';
 import './index.css';
+import './i18n/i18n';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

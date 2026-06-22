@@ -2,92 +2,67 @@ import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { QuestionMarkCircleIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 
 type TourStep = {
   selector: string;
   path?: RegExp;
-  title: string;
-  body: string;
   action?: 'navigate-services' | 'click-target';
 };
 
 const tourStorageKey = 'caremate_booking_tour_completed';
 
-const steps: TourStep[] = [
+const baseSteps: TourStep[] = [
   {
     selector: '[data-tour="nav-services"]',
-    title: 'Bắt đầu từ Dịch vụ',
-    body: 'Bấm vào mục Dịch vụ để xem các gói chăm sóc đang mở trên CareMate.',
     action: 'navigate-services',
   },
   {
     selector: '[data-tour="service-search"]',
     path: /^\/services$/,
-    title: 'Tìm dịch vụ phù hợp',
-    body: 'Bạn có thể tìm theo tên dịch vụ hoặc lọc theo nhóm để thấy đúng nhu cầu chăm sóc.',
   },
   {
     selector: '[data-tour="service-categories"]',
     path: /^\/services$/,
-    title: 'Chọn nhóm dịch vụ',
-    body: 'Các nút nhóm giúp bạn lọc nhanh theo nhu cầu, ví dụ chăm sóc sau sinh, chăm bé hoặc gói dài ngày.',
   },
   {
     selector: '[data-tour="service-card"]',
     path: /^\/services$/,
-    title: 'Chọn một dịch vụ',
-    body: 'Mở thẻ dịch vụ để xem chi tiết giá, thời lượng và các hạng mục được chăm sóc.',
     action: 'click-target',
   },
   {
     selector: '[data-tour="service-detail-info"]',
     path: /^\/services\/[^/]+$/,
-    title: 'Xem thông tin dịch vụ',
-    body: 'Kiểm tra nhóm dịch vụ, số buổi, thời lượng và chi phí dự kiến trước khi chuyển sang bước chọn y tá.',
   },
   {
     selector: '[data-tour="service-book-now"]',
     path: /^\/services\/[^/]+$/,
-    title: 'Đi tới bước chọn y tá',
-    body: 'Sau khi đã xem kỹ thông tin, bấm Đặt lịch ngay để xem danh sách y tá phù hợp.',
     action: 'click-target',
   },
   {
     selector: '[data-tour="nurse-filters"]',
     path: /^\/find-nurse$/,
-    title: 'Lọc danh sách y tá',
-    body: 'Danh sách này đã được lọc theo dịch vụ. Bạn có thể tìm tên, lọc khu vực hoặc sắp xếp theo đánh giá, khoảng cách, kinh nghiệm.',
   },
   {
     selector: '[data-tour="nurse-card"]',
     path: /^\/find-nurse$/,
-    title: 'Chọn hồ sơ y tá',
-    body: 'Mở hồ sơ y tá để xem kinh nghiệm, đánh giá và các khung giờ còn trống.',
     action: 'click-target',
   },
   {
     selector: '[data-tour="booking-schedule"]',
     path: /^\/nurses\/[^/]+$/,
-    title: 'Chọn ngày và khung giờ',
-    body: 'Ở đây chỉ hiển thị các khung giờ y tá còn có thể nhận lịch. Chọn một giờ phù hợp với gia đình bạn.',
   },
   {
     selector: '[data-tour="booking-slot"]',
     path: /^\/nurses\/[^/]+$/,
-    title: 'Bấm vào giờ muốn đặt',
-    body: 'Khi khung giờ đổi màu, lịch đã được chọn. Với gói nhiều buổi, chọn đủ giờ cho từng ngày.',
   },
   {
     selector: '[data-tour="booking-address"]',
     path: /^\/nurses\/[^/]+$/,
-    title: 'Nhập địa chỉ phục vụ',
-    body: 'Điền địa chỉ để y tá biết nơi đến. Nếu bản đồ bật, bạn có thể chọn vị trí chính xác trên bản đồ.',
   },
   {
     selector: '[data-tour="booking-submit"]',
     path: /^\/nurses\/[^/]+$/,
-    title: 'Hoàn tất đặt lịch',
-    body: 'Kiểm tra lại thông tin rồi bấm tiếp tục. Nếu chưa đăng nhập, hệ thống sẽ đưa bạn tới trang đăng nhập trước.',
   },
 ];
 
@@ -104,7 +79,7 @@ const findVisibleTarget = (selector: string) => {
 };
 
 const findFirstRouteStepIndex = (pathname: string) =>
-  steps.findIndex((item) => item.path?.test(pathname));
+  baseSteps.findIndex((item) => item.path?.test(pathname));
 
 const isCenteredEnough = (rect: DOMRect) =>
   rect.top >= 96 && rect.bottom <= window.innerHeight - 96;
@@ -132,14 +107,15 @@ const getTooltipPosition = (rect: DOMRect | null) => {
 const BookingTour = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
 
-  const step = steps[stepIndex];
-  const isLastStep = stepIndex === steps.length - 1;
+  const step = baseSteps[stepIndex];
+  const isLastStep = stepIndex === baseSteps.length - 1;
 
-  const progressLabel = useMemo(() => `${stepIndex + 1}/${steps.length}`, [stepIndex]);
+  const progressLabel = useMemo(() => `${stepIndex + 1}/${baseSteps.length}`, [stepIndex]);
 
   useEffect(() => {
     if (!open) return;
@@ -220,7 +196,7 @@ const BookingTour = () => {
       return;
     }
 
-    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
+    setStepIndex((current) => Math.min(current + 1, baseSteps.length - 1));
   };
 
   const goBack = () => {
@@ -245,7 +221,7 @@ const BookingTour = () => {
         <span className="pointer-events-none absolute inset-0 -translate-x-full bg-[linear-gradient(110deg,transparent_0%,rgba(255,255,255,0.16)_38%,rgba(255,255,255,0.72)_50%,rgba(255,255,255,0.16)_62%,transparent_100%)] animate-[booking-tour-shine_2.8s_ease-in-out_infinite]" />
         <span className="pointer-events-none absolute inset-0 rounded-full shadow-[inset_0_0_18px_rgba(255,255,255,0.16),0_0_22px_rgba(236,72,153,0.18)]" />
         <QuestionMarkCircleIcon className="relative h-6 w-6 sm:hidden" />
-        <span className="relative hidden sm:inline">Hướng dẫn đặt lịch</span>
+        <span className="relative hidden sm:inline">{t('common.tour.trigger')}</span>
       </button>
 
       <AnimatePresence>
@@ -281,24 +257,24 @@ const BookingTour = () => {
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div>
-                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-brand">Bước {progressLabel}</div>
-                <h2 className="mt-2 text-lg font-black leading-tight">{step.title}</h2>
+                <div className="text-[10px] font-black uppercase tracking-[0.22em] text-brand">{t('common.tour.step', { progress: progressLabel })}</div>
+                <h2 className="mt-2 text-lg font-black leading-tight">{t(`common.tour.steps.${stepIndex}.title`)}</h2>
               </div>
               <button
                 type="button"
                 onClick={() => closeTour(true)}
                 className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-[#10233F]"
-                aria-label="Đóng hướng dẫn"
+                aria-label={t('common.tour.close')}
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
 
-            <p className="text-sm font-semibold leading-6 text-slate-600">{step.body}</p>
+            <p className="text-sm font-semibold leading-6 text-slate-600">{t(`common.tour.steps.${stepIndex}.body`)}</p>
 
             {!targetRect && (
               <div className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-xs font-bold leading-5 text-amber-700">
-                Nếu trang đang tải dữ liệu, chờ một chút rồi bấm tiếp tục.
+                {t('common.tour.loadingDelay')}
               </div>
             )}
 
@@ -309,7 +285,7 @@ const BookingTour = () => {
                 disabled={stepIndex === 0}
                 className="rounded-xl px-4 py-2 text-sm font-black text-slate-500 transition hover:bg-slate-50 disabled:opacity-30"
               >
-                Quay lại
+                {t('common.tour.back')}
               </button>
               <div className="flex items-center gap-2">
                 <button
@@ -317,14 +293,14 @@ const BookingTour = () => {
                   onClick={() => closeTour(true)}
                   className="rounded-xl px-4 py-2 text-sm font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-700"
                 >
-                  Bỏ qua
+                  {t('common.tour.skip')}
                 </button>
                 <button
                   type="button"
                   onClick={goNext}
                   className="rounded-xl bg-brand px-4 py-2 text-sm font-black text-white shadow-lg shadow-pink-200 transition hover:bg-brand-deep"
                 >
-                  {isLastStep ? 'Hoàn tất' : 'Tiếp tục'}
+                  {isLastStep ? t('common.tour.finish') : t('common.tour.next')}
                 </button>
               </div>
             </div>

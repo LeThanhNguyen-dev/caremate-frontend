@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeftIcon,
@@ -21,6 +22,7 @@ import {
 } from '../utils/servicePresentation';
 
 const ServiceDetailPage = () => {
+  const { t, i18n } = useTranslation();
   const { serviceId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -48,7 +50,7 @@ const ServiceDetailPage = () => {
         setServices(allServices.filter((item) => item.status === 'active'));
         setNurses(nurseData);
       } catch {
-        showToast('Không thể tải chi tiết dịch vụ.', 'error');
+        showToast(t('serviceDetail.toastError'), 'error');
         navigate('/services', { replace: true });
       } finally {
         setLoading(false);
@@ -56,10 +58,10 @@ const ServiceDetailPage = () => {
     };
 
     void load();
-  }, [navigate, serviceId, showToast]);
+  }, [navigate, serviceId, showToast, i18n.language]);
 
   const schedule = useMemo(() => getVisiblePackageSchedule(service), [service]);
-  const included = useMemo(() => (service ? getIncludedServiceLabels(service) : []), [service]);
+  const included = useMemo(() => (service ? getIncludedServiceLabels(t, service) : []), [service, t]);
   const relatedServices = useMemo(
     () => services.filter((item) => item.id !== service?.id && item.category === service?.category).slice(0, 3),
     [service, services],
@@ -85,43 +87,43 @@ const ServiceDetailPage = () => {
               className="mb-8 inline-flex items-center gap-2 rounded-full bg-slate-50 px-4 py-2 text-sm font-black text-slate-600 transition hover:bg-brand-soft hover:text-brand"
             >
               <ArrowLeftIcon className="h-4 w-4" />
-              Quay lại dịch vụ
+              {t('serviceDetail.back')}
             </button>
 
             <div className="mb-5 flex flex-wrap items-center gap-2 text-sm font-bold text-slate-400">
-              <Link to="/" className="hover:text-brand">Trang chủ</Link>
+              <Link to="/" className="hover:text-brand">{t('serviceDetail.home')}</Link>
               <span>/</span>
-              <Link to="/services" className="hover:text-brand">Dịch vụ</Link>
+              <Link to="/services" className="hover:text-brand">{t('serviceDetail.services')}</Link>
               <span>/</span>
               <span className="text-brand">{service.name}</span>
             </div>
 
             <div className="inline-flex rounded-full bg-brand-soft px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-brand">
-              {getCategoryLabel(service.category)}
+              {getCategoryLabel(t, service.category)}
             </div>
             <h1 className="mt-4 max-w-2xl text-4xl font-black leading-tight tracking-tight text-[#10233F] sm:text-5xl">
               {service.name}
             </h1>
             <p className="mt-5 max-w-2xl text-base font-semibold leading-8 text-slate-600">
-              {service.description || 'Chưa có mô tả từ hệ thống.'}
+              {service.description || t('serviceDetail.noDesc')}
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
-              <InfoChip icon={<ClockIcon className="h-4 w-4" />} label={`${service.packageDays ?? 1} buổi`} />
-              <InfoChip icon={<ClockIcon className="h-4 w-4" />} label={`${service.estimatedDurationMinutes} phút/buổi`} />
+              <InfoChip icon={<ClockIcon className="h-4 w-4" />} label={t('serviceDetail.sessionsCount', { count: service.packageDays ?? 1 })} />
+              <InfoChip icon={<ClockIcon className="h-4 w-4" />} label={t('serviceDetail.durationPerSession', { count: service.estimatedDurationMinutes })} />
             </div>
           </div>
 
           <div data-tour="service-detail-info" className="rounded-2xl border border-slate-100 bg-white p-6 shadow-[0_28px_70px_rgba(15,23,42,0.08)]">
-            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">Thông tin từ hệ thống</div>
+            <div className="text-xs font-black uppercase tracking-[0.18em] text-slate-400">{t('serviceDetail.sysInfo')}</div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <DataTile label="Mã dịch vụ" value={`#${service.id}`} />
-              <DataTile label="Nhóm" value={getCategoryLabel(service.category)} />
-              <DataTile label="Số buổi" value={`${service.packageDays ?? 1}`} />
-              <DataTile label="Thời lượng" value={`${service.estimatedDurationMinutes} phút/buổi`} />
+              <DataTile label={t('serviceDetail.serviceCode')} value={`#${service.id}`} />
+              <DataTile label={t('serviceDetail.category')} value={getCategoryLabel(t, service.category)} />
+              <DataTile label={t('serviceDetail.sessions')} value={`${service.packageDays ?? 1}`} />
+              <DataTile label={t('serviceDetail.duration')} value={`${service.estimatedDurationMinutes} phút`} />
             </div>
             <div className="mt-5 rounded-2xl bg-brand-soft p-5">
-              <div className="text-xs font-black uppercase tracking-[0.16em] text-brand/70">Chi phí từ</div>
+              <div className="text-xs font-black uppercase tracking-[0.16em] text-brand/70">{t('serviceDetail.priceFrom')}</div>
               <div className="mt-1 text-4xl font-black text-brand">{formatCurrency(service.basePrice)}</div>
             </div>
           </div>
@@ -130,7 +132,7 @@ const ServiceDetailPage = () => {
 
       <main className="mx-auto grid max-w-7xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
         <div className="space-y-6">
-          <Section title="Dịch vụ bao gồm">
+          <Section title={t('serviceDetail.included')}>
             {included.length > 0 ? (
               <div className="grid gap-3 md:grid-cols-2">
                 {included.map((item) => (
@@ -141,18 +143,18 @@ const ServiceDetailPage = () => {
                 ))}
               </div>
             ) : (
-              <EmptyRealData message="Hệ thống chưa cấu hình danh sách hạng mục cho dịch vụ này." />
+              <EmptyRealData message={t('serviceDetail.noIncluded')} />
             )}
           </Section>
 
-          <Section title="Lịch trình chi tiết">
+          <Section title={t('serviceDetail.schedule')}>
             {schedule.length > 0 ? (
               <div className="space-y-3">
                 {schedule.map((item, index) => (
                   <details key={`${item.day}-${item.title}`} open={index === 0} className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 bg-white px-4 py-4 text-left transition group-open:bg-brand-soft">
                       <div>
-                        <div className="text-xs font-black uppercase tracking-[0.14em] text-brand">Ngày {item.day}</div>
+                        <div className="text-xs font-black uppercase tracking-[0.14em] text-brand">{t('serviceDetail.day', { day: item.day })}</div>
                         <div className="mt-1 text-sm font-black text-[#10233F]">{getScheduleTitle(item)}</div>
                       </div>
                       <span className="text-lg font-black text-brand">+</span>
@@ -164,11 +166,11 @@ const ServiceDetailPage = () => {
                 ))}
               </div>
             ) : (
-              <EmptyRealData message="Hệ thống chưa cấu hình lịch trình chi tiết cho dịch vụ này." />
+              <EmptyRealData message={t('serviceDetail.noSchedule')} />
             )}
           </Section>
 
-          <Section title="Điều dưỡng phù hợp">
+          <Section title={t('serviceDetail.nurses')}>
             {previewNurses.length > 0 ? (
               <>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
@@ -180,7 +182,7 @@ const ServiceDetailPage = () => {
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="truncate text-sm font-black text-[#10233F]">{nurse.fullName}</div>
-                          <div className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">{nurse.specialization || 'Chưa cập nhật chuyên môn'}</div>
+                          <div className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-slate-500">{nurse.specialization || t('serviceDetail.noSpec')}</div>
                         </div>
                       </div>
 
@@ -191,7 +193,7 @@ const ServiceDetailPage = () => {
                         </span>
                         <span className="inline-flex items-center justify-center gap-1 rounded-xl bg-slate-50 px-2 py-2">
                           <MapPinIcon className="h-4 w-4 text-brand" />
-                          {nurse.distanceKm != null ? `${nurse.distanceKm.toFixed(1)} km` : `Bán kính ${nurse.serviceRadiusKm} km`}
+                          {nurse.distanceKm != null ? `${nurse.distanceKm.toFixed(1)} km` : t('serviceDetail.radius', { km: nurse.serviceRadiusKm })}
                         </span>
                       </div>
 
@@ -200,7 +202,7 @@ const ServiceDetailPage = () => {
                         onClick={() => navigate(`/nurses/${nurse.userId}?serviceId=${service.id}`)}
                         className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-brand/20 px-3 py-2.5 text-sm font-black text-brand transition hover:bg-brand hover:text-white"
                       >
-                        Xem hồ sơ
+                        {t('serviceDetail.viewProfile')}
                         <ArrowRightIcon className="h-4 w-4" />
                       </button>
                     </article>
@@ -212,19 +214,19 @@ const ServiceDetailPage = () => {
                   onClick={() => navigate(`/find-nurse?serviceId=${service.id}`)}
                   className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#10233F] px-5 py-4 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-brand md:w-auto"
                 >
-                  Xem tất cả điều dưỡng ({nurses.length})
+                  {t('serviceDetail.viewAllNurses', { count: nurses.length })}
                   <ArrowRightIcon className="h-4 w-4" />
                 </button>
               </>
             ) : (
               <div className="rounded-2xl bg-slate-50 p-5">
-                <div className="text-sm font-black text-[#10233F]">Chưa có điều dưỡng hiển thị nhanh cho gói này.</div>
+                <div className="text-sm font-black text-[#10233F]">{t('serviceDetail.noNurses')}</div>
                 <button
                   type="button"
                   onClick={() => navigate(`/find-nurse?serviceId=${service.id}`)}
                   className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-black text-white"
                 >
-                  Mở trang tìm điều dưỡng
+                  {t('serviceDetail.openNurseSearch')}
                   <ArrowRightIcon className="h-4 w-4" />
                 </button>
               </div>
@@ -232,12 +234,12 @@ const ServiceDetailPage = () => {
           </Section>
 
           {relatedServices.length > 0 && (
-            <Section title="Dịch vụ liên quan">
+            <Section title={t('serviceDetail.related')}>
               <div className="grid gap-4 md:grid-cols-3">
                 {relatedServices.map((item) => (
                   <Link key={item.id} to={`/services/${item.id}`} className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl">
                     <div className="h-24 bg-[linear-gradient(135deg,#fdf2f8,#ffffff_55%,#ecfdf5)] p-4">
-                      <div className="text-xs font-black uppercase tracking-[0.16em] text-brand">{getCategoryLabel(item.category)}</div>
+                      <div className="text-xs font-black uppercase tracking-[0.16em] text-brand">{getCategoryLabel(t, item.category)}</div>
                     </div>
                     <div className="p-4">
                       <div className="line-clamp-2 text-sm font-black text-[#10233F]">{item.name}</div>
@@ -252,12 +254,12 @@ const ServiceDetailPage = () => {
 
         <aside className="h-fit rounded-2xl border border-slate-100 bg-white p-5 shadow-[0_24px_70px_rgba(15,23,42,0.08)] lg:sticky lg:top-24">
           <div className="text-sm font-black text-[#10233F]">{service.name}</div>
-          <div className="mt-4 text-xs font-bold text-slate-400">Tổng chi phí từ</div>
+          <div className="mt-4 text-xs font-bold text-slate-400">{t('serviceDetail.totalCostFrom')}</div>
           <div className="mt-1 text-4xl font-black text-brand">{formatCurrency(service.basePrice)}</div>
 
           <div className="mt-5 space-y-3 text-sm font-bold text-slate-600">
-            <InfoLine label={`${service.packageDays ?? 1} buổi`} />
-            <InfoLine label={`${service.estimatedDurationMinutes} phút/buổi`} />
+            <InfoLine label={t('serviceDetail.sessionsCount', { count: service.packageDays ?? 1 })} />
+            <InfoLine label={t('serviceDetail.durationPerSession', { count: service.estimatedDurationMinutes })} />
           </div>
 
           <button
@@ -266,12 +268,12 @@ const ServiceDetailPage = () => {
             onClick={() => navigate(`/find-nurse?serviceId=${service.id}`)}
             className="mt-6 inline-flex h-13 w-full items-center justify-center gap-2 rounded-2xl bg-brand px-5 py-4 text-sm font-black text-white shadow-lg shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-brand-deep"
           >
-            Đặt lịch ngay
+            {t('serviceDetail.bookNow')}
             <ArrowRightIcon className="h-4 w-4" />
           </button>
 
           <div className="mt-5 rounded-2xl bg-slate-50 p-4 text-center text-xs font-bold leading-5 text-slate-500">
-            Giá và thời lượng được lấy trực tiếp từ dữ liệu dịch vụ hiện tại.
+            {t('serviceDetail.disclaimer')}
           </div>
         </aside>
       </main>
@@ -280,7 +282,7 @@ const ServiceDetailPage = () => {
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-100 bg-white p-4 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:hidden">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           <div>
-            <div className="text-xs font-bold text-slate-400">Tổng chi phí từ</div>
+            <div className="text-xs font-bold text-slate-400">{t('serviceDetail.totalCostFrom')}</div>
             <div className="mt-0.5 text-lg font-black text-brand">{formatCurrency(service.basePrice)}</div>
           </div>
           <button
@@ -288,7 +290,7 @@ const ServiceDetailPage = () => {
             onClick={() => navigate(`/find-nurse?serviceId=${service.id}`)}
             className="inline-flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-brand px-6 text-sm font-black text-white shadow-lg shadow-pink-200 transition active:scale-95 sm:flex-none sm:px-10"
           >
-            Đặt lịch ngay
+            {t('serviceDetail.bookNow')}
             <ArrowRightIcon className="h-4 w-4" />
           </button>
         </div>

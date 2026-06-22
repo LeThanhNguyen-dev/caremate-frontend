@@ -5,33 +5,35 @@ import type { BookingDetailDto } from '../api/frontend-api-contract';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { useState } from 'react';
-import { formatDateTime, formatTime, formatDurationMinutes, QUICK_FEEDBACK_TAGS } from '../constants/booking';
+import { formatDateTime, formatTime, formatDurationMinutes, getQuickFeedbackTags } from '../constants/booking';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   booking: BookingDetailDto;
   onProgressChanged?: () => void;
 };
 
-const steps = [
-  { status: 'pending_confirm', label: 'Chờ xác nhận', description: 'Y tá đang xem và xác nhận lịch hẹn.' },
-  { status: 'confirmed', label: 'Đã xác nhận', description: 'Lịch hẹn đã được y tá nhận.' },
-  { status: 'in_progress', label: 'Đang thực hiện', description: 'Y tá đã bắt đầu buổi chăm sóc.' },
-  { status: 'completed', label: 'Hoàn thành', description: 'Buổi chăm sóc đã kết thúc.' },
-];
-
-const terminalLabels: Record<string, { label: string; description: string }> = {
-  cancelled: { label: 'Đã hủy', description: 'Lịch hẹn đã được hủy.' },
-  rejected: { label: 'Bị từ chối', description: 'Y tá đã từ chối lịch hẹn này.' },
-};
-
-const timelineStatusLabels: Record<string, string> = {
-  pending_confirm: 'Chưa bắt đầu',
-  confirmed: 'Chưa bắt đầu',
-  in_progress: 'Đang chăm sóc',
-  completed: 'Hoàn thành',
-};
-
 const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => {
+  const { t } = useTranslation();
+  const steps = [
+    { status: 'pending_confirm', label: t('singleServiceTracker.steps.pending_confirm.label'), description: t('singleServiceTracker.steps.pending_confirm.desc') },
+    { status: 'confirmed', label: t('singleServiceTracker.steps.confirmed.label'), description: t('singleServiceTracker.steps.confirmed.desc') },
+    { status: 'in_progress', label: t('singleServiceTracker.steps.in_progress.label'), description: t('singleServiceTracker.steps.in_progress.desc') },
+    { status: 'completed', label: t('singleServiceTracker.steps.completed.label'), description: t('singleServiceTracker.steps.completed.desc') },
+  ];
+
+  const terminalLabels: Record<string, { label: string; description: string }> = {
+    cancelled: { label: t('singleServiceTracker.terminal.cancelled.label'), description: t('singleServiceTracker.terminal.cancelled.desc') },
+    rejected: { label: t('singleServiceTracker.terminal.rejected.label'), description: t('singleServiceTracker.terminal.rejected.desc') },
+  };
+
+  const timelineStatusLabels: Record<string, string> = {
+    pending_confirm: t('singleServiceTracker.status.pending'),
+    confirmed: t('singleServiceTracker.status.pending'),
+    in_progress: t('singleServiceTracker.status.in_progress'),
+    completed: t('singleServiceTracker.status.completed'),
+  };
+
   const { user } = useAuth();
   const { showToast } = useToast();
   const [actionLoading, setActionLoading] = useState(false);
@@ -45,7 +47,7 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
   const isTerminal = booking.status === 'cancelled' || booking.status === 'rejected';
   const isLate = !isTerminal && booking.status !== 'completed' && new Date(booking.startTime).getTime() < Date.now() && !booking.checkInTime;
   const progressPercent = isTerminal ? 100 : currentIndex >= 0 ? Math.round((currentIndex / (steps.length - 1)) * 100) : 0;
-  const displayStatus = isLate ? 'Trễ giờ' : terminalLabels[booking.status]?.label || timelineStatusLabels[booking.status] || booking.status;
+  const displayStatus = isLate ? t('singleServiceTracker.status.late') : terminalLabels[booking.status]?.label || timelineStatusLabels[booking.status] || booking.status;
 
   const updateStatus = async (nextStatus: string, successMessage: string) => {
     try {
@@ -56,7 +58,7 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
       onProgressChanged?.();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      showToast(error.response?.data?.message || 'Không thể cập nhật tiến độ lịch hẹn.', 'error');
+      showToast(error.response?.data?.message || t('singleServiceTracker.updateError'), 'error');
     } finally {
       setActionLoading(false);
     }
@@ -77,11 +79,11 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
         note: reviewForm.note.trim() || undefined,
         tags: reviewForm.tags,
       });
-      showToast('Đã lưu đánh giá buổi chăm sóc.', 'success');
+      showToast(t('singleServiceTracker.ratingSuccess'), 'success');
       onProgressChanged?.();
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } } };
-      showToast(error.response?.data?.message || 'Không thể lưu đánh giá buổi chăm sóc.', 'error');
+      showToast(error.response?.data?.message || t('singleServiceTracker.ratingError'), 'error');
     } finally {
       setReviewLoading(false);
     }
@@ -92,9 +94,9 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
       <div className="bg-slate-900 p-8 text-white">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h3 className="text-xl font-black tracking-tight">Tiến độ dịch vụ lẻ</h3>
+            <h3 className="text-xl font-black tracking-tight">{t('singleServiceTracker.title')}</h3>
             <p className="mt-2 text-sm font-medium text-white/50">
-              Khách hàng theo dõi được trạng thái thực hiện của buổi chăm sóc này.
+              {t('singleServiceTracker.subtitle')}
             </p>
           </div>
           <div className={`rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] ${isLate ? 'bg-amber-400 text-slate-950' : 'bg-white/10'}`}>
@@ -163,19 +165,19 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
         <div className="mb-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-5">
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Giờ bắt đầu dự kiến</div>
-            <div className="mt-2 text-sm font-black text-slate-900">{formatDateTime(booking.startTime)}</div>
+            <div className="mt-2 text-sm font-black text-slate-900">{formatDateTime(t, booking.startTime)}</div>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-5">
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Check-in thực tế</div>
-            <div className="mt-2 text-sm font-black text-slate-900">{formatTime(booking.checkInTime)}</div>
+            <div className="mt-2 text-sm font-black text-slate-900">{formatTime(t, booking.checkInTime)}</div>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-5">
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Check-out thực tế</div>
-            <div className="mt-2 text-sm font-black text-slate-900">{formatTime(booking.checkOutTime)}</div>
+            <div className="mt-2 text-sm font-black text-slate-900">{formatTime(t, booking.checkOutTime)}</div>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-5">
             <div className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Tổng thời gian thực tế</div>
-            <div className="mt-2 text-sm font-black text-slate-900">{formatDurationMinutes(booking.actualDurationMinutes)}</div>
+            <div className="mt-2 text-sm font-black text-slate-900">{formatDurationMinutes(t, booking.actualDurationMinutes)}</div>
           </div>
         </div>
 
@@ -273,7 +275,7 @@ const SingleServiceProgressTracker = ({ booking, onProgressChanged }: Props) => 
               })}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {QUICK_FEEDBACK_TAGS.map((tag) => {
+              {getQuickFeedbackTags(t).map((tag: string) => {
                 const active = reviewForm.tags.includes(tag);
                 return (
                   <button
