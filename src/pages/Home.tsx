@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     ArrowRightIcon,
     BoltIcon,
@@ -119,6 +120,7 @@ const testimonials = [
 ];
 
 const Home = () => {
+    const { t } = useTranslation();
     const heroRef = useRef(null);
     const { scrollYProgress: heroProgress } = useScroll({
         target: heroRef,
@@ -239,8 +241,8 @@ const Home = () => {
                             <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/90 p-5 backdrop-blur">
                                 <div className="flex items-center justify-between gap-4">
                                     <div>
-                                        <div className="text-sm font-black text-[#10233F]">Hồ sơ y tá xác minh</div>
-                                        <div className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">Ảnh • Chứng chỉ • CCCD • Đánh giá</div>
+                                        <div className="text-sm font-black text-[#10233F]">{t('home.hero.verifiedNurseProfile')}</div>
+                                        <div className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">{t('home.hero.verifiedDetails')}</div>
                                     </div>
                                     <CheckBadgeIcon className="h-9 w-9 text-emerald-500" />
                                 </div>

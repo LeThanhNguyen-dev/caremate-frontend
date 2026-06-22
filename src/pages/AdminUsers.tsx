@@ -13,6 +13,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import caremateApi from '../api/caremateApi';
 import type { AdminUserDto } from '../api/frontend-api-contract';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '../hooks/useToast';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
@@ -48,6 +49,7 @@ const statusLabels: Record<string, { label: string; className: string }> = {
 
 const AdminUsers = () => {
     const { showToast } = useToast();
+    const { t } = useTranslation();
     const [users, setUsers] = useState<AdminUserDto[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -64,7 +66,7 @@ const AdminUsers = () => {
             const data = await caremateApi.getAdminUsers();
             setUsers(data);
         } catch (error) {
-            showToast('Không thể tải danh sách người dùng.', 'error');
+            showToast(t('adminUsers.loadError'), 'error');
             console.error(error);
         } finally {
             setLoading(false);
@@ -102,9 +104,9 @@ const AdminUsers = () => {
             setUsers((prev) => [created, ...prev]);
             setCreateForm(emptyCreateForm);
             setIsCreateOpen(false);
-            showToast('Đã tạo tài khoản người dùng.', 'success');
+            showToast(t('adminUsers.createSuccess'), 'success');
         } catch (error) {
-            showToast('Không thể tạo tài khoản. Kiểm tra email, số điện thoại hoặc mật khẩu.', 'error');
+            showToast(t('adminUsers.createError'), 'error');
             console.error(error);
         } finally {
             setSavingCreate(false);
@@ -115,8 +117,8 @@ const AdminUsers = () => {
         const nextStatus = user.status === 'blocked' ? 'active' : 'blocked';
         const confirmMessage =
             nextStatus === 'blocked'
-                ? `Khóa tài khoản ${user.fullName}? Người dùng sẽ không đăng nhập được.`
-                : `Mở khóa tài khoản ${user.fullName}?`;
+                ? t('adminUsers.blockConfirm', { name: user.fullName })
+                : t('adminUsers.unblockConfirm', { name: user.fullName });
 
         if (!window.confirm(confirmMessage)) {
             return;
@@ -127,9 +129,9 @@ const AdminUsers = () => {
             const updated = await caremateApi.updateAdminUserStatus(user.userId, { status: nextStatus });
             setUsers((prev) => prev.map((item) => (item.userId === updated.userId ? updated : item)));
             setSelectedUser((current) => (current?.userId === updated.userId ? updated : current));
-            showToast(nextStatus === 'blocked' ? 'Đã khóa tài khoản.' : 'Đã mở khóa tài khoản.', 'success');
+            showToast(nextStatus === 'blocked' ? t('adminUsers.blockSuccess') : t('adminUsers.unblockSuccess'), 'success');
         } catch (error) {
-            showToast('Không thể cập nhật trạng thái tài khoản.', 'error');
+            showToast(t('adminUsers.statusUpdateError'), 'error');
             console.error(error);
         } finally {
             setUpdatingUserId(null);

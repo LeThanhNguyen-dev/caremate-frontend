@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import NotificationDropdown from './NotificationDropdown';
+import LanguageSwitcher from './LanguageSwitcher';
 import BookingTour from './BookingTour';
 import PageTransition from './PageTransition';
 import caremateApi from '../api/caremateApi';
@@ -22,6 +24,7 @@ import { getCategoryLabel, getIncludedServiceLabels } from '../utils/servicePres
 
 const Layout = () => {
     const { user, logout, isAuthenticated } = useAuth();
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -29,7 +32,7 @@ const Layout = () => {
     const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
     const { data: services = [] } = useQuery({
-        queryKey: ['services'],
+        queryKey: ['services', i18n.language],
         queryFn: async () => {
             const data = await caremateApi.getServices();
             return data.filter((s) => s.status === 'active');
@@ -48,10 +51,10 @@ const Layout = () => {
     };
 
     const navigation = [
-        { name: 'Trang chủ', href: '/' },
-        { name: 'Dịch vụ', href: '/services' },
-        { name: 'Cộng đồng', href: '/community' },
-        { name: 'Giới thiệu', href: '/about' },
+        { key: 'home', name: t('nav.home'), href: '/' },
+        { key: 'services', name: t('nav.services'), href: '/services' },
+        { key: 'community', name: t('nav.community'), href: '/community' },
+        { key: 'about', name: t('nav.about'), href: '/about' },
     ];
     const socialLinks = [
         { label: 'FB', href: 'https://www.facebook.com/profile.php?id=61586875252074' },
@@ -66,16 +69,25 @@ const Layout = () => {
         if (existing) {
             existing.items.push(service);
         } else {
-            groups.push({ category, title: getCategoryLabel(category), items: [service] });
+            groups.push({ category, title: getCategoryLabel(t, category), items: [service] });
         }
         return groups;
     }, []);
 
     return (
-        <div className="min-h-screen flex flex-col bg-white font-sans">
+        <div className="min-h-screen flex flex-col bg-slate-50/30 font-sans relative selection:bg-brand/20 selection:text-brand-deep">
+            {/* Dynamic Background Elements */}
+            <div className="pointer-events-none fixed inset-0 z-[-1] overflow-hidden">
+                <div className="absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full bg-gradient-to-br from-brand/10 to-pink-300/5 blur-[100px] mix-blend-multiply opacity-70 animate-[spin_30s_linear_infinite]" />
+                <div className="absolute top-[20%] -right-[10%] w-[40vw] h-[60vw] max-w-[800px] max-h-[1000px] rounded-full bg-gradient-to-bl from-blue-300/10 to-teal-200/10 blur-[120px] mix-blend-multiply opacity-70" />
+                <div className="absolute -bottom-[10%] left-[20%] w-[60vw] h-[40vw] max-w-[1000px] max-h-[800px] rounded-full bg-gradient-to-tr from-purple-300/10 to-brand/5 blur-[120px] mix-blend-multiply opacity-70" />
+            </div>
+
             <header
-                className={`fixed top-0 left-0 right-0 z-[100] bg-white/95 shadow-sm shadow-slate-200/50 backdrop-blur-2xl transition-all duration-500 ${
-                    scrolled ? 'lg:bg-white/88 lg:shadow-xl lg:shadow-slate-200/35' : 'lg:bg-white/70 lg:shadow-none'
+                className={`fixed left-1/2 -translate-x-1/2 z-[100] transition-all duration-700 w-full ${
+                    scrolled 
+                        ? 'top-4 lg:w-[96%] max-w-[1760px] rounded-[2rem] bg-white/70 py-1.5 shadow-2xl shadow-brand/10 backdrop-blur-2xl border border-white/60' 
+                        : 'top-0 bg-white/40 py-3 shadow-none backdrop-blur-md lg:w-full border-b border-transparent'
                 }`}
             >
                 <nav className="mx-auto grid w-full max-w-[1760px] grid-cols-[auto_1fr] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[360px_1fr_360px] lg:px-8 2xl:px-10 h-20">
@@ -88,8 +100,8 @@ const Layout = () => {
                     <div className="hidden min-w-0 h-full items-center justify-center lg:flex">
                         <div className="flex h-full items-center justify-center gap-9">
                             {navigation.map((item) => (
-                                item.name === 'Dịch vụ' ? (
-                                    <div key={item.name} className="group relative">
+                                item.key === 'services' ? (
+                                    <div key={item.key} className="group relative">
                                         <Link
                                             to={item.href}
                                             data-tour="nav-services"
@@ -110,13 +122,13 @@ const Layout = () => {
                                                             to="/services"
                                                             className="mb-2 flex items-center justify-between rounded-2xl bg-white px-4 py-3 text-sm font-black text-[#10233F] shadow-sm transition hover:text-brand"
                                                         >
-                                                            Tất cả dịch vụ
+                                                            {t('serviceMenu.allServices')}
                                                             <ChevronDownIcon className="-rotate-90 h-4 w-4 text-slate-300" />
                                                         </Link>
                                                         <div className="space-y-1">
                                                             {serviceGroups.length === 0 && (
                                                                 <div className="rounded-2xl px-4 py-3 text-sm font-bold text-slate-500">
-                                                                    Đang tải danh mục dịch vụ...
+                                                                    {t('serviceMenu.loadingCategories')}
                                                                 </div>
                                                             )}
                                                             {serviceGroups.map((group) => (
@@ -127,7 +139,7 @@ const Layout = () => {
                                                                     >
                                                                         <span>
                                                                             <span className="block text-sm font-black text-[#10233F] transition group-hover/category:text-brand">{group.title}</span>
-                                                                            <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">{group.items.length} dịch vụ</span>
+                                                                            <span className="mt-1 block text-xs font-semibold leading-5 text-slate-500">{t('serviceMenu.serviceCount', { count: group.items.length })}</span>
                                                                         </span>
                                                                         <ChevronDownIcon className="-rotate-90 mt-1 h-4 w-4 shrink-0 text-slate-300 transition group-hover/category:text-brand" />
                                                                     </Link>
@@ -139,7 +151,7 @@ const Layout = () => {
                                                                             <div className="max-h-[460px] overflow-y-auto pr-1">
                                                                                 <div className="grid gap-1.5">
                                                                                 {group.items.map((service) => {
-                                                                                    const included = getIncludedServiceLabels(service);
+                                                                                    const included = getIncludedServiceLabels(t, service);
                                                                                     return (
                                                                                     <Link
                                                                                         key={service.id}
@@ -148,8 +160,8 @@ const Layout = () => {
                                                                                     >
                                                                                         <div className="text-sm font-black text-[#10233F] transition group-hover/item:text-brand">{service.name}</div>
                                                                                         <div className="mt-1 flex flex-wrap gap-1.5 text-[11px] font-black text-slate-400">
-                                                                                            <span className="rounded-full bg-slate-50 px-2 py-1">{service.serviceKind === 'package' ? 'Gói dịch vụ' : 'Dịch vụ đơn'}</span>
-                                                                                            <span className="rounded-full bg-slate-50 px-2 py-1">{service.packageDays ?? 1} buổi</span>
+                                                                                            <span className="rounded-full bg-slate-50 px-2 py-1">{service.serviceKind === 'package' ? t('serviceMenu.packageService') : t('serviceMenu.singleService')}</span>
+                                                                                            <span className="rounded-full bg-slate-50 px-2 py-1">{t('serviceMenu.sessions', { count: service.packageDays ?? 1 })}</span>
                                                                                         </div>
                                                                                         {included.length > 0 && (
                                                                                             <div className="mt-2 space-y-1">
@@ -173,13 +185,13 @@ const Layout = () => {
                                                     </div>
 
                                                     <div className="rounded-2xl border border-teal-100 bg-gradient-to-br from-teal-50 via-white to-pink-50 p-5">
-                                                        <div className="inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-brand shadow-sm">Dịch vụ CareMate</div>
-                                                        <h3 className="mt-4 text-xl font-black leading-tight text-[#10233F]">Tất cả dịch vụ được nhóm theo danh mục.</h3>
+                                                        <div className="inline-flex rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-brand shadow-sm">{t('serviceMenu.caremateServices')}</div>
+                                                        <h3 className="mt-4 text-xl font-black leading-tight text-[#10233F]">{t('serviceMenu.menuTitle')}</h3>
                                                         <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">
-                                                            Rê vào danh mục bên trái để xem toàn bộ dịch vụ và các dịch vụ con trong từng gói.
+                                                            {t('serviceMenu.menuDescription')}
                                                         </p>
                                                         <Link to="/services" className="mt-5 inline-flex rounded-full bg-[#10233F] px-5 py-3 text-sm font-black text-white shadow-lg shadow-slate-200 transition hover:bg-brand">
-                                                            Xem tất cả
+                                                            {t('serviceMenu.viewAll')}
                                                         </Link>
                                                     </div>
                                                 </div>
@@ -202,7 +214,8 @@ const Layout = () => {
                         </div>
                     </div>
 
-                    <div className="flex h-full items-center justify-end gap-6">
+                    <div className="flex items-center justify-end gap-6">
+                        <LanguageSwitcher />
                         <button className="relative z-[120] shrink-0 rounded-xl p-2 text-[#10233F] hover:bg-slate-100 lg:hidden" onClick={() => setMobileMenuOpen(true)} aria-label="Mở menu">
                             <Bars3Icon className="h-7 w-7" />
                         </button>
@@ -224,7 +237,7 @@ const Layout = () => {
                                         <div className="text-right hidden xl:block">
                                             <div className="text-sm font-black text-[#10233F] group-hover:text-brand transition-colors">{user?.username}</div>
                                             <div className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                                                {user?.role === 'admin' ? 'Quản trị viên' : user?.role?.startsWith('nurse') ? 'Điều dưỡng' : 'Khách hàng'}
+                                                {user?.role === 'admin' ? t('role.admin') : user?.role?.startsWith('nurse') ? t('role.nurse') : t('role.customer')}
                                             </div>
                                         </div>
                                         <div className="h-10 w-10 rounded-xl bg-brand text-white flex items-center justify-center font-black text-lg">
@@ -242,13 +255,13 @@ const Layout = () => {
                                             >
                                                 <div className="space-y-1 mb-6">
                                                     {[
-                                                        { name: 'Cài đặt thông tin', icon: Cog8ToothIcon, href: '/profile' },
-                                                        { name: 'Quản lý dịch vụ', icon: CalendarDaysIcon, href: '/my-bookings' },
-                                                        { name: 'Nhắn tin hỗ trợ', icon: ChatBubbleLeftRightIcon, href: '/chat' },
-                                                        { name: 'Thông báo của tôi', icon: BellAlertIcon, href: '/notifications' },
+                                                        { key: 'settings', name: t('profileMenu.settings'), icon: Cog8ToothIcon, href: '/profile' },
+                                                        { key: 'myBookings', name: t('profileMenu.myBookings'), icon: CalendarDaysIcon, href: '/my-bookings' },
+                                                        { key: 'chat', name: t('profileMenu.chat'), icon: ChatBubbleLeftRightIcon, href: '/chat' },
+                                                        { key: 'notifications', name: t('profileMenu.notifications'), icon: BellAlertIcon, href: '/notifications' },
                                                     ].map((item) => (
                                                         <Link
-                                                            key={item.name}
+                                                            key={item.key}
                                                             to={item.href}
                                                             onClick={() => setProfileDropdownOpen(false)}
                                                             className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 text-slate-500 hover:text-[#10233F] transition-all group"
@@ -267,7 +280,7 @@ const Layout = () => {
                                                     <div className="h-8 w-8 rounded-xl bg-slate-100 flex items-center justify-center group-hover:bg-red-100 transition-colors">
                                                         <ArrowRightOnRectangleIcon className="h-4 w-4" />
                                                     </div>
-                                                    <span className="text-xs font-black">Đăng xuất</span>
+                                                    <span className="text-xs font-black">{t('auth.logout')}</span>
                                                 </button>
                                             </motion.div>
                                         )}
@@ -275,9 +288,9 @@ const Layout = () => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="hidden lg:flex h-full items-center gap-6">
-                                <Link to="/login" className="inline-flex items-center text-[17px] font-extrabold tracking-[0.01em] text-[#10233F] transition hover:text-brand">Đăng nhập</Link>
-                                <Link to="/register" className="rounded-full bg-[#10233F] px-10 py-[18px] text-[15px] font-black uppercase tracking-[0.1em] text-white shadow-xl shadow-[#10233F]/15 transition hover:bg-brand hover:shadow-brand/20">Bắt đầu ngay</Link>
+                            <div className="hidden lg:flex items-center gap-6">
+                                <Link to="/login" className="whitespace-nowrap text-[13px] font-black uppercase tracking-[0.15em] text-slate-500 transition-all hover:text-brand hover:-translate-y-0.5">{t('auth.login')}</Link>
+                                <Link to="/register" className="btn-primary">{t('auth.register')}</Link>
                             </div>
                         )}
                     </div>
@@ -330,7 +343,7 @@ const Layout = () => {
                                                             </Link>
                                                             <div className="mt-1 grid gap-1 pl-3">
                                                                 {group.items.map((service) => {
-                                                                    const included = getIncludedServiceLabels(service);
+                                                                    const included = getIncludedServiceLabels(t, service);
                                                                     return (
                                                                         <Link
                                                                             key={service.id}
@@ -368,11 +381,11 @@ const Layout = () => {
                                     </div>
                                     <div className="mt-6 border-t border-slate-100 pt-6 space-y-3">
                                         {isAuthenticated ? (
-                                            <button onClick={() => void handleLogout()} className="w-full rounded-2xl px-4 py-3 text-left text-xl font-black leading-tight text-red-600 hover:bg-red-50">Đăng xuất</button>
+                                            <button onClick={() => void handleLogout()} className="w-full rounded-2xl px-4 py-3 text-left text-xl font-black leading-tight text-red-600 hover:bg-red-50">{t('auth.logout')}</button>
                                         ) : (
                                             <>
-                                                <Link to="/login" className="block rounded-2xl px-4 py-3 text-xl font-black leading-tight text-[#10233F] hover:bg-slate-50" onClick={() => setMobileMenuOpen(false)}>Đăng nhập</Link>
-                                                <Link to="/register" className="btn-primary w-full py-4 text-sm" onClick={() => setMobileMenuOpen(false)}>Tham gia ngay</Link>
+                                                <Link to="/login" className="block rounded-2xl px-4 py-3 text-xl font-black leading-tight text-[#10233F] hover:bg-slate-50" onClick={() => setMobileMenuOpen(false)}>{t('auth.login')}</Link>
+                                                <Link to="/register" className="btn-primary w-full py-4 text-sm" onClick={() => setMobileMenuOpen(false)}>{t('auth.joinNow')}</Link>
                                             </>
                                         )}
                                     </div>
@@ -388,8 +401,11 @@ const Layout = () => {
                 <PageTransition />
             </main>
 
-            <footer className="bg-[#10233F] pt-28 pb-12 text-white overflow-hidden relative">
-                <div className="absolute bottom-0 right-0 w-96 h-96 bg-brand/5 blur-[120px] -mr-48 -mb-48 rounded-full"></div>
+            <footer className="bg-gradient-to-b from-[#10233F] to-[#0a1629] pt-28 pb-12 text-white overflow-hidden relative lg:rounded-t-[4rem] mt-20 shadow-[0_-20px_80px_-20px_rgba(236,72,153,0.1)] border-t border-white/5">
+                {/* Decorative Elements */}
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent opacity-50"></div>
+                <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand/10 blur-[140px] rounded-full pointer-events-none mix-blend-screen"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[140px] rounded-full pointer-events-none mix-blend-screen"></div>
 
                 <div className="relative z-10 mx-auto w-full max-w-[1760px] px-6 lg:px-8 2xl:px-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
@@ -398,31 +414,31 @@ const Layout = () => {
                                 <img src="/assets/images/caremate-brand-logo.png" alt="CareMate Logo" className="h-16 w-auto object-contain" />
                             </Link>
                             <p className="text-slate-400 text-sm leading-relaxed font-medium max-w-xs">
-                                Định nghĩa lại tiêu chuẩn chăm sóc gia đình Việt với công nghệ và sự tận tâm từ trái tim.
+                                {t('footer.slogan')}
                             </p>
                         </div>
 
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Điều hướng</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">{t('footer.navigation')}</h4>
                             <ul className="space-y-4 text-sm font-bold">
-                                <li><Link to="/" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Trang chủ</Link></li>
-                                <li><Link to="/services" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Dịch vụ</Link></li>
-                                <li><Link to="/community" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Cộng đồng</Link></li>
-                                <li><Link to="/about" className="hover:text-brand transition-colors text-slate-400 hover:text-white">Giới thiệu</Link></li>
+                                <li><Link to="/" className="hover:text-brand transition-colors text-slate-400 hover:text-white">{t('nav.home')}</Link></li>
+                                <li><Link to="/services" className="hover:text-brand transition-colors text-slate-400 hover:text-white">{t('nav.services')}</Link></li>
+                                <li><Link to="/community" className="hover:text-brand transition-colors text-slate-400 hover:text-white">{t('nav.community')}</Link></li>
+                                <li><Link to="/about" className="hover:text-brand transition-colors text-slate-400 hover:text-white">{t('nav.about')}</Link></li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Trung tâm hỗ trợ</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">{t('footer.supportCenter')}</h4>
                             <ul className="space-y-4 text-sm font-bold text-slate-400">
-                                <li><Link to="/" className="hover:text-white transition-colors">Câu hỏi thường gặp</Link></li>
-                                <li><Link to="/" className="hover:text-white transition-colors">Chính sách bảo mật</Link></li>
-                                <li><Link to="/" className="hover:text-white transition-colors">Liên hệ 24/7</Link></li>
+                                <li><Link to="/" className="hover:text-white transition-colors">{t('footer.faq')}</Link></li>
+                                <li><Link to="/" className="hover:text-white transition-colors">{t('footer.privacy')}</Link></li>
+                                <li><Link to="/" className="hover:text-white transition-colors">{t('footer.contact247')}</Link></li>
                             </ul>
                         </div>
 
                         <div>
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Văn phòng</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">{t('footer.office')}</h4>
                             <div className="text-sm font-bold space-y-4 text-slate-400">
                                 <p>Khu đô thị FPT, Da Nang, Vietnam</p>
                                 <p>Hotline: 1900 6789</p>
@@ -431,7 +447,7 @@ const Layout = () => {
                         </div>
 
                         <div className="hidden">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">Tải ứng dụng</h4>
+                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-8">{t('footer.downloadApp')}</h4>
                             <div className="space-y-3">
                                 {['App Store', 'Google Play'].map((store) => (
                                     <div key={store} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-black text-white/75 transition hover:border-brand/50 hover:bg-brand/10">
@@ -444,7 +460,7 @@ const Layout = () => {
 
                     <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
                         <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 text-center md:text-left">
-                            &copy; 2026 CareMate. Luxury Care Experience.
+                            {t('footer.copyright')}
                         </div>
                         <div className="flex gap-4">
                             {socialLinks.map((social) => (

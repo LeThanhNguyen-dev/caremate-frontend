@@ -21,6 +21,7 @@ import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 import bankApi from '../api/bankApi';
 import type { BankOptionDto } from '../api/frontend-api-contract';
 import goongApi, { createGoongSessionToken, extractGoongAddressParts, type GoongPrediction } from '../api/goongApi';
+import { useTranslation } from 'react-i18next';
 
 const toSafeText = (value: unknown) => (typeof value === 'string' ? value : value == null ? '' : String(value));
 
@@ -63,6 +64,7 @@ const composeFullAddress = (addressLine: unknown, ward: unknown, district: unkno
 };
 
 const CustomerProfilePage = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { showToast } = useToast();
     const [activeTab, setActiveTab] = useState<'info' | 'security' | 'activity'>('info');
@@ -195,12 +197,12 @@ const CustomerProfilePage = () => {
                 .autocomplete(input, goongSessionTokenRef.current, abortController.signal)
                 .then((suggestions) => {
                     setAddressSuggestions(suggestions);
-                    setAddressLookupError(suggestions.length === 0 ? 'Không tìm thấy gợi ý địa chỉ phù hợp.' : '');
+                    setAddressLookupError(suggestions.length === 0 ? t('customerProfile.goongError1') : '');
                 })
                 .catch((error: unknown) => {
                     if (!(error instanceof DOMException && error.name === 'AbortError')) {
                         setAddressSuggestions([]);
-                        setAddressLookupError('Không thể tải gợi ý Goong. Hãy kiểm tra GOONG_API_KEY ở backend hoặc domain được phép trong Goong Console.');
+                        setAddressLookupError(t('customerProfile.goongError2'));
                     }
                 })
                 .finally(() => {
@@ -234,7 +236,7 @@ const CustomerProfilePage = () => {
         const placeId = toSafeText(suggestion.place_id);
 
         if (!fallbackAddress || !placeId) {
-            setAddressLookupError('Gợi ý địa chỉ không hợp lệ. Vui lòng nhập lại địa chỉ.');
+            setAddressLookupError(t('customerProfile.goongError3'));
             return;
         }
 
@@ -263,7 +265,7 @@ const CustomerProfilePage = () => {
         } catch {
             suppressNextAddressLookupRef.current = true;
             setProfileForm((prev) => ({ ...prev, address: fallbackAddress }));
-            setAddressLookupError('Không thể lấy chi tiết địa chỉ từ Goong.');
+            setAddressLookupError(t('customerProfile.goongError4'));
             setAddressSuggestionsOpen(false);
             setAddressSuggestions([]);
         }
@@ -285,10 +287,10 @@ const CustomerProfilePage = () => {
                 bankAccountNumber: profileForm.bankAccountNumber,
                 bankAccountName: profileForm.bankAccountName,
             });
-            showToast('Cập nhật thông tin thành công!', 'success');
+            showToast(t('customerProfile.updateSuccess'), 'success');
             await loadProfile();
         } catch {
-            showToast('Không thể lưu thay đổi.', 'error');
+            showToast(t('customerProfile.updateError'), 'error');
         } finally {
             setProfileSaving(false);
         }
@@ -298,15 +300,15 @@ const CustomerProfilePage = () => {
     const handleChangePassword = async (e: React.FormEvent) => {
         e.preventDefault();
         if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            showToast('Mật khẩu xác nhận không khớp.', 'error');
+            showToast(t('customerProfile.passwordMismatch'), 'error');
             return;
         }
         if (passwordForm.newPassword.length < 6) {
-            showToast('Mật khẩu mới phải có ít nhất 6 ký tự.', 'error');
+            showToast(t('customerProfile.passwordLength'), 'error');
             return;
         }
         if (!/[a-z]/.test(passwordForm.newPassword) || !/\d/.test(passwordForm.newPassword)) {
-            showToast('Mật khẩu mới cần có chữ thường và số.', 'error');
+            showToast(t('customerProfile.passwordStrength'), 'error');
             return;
         }
 
@@ -316,21 +318,21 @@ const CustomerProfilePage = () => {
                 currentPassword: passwordForm.currentPassword,
                 newPassword: passwordForm.newPassword,
             });
-            showToast('Đổi mật khẩu thành công!', 'success');
+            showToast(t('customerProfile.passwordSuccess'), 'success');
             setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
         } catch {
-            showToast('Đổi mật khẩu thất bại. Vui lòng kiểm tra mật khẩu hiện tại.', 'error');
+            showToast(t('customerProfile.passwordError'), 'error');
         } finally {
             setPasswordSaving(false);
         }
     };
 
     const statusLabels: Record<string, { label: string; class: string }> = {
-        completed: { label: 'Hoàn thành', class: 'bg-emerald-50 text-emerald-600' },
-        confirmed: { label: 'Đã xác nhận', class: 'bg-blue-50 text-blue-600' },
-        in_progress: { label: 'Đang thực hiện', class: 'bg-brand/5 text-brand' },
-        pending_confirm: { label: 'Chờ xác nhận', class: 'bg-amber-50 text-amber-600' },
-        cancelled: { label: 'Đã hủy', class: 'bg-slate-50 text-slate-400' },
+        completed: { label: t('customerProfile.status.completed'), class: 'bg-emerald-50 text-emerald-600' },
+        confirmed: { label: t('customerProfile.status.confirmed'), class: 'bg-blue-50 text-blue-600' },
+        in_progress: { label: t('customerProfile.status.in_progress'), class: 'bg-brand/5 text-brand' },
+        pending_confirm: { label: t('customerProfile.status.pending_confirm'), class: 'bg-amber-50 text-amber-600' },
+        cancelled: { label: t('customerProfile.status.cancelled'), class: 'bg-slate-50 text-slate-400' },
     };
 
     return (
@@ -355,11 +357,11 @@ const CustomerProfilePage = () => {
 
                     <div className="flex-1 text-center md:text-left">
                         <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4 justify-center md:justify-start">
-                            <h1 className="text-4xl font-black text-slate-900">{profileForm.fullName || 'Khách hàng'}</h1>
-                            <span className="px-4 py-1.5 rounded-xl bg-brand/5 text-brand text-[10px] font-black uppercase tracking-widest border border-brand/10 w-fit mx-auto md:mx-0">Thành viên</span>
+                            <h1 className="text-4xl font-black text-slate-900">{profileForm.fullName || t('customerProfile.defaultName')}</h1>
+                            <span className="px-4 py-1.5 rounded-xl bg-brand/5 text-brand text-[10px] font-black uppercase tracking-widest border border-brand/10 w-fit mx-auto md:mx-0">{t('customerProfile.memberRole')}</span>
                         </div>
                         <p className="text-slate-400 font-medium mb-8 max-w-xl">
-                            Cảm ơn bạn đã tin tưởng CareMate. Chúng tôi luôn sẵn sàng đồng hành cùng sức khỏe gia đình bạn.
+                            {t('customerProfile.greetingDesc')}
                         </p>
                         <div className="flex flex-wrap items-center gap-6 text-sm">
                             {profileForm.email && (
@@ -382,9 +384,9 @@ const CustomerProfilePage = () => {
                     {/* Navigation Sidebar */}
                     <aside className="space-y-4">
                         {[
-                            { id: 'info', name: 'Thông tin cá nhân', icon: UserIcon },
-                            { id: 'security', name: 'Bảo mật & Mật khẩu', icon: ShieldCheckIcon },
-                            { id: 'activity', name: 'Hoạt động gần đây', icon: ClockIcon },
+                            { id: 'info', name: t('customerProfile.tabInfo'), icon: UserIcon },
+                            { id: 'security', name: t('customerProfile.tabSecurity'), icon: ShieldCheckIcon },
+                            { id: 'activity', name: t('customerProfile.tabActivity'), icon: ClockIcon },
                         ].map((tab) => (
                             <button
                                 key={tab.id}
@@ -407,7 +409,7 @@ const CustomerProfilePage = () => {
                         {activeTab === 'info' && (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
                                 <HealthCheckInsEntryPage />
-                                <h2 className="text-2xl font-black text-slate-900">Chi tiết tài khoản</h2>
+                                <h2 className="text-2xl font-black text-slate-900">{t('customerProfile.accountDetails')}</h2>
 
                                 {profileLoading ? (
                                     <div className="flex items-center justify-center py-20">
@@ -417,7 +419,7 @@ const CustomerProfilePage = () => {
                                     <>
                                         <div className="grid md:grid-cols-2 gap-8">
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Họ và tên</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.fullName')}</label>
                                                 <div className="relative group">
                                                     <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-brand transition-colors" />
                                                     <input
@@ -429,7 +431,7 @@ const CustomerProfilePage = () => {
                                                 </div>
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Email liên hệ</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.emailLabel')}</label>
                                                 <div className="relative group">
                                                     <EnvelopeIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
                                                     <input
@@ -441,20 +443,20 @@ const CustomerProfilePage = () => {
                                                 </div>
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Số điện thoại</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.phoneLabel')}</label>
                                                 <div className="relative group">
                                                     <PhoneIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-brand transition-colors" />
                                                     <input
                                                         type="text"
                                                         value={profileForm.phone}
                                                         onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                                                        placeholder="Chưa có số điện thoại"
+                                                        placeholder={t('customerProfile.phonePlaceholder')}
                                                         className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                     />
                                                 </div>
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Địa chỉ mặc định</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.addressLabel')}</label>
                                                 <div className="relative group">
                                                     <MapPinIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-brand transition-colors" />
                                                     <input
@@ -463,7 +465,7 @@ const CustomerProfilePage = () => {
                                                         onBlur={() => window.setTimeout(() => setAddressSuggestionsOpen(false), 150)}
                                                         onChange={handleAddressChange}
                                                         onFocus={() => setAddressSuggestionsOpen(addressSuggestions.length > 0)}
-                                                        placeholder="Nhập địa chỉ để Goong gợi ý"
+                                                        placeholder={t('customerProfile.addressPlaceholder')}
                                                         className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                     />
                                                     {addressLookupLoading && (
@@ -503,7 +505,7 @@ const CustomerProfilePage = () => {
                                                     )}
                                                 </div>
                                                 {!goongApi.hasApiKey && (
-                                                    <p className="text-xs font-semibold text-slate-400">Backend cần GOONG_API_KEY để bật gợi ý địa chỉ Goong.</p>
+                                                    <p className="text-xs font-semibold text-slate-400">{t('customerProfile.goongApiKeyWarning')}</p>
                                                 )}
                                                 {addressLookupError && (
                                                     <div className="rounded-2xl bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-700">
@@ -512,7 +514,7 @@ const CustomerProfilePage = () => {
                                                 )}
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Quận/Huyện</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.district')}</label>
                                                 <input
                                                     type="text"
                                                     value={profileForm.district}
@@ -521,12 +523,11 @@ const CustomerProfilePage = () => {
                                                         district: e.target.value,
                                                         address: composeFullAddress(profileForm.addressLine, profileForm.ward, e.target.value, profileForm.address),
                                                     })}
-                                                    placeholder="Ví dụ: Hải Châu"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Phường/Xã</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.ward')}</label>
                                                 <input
                                                     type="text"
                                                     value={profileForm.ward}
@@ -535,12 +536,11 @@ const CustomerProfilePage = () => {
                                                         ward: e.target.value,
                                                         address: composeFullAddress(profileForm.addressLine, e.target.value, profileForm.district, profileForm.address),
                                                     })}
-                                                    placeholder="Ví dụ: Phường 1"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
                                             <div className="space-y-4 md:col-span-2">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Số nhà, tên đường</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.addressLine')}</label>
                                                 <input
                                                     type="text"
                                                     value={profileForm.addressLine}
@@ -549,62 +549,57 @@ const CustomerProfilePage = () => {
                                                         addressLine: e.target.value,
                                                         address: composeFullAddress(e.target.value, profileForm.ward, profileForm.district, profileForm.address),
                                                     })}
-                                                    placeholder="Ví dụ: 344 Nguyễn Hữu Thọ"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Vĩ độ</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.latitude')}</label>
                                                 <input
                                                     type="number"
                                                     step="any"
                                                     value={profileForm.latitude}
                                                     onChange={(e) => setProfileForm({ ...profileForm, latitude: e.target.value })}
-                                                    placeholder="Ví dụ: 16.0678"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Kinh độ</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.longitude')}</label>
                                                 <input
                                                     type="number"
                                                     step="any"
                                                     value={profileForm.longitude}
                                                     onChange={(e) => setProfileForm({ ...profileForm, longitude: e.target.value })}
-                                                    placeholder="Ví dụ: 108.2208"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mã ngân hàng / BIN</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.bankBin')}</label>
                                                 <select
                                                     value={profileForm.bankBin}
                                                     onChange={(e) => setProfileForm({ ...profileForm, bankBin: e.target.value })}
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 >
-                                                    <option value="">Chọn ngân hàng nhận tiền</option>
+                                                    <option value="">{t('customerProfile.bankSelect')}</option>
                                                     {banks.map((bank) => (
                                                         <option key={bank.code} value={bank.code}>{bank.shortName || bank.name}</option>
                                                     ))}
                                                 </select>
                                             </div>
                                             <div className="space-y-4">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Số tài khoản nhận hoàn tiền</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.bankAccount')}</label>
                                                 <input
                                                     type="text"
                                                     value={profileForm.bankAccountNumber}
                                                     onChange={(e) => setProfileForm({ ...profileForm, bankAccountNumber: e.target.value })}
-                                                    placeholder="Nhập số tài khoản"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
                                             <div className="space-y-4 md:col-span-2">
-                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Tên chủ tài khoản</label>
+                                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.bankName')}</label>
                                                 <input
                                                     type="text"
                                                     value={profileForm.bankAccountName}
                                                     onChange={(e) => setProfileForm({ ...profileForm, bankAccountName: e.target.value })}
-                                                    placeholder="Nhập tên chủ tài khoản để admin đối chiếu"
                                                     className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                                 />
                                             </div>
@@ -615,7 +610,7 @@ const CustomerProfilePage = () => {
                                                 disabled={profileSaving}
                                                 className="btn-primary !px-12 disabled:opacity-50"
                                             >
-                                                {profileSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                                                {profileSaving ? t('customerProfile.savingBtn') : t('customerProfile.saveBtn')}
                                             </button>
                                         </div>
                                     </>
@@ -627,34 +622,34 @@ const CustomerProfilePage = () => {
                         {activeTab === 'security' && (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
                                 <div>
-                                    <h2 className="text-2xl font-black text-slate-900 mb-2">Đổi mật khẩu</h2>
-                                    <p className="text-sm font-medium text-slate-400">Cập nhật mật khẩu để bảo vệ tài khoản an toàn hơn.</p>
+                                    <h2 className="text-2xl font-black text-slate-900 mb-2">{t('customerProfile.passwordTitle')}</h2>
+                                    <p className="text-sm font-medium text-slate-400">{t('customerProfile.passwordDesc')}</p>
                                 </div>
 
                                 <form onSubmit={handleChangePassword} className="space-y-6 max-w-lg">
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mật khẩu hiện tại</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.currentPassword')}</label>
                                         <div className="relative group">
                                             <LockClosedIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-brand transition-colors" />
                                             <input
                                                 type="password"
                                                 value={passwordForm.currentPassword}
                                                 onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-                                                placeholder="Nhập mật khẩu hiện tại"
+                                                placeholder={t('customerProfile.currentPasswordPlaceholder')}
                                                 required
                                                 className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
                                             />
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Mật khẩu mới</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.newPassword')}</label>
                                         <div className="relative group">
                                             <LockClosedIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-brand transition-colors" />
                                             <input
                                                 type="password"
                                                 value={passwordForm.newPassword}
                                                 onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                                placeholder="Ít nhất 6 ký tự"
+                                                placeholder={t('customerProfile.newPasswordPlaceholder')}
                                                 required
                                                 minLength={6}
                                                 className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
@@ -662,14 +657,14 @@ const CustomerProfilePage = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-3">
-                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Xác nhận mật khẩu mới</label>
+                                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{t('customerProfile.confirmPassword')}</label>
                                         <div className="relative group">
                                             <LockClosedIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-brand transition-colors" />
                                             <input
                                                 type="password"
                                                 value={passwordForm.confirmPassword}
                                                 onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                                                placeholder="Nhập lại mật khẩu mới"
+                                                placeholder={t('customerProfile.confirmPasswordPlaceholder')}
                                                 required
                                                 minLength={6}
                                                 className="w-full bg-slate-50 border-none rounded-xl py-4 pl-14 pr-6 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:ring-4 focus:ring-brand/5 transition-all"
@@ -680,7 +675,7 @@ const CustomerProfilePage = () => {
                                     <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 flex items-start gap-3">
                                         <ExclamationTriangleIcon className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
                                         <div className="text-xs font-medium text-amber-700 leading-relaxed">
-                                            Sau khi đổi mật khẩu, bạn sẽ cần đăng nhập lại trên tất cả các thiết bị khác.
+                                            {t('customerProfile.passwordWarning')}
                                         </div>
                                     </div>
 
@@ -689,7 +684,7 @@ const CustomerProfilePage = () => {
                                         disabled={passwordSaving}
                                         className="btn-primary !px-12 disabled:opacity-50"
                                     >
-                                        {passwordSaving ? 'Đang xử lý...' : 'Đổi mật khẩu'}
+                                        {passwordSaving ? t('customerProfile.processingBtn') : t('customerProfile.changePasswordBtn')}
                                     </button>
                                 </form>
                             </motion.div>
@@ -698,11 +693,11 @@ const CustomerProfilePage = () => {
                         {/* Tab: Activity */}
                         {activeTab === 'activity' && (
                             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                                <h2 className="text-2xl font-black text-slate-900 mb-8">Lịch sử hoạt động</h2>
+                                <h2 className="text-2xl font-black text-slate-900 mb-8">{t('customerProfile.activityTitle')}</h2>
                                 {recentBookings.length === 0 ? (
                                     <div className="py-20 text-center">
                                         <Squares2X2Icon className="h-12 w-12 text-slate-200 mx-auto mb-4" />
-                                        <p className="text-sm font-bold text-slate-400">Chưa có hoạt động nào.</p>
+                                        <p className="text-sm font-bold text-slate-400">{t('customerProfile.noActivity')}</p>
                                     </div>
                                 ) : (
                                     recentBookings.map((booking) => {

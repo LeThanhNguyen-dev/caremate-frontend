@@ -11,12 +11,14 @@ import {
     ArrowPathIcon,
     ShieldExclamationIcon
 } from '@heroicons/react/24/outline';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '../hooks/useToast';
 
 ChartJS.register(ArcElement, Legend, Tooltip);
 
 const AdminReports = () => {
     const { showToast } = useToast();
+    const { t } = useTranslation();
     const [disputes, setDisputes] = useState<Dispute[]>([]);
     const [adminNote, setAdminNote] = useState<Record<number, string>>({});
     const [loading, setLoading] = useState(true);
@@ -27,7 +29,7 @@ const AdminReports = () => {
             const data = await caremateApi.getAdminDisputes();
             setDisputes(data);
         } catch {
-            showToast('Không thể tải danh sách khiếu nại.', 'error');
+            showToast(t('adminReports.loadError'), 'error');
         } finally {
             setLoading(false);
         }

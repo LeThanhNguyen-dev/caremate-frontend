@@ -11,8 +11,10 @@ import {
 } from '@heroicons/react/24/outline';
 import type { Notification } from '../types/notification';
 import { useNotifications } from '../hooks/useNotifications';
+import { useTranslation } from 'react-i18next';
 
 const NotificationsPage = () => {
+    const { t } = useTranslation();
     const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, deleteAllNotifications } = useNotifications();
     const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
@@ -34,13 +36,13 @@ const NotificationsPage = () => {
                         <div>
                             <div className="accent-label !mb-6 shadow-sm">
                                 <SparklesIcon className="h-3 w-3" />
-                                Hệ thống thông báo
+                                {t('notificationsPage.system')}
                             </div>
                             <h1 className="text-5xl font-black text-slate-900 tracking-tight mb-4">
-                                Trung tâm <span className="text-brand">thông báo</span>
+                                {t('notificationsPage.center')} <span className="text-brand">{t('notificationsPage.notification')}</span>
                             </h1>
                             <p className="text-slate-500 font-medium text-lg">
-                                Bạn có <span className="text-brand font-black">{unreadCount}</span> thông báo mới chưa đọc.
+                                {t('notificationsPage.youHave')} <span className="text-brand font-black">{unreadCount}</span> {t('notificationsPage.unreadNotifications')}
                             </p>
                         </div>
 
@@ -50,14 +52,14 @@ const NotificationsPage = () => {
                                 className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:border-brand hover:text-brand transition-all shadow-sm active:scale-95"
                             >
                                 <CheckCircleIcon className="h-4 w-4" />
-                                Đánh dấu tất cả đã đọc
+                                {t('notificationsPage.markAllAsRead')}
                             </button>
                             <button
                                 onClick={() => void deleteAllNotifications()}
                                 className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-red-500 hover:border-red-500 hover:bg-red-50 transition-all shadow-sm active:scale-95"
                             >
                                 <TrashIcon className="h-4 w-4" />
-                                Xóa tất cả
+                                {t('notificationsPage.deleteAll')}
                             </button>
                         </div>
                     </div>
@@ -72,7 +74,7 @@ const NotificationsPage = () => {
                                 : 'text-slate-400 hover:text-slate-600'
                         }`}
                     >
-                        Tất cả thông báo
+                        {t('notificationsPage.allNotifications')}
                     </button>
                     <button
                         onClick={() => setFilter('unread')}
@@ -82,7 +84,7 @@ const NotificationsPage = () => {
                                 : 'text-slate-400 hover:text-slate-600'
                         }`}
                     >
-                        Chưa đọc ({unreadCount})
+                        {t('notificationsPage.unread', { count: unreadCount })}
                     </button>
                 </div>
 
@@ -98,9 +100,9 @@ const NotificationsPage = () => {
                             <div className="h-32 w-32 rounded-xl bg-slate-50 flex items-center justify-center mx-auto mb-10">
                                 <InboxStackIcon className="h-14 w-14 text-slate-200" />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">Hộp thông báo đang trống</h3>
+                            <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{t('notificationsPage.emptyTitle')}</h3>
                             <p className="text-slate-400 text-lg font-medium max-w-sm mx-auto">
-                                Mọi cập nhật mới từ CareMate sẽ hiển thị tại đây.
+                                {t('notificationsPage.emptyDesc')}
                             </p>
                         </motion.div>
                     ) : (
@@ -163,7 +165,7 @@ const NotificationsPage = () => {
                                                 <button
                                                     onClick={() => void markAsRead(n.id)}
                                                     className="h-14 w-14 rounded-xl bg-white border-2 border-slate-50 text-brand hover:bg-brand hover:text-white hover:border-brand transition-all duration-300 shadow-sm flex items-center justify-center group/btn"
-                                                    title="Đánh dấu đã đọc"
+                                                    title={t('notificationsPage.markAsRead')}
                                                 >
                                                     <CheckBadgeIcon className="h-7 w-7 transition-transform group-hover/btn:scale-110" />
                                                 </button>
@@ -171,7 +173,7 @@ const NotificationsPage = () => {
                                             <button
                                                 onClick={() => void deleteNotification(n.id)}
                                                 className="h-14 w-14 rounded-xl bg-white border-2 border-slate-50 text-slate-300 hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all duration-300 shadow-sm flex items-center justify-center group/btn"
-                                                title="Xóa thông báo"
+                                                title={t('notificationsPage.delete')}
                                             >
                                                 <TrashIcon className="h-6 w-6 transition-transform group-hover/btn:scale-110" />
                                             </button>

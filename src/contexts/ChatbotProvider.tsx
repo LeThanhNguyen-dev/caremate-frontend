@@ -3,9 +3,11 @@ import caremateApi from '../api/caremateApi';
 import { ChatbotContext, type LocalAiChatMessage } from './ChatbotContextObject';
 import { getErrorMessage } from '../utils/apiError';
 import { useAuth } from '../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export const ChatbotProvider = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<LocalAiChatMessage[]>([]);
@@ -17,7 +19,7 @@ export const ChatbotProvider = ({ children }: { children: ReactNode }) => {
     if (!trimmed || isLoading) return;
 
     if (isAuthLoading || !isAuthenticated) {
-      setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục sử dụng CareMate AI.');
+      setError(t('common.chatbot.sessionExpired'));
       return;
     }
 
@@ -49,10 +51,10 @@ export const ChatbotProvider = ({ children }: { children: ReactNode }) => {
 
       setMessages((prev) => [...prev, response]);
     } catch (err) {
-      const message = getErrorMessage(err, 'CareMate AI dang tam thoi khong phan hoi.');
+      const message = getErrorMessage(err, t('common.chatbot.errorFallback'));
       setError(
         message.includes('401')
-          ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục sử dụng CareMate AI.'
+          ? t('common.chatbot.sessionExpired')
           : message,
       );
     } finally {

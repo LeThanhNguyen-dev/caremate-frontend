@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -14,18 +15,19 @@ import type { ServiceDetailDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
 import { formatCurrency, getCategoryLabel, getIncludedServiceLabels } from '../utils/servicePresentation';
 
-const trustItems = [
-  'Điều dưỡng chuyên nghiệp',
-  'Tư vấn tận tâm',
-  'An toàn và uy tín',
-  'Linh hoạt thời gian',
-];
-
 const ServicesPage = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { showToast } = useToast();
   const [services, setServices] = useState<ServiceDetailDto[]>([]);
+
+  const trustItems = [
+    t('services.trust1'),
+    t('services.trust2'),
+    t('services.trust3'),
+    t('services.trust4'),
+  ];
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
@@ -45,14 +47,14 @@ const ServicesPage = () => {
         const serviceData = await caremateApi.getServices();
         setServices(serviceData.filter((service) => service.status === 'active'));
       } catch {
-        showToast('Không thể tải danh sách dịch vụ.', 'error');
+        showToast(t('services.toastError'), 'error');
       } finally {
         setLoading(false);
       }
     };
 
     void load();
-  }, [showToast]);
+  }, [showToast, i18n.language]);
 
   const categories = useMemo(() => {
     const unique = Array.from(new Set(services.map((service) => service.category?.trim()).filter(Boolean)));
@@ -112,15 +114,15 @@ const ServicesPage = () => {
           <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-brand shadow-sm">
               <SparklesIcon className="h-4 w-4" />
-              Dịch vụ CareMate
+              {t('services.label')}
             </div>
             <h1 className="mt-6 text-[38px] font-black leading-[1.1] tracking-tight text-white sm:text-[48px] lg:text-[58px]">
-              Chọn dịch vụ
-              <span className="mt-2 block font-semibold italic text-brand sm:mt-3">chăm sóc phù hợp</span>
-              cho gia đình bạn
+              {t('services.title1')}
+              <span className="mt-2 block font-semibold italic text-brand sm:mt-3">{t('services.title2')}</span>
+              {t('services.title3')}
             </h1>
             <p className="mt-6 max-w-xl text-[16px] font-semibold leading-[1.8] text-white/80">
-              Mỗi dịch vụ được tách thành một trang chi tiết riêng để gia đình xem rõ gói gồm gì, lịch trình ra sao và chi phí trước khi tìm điều dưỡng.
+              {t('services.desc')}
             </p>
 
             <div data-tour="service-search" className="mt-8 flex max-w-2xl flex-col gap-3 rounded-xl border border-white/10 bg-white/10 p-3 shadow-2xl backdrop-blur-md sm:flex-row">
@@ -129,32 +131,32 @@ const ServicesPage = () => {
                 <input
                   value={searchQuery}
                   onChange={(event) => setSearchQuery(event.target.value)}
-                  placeholder="Bạn cần dịch vụ gì?"
+                  placeholder={t('services.searchPlaceholder')}
                   className="h-12 w-full rounded-2xl border border-white/10 bg-white/5 pl-12 pr-4 text-sm font-bold text-white placeholder-white/50 outline-none transition focus:border-brand/30 focus:bg-white/20 focus:ring-4 focus:ring-brand/10"
                 />
               </div>
               <a href="#service-list" className="inline-flex h-12 items-center justify-center rounded-2xl bg-brand px-7 text-sm font-black text-white shadow-lg shadow-pink-200 transition hover:-translate-y-0.5 hover:bg-brand-deep">
-                Tìm kiếm
+                {t('services.searchBtn')}
               </a>
             </div>
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="hidden lg:block">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur-md">
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">Dữ liệu hiện có</div>
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-white/40">{t('services.dataAvailable')}</div>
               <div className="mt-5 grid grid-cols-2 gap-4">
                 <div className="rounded-2xl bg-brand/10 border border-brand/20 p-5">
                   <div className="text-4xl font-black text-brand">{services.length}</div>
-                  <div className="mt-2 text-sm font-black text-white">dịch vụ đang hoạt động</div>
+                  <div className="mt-2 text-sm font-black text-white">{t('services.activeServices')}</div>
                 </div>
                 <div className="rounded-2xl bg-white/5 border border-white/10 p-5">
                   <div className="text-4xl font-black text-white">{Math.max(0, categories.length - 1)}</div>
-                  <div className="mt-2 text-sm font-black text-white">nhóm dịch vụ</div>
+                  <div className="mt-2 text-sm font-black text-white">{t('services.categories')}</div>
                 </div>
               </div>
               <div className="mt-5 rounded-2xl bg-white/5 border border-white/10 p-5 text-white">
-                <div className="text-sm font-black text-brand">Quy trình</div>
-                <div className="mt-2 text-sm font-semibold text-white/70">Chọn dịch vụ, xem chi tiết thật từ hệ thống, rồi chọn điều dưỡng.</div>
+                <div className="text-sm font-black text-brand">{t('services.process')}</div>
+                <div className="mt-2 text-sm font-semibold text-white/70">{t('services.processDesc')}</div>
               </div>
             </div>
           </motion.div>
@@ -166,9 +168,9 @@ const ServicesPage = () => {
           <div>
             <div className="flex items-center gap-3">
               <Squares2X2Icon className="h-6 w-6 text-brand" />
-              <h2 className="text-2xl font-black tracking-tight text-[#10233F]">Tất cả dịch vụ</h2>
+              <h2 className="text-2xl font-black tracking-tight text-[#10233F]">{t('services.allServicesTitle')}</h2>
             </div>
-            <p className="mt-2 text-sm font-semibold text-slate-500">{filteredServices.length} dịch vụ phù hợp với nhu cầu của bạn.</p>
+            <p className="mt-2 text-sm font-semibold text-slate-500">{t('services.servicesMatch', { count: filteredServices.length })}</p>
           </div>
 
           <div data-tour="service-categories" className="flex flex-wrap gap-2">
@@ -183,7 +185,7 @@ const ServicesPage = () => {
                     active ? 'bg-[#10233F] text-white shadow-lg shadow-slate-200' : 'bg-slate-50 text-slate-600 hover:bg-brand-soft hover:text-brand'
                   }`}
                 >
-                  {category === 'all' ? 'Tất cả' : getCategoryLabel(category)}
+                  {category === 'all' ? t('services.all') : getCategoryLabel(t, category)}
                 </button>
               );
             })}
@@ -192,7 +194,7 @@ const ServicesPage = () => {
 
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filteredServices.map((service, index) => {
-            const included = getIncludedServiceLabels(service).slice(0, 2);
+            const included = getIncludedServiceLabels(t, service).slice(0, 2);
 
             return (
               <motion.article
@@ -206,26 +208,26 @@ const ServicesPage = () => {
                   <div className="relative h-40 overflow-hidden bg-[linear-gradient(135deg,#fdf2f8,#ffffff_55%,#ecfdf5)]">
                     <div className="absolute inset-0 p-5">
                       <div className="flex h-full items-end rounded-xl border border-white/80 bg-white/70 p-4">
-                        <div className="text-2xl font-black leading-tight text-[#10233F]">{service.packageDays ?? 1} buổi</div>
+                        <div className="text-2xl font-black leading-tight text-[#10233F]">{service.packageDays ?? 1} {t('services.sessions')}</div>
                       </div>
                     </div>
                     <div className="absolute left-4 top-4 z-10 max-w-[calc(100%-2rem)] truncate whitespace-nowrap rounded-full bg-brand px-3 py-1.5 text-xs font-black text-white shadow-lg shadow-pink-200">
-                      {service.serviceKind === 'package' ? 'Gói chăm sóc' : getCategoryLabel(service.category)}
+                      {service.serviceKind === 'package' ? t('services.carePackage') : getCategoryLabel(t, service.category)}
                     </div>
                   </div>
 
                   <div className="p-5">
                     <h3 className="text-xl font-black leading-tight text-[#10233F]">{service.name}</h3>
                     <p className="mt-3 line-clamp-2 min-h-[3.5rem] text-sm font-semibold leading-7 text-slate-600">
-                      {service.description || 'Chưa có mô tả từ hệ thống.'}
+                      {service.description || t('services.noDesc')}
                     </p>
 
                     <div className="mt-4 flex flex-wrap gap-2 text-xs font-black text-slate-600">
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5">
                         <ClockIcon className="h-4 w-4" />
-                        {service.packageDays ?? 1} buổi
+                        {service.packageDays ?? 1} {t('services.sessions')}
                       </span>
-                      <span className="rounded-full bg-slate-50 px-3 py-1.5">{service.estimatedDurationMinutes} phút/buổi</span>
+                      <span className="rounded-full bg-slate-50 px-3 py-1.5">{service.estimatedDurationMinutes} {t('services.minsPerSession')}</span>
                     </div>
 
                     {included.length > 0 && (
@@ -241,11 +243,11 @@ const ServicesPage = () => {
 
                     <div className="mt-5 flex items-center justify-between gap-4 border-t border-slate-100 pt-4">
                       <div>
-                        <div className="text-xs font-bold text-slate-400">Từ</div>
+                        <div className="text-xs font-bold text-slate-400">{t('services.from')}</div>
                         <div className="text-xl font-black text-brand">{formatCurrency(service.basePrice)}</div>
                       </div>
                       <span className="inline-flex items-center gap-2 rounded-xl border border-brand/20 px-4 py-2 text-sm font-black text-brand transition group-hover:bg-brand group-hover:text-white">
-                        Xem chi tiết
+                        {t('services.viewDetail')}
                         <ArrowRightIcon className="h-4 w-4" />
                       </span>
                     </div>

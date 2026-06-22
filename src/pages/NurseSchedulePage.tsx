@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
 import type { AvailabilitySlotDto, BookingDetailDto, PackageSessionDto } from '../api/frontend-api-contract';
@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../hooks/useAuth';
 import NursePendingApproval from '../components/nurse/NursePendingApproval';
+import { useTranslation } from 'react-i18next';
 
 const HOURS = Array.from({ length: 13 }, (_, index) => index + 7);
 const HOUR_HEIGHT = 56;
@@ -72,6 +73,7 @@ const formatTimeValue = (hour: number) => `${String(hour).padStart(2, '0')}:00`;
 const rangesOverlap = (startA: Date, endA: Date, startB: Date, endB: Date) => startA < endB && startB < endA;
 
 const NurseSchedulePage = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { showToast } = useToast();
 
@@ -98,9 +100,9 @@ const NurseSchedulePage = () => {
             setBookings(bookingData);
             setPackageSessions(sessionData);
         } catch {
-            showToast('Không thể tải dữ liệu lịch làm việc.', 'error');
+            showToast(t('nurseSchedule.toast.errorLoad'), 'error');
         }
-    }, [showToast]);
+    }, [showToast, t]);
 
     useEffect(() => {
         let isActive = true;
@@ -119,7 +121,7 @@ const NurseSchedulePage = () => {
                     setPackageSessions(sessionData);
                 }
             } catch {
-                showToast('Không thể tải dữ liệu lịch làm việc.', 'error');
+                showToast(t('nurseSchedule.toast.errorLoad'), 'error');
             }
         };
 
@@ -152,12 +154,12 @@ const NurseSchedulePage = () => {
         const endTime = new Date(`${slotForm.date}T${slotForm.endTime}:00`);
 
         if (endTime <= startTime) {
-            showToast('Giờ kết thúc phải sau giờ bắt đầu.', 'error');
+            showToast(t('nurseSchedule.toast.endTimeError'), 'error');
             return;
         }
 
         if (startTime.getTime() < Date.now()) {
-            showToast('Không thể tạo slot rảnh trong quá khứ.', 'error');
+            showToast(t('nurseSchedule.toast.pastError'), 'error');
             return;
         }
 
@@ -166,7 +168,7 @@ const NurseSchedulePage = () => {
         );
 
         if (hasOverlap) {
-            showToast('Khung giờ này đang trùng với slot đã có.', 'error');
+            showToast(t('nurseSchedule.toast.overlapError'), 'error');
             return;
         }
 
@@ -175,21 +177,21 @@ const NurseSchedulePage = () => {
                 startTime: `${slotForm.date}T${slotForm.startTime}:00`,
                 endTime: `${slotForm.date}T${slotForm.endTime}:00`,
             });
-            showToast('Tạo lịch rảnh thành công.', 'success');
+            showToast(t('nurseSchedule.toast.createSuccess'), 'success');
             setSlotModalOpen(false);
             await load();
         } catch {
-            showToast('Không thể tạo lịch rảnh.', 'error');
+            showToast(t('nurseSchedule.toast.createFail'), 'error');
         }
     };
 
     const deleteSlot = async (slotId: number) => {
         try {
             await caremateApi.deleteAvailability(slotId);
-            showToast('Đã xóa slot rảnh.', 'success');
+            showToast(t('nurseSchedule.toast.deleteSuccess'), 'success');
             await load();
         } catch {
-            showToast('Không thể xóa slot này.', 'error');
+            showToast(t('nurseSchedule.toast.deleteFail'), 'error');
         }
     };
 
@@ -255,12 +257,12 @@ const NurseSchedulePage = () => {
                 <div className="luxury-card relative overflow-hidden border-none bg-slate-900 p-6 text-white shadow-xl lg:p-7">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full"></div>
                     <div className="relative z-10">
-                        <div className="mb-3 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-white">Quản trị thời gian</div>
-                        <h1 className="mt-3 text-2xl font-black tracking-tight text-white sm:text-3xl">Lịch làm việc của bạn</h1>
+                        <div className="mb-3 inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 text-[8px] font-black uppercase tracking-[0.18em] text-white">{t('nurseSchedule.hero.badge')}</div>
+                        <h1 className="mt-3 text-2xl font-black tracking-tight text-white sm:text-3xl">{t('nurseSchedule.hero.title')}</h1>
                         <div className="mt-5 flex flex-wrap gap-3">
-                            <button onClick={() => setAnchorDate(new Date())} className="h-10 rounded-xl border border-white/10 bg-white/10 px-5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-white/20">Hôm nay</button>
+                            <button onClick={() => setAnchorDate(new Date())} className="h-10 rounded-xl border border-white/10 bg-white/10 px-5 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-white/20">{t('nurseSchedule.hero.btnToday')}</button>
                             <button data-tour="nurse-schedule-create" onClick={() => setSlotModalOpen(true)} className="flex h-10 items-center gap-2 rounded-xl bg-[#10B981] px-5 text-[10px] font-black uppercase tracking-widest text-white shadow-lg shadow-emerald-600/20 transition-all hover:scale-[1.02] active:scale-95">
-                                <PlusIcon className="h-4 w-4" /> Tạo slot rảnh
+                                <PlusIcon className="h-4 w-4" /> {t('nurseSchedule.hero.btnCreateSlot')}
                             </button>
                         </div>
                     </div>
@@ -268,9 +270,9 @@ const NurseSchedulePage = () => {
 
                 <div className="grid gap-3">
                     {[
-                        { label: 'Slot còn trống', value: stats.free, icon: ClockIcon, color: 'text-[#10B981] bg-emerald-50' },
-                        { label: 'Slot đã được đặt', value: stats.booked, icon: CheckBadgeIcon, color: 'text-[#10B981] bg-emerald-50' },
-                        { label: 'Booking sắp tới', value: stats.upcoming, icon: CalendarIcon, color: 'text-[#10B981] bg-emerald-50' },
+                        { label: t('nurseSchedule.stats.freeSlots'), value: stats.free, icon: ClockIcon, color: 'text-[#10B981] bg-emerald-50' },
+                        { label: t('nurseSchedule.stats.bookedSlots'), value: stats.booked, icon: CheckBadgeIcon, color: 'text-[#10B981] bg-emerald-50' },
+                        { label: t('nurseSchedule.stats.upcomingBookings'), value: stats.upcoming, icon: CalendarIcon, color: 'text-[#10B981] bg-emerald-50' },
                     ].map((item) => (
                         <div key={item.label} className="luxury-card flex items-center gap-4 border-none p-4 shadow-md">
                             <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${item.color}`}>
@@ -292,7 +294,7 @@ const NurseSchedulePage = () => {
                             <button onClick={() => setAnchorDate(addDays(anchorDate, -7))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-600 transition-all hover:bg-slate-100"><ChevronLeftIcon className="h-4 w-4" /></button>
                             <button onClick={() => setAnchorDate(addDays(anchorDate, 7))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-600 transition-all hover:bg-slate-100"><ChevronRightIcon className="h-4 w-4" /></button>
                         </div>
-                        <h3 className="text-lg font-black text-slate-900">Tháng {new Intl.DateTimeFormat('vi-VN', { month: 'numeric', year: 'numeric' }).format(anchorDate)}</h3>
+                        <h3 className="text-lg font-black text-slate-900">{t('nurseSchedule.calendar.monthLabel')} {new Intl.DateTimeFormat('vi-VN', { month: 'numeric', year: 'numeric' }).format(anchorDate)}</h3>
                     </div>
                 </div>
 
@@ -334,7 +336,7 @@ const NurseSchedulePage = () => {
                                                     <div className="flex items-start justify-between">
                                                         <div>
                                                             <div className={`text-[9px] font-black uppercase tracking-widest ${slot.isAvailable ? 'text-emerald-500' : 'text-slate-400'}`}>
-                                                                {slot.isAvailable ? 'Khung rảnh' : 'Đã được đặt'}
+                                                                {slot.isAvailable ? t('nurseSchedule.calendar.freeSlotText') : t('nurseSchedule.calendar.bookedSlotText')}
                                                             </div>
                                                             <div className="mt-0.5 font-black">
                                                                 {new Date(slot.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
@@ -350,7 +352,7 @@ const NurseSchedulePage = () => {
                                             ))}
                                             {events.bookings.map((booking) => (
                                                 <div key={booking.id} className="absolute left-1.5 right-1.5 z-10 rounded-lg border border-slate-900 bg-slate-900 p-2.5 text-[11px] text-white shadow-lg ring-1 ring-white" style={getSlotStyle(booking.startTime, booking.endTime)}>
-                                                    <div className="font-black text-[10px] uppercase text-[#10B981] mb-1">Lịch hẹn khách</div>
+                                                    <div className="font-black text-[10px] uppercase text-[#10B981] mb-1">{t('nurseSchedule.calendar.customerBookingText')}</div>
                                                     <div className="font-black leading-tight">#{booking.id} - {booking.serviceName}</div>
                                                     <div className="mt-2 text-[10px] font-bold text-white/70">
                                                         {new Date(booking.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
@@ -373,7 +375,7 @@ const NurseSchedulePage = () => {
                                                     style={getPackageSessionStyle(session.sessionDate)}
                                                 >
                                                     <div className="mb-1 text-[10px] font-black uppercase text-white/70">
-                                                        Gói #{session.bookingId} - Buổi {session.sessionNumber}/{session.totalSessions}
+                                                        {t('nurseSchedule.calendar.packagePrefix')} #{session.bookingId} - {t('nurseSchedule.calendar.sessionPrefix')} {session.sessionNumber}/{session.totalSessions}
                                                     </div>
                                                     <div className="font-black leading-tight">{session.title || session.serviceName}</div>
                                                     <div className="mt-1 text-[10px] font-bold text-white/70">
@@ -394,23 +396,23 @@ const NurseSchedulePage = () => {
                 <div className="fixed inset-0 z-[60] flex items-center justify-center p-6">
                     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setSlotModalOpen(false)} />
                     <div className="relative w-full max-w-md luxury-card p-10 bg-white border-none shadow-2xl">
-                        <h3 className="text-2xl font-black text-slate-900 mb-8 tracking-tight">Tạo slot rảnh mới</h3>
+                        <h3 className="text-2xl font-black text-slate-900 mb-8 tracking-tight">{t('nurseSchedule.modal.modalTitle')}</h3>
                         <form onSubmit={createSlot} className="space-y-6">
                             <div>
-                                <label className="form-label">Ngày thực hiện</label>
+                                <label className="form-label">{t('nurseSchedule.modal.dateLabel')}</label>
                                 <input type="date" className="form-input" value={slotForm.date} onChange={(e) => setSlotForm({ ...slotForm, date: e.target.value })} required />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="form-label">Thời gian bắt đầu</label>
+                                    <label className="form-label">{t('nurseSchedule.modal.startTimeLabel')}</label>
                                     <input type="time" className="form-input" value={slotForm.startTime} onChange={(e) => setSlotForm({ ...slotForm, startTime: e.target.value })} required />
                                 </div>
                                 <div>
-                                    <label className="form-label">Thời gian kết thúc</label>
+                                    <label className="form-label">{t('nurseSchedule.modal.endTimeLabel')}</label>
                                     <input type="time" className="form-input" value={slotForm.endTime} onChange={(e) => setSlotForm({ ...slotForm, endTime: e.target.value })} required />
                                 </div>
                             </div>
-                            <button type="submit" className="bg-[#10B981] text-white w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all">Xác nhận lưu lịch</button>
+                            <button type="submit" className="bg-[#10B981] text-white w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all">{t('nurseSchedule.modal.btnSubmit')}</button>
                         </form>
                     </div>
                 </div>

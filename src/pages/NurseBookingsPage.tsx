@@ -17,53 +17,48 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import NursePendingApproval from '../components/nurse/NursePendingApproval';
-import { getPlatformFee, STATUS_LABELS } from '../constants/booking';
+import { getPlatformFee, getStatusLabel } from '../constants/booking';
+import { useTranslation } from 'react-i18next';
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 const getNursePayout = (booking: BookingDetailDto) =>
     booking.nursePayoutAmount ?? booking.totalPrice - getPlatformFee(booking.totalPrice);
 
-const statusConfig: Record<string, { label: string; class: string; icon: IconComponent }> = {
+const statusConfig: Record<string, { class: string; icon: IconComponent }> = {
     pending_confirm: { 
-        label: STATUS_LABELS.pending_confirm, 
         class: 'bg-amber-50 text-amber-600 border-amber-100',
         icon: ClockIcon 
     },
     confirmed: { 
-        label: STATUS_LABELS.confirmed, 
         class: 'bg-emerald-50 text-[#10B981] border-emerald-100',
         icon: CheckBadgeIcon 
     },
     in_progress: { 
-        label: STATUS_LABELS.in_progress, 
         class: 'bg-blue-50 text-blue-600 border-blue-100',
         icon: PlayIcon 
     },
     completed: { 
-        label: STATUS_LABELS.completed, 
         class: 'bg-emerald-100 text-emerald-800 border-emerald-200',
         icon: CheckIcon 
     },
     cancelled: { 
-        label: STATUS_LABELS.cancelled, 
         class: 'bg-red-50 text-red-600 border-red-100',
         icon: XCircleIcon 
     },
     rejected: { 
-        label: STATUS_LABELS.rejected, 
         class: 'bg-slate-50 text-slate-500 border-slate-200',
         icon: XCircleIcon 
     },
 };
 
 const filterOptions = [
-    { value: 'all', label: 'Tất cả' },
-    { value: 'pending_confirm', label: 'Chờ xác nhận' },
-    { value: 'confirmed', label: 'Đã xác nhận' },
-    { value: 'in_progress', label: 'Đang thực hiện' },
-    { value: 'completed', label: 'Hoàn thành' },
-    { value: 'cancelled', label: 'Đã hủy' },
-    { value: 'rejected', label: 'Từ chối' },
+    { value: 'all', labelKey: 'nurseBookings.filter.all' },
+    { value: 'pending_confirm', labelKey: 'nurseBookings.filter.pending_confirm' },
+    { value: 'confirmed', labelKey: 'nurseBookings.filter.confirmed' },
+    { value: 'in_progress', labelKey: 'nurseBookings.filter.in_progress' },
+    { value: 'completed', labelKey: 'nurseBookings.filter.completed' },
+    { value: 'cancelled', labelKey: 'nurseBookings.filter.cancelled' },
+    { value: 'rejected', labelKey: 'nurseBookings.filter.rejected' },
 ] as const;
 
 type BookingFilter = typeof filterOptions[number]['value'];
@@ -76,6 +71,7 @@ const isSameLocalDay = (value: string, date = new Date()) => {
 };
 
 const NurseBookingsPage = () => {
+    const { t } = useTranslation();
     const { user } = useAuth();
     const { showToast } = useToast();
 
@@ -91,11 +87,11 @@ const NurseBookingsPage = () => {
             const data = await caremateApi.getMyNurseBookings();
             setBookings(data);
         } catch {
-            showToast('Không thể tải danh sách lịch hẹn.', 'error');
+            showToast(t('nurseBookings.toast.errorLoad'), 'error');
         } finally {
             setLoading(false);
         }
-    }, [showToast]);
+    }, [showToast, t]);
 
     useEffect(() => {
         void load();
@@ -104,10 +100,10 @@ const NurseBookingsPage = () => {
     const updateStatus = async (id: number, status: string) => {
         try {
             await caremateApi.updateBookingStatus(id, { status });
-            showToast('Cập nhật trạng thái thành công.', 'success');
+            showToast(t('nurseBookings.toast.updateSuccess'), 'success');
             await load();
         } catch {
-            showToast('Không thể cập nhật trạng thái.', 'error');
+            showToast(t('nurseBookings.toast.updateFail'), 'error');
         }
     };
 
@@ -163,7 +159,7 @@ const NurseBookingsPage = () => {
             <div className="flex min-h-[60vh] items-center justify-center bg-white">
                 <div className="flex flex-col items-center gap-6">
                     <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-[#10B981] border-t-transparent"></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Đang đồng bộ lịch hẹn...</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{t('nurseBookings.hero.loading')}</span>
                 </div>
             </div>
         );
@@ -175,19 +171,20 @@ const NurseBookingsPage = () => {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
                 <div>
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-[#10B981] text-[9px] font-black uppercase tracking-[0.2em] mb-2 shadow-sm">
-                        Quản trị vận hành
+                        {t('nurseBookings.hero.badge')}
                     </div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Lịch hẹn điều dưỡng</h1>
-                    <p className="text-slate-500 font-medium text-lg">
-                        Bạn có <span className="text-[#10B981] font-black">{bookingStats.needsAction}</span> lịch hẹn cần xử lý và <span className="text-[#10B981] font-black">{bookingStats.upcoming}</span> ca sắp tới.
-                    </p>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-4">{t('nurseBookings.hero.title')}</h1>
+                    <p 
+                        className="text-slate-500 font-medium text-lg"
+                        dangerouslySetInnerHTML={{ __html: t('nurseBookings.hero.statsNeedAction', { needsAction: bookingStats.needsAction, upcoming: bookingStats.upcoming }) }}
+                    />
                 </div>
                 
                 <div className="flex flex-col gap-3 md:min-w-[340px]">
                     <input
                         value={searchTerm}
                         onChange={(event) => setSearchTerm(event.target.value)}
-                        placeholder="Tìm theo mã, dịch vụ, địa chỉ..."
+                        placeholder={t('nurseBookings.hero.searchPlaceholder')}
                         className="h-11 rounded-xl border border-slate-100 bg-white px-4 text-sm font-bold text-slate-700 outline-none transition focus:border-emerald-200 focus:ring-4 focus:ring-emerald-500/5"
                     />
                     <div className="flex rounded-xl bg-white p-1.5 shadow-sm border border-slate-50">
@@ -203,7 +200,7 @@ const NurseBookingsPage = () => {
                                     : 'text-slate-400 hover:text-[#10B981]'
                             }`}
                         >
-                            Tất cả
+                            {t('nurseBookings.hero.btnAll')}
                         </button>
                         <button
                             type="button"
@@ -214,7 +211,7 @@ const NurseBookingsPage = () => {
                                     : 'text-slate-400 hover:text-[#10B981]'
                             }`}
                         >
-                            Hôm nay ({bookingStats.today})
+                            {t('nurseBookings.hero.btnToday', { count: bookingStats.today })}
                         </button>
                     </div>
                 </div>
@@ -236,7 +233,7 @@ const NurseBookingsPage = () => {
                                     : 'border-slate-100 bg-white text-slate-400 hover:border-emerald-100 hover:text-[#10B981]'
                             }`}
                         >
-                            {option.label} ({count})
+                            {t(option.labelKey)} ({count})
                         </button>
                     );
                 })}
@@ -252,8 +249,8 @@ const NurseBookingsPage = () => {
                             className="bg-white rounded-xl p-24 text-center border border-slate-50 shadow-xl shadow-slate-200/20"
                         >
                             <InboxStackIcon className="h-16 w-16 mx-auto text-slate-100 mb-8" />
-                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Không có lịch hẹn phù hợp</h3>
-                            <p className="text-slate-400 text-lg font-medium">Thử đổi bộ lọc hoặc từ khóa để xem các lịch hẹn khác.</p>
+                            <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">{t('nurseBookings.list.emptyTitle')}</h3>
+                            <p className="text-slate-400 text-lg font-medium">{t('nurseBookings.list.emptyDesc')}</p>
                         </motion.div>
                     ) : (
                         filteredBookings.map((booking, idx) => {
@@ -280,7 +277,7 @@ const NurseBookingsPage = () => {
                                                     <h3 className="text-2xl font-black text-slate-900 tracking-tight">{booking.serviceName}</h3>
                                                     <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${config.class} flex items-center gap-2`}>
                                                         <config.icon className="h-3 w-3" />
-                                                        {config.label}
+                                                        {t(`nurseBookings.filter.${booking.status}`, { defaultValue: getStatusLabel(t, booking.status) })}
                                                     </span>
                                                 </div>
                                                 
@@ -295,7 +292,7 @@ const NurseBookingsPage = () => {
                                                     </div>
                                                     <div className="flex items-center gap-2.5 text-sm font-bold text-slate-500">
                                                         <MapPinIcon className="h-5 w-5 text-[#10B981]" />
-                                                        {booking.address || 'Tại địa điểm yêu cầu'}
+                                                        {booking.address || t('nurseBookings.list.addressDefault')}
                                                     </div>
                                                 </div>
                                             </div>
@@ -306,7 +303,7 @@ const NurseBookingsPage = () => {
                                                 to={`/bookings/${booking.id}`} 
                                                 className="px-6 py-4 rounded-xl bg-slate-50 text-slate-900 text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all flex items-center gap-2 border border-slate-100"
                                             >
-                                                Chi tiết & Chat
+                                                {t('nurseBookings.list.btnDetail')}
                                                 <ChevronRightIcon className="h-4 w-4" />
                                             </Link>
 
@@ -316,13 +313,13 @@ const NurseBookingsPage = () => {
                                                         onClick={() => void updateStatus(booking.id, 'confirmed')}
                                                         className="bg-[#10B981] text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all"
                                                     >
-                                                        Chấp nhận
+                                                        {t('nurseBookings.list.btnAccept')}
                                                     </button>
                                                     <button 
                                                         onClick={() => void updateStatus(booking.id, 'rejected')}
                                                         className="px-8 py-4 rounded-xl bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all active:scale-95 shadow-sm"
                                                     >
-                                                        Từ chối
+                                                        {t('nurseBookings.list.btnReject')}
                                                     </button>
                                                 </>
                                             )}
@@ -333,7 +330,7 @@ const NurseBookingsPage = () => {
                                                     className="bg-[#10B981] text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
                                                 >
                                                     <PlayIcon className="h-4 w-4" />
-                                                    Bắt đầu thực hiện
+                                                    {t('nurseBookings.list.btnStart')}
                                                 </button>
                                             )}
 
@@ -343,7 +340,7 @@ const NurseBookingsPage = () => {
                                                     className="bg-emerald-600 text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
                                                 >
                                                     <CheckIcon className="h-4 w-4" />
-                                                    Hoàn thành ca
+                                                    {t('nurseBookings.list.btnComplete')}
                                                 </button>
                                             )}
                                             {isPackage && (booking.status === 'confirmed' || booking.status === 'in_progress') && (
@@ -352,7 +349,7 @@ const NurseBookingsPage = () => {
                                                     className="bg-[#10B981] text-white px-8 py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all flex items-center gap-3"
                                                 >
                                                     <PlayIcon className="h-4 w-4" />
-                                                    Theo dõi từng buổi
+                                                    {t('nurseBookings.list.btnTrack')}
                                                 </Link>
                                             )}
                                         </div>
@@ -360,20 +357,20 @@ const NurseBookingsPage = () => {
                                     
                                     {booking.notes && (
                                         <div className="mt-8 pt-8 border-t border-slate-50 text-xs font-medium text-slate-400 leading-relaxed italic">
-                                            Ghi chú khách hàng: "{booking.notes}"
+                                            {t('nurseBookings.list.customerNote', { note: booking.notes })}
                                         </div>
                                     )}
                                     <div className="mt-6 grid gap-3 border-t border-slate-50 pt-6 sm:grid-cols-3">
                                         <div className="rounded-xl bg-slate-50 px-4 py-3">
-                                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Khách trả</div>
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{t('nurseBookings.list.priceCustomer')}</div>
                                             <div className="mt-1 text-sm font-black text-slate-900">{booking.totalPrice.toLocaleString('vi-VN')}đ</div>
                                         </div>
                                         <div className="rounded-xl bg-rose-50 px-4 py-3">
-                                            <div className="text-[9px] font-black uppercase tracking-widest text-rose-400">Phí nền tảng 15%</div>
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-rose-400">{t('nurseBookings.list.pricePlatform')}</div>
                                             <div className="mt-1 text-sm font-black text-rose-700">{(booking.platformFee ?? getPlatformFee(booking.totalPrice)).toLocaleString('vi-VN')}đ</div>
                                         </div>
                                         <div className="rounded-xl bg-emerald-50 px-4 py-3">
-                                            <div className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Y tá thực nhận</div>
+                                            <div className="text-[9px] font-black uppercase tracking-widest text-emerald-500">{t('nurseBookings.list.priceNurse')}</div>
                                             <div className="mt-1 text-sm font-black text-emerald-700">{getNursePayout(booking).toLocaleString('vi-VN')}đ</div>
                                         </div>
                                     </div>

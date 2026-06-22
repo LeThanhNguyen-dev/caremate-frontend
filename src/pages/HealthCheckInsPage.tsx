@@ -15,6 +15,7 @@ import type {
   RecommendedCareServiceDto,
 } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
+import { useTranslation } from 'react-i18next';
 
 type FormState = {
   postpartumDay: string;
@@ -57,6 +58,7 @@ const initialForm: FormState = {
 };
 
 const HealthCheckInsPage = () => {
+  const { t } = useTranslation();
   const { showToast } = useToast();
   const [form, setForm] = useState<FormState>(initialForm);
   const [carePlan, setCarePlan] = useState<CarePlanResponse | null>(null);
@@ -71,10 +73,10 @@ const HealthCheckInsPage = () => {
       const result = await caremateApi.recommendCarePlan({ checkIn: payload });
       setCarePlan(result);
       setCarePlanError(null);
-      showToast('Đã tạo lộ trình chăm sóc cá nhân hóa.', 'success');
+      showToast(t('healthCheckins.toastSuccess'), 'success');
     } catch (error) {
       setCarePlan(null);
-      setCarePlanError(getCarePlanErrorMessage(error));
+      setCarePlanError(getCarePlanErrorMessage(error, t));
     } finally {
       setSubmitting(false);
     }
@@ -95,85 +97,85 @@ const HealthCheckInsPage = () => {
                 <SparklesIcon className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-xl font-black text-slate-950">Lộ trình chăm sóc của bạn</h1>
+                <h1 className="text-xl font-black text-slate-950">{t('healthCheckins.title')}</h1>
                 <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-slate-600">
-                  Nhập tình trạng mẹ và bé để CareMate gợi ý gói dịch vụ chăm sóc phù hợp.
+                  {t('healthCheckins.subtitle')}
                 </p>
               </div>
             </div>
             <span className="rounded-full bg-teal-50 px-3 py-1.5 text-xs font-black text-teal-700">
-              Không chẩn đoán, không kê đơn
+              {t('healthCheckins.badge')}
             </span>
           </div>
 
           <form onSubmit={submit} className="mt-6 space-y-6">
             <section className="grid gap-4 lg:grid-cols-3">
-              <Field label="Ngày sau sinh">
-                <NumberInput value={form.postpartumDay} min={0} max={365} unit="ngày" onChange={(postpartumDay) => setForm((prev) => ({ ...prev, postpartumDay }))} />
+              <Field label={t('healthCheckins.fields.postpartumDay')}>
+                <NumberInput value={form.postpartumDay} min={0} max={365} unit={t('healthCheckins.fields.dayUnit')} onChange={(postpartumDay) => setForm((prev) => ({ ...prev, postpartumDay }))} />
               </Field>
-              <Field label="Kiểu sinh">
+              <Field label={t('healthCheckins.fields.deliveryMethod')}>
                 <Select
                   value={form.deliveryMethod}
                   options={[
-                    ['', 'Chưa chọn'],
-                    ['Vaginal', 'Sinh thường'],
-                    ['CSection', 'Sinh mổ'],
-                    ['Assisted', 'Sinh có hỗ trợ'],
+                    ['', t('healthCheckins.fields.deliveryMethods.unselected')],
+                    ['Vaginal', t('healthCheckins.fields.deliveryMethods.vaginal')],
+                    ['CSection', t('healthCheckins.fields.deliveryMethods.csection')],
+                    ['Assisted', t('healthCheckins.fields.deliveryMethods.assisted')],
                   ]}
                   onChange={(deliveryMethod) => setForm((prev) => ({ ...prev, deliveryMethod }))}
                 />
               </Field>
-              <Field label="Số giờ ngủ trong 24h">
-                <NumberInput value={form.sleepHours} min={0} max={24} step={0.5} unit="giờ" onChange={(sleepHours) => setForm((prev) => ({ ...prev, sleepHours }))} />
+              <Field label={t('healthCheckins.fields.sleepHours')}>
+                <NumberInput value={form.sleepHours} min={0} max={24} step={0.5} unit={t('healthCheckins.fields.hourUnit')} onChange={(sleepHours) => setForm((prev) => ({ ...prev, sleepHours }))} />
               </Field>
-              <Field label="Mức đau hiện tại">
+              <Field label={t('healthCheckins.fields.painLevel')}>
                 <NumberInput value={form.painLevel} min={1} max={10} unit="/10" onChange={(painLevel) => setForm((prev) => ({ ...prev, painLevel }))} />
               </Field>
-              <Field label="Vị trí đau">
+              <Field label={t('healthCheckins.fields.painLocation')}>
                 <Select
                   value={form.painLocation}
                   options={[
-                    ['', 'Không rõ/chưa có'],
-                    ['bung duoi', 'Bụng dưới'],
-                    ['vet mo/khau', 'Vết mổ/khâu'],
-                    ['tang sinh mon', 'Tầng sinh môn'],
-                    ['nguc/sua', 'Ngực/sữa'],
-                    ['bap chan', 'Bắp chân'],
-                    ['lung', 'Lưng'],
+                    ['', t('healthCheckins.fields.painLocations.unknown')],
+                    ['bung duoi', t('healthCheckins.fields.painLocations.lowerAbdomen')],
+                    ['vet mo/khau', t('healthCheckins.fields.painLocations.incision')],
+                    ['tang sinh mon', t('healthCheckins.fields.painLocations.perineum')],
+                    ['nguc/sua', t('healthCheckins.fields.painLocations.breast')],
+                    ['bap chan', t('healthCheckins.fields.painLocations.calf')],
+                    ['lung', t('healthCheckins.fields.painLocations.back')],
                   ]}
                   onChange={(painLocation) => setForm((prev) => ({ ...prev, painLocation }))}
                 />
               </Field>
-              <Field label="Nhiệt độ">
+              <Field label={t('healthCheckins.fields.temperature')}>
                 <NumberInput value={form.temperatureCelsius} min={30} max={45} step={0.1} unit="°C" onChange={(temperatureCelsius) => setForm((prev) => ({ ...prev, temperatureCelsius }))} />
               </Field>
-              <Field label="Huyết áp">
+              <Field label={t('healthCheckins.fields.bloodPressure')}>
                 <div className="grid grid-cols-2 gap-2">
                   <NumberInput value={form.systolicBloodPressure} min={0} max={300} unit="SYS" onChange={(systolicBloodPressure) => setForm((prev) => ({ ...prev, systolicBloodPressure }))} />
                   <NumberInput value={form.diastolicBloodPressure} min={0} max={220} unit="DIA" onChange={(diastolicBloodPressure) => setForm((prev) => ({ ...prev, diastolicBloodPressure }))} />
                 </div>
               </Field>
-              <Field label="Sản dịch/ra máu">
+              <Field label={t('healthCheckins.fields.bleedingLevel')}>
                 <Select
                   value={form.bleedingLevel}
                   options={[
-                    ['', 'Chưa chọn'],
-                    ['Normal', 'Bình thường'],
-                    ['Light', 'Ít'],
-                    ['Heavy', 'Nhiều/bất thường'],
+                    ['', t('healthCheckins.fields.bleedingLevels.unselected')],
+                    ['Normal', t('healthCheckins.fields.bleedingLevels.normal')],
+                    ['Light', t('healthCheckins.fields.bleedingLevels.light')],
+                    ['Heavy', t('healthCheckins.fields.bleedingLevels.heavy')],
                   ]}
                   onChange={(bleedingLevel) => setForm((prev) => ({ ...prev, bleedingLevel }))}
                 />
               </Field>
-              <Field label="Vết mổ/vết khâu">
+              <Field label={t('healthCheckins.fields.incisionStatus')}>
                 <Select
                   value={form.incisionStatus}
                   options={[
-                    ['', 'Không có/chưa rõ'],
-                    ['Normal', 'Bình thường'],
-                    ['Painful', 'Đau'],
-                    ['RedSwollen', 'Sưng đỏ'],
-                    ['Discharge', 'Chảy dịch'],
+                    ['', t('healthCheckins.fields.incisionStatuses.unknown')],
+                    ['Normal', t('healthCheckins.fields.incisionStatuses.normal')],
+                    ['Painful', t('healthCheckins.fields.incisionStatuses.painful')],
+                    ['RedSwollen', t('healthCheckins.fields.incisionStatuses.redSwollen')],
+                    ['Discharge', t('healthCheckins.fields.incisionStatuses.discharge')],
                   ]}
                   onChange={(incisionStatus) => setForm((prev) => ({ ...prev, incisionStatus }))}
                 />
@@ -181,87 +183,87 @@ const HealthCheckInsPage = () => {
             </section>
 
             <section className="grid gap-4 lg:grid-cols-2">
-              <Field label="Tình trạng sữa">
+              <Field label={t('healthCheckins.fields.milkStatus')}>
                 <Select
                   value={form.milkStatus}
                   options={[
-                    ['Normal', 'Bình thường'],
-                    ['Low', 'Ít sữa'],
-                    ['Painful', 'Đau/tắc sữa'],
-                    ['Improving', 'Đang cải thiện'],
+                    ['Normal', t('healthCheckins.fields.milkStatuses.normal')],
+                    ['Low', t('healthCheckins.fields.milkStatuses.low')],
+                    ['Painful', t('healthCheckins.fields.milkStatuses.painful')],
+                    ['Improving', t('healthCheckins.fields.milkStatuses.improving')],
                   ]}
                   onChange={(milkStatus) => setForm((prev) => ({ ...prev, milkStatus }))}
                 />
               </Field>
-              <Field label="Tâm trạng">
+              <Field label={t('healthCheckins.fields.mood')}>
                 <Select
                   value={form.mood}
                   options={[
-                    ['Calm', 'Bình tĩnh'],
-                    ['Tired', 'Mệt'],
-                    ['Stressed', 'Căng thẳng'],
-                    ['Anxious', 'Lo âu'],
-                    ['Overwhelmed', 'Quá tải'],
+                    ['Calm', t('healthCheckins.fields.moods.calm')],
+                    ['Tired', t('healthCheckins.fields.moods.tired')],
+                    ['Stressed', t('healthCheckins.fields.moods.stressed')],
+                    ['Anxious', t('healthCheckins.fields.moods.anxious')],
+                    ['Overwhelmed', t('healthCheckins.fields.moods.overwhelmed')],
                   ]}
                   onChange={(mood) => setForm((prev) => ({ ...prev, mood }))}
                 />
               </Field>
-              <Field label="Bé bú">
+              <Field label={t('healthCheckins.fields.babyFeeding')}>
                 <Select
                   value={form.babyFeeding}
                   options={[
-                    ['Normal', 'Bú bình thường'],
-                    ['LessThanUsual', 'Bú ít hơn'],
-                    ['RefusesFeeding', 'Từ chối bú'],
-                    ['FrequentFeeding', 'Bú nhiều lần'],
+                    ['Normal', t('healthCheckins.fields.babyFeedings.normal')],
+                    ['LessThanUsual', t('healthCheckins.fields.babyFeedings.less')],
+                    ['RefusesFeeding', t('healthCheckins.fields.babyFeedings.refuses')],
+                    ['FrequentFeeding', t('healthCheckins.fields.babyFeedings.frequent')],
                   ]}
                   onChange={(babyFeeding) => setForm((prev) => ({ ...prev, babyFeeding }))}
                 />
               </Field>
-              <Field label="Giấc ngủ của bé">
+              <Field label={t('healthCheckins.fields.babySleep')}>
                 <Select
                   value={form.babySleep}
                   options={[
-                    ['Normal', 'Ngủ bình thường'],
-                    ['CryingOften', 'Hay quấy khóc'],
-                    ['WakingFrequently', 'Thức giấc nhiều'],
-                    ['SleepingLonger', 'Ngủ lâu hơn'],
+                    ['Normal', t('healthCheckins.fields.babySleeps.normal')],
+                    ['CryingOften', t('healthCheckins.fields.babySleeps.crying')],
+                    ['WakingFrequently', t('healthCheckins.fields.babySleeps.waking')],
+                    ['SleepingLonger', t('healthCheckins.fields.babySleeps.longer')],
                   ]}
                   onChange={(babySleep) => setForm((prev) => ({ ...prev, babySleep }))}
                 />
               </Field>
-              <Field label="Tã ướt trong 24h">
-                <NumberInput value={form.babyWetDiapers} min={0} max={20} unit="tã" onChange={(babyWetDiapers) => setForm((prev) => ({ ...prev, babyWetDiapers }))} />
+              <Field label={t('healthCheckins.fields.babyWetDiapers')}>
+                <NumberInput value={form.babyWetDiapers} min={0} max={20} unit={t('healthCheckins.fields.diaperUnit')} onChange={(babyWetDiapers) => setForm((prev) => ({ ...prev, babyWetDiapers }))} />
               </Field>
-              <Field label="Hoạt động của bé">
+              <Field label={t('healthCheckins.fields.babyActivity')}>
                 <Select
                   value={form.babyActivity}
                   options={[
-                    ['', 'Chưa chọn'],
-                    ['Normal', 'Tỉnh táo bình thường'],
-                    ['Sleepy', 'Ngủ nhiều hơn'],
-                    ['Lethargic', 'Lừ đừ/yếu'],
-                    ['Irritable', 'Khó chịu/quấy nhiều'],
+                    ['', t('healthCheckins.fields.babyActivities.unselected')],
+                    ['Normal', t('healthCheckins.fields.babyActivities.normal')],
+                    ['Sleepy', t('healthCheckins.fields.babyActivities.sleepy')],
+                    ['Lethargic', t('healthCheckins.fields.babyActivities.lethargic')],
+                    ['Irritable', t('healthCheckins.fields.babyActivities.irritable')],
                   ]}
                   onChange={(babyActivity) => setForm((prev) => ({ ...prev, babyActivity }))}
                 />
               </Field>
             </section>
 
-            <Field label="Ghi chú tự nhiên">
+            <Field label={t('healthCheckins.fields.note')}>
               <textarea
                 value={form.note}
                 onChange={(event) => setForm((prev) => ({ ...prev, note: event.target.value }))}
                 rows={5}
                 maxLength={1000}
-                placeholder="Ví dụ: Mẹ hơi đau vết mổ, bé bú ít hơn hôm qua, muốn có y tá hỗ trợ tư thế cho bú..."
+                placeholder={t('healthCheckins.fields.notePlaceholder')}
                 className="w-full resize-none rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-semibold leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-teal-400 focus:ring-3 focus:ring-teal-50"
               />
             </Field>
 
             <div className="flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs font-semibold leading-5 text-slate-500">
-                CareMate AI tạo lộ trình tham khảo. Nếu có dấu hiệu bất thường, hãy liên hệ bác sĩ hoặc y tá.
+                {t('healthCheckins.disclaimerAI')}
               </p>
               <button
                 type="submit"
@@ -269,7 +271,7 @@ const HealthCheckInsPage = () => {
                 className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-slate-950 px-5 text-sm font-black text-white transition hover:bg-teal-700 disabled:opacity-50"
               >
                 <ClipboardDocumentCheckIcon className="h-4 w-4" />
-                {submitting ? 'Đang gợi ý lộ trình...' : 'Gợi ý lộ trình chăm sóc'}
+                {submitting ? t('healthCheckins.btnSubmitting') : t('healthCheckins.btnSubmit')}
               </button>
             </div>
           </form>
@@ -277,14 +279,14 @@ const HealthCheckInsPage = () => {
 
         <aside className="space-y-5">
           <section className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
-            <SectionTitle icon={<CalendarDaysIcon className="h-5 w-5" />} title="Kết quả lộ trình" />
+            <SectionTitle icon={<CalendarDaysIcon className="h-5 w-5" />} title={t('healthCheckins.resultTitle')} />
             {carePlanError ? (
-              <CarePlanErrorCard message={carePlanError} submitting={submitting} onRetry={runRecommendation} />
+              <CarePlanErrorCard message={carePlanError} submitting={submitting} onRetry={runRecommendation} t={t} />
             ) : carePlan ? (
-              <CarePlanResult plan={carePlan} />
+              <CarePlanResult plan={carePlan} t={t} />
             ) : (
               <p className="mt-5 rounded-md border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
-                Chưa có lộ trình. Hãy hoàn tất check-in để CareMate đề xuất kế hoạch phù hợp.
+                {t('healthCheckins.resultEmpty')}
               </p>
             )}
           </section>
@@ -294,12 +296,12 @@ const HealthCheckInsPage = () => {
   );
 };
 
-function CarePlanResult({ plan }: { plan: CarePlanResponse }) {
+function CarePlanResult({ plan, t }: { plan: CarePlanResponse; t: any }) {
   return (
     <div className="mt-5 space-y-5">
-      <SafetyNoticeCard level={plan.safetyLevel} notice={plan.safetyNotice} />
-      <CarePlanSummaryCard plan={plan} />
-      {plan.recommendedServices.length > 0 && <RecommendedServicesCard services={plan.recommendedServices} />}
+      <SafetyNoticeCard level={plan.safetyLevel} notice={plan.safetyNotice} t={t} />
+      <CarePlanSummaryCard plan={plan} t={t} />
+      {plan.recommendedServices.length > 0 && <RecommendedServicesCard services={plan.recommendedServices} t={t} />}
       <p className="rounded-2xl border border-amber-100 bg-amber-50/80 px-4 py-3 text-xs font-semibold leading-6 text-amber-900">
         {plan.disclaimer}
       </p>
@@ -311,16 +313,18 @@ function CarePlanErrorCard({
   message,
   submitting,
   onRetry,
+  t,
 }: {
   message: string;
   submitting: boolean;
   onRetry: () => Promise<void>;
+  t: any;
 }) {
   return (
     <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50/80 p-5 shadow-sm">
       <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-amber-800">
         <ExclamationTriangleIcon className="h-4 w-4" />
-        AI cần xác nhận thêm
+        {t('healthCheckins.errorTitle')}
       </div>
       <p className="mt-3 text-sm font-semibold leading-6 text-amber-950">{message}</p>
       <button
@@ -329,13 +333,13 @@ function CarePlanErrorCard({
         disabled={submitting}
         className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-amber-900 px-4 text-sm font-black text-white transition hover:bg-amber-800 disabled:opacity-50"
       >
-        {submitting ? 'Đang thử lại...' : 'Thử lại'}
+        {submitting ? t('healthCheckins.btnRetrying') : t('healthCheckins.btnRetry')}
       </button>
     </div>
   );
 }
 
-function SafetyNoticeCard({ level, notice }: { level: string; notice: string | null }) {
+function SafetyNoticeCard({ level, notice, t }: { level: string; notice: string | null; t: any }) {
   if (level === 'normal' && !notice) return null;
   const urgent = level === 'urgent';
 
@@ -345,29 +349,29 @@ function SafetyNoticeCard({ level, notice }: { level: string; notice: string | n
     >
       <div className="mb-1 flex items-center gap-2 font-black">
         <ExclamationTriangleIcon className="h-5 w-5" />
-        {urgent ? 'Cần liên hệ y tế' : 'Cần chú ý thêm'}
+        {urgent ? t('healthCheckins.safetyUrgent') : t('healthCheckins.safetyAttention')}
       </div>
-      {notice ?? 'Có một số dấu hiệu cần theo dõi sát hơn trong lộ trình chăm sóc.'}
+      {notice ?? t('healthCheckins.safetyDefault')}
     </div>
   );
 }
 
-function CarePlanSummaryCard({ plan }: { plan: CarePlanResponse }) {
+function CarePlanSummaryCard({ plan, t }: { plan: CarePlanResponse; t: any }) {
   return (
     <div className="rounded-xl border border-teal-100 bg-[linear-gradient(180deg,#f2fffb_0%,#ecfdf7_100%)] p-5 shadow-sm">
       <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-teal-700">
         <SparklesIcon className="h-4 w-4" />
-        Tóm tắt CareMate AI
+        {t('healthCheckins.summaryTitle')}
       </div>
       <p className="mt-3 text-[15px] font-semibold leading-7 text-slate-800">{plan.summary}</p>
     </div>
   );
 }
 
-function RecommendedServicesCard({ services }: { services: RecommendedCareServiceDto[] }) {
+function RecommendedServicesCard({ services, t }: { services: RecommendedCareServiceDto[]; t: any }) {
   return (
     <div>
-      <SectionLabel>Gói dịch vụ phù hợp</SectionLabel>
+      <SectionLabel>{t('healthCheckins.recommendedTitle')}</SectionLabel>
       <div className="mt-3 grid gap-2">
         {services.map((service) => (
           <Link
@@ -378,7 +382,7 @@ function RecommendedServicesCard({ services }: { services: RecommendedCareServic
             <div className="text-sm font-black text-slate-950">{service.name}</div>
             <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{service.reason}</p>
             <div className="mt-3 inline-flex rounded-full bg-teal-50 px-3 py-1.5 text-xs font-black text-teal-700">
-              {service.sessionCount ? `${service.sessionCount} buổi | ` : ''}
+              {service.sessionCount ? `${service.sessionCount} ${t('healthCheckins.sessionLabel')}` : ''}
               {service.estimatedPrice.toLocaleString('vi-VN')}đ
             </div>
           </Link>
@@ -518,7 +522,7 @@ function emptyToNull(value: string): string | null {
   return trimmed ? trimmed : null;
 }
 
-function getCarePlanErrorMessage(error: unknown): string {
+function getCarePlanErrorMessage(error: unknown, t: any): string {
   if (axios.isAxiosError(error)) {
     const message = (error.response?.data as { message?: string } | undefined)?.message?.trim();
     if (message) {
@@ -526,7 +530,7 @@ function getCarePlanErrorMessage(error: unknown): string {
     }
   }
 
-  return 'CareMate AI chưa thể tạo gợi ý đủ chính xác lúc này. Vui lòng thử lại.';
+  return t('healthCheckins.errorMessage');
 }
 
 export default HealthCheckInsPage;

@@ -19,7 +19,8 @@ import type { CccdOcrResultDto, DocumentDto, NurseProfileDetailDto } from '../ty
 import { getErrorMessage } from '../utils/apiError';
 import bankApi from '../api/bankApi';
 import type { BankOptionDto } from '../api/frontend-api-contract';
-import goongApi, { createGoongSessionToken, extractGoongAddressParts, type GoongPrediction } from '../api/goongApi';
+import goongApi, { createGoongSessionToken, type GoongPrediction, extractGoongAddressParts } from '../api/goongApi';
+import { useTranslation } from 'react-i18next';
 
 const toSafeText = (value: unknown) => (typeof value === 'string' ? value : value == null ? '' : String(value));
 
@@ -77,6 +78,7 @@ const composeFullAddress = (addressLine: unknown, ward: unknown, district: unkno
 };
 
 const NurseProfile = () => {
+    const { t } = useTranslation();
     const { showToast } = useToast();
     const [profile, setProfile] = useState<NurseProfileDetailDto | null>(null);
     const [loading, setLoading] = useState(true);
@@ -121,7 +123,7 @@ const NurseProfile = () => {
                 longitude: toCoordinateText(data.longitude ?? data.defaultAddress?.longitude),
             });
         } catch {
-            showToast('Không thể tải hồ sơ điều dưỡng.', 'error');
+            showToast(t('nurseProfile.toast.errorLoad'), 'error');
         } finally {
             setLoading(false);
         }
@@ -158,12 +160,12 @@ const NurseProfile = () => {
                 .autocomplete(input, goongSessionTokenRef.current, abortController.signal)
                 .then((suggestions) => {
                     setAddressSuggestions(suggestions);
-                    setAddressLookupError(suggestions.length === 0 ? 'Không tìm thấy gợi ý địa chỉ phù hợp.' : '');
+                    setAddressLookupError(suggestions.length === 0 ? t('nurseProfile.toast.errorGoongNoMatch') : '');
                 })
                 .catch((error: unknown) => {
                     if (!(error instanceof DOMException && error.name === 'AbortError')) {
                         setAddressSuggestions([]);
-                        setAddressLookupError('Không thể tải gợi ý Goong. Hãy kiểm tra GOONG_API_KEY ở backend.');
+                        setAddressLookupError(t('nurseProfile.toast.errorGoongApi'));
                     }
                 })
                 .finally(() => {
@@ -197,7 +199,7 @@ const NurseProfile = () => {
         const placeId = toSafeText(suggestion.place_id);
 
         if (!fallbackAddress || !placeId) {
-            setAddressLookupError('Gợi ý địa chỉ không hợp lệ. Vui lòng nhập lại địa chỉ.');
+            setAddressLookupError(t('nurseProfile.toast.errorGoongInvalid'));
             return;
         }
 
@@ -226,7 +228,7 @@ const NurseProfile = () => {
         } catch {
             suppressNextAddressLookupRef.current = true;
             setFormData((prev) => ({ ...prev, address: fallbackAddress }));
-            setAddressLookupError('Không thể lấy chi tiết địa chỉ từ Goong.');
+            setAddressLookupError(t('nurseProfile.toast.errorGoongDetail'));
             setAddressSuggestionsOpen(false);
             setAddressSuggestions([]);
         }
@@ -242,10 +244,10 @@ const NurseProfile = () => {
                 latitude: parseCoordinate(formData.latitude),
                 longitude: parseCoordinate(formData.longitude),
             });
-            showToast('Cập nhật hồ sơ thành công.', 'success');
+            showToast(t('nurseProfile.toast.updateSuccess'), 'success');
             await loadProfile();
         } catch {
-            showToast('Cập nhật hồ sơ thất bại.', 'error');
+            showToast(t('nurseProfile.toast.updateFail'), 'error');
         } finally {
             setSaving(false);
         }
@@ -258,10 +260,10 @@ const NurseProfile = () => {
             setAvatarUploading(true);
             const avatar = await nurseApi.uploadAvatar(file);
             setFormData((prev) => ({ ...prev, avatar }));
-            showToast('Ảnh đại diện đã được cập nhật.', 'success');
+            showToast(t('nurseProfile.toast.avatarSuccess'), 'success');
             await loadProfile();
         } catch (err) {
-            showToast(getErrorMessage(err, 'Không thể tải ảnh đại diện.'), 'error');
+            showToast(getErrorMessage(err, t('nurseProfile.toast.avatarFail')), 'error');
         } finally {
             setAvatarUploading(false);
         }
@@ -274,15 +276,15 @@ const NurseProfile = () => {
             setCccdOcrResult(result);
 
             if (result.isIdentityCard) {
-                showToast('Đã OCR ảnh CCCD bằng FPT AI.', 'success');
+                showToast(t('nurseProfile.toast.ocrSuccess'), 'success');
             } else {
-                showToast(result.warning || 'FPT AI chưa nhận diện đây là CCCD.', 'error');
+                showToast(result.warning || t('nurseProfile.toast.ocrFail'), 'error');
             }
 
             return result;
         } catch (err) {
             setCccdOcrResult(null);
-            showToast(getErrorMessage(err, 'Không thể OCR ảnh CCCD bằng FPT AI.'), 'error');
+            showToast(getErrorMessage(err, t('nurseProfile.toast.ocrError')), 'error');
             return null;
         } finally {
             setCccdOcrLoading(false);
@@ -312,7 +314,7 @@ const NurseProfile = () => {
     const uploadDocument = async (event: React.FormEvent) => {
         event.preventDefault();
         if (!selectedFiles.length) {
-            showToast('Vui lòng chọn ít nhất một tài liệu.', 'error');
+            showToast(t('nurseProfile.toast.docEmpty'), 'error');
             return;
         }
 
@@ -321,7 +323,7 @@ const NurseProfile = () => {
             if (isCccdDocumentType(docType)) {
                 const ocrResult = cccdOcrResult ?? await runCccdOcr(selectedFiles[0], docType);
                 if (!ocrResult?.isIdentityCard) {
-                    showToast(ocrResult?.warning || 'Ảnh được chọn chưa giống CCCD. Vui lòng kiểm tra lại.', 'error');
+                    showToast(ocrResult?.warning || t('nurseProfile.toast.docWarning'), 'error');
                     return;
                 }
             }
@@ -329,11 +331,11 @@ const NurseProfile = () => {
             await nurseApi.uploadDocuments({ type: docType, files: selectedFiles });
             setSelectedFiles([]);
             setCccdOcrResult(null);
-            showToast(`Đã gửi ${selectedFiles.length} tài liệu lên hệ thống.`, 'success');
+            showToast(t('nurseProfile.toast.docSuccess', { count: selectedFiles.length }), 'success');
             await loadProfile();
         } catch (err) {
             console.error('Upload error:', err);
-            showToast(getErrorMessage(err, 'Không thể tải tài liệu lên hệ thống.'), 'error');
+            showToast(getErrorMessage(err, t('nurseProfile.toast.docFail')), 'error');
         } finally {
             setUploading(false);
         }
@@ -342,19 +344,19 @@ const NurseProfile = () => {
     const submitVerification = async () => {
         try {
             await nurseApi.submitVerification();
-            showToast('Hồ sơ đã được gửi duyệt thành công.', 'success');
+            showToast(t('nurseProfile.toast.verifySuccess'), 'success');
             await loadProfile();
         } catch (err) {
-            showToast(getErrorMessage(err, 'Không thể gửi duyệt hồ sơ.'), 'error');
+            showToast(getErrorMessage(err, t('nurseProfile.toast.verifyFail')), 'error');
         }
     };
 
     const profileStatus =
         profile?.isVerified === 'verified'
-            ? 'Đã xác minh'
+            ? t('nurseProfile.status.verified')
             : profile?.isVerified === 'rejected'
-              ? 'Bị từ chối'
-              : 'Đang chờ duyệt';
+              ? t('nurseProfile.status.rejected')
+              : t('nurseProfile.status.pending');
     const hasFront = !!profile?.documents?.some((d) => d.type === 'id_card_front');
     const hasBack = !!profile?.documents?.some((d) => d.type === 'id_card_back');
     const hasCertificate = !!profile?.documents?.some((d) => d.type === 'certificate');
@@ -380,7 +382,7 @@ const NurseProfile = () => {
             <div className="flex min-h-[60vh] items-center justify-center bg-white">
                 <div className="flex flex-col items-center gap-6">
                     <div className="h-12 w-12 animate-spin rounded-full border-[3px] border-[#10B981] border-t-transparent"></div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Đang truy xuất hồ sơ y tế...</span>
+                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">{t('nurseProfile.hero.loading')}</span>
                 </div>
             </div>
         );
@@ -392,29 +394,29 @@ const NurseProfile = () => {
                 <div className="luxury-card bg-slate-900 text-white p-12 border-none shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full"></div>
                     <div className="relative z-10">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-4">Hồ sơ chuyên môn</div>
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 text-[9px] font-black uppercase tracking-[0.2em] mb-4">{t('nurseProfile.hero.badge')}</div>
                         <div className="mt-4 flex flex-col gap-6 sm:flex-row sm:items-center">
                             <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-white/10 ring-1 ring-white/15">
                                 {profile?.avatar ? (
                                     <img src={profile.avatar} alt={profile.fullName} className="h-full w-full object-cover" />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center text-4xl font-black text-white/70">
-                                        {profile?.fullName?.charAt(0) || 'Y'}
+                                        {profile?.fullName?.charAt(0) || t('nurseProfile.hero.defaultLetter')}
                                     </div>
                                 )}
                                 <label className="absolute inset-x-0 bottom-0 flex cursor-pointer items-center justify-center gap-1 bg-black/55 py-2 text-[9px] font-black uppercase tracking-widest text-white">
                                     <CameraIcon className="h-3.5 w-3.5" />
-                                    {avatarUploading ? 'Đang tải' : 'Đổi ảnh'}
+                                    {avatarUploading ? t('nurseProfile.hero.uploading') : t('nurseProfile.hero.changeAvatar')}
                                     <input type="file" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={(event) => void uploadAvatar(event.target.files?.[0])} disabled={avatarUploading} />
                                 </label>
                             </div>
                             <div>
                                 <h1 className="text-4xl font-black text-white tracking-tight">{profile?.fullName}</h1>
-                                <p className="mt-2 text-sm font-bold text-white/45">{profile?.specialization || 'Chưa cập nhật chuyên môn hiển thị'}</p>
+                                <p className="mt-2 text-sm font-bold text-white/45">{profile?.specialization || t('nurseProfile.hero.noSpec')}</p>
                             </div>
                         </div>
                         <p className="mt-4 max-w-2xl text-lg font-medium text-white/50 leading-relaxed">
-                            Quản lý thông tin nghề nghiệp và tài liệu chuyên môn để duy trì trạng thái xác minh trên CareMate.
+                            {t('nurseProfile.hero.desc')}
                         </p>
                         <div className="mt-10 flex items-center gap-3">
                             <span className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${profile?.isVerified === 'verified' ? 'bg-emerald-500/20 text-[#10B981]' : 'bg-amber-500/20 text-amber-400'}`}>
@@ -424,7 +426,7 @@ const NurseProfile = () => {
                         </div>
                         {profile?.isVerified === 'rejected' && profile.rejectionReason && (
                             <div className="mt-4 rounded-xl border border-red-300 bg-red-500/10 p-4 text-sm text-red-100">
-                                <div className="font-black uppercase tracking-wider text-[10px] mb-1">Lý do bị từ chối</div>
+                                <div className="font-black uppercase tracking-wider text-[10px] mb-1">{t('nurseProfile.hero.rejectionReason')}</div>
                                 <div>{profile.rejectionReason}</div>
                             </div>
                         )}
@@ -433,9 +435,9 @@ const NurseProfile = () => {
 
                 <div className="grid gap-4 h-full">
                     {[
-                        { label: 'Liên hệ Email', value: profile?.email || '-', icon: EnvelopeIcon },
-                        { label: 'Số điện thoại', value: profile?.phone || 'Chưa cập nhật', icon: PhoneIcon },
-                        { label: 'Chứng chỉ hiện có', value: `${profile?.documents?.length ?? 0} Tài liệu`, icon: DocumentTextIcon },
+                        { label: t('nurseProfile.hero.email'), value: profile?.email || '-', icon: EnvelopeIcon },
+                        { label: t('nurseProfile.hero.phone'), value: profile?.phone || t('nurseProfile.hero.notUpdated'), icon: PhoneIcon },
+                        { label: t('nurseProfile.hero.certificates'), value: `${profile?.documents?.length ?? 0} ${t('nurseProfile.hero.documents')}`, icon: DocumentTextIcon },
                     ].map((item) => (
                         <div key={item.label} className="luxury-card p-6 flex items-center gap-5 border-none shadow-lg bg-white transition-all hover:translate-x-2">
                             <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-[#10B981]">
@@ -454,8 +456,8 @@ const NurseProfile = () => {
                 <div data-tour="nurse-profile-form" className="luxury-card p-10 border-none shadow-xl bg-white">
                     <div className="mb-10 flex items-center justify-between">
                         <div>
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Kinh nghiệm chuyên môn</h3>
-                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Cập nhật năng lực chăm sóc</p>
+                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t('nurseProfile.form.title')}</h3>
+                            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('nurseProfile.form.subtitle')}</p>
                         </div>
                         <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-[#10B981]">
                             <AcademicCapIcon className="h-6 w-6" />
@@ -464,24 +466,24 @@ const NurseProfile = () => {
 
                     <form onSubmit={updateProfile} className="space-y-8">
                         <div>
-                            <label className="form-label">Giới thiệu bản thân chuyên nghiệp</label>
-                            <textarea className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all min-h-[160px] resize-none" rows={5} value={formData.bio} onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))} placeholder="Chia sẻ về kinh nghiệm, thế mạnh và tâm thế phục vụ của bạn..." />
+                            <label className="form-label">{t('nurseProfile.form.bioLabel')}</label>
+                            <textarea className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all min-h-[160px] resize-none" rows={5} value={formData.bio} onChange={(event) => setFormData((prev) => ({ ...prev, bio: event.target.value }))} placeholder={t('nurseProfile.form.bioPlaceholder')} />
                         </div>
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
-                                <label className="form-label">Tên hiển thị với khách</label>
+                                <label className="form-label">{t('nurseProfile.form.fullNameLabel')}</label>
                                 <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.fullName} onChange={(event) => setFormData((prev) => ({ ...prev, fullName: event.target.value }))} />
                             </div>
                             <div>
-                                <label className="form-label">Số điện thoại liên hệ</label>
+                                <label className="form-label">{t('nurseProfile.form.phoneLabel')}</label>
                                 <input type="tel" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.phoneNumber} onChange={(event) => setFormData((prev) => ({ ...prev, phoneNumber: event.target.value }))} />
                             </div>
                             <div className="sm:col-span-2">
-                                <label className="form-label">Chuyên môn hiển thị</label>
-                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.specialization} onChange={(event) => setFormData((prev) => ({ ...prev, specialization: event.target.value }))} placeholder="VD: Chăm sóc mẹ sau sinh, massage bé, tư vấn nuôi con bằng sữa mẹ" />
+                                <label className="form-label">{t('nurseProfile.form.specLabel')}</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.specialization} onChange={(event) => setFormData((prev) => ({ ...prev, specialization: event.target.value }))} placeholder={t('nurseProfile.form.specPlaceholder')} />
                             </div>
                             <div className="sm:col-span-2">
-                                <label className="form-label">Địa chỉ làm việc chính</label>
+                                <label className="form-label">{t('nurseProfile.form.addressLabel')}</label>
                                 <div className="relative">
                                     <MapPinIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-300" />
                                     <input
@@ -491,7 +493,7 @@ const NurseProfile = () => {
                                         onBlur={() => window.setTimeout(() => setAddressSuggestionsOpen(false), 150)}
                                         onChange={handleAddressChange}
                                         onFocus={() => setAddressSuggestionsOpen(addressSuggestions.length > 0)}
-                                        placeholder="Nhập địa chỉ để Goong gợi ý, ví dụ: 344 Nguyễn Hữu Thọ, Đà Nẵng"
+                                        placeholder={t('nurseProfile.form.addressPlaceholder')}
                                     />
                                     {addressLookupLoading && (
                                         <div className="absolute right-5 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
@@ -536,53 +538,53 @@ const NurseProfile = () => {
                                 )}
                             </div>
                             <div>
-                                <label className="form-label">Quận/Huyện</label>
-                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.district} onChange={(event) => setFormData((prev) => ({ ...prev, district: event.target.value, address: composeFullAddress(prev.addressLine, prev.ward, event.target.value, prev.address) }))} placeholder="Ví dụ: Cẩm Lệ" />
+                                <label className="form-label">{t('nurseProfile.form.districtLabel')}</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.district} onChange={(event) => setFormData((prev) => ({ ...prev, district: event.target.value, address: composeFullAddress(prev.addressLine, prev.ward, event.target.value, prev.address) }))} placeholder={t('nurseProfile.form.districtPlaceholder')} />
                             </div>
                             <div>
-                                <label className="form-label">Phường/Xã</label>
-                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.ward} onChange={(event) => setFormData((prev) => ({ ...prev, ward: event.target.value, address: composeFullAddress(prev.addressLine, event.target.value, prev.district, prev.address) }))} placeholder="Ví dụ: Khuê Trung" />
+                                <label className="form-label">{t('nurseProfile.form.wardLabel')}</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.ward} onChange={(event) => setFormData((prev) => ({ ...prev, ward: event.target.value, address: composeFullAddress(prev.addressLine, event.target.value, prev.district, prev.address) }))} placeholder={t('nurseProfile.form.wardPlaceholder')} />
                             </div>
                             <div className="sm:col-span-2">
-                                <label className="form-label">Số nhà, tên đường</label>
-                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.addressLine} onChange={(event) => setFormData((prev) => ({ ...prev, addressLine: event.target.value, address: composeFullAddress(event.target.value, prev.ward, prev.district, prev.address) }))} placeholder="Ví dụ: 344 Nguyễn Hữu Thọ" />
+                                <label className="form-label">{t('nurseProfile.form.addressLineLabel')}</label>
+                                <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.addressLine} onChange={(event) => setFormData((prev) => ({ ...prev, addressLine: event.target.value, address: composeFullAddress(event.target.value, prev.ward, prev.district, prev.address) }))} placeholder={t('nurseProfile.form.addressLinePlaceholder')} />
                             </div>
                             <div>
-                                <label className="form-label">Vĩ độ</label>
+                                <label className="form-label">{t('nurseProfile.form.latitude')}</label>
                                 <input type="number" step="any" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.latitude} onChange={(event) => setFormData((prev) => ({ ...prev, latitude: event.target.value }))} />
                             </div>
                             <div>
-                                <label className="form-label">Kinh độ</label>
+                                <label className="form-label">{t('nurseProfile.form.longitude')}</label>
                                 <input type="number" step="any" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.longitude} onChange={(event) => setFormData((prev) => ({ ...prev, longitude: event.target.value }))} />
                             </div>
                             <div>
-                                <label className="form-label">Số năm kinh nghiệm</label>
+                                <label className="form-label">{t('nurseProfile.form.yearsExperienceLabel')}</label>
                                 <input type="number" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.yearsExperience} onChange={(event) => setFormData((prev) => ({ ...prev, yearsExperience: Number(event.target.value) || 0 }))} />
                             </div>
                             <div>
-                                <label className="form-label">Bán kính phục vụ (km)</label>
+                                <label className="form-label">{t('nurseProfile.form.serviceRadiusLabel')}</label>
                                 <input type="number" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.serviceRadiusKm} onChange={(event) => setFormData((prev) => ({ ...prev, serviceRadiusKm: Number(event.target.value) || 0 }))} />
                             </div>
                             <div>
-                                <label className="form-label">Ngân hàng nhận tiền</label>
+                                <label className="form-label">{t('nurseProfile.form.bankLabel')}</label>
                                 <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankBin} onChange={(event) => setFormData((prev) => ({ ...prev, bankBin: event.target.value }))}>
-                                    <option value="">Chọn ngân hàng</option>
+                                    <option value="">{t('nurseProfile.form.bankPlaceholder')}</option>
                                     {banks.map((bank) => (
                                         <option key={bank.code} value={bank.code}>{bank.shortName || bank.name}</option>
                                     ))}
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Số tài khoản nhận tiền</label>
+                                <label className="form-label">{t('nurseProfile.form.bankNumberLabel')}</label>
                                 <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankAccountNumber} onChange={(event) => setFormData((prev) => ({ ...prev, bankAccountNumber: event.target.value }))} />
                             </div>
                             <div className="sm:col-span-2">
-                                <label className="form-label">Tên chủ tài khoản</label>
+                                <label className="form-label">{t('nurseProfile.form.bankNameLabel')}</label>
                                 <input type="text" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" value={formData.bankAccountName} onChange={(event) => setFormData((prev) => ({ ...prev, bankAccountName: event.target.value }))} />
                             </div>
                         </div>
                         <button type="submit" className="bg-[#10B981] text-white w-full py-4 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] shadow-xl shadow-emerald-600/20 hover:scale-[1.02] transition-all" disabled={saving}>
-                            {saving ? 'Đang đồng bộ...' : 'Xác nhận lưu thay đổi hồ sơ'}
+                            {saving ? t('nurseProfile.form.btnSaving') : t('nurseProfile.form.btnSave')}
                         </button>
                     </form>
                 </div>
@@ -591,8 +593,8 @@ const NurseProfile = () => {
                     <div data-tour="nurse-profile-documents" className="luxury-card p-10 border-none shadow-xl bg-white">
                         <div className="mb-10 flex items-center justify-between">
                             <div>
-                                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Xác minh danh tính</h3>
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">Bổ sung hồ sơ năng lực</p>
+                                <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t('nurseProfile.documents.title')}</h3>
+                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-1">{t('nurseProfile.documents.subtitle')}</p>
                             </div>
                             <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-[#10B981]">
                                 <IdentificationIcon className="h-6 w-6" />
@@ -600,40 +602,44 @@ const NurseProfile = () => {
                         </div>
                         <form onSubmit={uploadDocument} className="space-y-6">
                             <div className="rounded-xl bg-slate-50 p-4 text-xs font-semibold text-slate-700">
-                                Checklist hồ sơ: CCCD trước ({hasFront ? 'Đủ' : 'Thiếu'}), CCCD sau ({hasBack ? 'Đủ' : 'Thiếu'}), Chứng chỉ ({hasCertificate ? 'Đủ' : 'Thiếu'})
+                                {t('nurseProfile.documents.checklist', { 
+                                    front: hasFront ? t('nurseProfile.documents.enough') : t('nurseProfile.documents.missing'), 
+                                    back: hasBack ? t('nurseProfile.documents.enough') : t('nurseProfile.documents.missing'), 
+                                    cert: hasCertificate ? t('nurseProfile.documents.enough') : t('nurseProfile.documents.missing') 
+                                })}
                             </div>
                             <div>
-                                <label className="form-label">Phân loại tài liệu</label>
+                                <label className="form-label">{t('nurseProfile.documents.docTypeLabel')}</label>
                                 <select className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all disabled:opacity-50" value={docType} onChange={handleDocumentTypeChange} disabled={!canChangeDocuments}>
-                                    <option value="id_card_front">Căn cước công dân (Mặt trước)</option>
-                                    <option value="id_card_back">Căn cước công dân (Mặt sau)</option>
-                                    <option value="certificate">Chứng chỉ hành nghề y tế</option>
+                                    <option value="id_card_front">{t('nurseProfile.documents.cccdFront')}</option>
+                                    <option value="id_card_back">{t('nurseProfile.documents.cccdBack')}</option>
+                                    <option value="certificate">{t('nurseProfile.documents.certType')}</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="form-label">Chọn tệp tài liệu (JPG/PNG)</label>
+                                <label className="form-label">{t('nurseProfile.documents.fileLabel')}</label>
                                 <div className="relative group">
                                     <input type="file" id="doc-upload" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple disabled={!canChangeDocuments} onChange={handleDocumentFilesChange} />
                                     <label htmlFor="doc-upload" className="flex items-center justify-between w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl py-4 px-6 cursor-pointer hover:bg-emerald-50 hover:border-emerald-200 transition-all group">
                                         <span className={`text-sm font-bold ${selectedFiles.length ? 'text-slate-900' : 'text-slate-400'}`}>
-                                            {selectedFiles.length ? `Đã chọn ${selectedFiles.length} tệp` : 'Nhấn để chọn tệp...'}
+                                            {selectedFiles.length ? t('nurseProfile.documents.selectedFiles', { count: selectedFiles.length }) : t('nurseProfile.documents.clickToSelect')}
                                         </span>
                                         <DocumentTextIcon className="h-5 w-5 text-slate-300 group-hover:text-[#10B981]" />
                                     </label>
                                 </div>
-                                <p className="mt-2 text-[10px] font-medium text-slate-400 italic">Hỗ trợ định dạng JPG, PNG. Dung lượng tối đa 5MB.</p>
+                                <p className="mt-2 text-[10px] font-medium text-slate-400 italic">{t('nurseProfile.documents.fileNote')}</p>
                             </div>
                             {isCccdDocumentType(docType) && selectedFiles.length === 1 && (
                                 <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-5">
                                     <div className="flex items-center justify-between gap-3">
                                         <div>
-                                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-700">FPT AI OCR CCCD</div>
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-700">{t('nurseProfile.documents.fptAi')}</div>
                                             <div className="mt-1 text-xs font-bold text-slate-500">
                                                 {cccdOcrLoading
-                                                    ? 'Đang đọc thông tin từ ảnh...'
+                                                    ? t('nurseProfile.documents.scanning')
                                                     : cccdOcrResult
-                                                      ? `Độ tin cậy ${cccdOcrResult.confidenceScore}%`
-                                                      : 'Chưa có kết quả OCR.'}
+                                                      ? t('nurseProfile.documents.confidence', { score: cccdOcrResult.confidenceScore })
+                                                      : t('nurseProfile.documents.noOcr')}
                                             </div>
                                         </div>
                                         <button
@@ -642,7 +648,7 @@ const NurseProfile = () => {
                                             disabled={cccdOcrLoading}
                                             className="shrink-0 rounded-xl bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-emerald-700 shadow-sm disabled:opacity-50"
                                         >
-                                            {cccdOcrLoading ? 'Đang quét' : 'Quét lại'}
+                                            {cccdOcrLoading ? t('nurseProfile.documents.btnScanning') : t('nurseProfile.documents.btnRescan')}
                                         </button>
                                     </div>
                                     {cccdOcrResult && (
@@ -669,19 +675,19 @@ const NurseProfile = () => {
                             )}
                             <button type="submit" className="w-full py-4 rounded-xl flex items-center justify-center gap-3 border-2 border-emerald-100 text-[#10B981] font-black text-[10px] uppercase tracking-widest hover:bg-emerald-50 transition-all disabled:opacity-50 disabled:hover:bg-transparent" disabled={uploading || !canChangeDocuments}>
                                 <PlusIcon className="h-5 w-5 text-[#10B981]" />
-                                {uploading ? 'Đang gửi...' : isApproved ? 'Hồ sơ đã xác minh' : isSubmitted ? 'Đang chờ duyệt' : profile?.isVerified === 'rejected' ? 'Gửi lại hồ sơ xác minh' : 'Gửi tài liệu xác minh'}
+                                {uploading ? t('nurseProfile.documents.btnSending') : isApproved ? t('nurseProfile.documents.btnVerified') : isSubmitted ? t('nurseProfile.documents.btnPending') : profile?.isVerified === 'rejected' ? t('nurseProfile.documents.btnResend') : t('nurseProfile.documents.btnSendDocs')}
                             </button>
                             <button type="button" onClick={() => void submitVerification()} disabled={!canSubmit} className="w-full py-4 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-widest disabled:opacity-50">
-                                {isApproved ? 'Hồ sơ đã được duyệt' : isSubmitted ? 'Đã gửi, đang chờ duyệt' : 'Gửi duyệt hồ sơ 1 lần'}
+                                {isApproved ? t('nurseProfile.documents.btnApproved') : isSubmitted ? t('nurseProfile.documents.btnSubmitted') : t('nurseProfile.documents.btnSubmitOnce')}
                             </button>
                         </form>
                     </div>
 
                     <div className="luxury-card p-10 border-none shadow-xl bg-white">
                         <div className="mb-10 flex items-center justify-between">
-                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">Danh mục hồ sơ</h3>
+                            <h3 className="text-2xl font-black text-slate-900 tracking-tight">{t('nurseProfile.documents.docList')}</h3>
                             <span className="px-4 py-1.5 rounded-xl bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 border border-slate-100">
-                                {profile?.documents?.length ?? 0} Mục
+                                {profile?.documents?.length ?? 0} {t('nurseProfile.documents.items')}
                             </span>
                         </div>
                         <div className="space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
@@ -698,12 +704,12 @@ const NurseProfile = () => {
                                                         {doc.type.replace(/_/g, ' ')}
                                                     </div>
                                                     <a href={doc.fileUrl} target="_blank" rel="noreferrer" className="mt-1 block text-sm font-black text-slate-900 hover:text-[#10B981] transition-colors">
-                                                        Xem chi tiết tài liệu
+                                                        {t('nurseProfile.documents.viewDetails')}
                                                     </a>
                                                 </div>
                                             </div>
                                             <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${doc.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : doc.status === 'rejected' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                                                {doc.status === 'approved' ? 'Đã duyệt' : doc.status === 'rejected' ? 'Bị từ chối' : 'Chờ duyệt'}
+                                                {doc.status === 'approved' ? t('nurseProfile.status.approved') : doc.status === 'rejected' ? t('nurseProfile.status.rejected') : t('nurseProfile.status.pending')}
                                             </span>
                                         </div>
                                     </motion.div>
@@ -711,7 +717,7 @@ const NurseProfile = () => {
                             ) : (
                                 <div className="py-12 text-center rounded-xl bg-slate-50/30 border-2 border-dashed border-slate-100">
                                     <DocumentTextIcon className="h-10 w-10 mx-auto text-slate-200 mb-4" />
-                                    <p className="text-sm font-bold text-slate-400">Chưa có tài liệu xác minh nào.</p>
+                                    <p className="text-sm font-bold text-slate-400">{t('nurseProfile.documents.noDocs')}</p>
                                 </div>
                             )}
                         </div>
@@ -724,11 +730,11 @@ const NurseProfile = () => {
                     <div>
                         <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-[#10B981]">
                             <SolidStarIcon className="h-4 w-4" />
-                            Đánh giá khách hàng
+                            {t('nurseProfile.reviews.title')}
                         </div>
-                        <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">Hồ sơ đánh giá của y tá</h3>
+                        <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">{t('nurseProfile.reviews.subtitle')}</h3>
                         <p className="mt-2 text-sm font-bold text-slate-400">
-                            {reviews.length} đánh giá • trung bình {averageRating.toFixed(1)}/5 sao
+                            {t('nurseProfile.reviews.stats', { count: reviews.length, avg: averageRating.toFixed(1) })}
                         </p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
@@ -739,7 +745,7 @@ const NurseProfile = () => {
                                 value={reviewCategory}
                                 onChange={(event) => setReviewCategory(event.target.value)}
                             >
-                                <option value="all">Tất cả danh mục</option>
+                                <option value="all">{t('nurseProfile.reviews.allCategories')}</option>
                                 {reviewCategories.map((category) => (
                                     <option key={category} value={category}>{category}</option>
                                 ))}
@@ -767,7 +773,7 @@ const NurseProfile = () => {
                                             )}
                                         </div>
                                         <div>
-                                            <div className="text-sm font-black text-slate-900">{review.customerName || 'Khách hàng'}</div>
+                                            <div className="text-sm font-black text-slate-900">{review.customerName || t('nurseProfile.reviews.defaultCustomer')}</div>
                                             <div className="mt-1 text-[10px] font-black uppercase tracking-widest text-slate-400">
                                                 {review.serviceCategory || review.serviceName}
                                             </div>
@@ -780,7 +786,7 @@ const NurseProfile = () => {
                                     </div>
                                 </div>
                                 <p className="mt-5 text-sm font-semibold leading-7 text-slate-600">
-                                    {review.comment || 'Khách hàng chưa để lại nhận xét chi tiết.'}
+                                    {review.comment || t('nurseProfile.reviews.noComment')}
                                 </p>
                                 <div className="mt-5 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
                                     <span>{review.serviceName}</span>
@@ -792,7 +798,7 @@ const NurseProfile = () => {
                 ) : (
                     <div className="rounded-2xl border-2 border-dashed border-slate-100 bg-slate-50/40 py-14 text-center">
                         <SolidStarIcon className="mx-auto h-10 w-10 text-slate-200" />
-                        <p className="mt-4 text-sm font-bold text-slate-400">Chưa có đánh giá nào trong danh mục này.</p>
+                        <p className="mt-4 text-sm font-bold text-slate-400">{t('nurseProfile.reviews.noReviews')}</p>
                     </div>
                 )}
             </section>
@@ -801,36 +807,36 @@ const NurseProfile = () => {
                 <div className="mb-8">
                     <div className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-[#10B981]">
                         <AcademicCapIcon className="h-4 w-4" />
-                        Thống kê hiệu suất
+                        {t('nurseProfile.performance.title')}
                     </div>
-                    <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">Tổng quan hoạt động</h3>
+                    <h3 className="mt-4 text-2xl font-black tracking-tight text-slate-900">{t('nurseProfile.performance.subtitle')}</h3>
                 </div>
 
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="rounded-2xl bg-slate-50 p-6">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Đánh giá</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nurseProfile.performance.rating')}</div>
                         <div className="mt-2 flex items-center gap-2">
                             <SolidStarIcon className="h-6 w-6 text-amber-400" />
                             <span className="text-3xl font-black text-slate-900">{averageRating.toFixed(1)}</span>
                         </div>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-6">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Lượt đánh giá</div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nurseProfile.performance.reviewCount')}</div>
                         <div className="mt-2 text-3xl font-black text-slate-900">{reviews.length}</div>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-6">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Kinh nghiệm</div>
-                        <div className="mt-2 text-3xl font-black text-slate-900">{profile?.yearsExperience ?? 0} <span className="text-lg font-black text-slate-400">năm</span></div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nurseProfile.performance.experience')}</div>
+                        <div className="mt-2 text-3xl font-black text-slate-900">{profile?.yearsExperience ?? 0} <span className="text-lg font-black text-slate-400">{t('nurseProfile.performance.years')}</span></div>
                     </div>
                     <div className="rounded-2xl bg-slate-50 p-6">
-                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Hồ sơ</div>
-                        <div className="mt-2 text-3xl font-black text-slate-900">{profile?.documents?.length ?? 0} <span className="text-lg font-black text-slate-400">tệp</span></div>
+                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{t('nurseProfile.performance.profileFiles')}</div>
+                        <div className="mt-2 text-3xl font-black text-slate-900">{profile?.documents?.length ?? 0} <span className="text-lg font-black text-slate-400">{t('nurseProfile.performance.files')}</span></div>
                     </div>
                 </div>
 
                 {profile?.ratingDistribution && Object.keys(profile.ratingDistribution).length > 0 && (
                     <div className="mt-8">
-                        <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Phân bổ đánh giá</div>
+                        <div className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">{t('nurseProfile.performance.ratingDist')}</div>
                         <div className="space-y-2">
                             {[5, 4, 3, 2, 1].map((star) => {
                                 const dist = profile.ratingDistribution as Record<string, number>;

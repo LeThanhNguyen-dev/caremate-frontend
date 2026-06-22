@@ -19,12 +19,14 @@ export default defineConfig({
     },
   },
   build: {
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           charts: ['chart.js', 'react-chartjs-2'],
           ui: ['framer-motion', '@heroicons/react'],
+          maps: ['maplibre-gl'],
         },
       },
     },

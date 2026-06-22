@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import {
     ArrowTopRightOnSquareIcon,
@@ -18,6 +19,7 @@ const mapUrl = 'https://maps.app.goo.gl/smYL7LcejKTJixmF9';
 const mapEmbedUrl = 'https://www.google.com/maps?q=FPT%20University%20Da%20Nang%20Campus%2C%20FPT%20City%2C%20Ngu%20Hanh%20Son%2C%20Da%20Nang%2C%20Vietnam&output=embed';
 
 const AboutUs = () => {
+    const { t } = useTranslation();
     const { showToast } = useToast();
     const [sending, setSending] = useState(false);
 
@@ -25,7 +27,7 @@ const AboutUs = () => {
         event.preventDefault();
         setSending(true);
         setTimeout(() => {
-            showToast('Cảm ơn bạn đã gửi ý kiến! Chúng tôi sẽ phản hồi sớm nhất.', 'success');
+            showToast(t('aboutUs.toastSuccess'), 'success');
             setSending(false);
             (event.target as HTMLFormElement).reset();
         }, 1500);
@@ -43,24 +45,24 @@ const AboutUs = () => {
                         className="max-w-3xl"
                     >
                         <div className="mb-6 w-fit rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[10px] font-black uppercase tracking-[0.35em] text-brand shadow-sm">
-                            Về CareMate
+                            {t('aboutUs.label')}
                         </div>
                         <h1 className="text-[54px] font-black leading-[1.04] tracking-tight text-white sm:text-[70px] lg:text-[88px]">
-                            Chăm sóc
-                            <span className="mt-2 block font-semibold italic text-brand sm:mt-3">bằng trái tim.</span>
+                            {t('aboutUs.title1')}
+                            <span className="mt-2 block font-semibold italic text-brand sm:mt-3">{t('aboutUs.title2')}</span>
                         </h1>
                         <p className="mt-6 max-w-2xl text-[18px] font-black leading-8 text-white">
-                            CareMate kết nối điều dưỡng chuyên nghiệp với các gia đình, mang lại sự an tâm cho mẹ và bé trong từng buổi chăm sóc.
+                            {t('aboutUs.desc1')}
                         </p>
                         <p className="mt-4 max-w-2xl text-[15px] font-semibold leading-[1.8] text-white/60">
-                            Chúng tôi giữ mọi thứ rõ ràng: hồ sơ y tá, lịch làm việc, chi phí và đánh giá đều được trình bày minh bạch trước khi đặt lịch.
+                            {t('aboutUs.desc2')}
                         </p>
                         <div className="mt-9 flex flex-wrap gap-4">
                             <a
                                 href="#about-contact"
                                 className="rounded-full bg-brand px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-brand/20 transition hover:-translate-y-0.5 hover:bg-brand-deep"
                             >
-                                Liên hệ CareMate
+                                {t('aboutUs.contactBtn')}
                             </a>
                             <a
                                 href={mapUrl}
@@ -68,7 +70,7 @@ const AboutUs = () => {
                                 rel="noreferrer"
                                 className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white px-8 py-4 text-xs font-black uppercase tracking-widest text-[#10233F] shadow-xl shadow-[#10233F]/15 transition hover:-translate-y-0.5 hover:text-brand"
                             >
-                                Mở bản đồ
+                                {t('aboutUs.openMap')}
                                 <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                             </a>
                         </div>
@@ -78,9 +80,9 @@ const AboutUs = () => {
 
             <section className="relative z-20 mx-auto -mt-14 grid max-w-7xl gap-6 px-6 lg:grid-cols-3 lg:px-8">
                 {[
-                    { icon: MapPinIcon, label: 'Trụ sở chính', value: 'FPT University Đà Nẵng, Khu đô thị FPT City, Ngũ Hành Sơn, Đà Nẵng' },
-                    { icon: EnvelopeIcon, label: 'Email hỗ trợ', value: 'support@caremate.com.vn' },
-                    { icon: PhoneIcon, label: 'Hotline 24/7', value: '1900 6789' },
+                    { icon: MapPinIcon, label: t('aboutUs.headquarters'), value: 'FPT University Đà Nẵng, Khu đô thị FPT City, Ngũ Hành Sơn, Đà Nẵng' },
+                    { icon: EnvelopeIcon, label: t('aboutUs.supportEmail'), value: 'support@caremate.com.vn' },
+                    { icon: PhoneIcon, label: t('aboutUs.hotline'), value: '1900 6789' },
                 ].map((item, index) => (
                     <motion.div
                         key={item.label}
@@ -110,8 +112,8 @@ const AboutUs = () => {
                             <MapPinIcon className="h-6 w-6" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-[#10233F]">Vị trí của chúng tôi</h2>
-                            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">FPT University Đà Nẵng</p>
+                            <h2 className="text-2xl font-black text-[#10233F]">{t('aboutUs.locationTitle')}</h2>
+                            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{t('aboutUs.locationSub')}</p>
                         </div>
                     </div>
 
@@ -131,7 +133,7 @@ const AboutUs = () => {
                         rel="noreferrer"
                         className="inline-flex items-center gap-2 rounded-full bg-[#10233F] px-6 py-3 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-[#10233F]/15 transition hover:-translate-y-0.5 hover:bg-brand"
                     >
-                        Xem đường đi trên Google Maps
+                        {t('aboutUs.viewOnMaps')}
                         <ArrowTopRightOnSquareIcon className="h-4 w-4" />
                     </a>
                 </motion.div>
@@ -147,41 +149,41 @@ const AboutUs = () => {
                             <ChatBubbleBottomCenterTextIcon className="h-6 w-6" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-[#10233F]">Gửi ý kiến đóng góp</h2>
-                            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">Chúng tôi luôn lắng nghe bạn</p>
+                            <h2 className="text-2xl font-black text-[#10233F]">{t('aboutUs.feedbackTitle')}</h2>
+                            <p className="text-xs font-bold uppercase tracking-widest text-slate-500">{t('aboutUs.feedbackSub')}</p>
                         </div>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid gap-6 sm:grid-cols-2">
                             <div>
-                                <label className="form-label">Họ và tên</label>
+                                <label className="form-label">{t('aboutUs.fullName')}</label>
                                 <input type="text" className="form-input" placeholder="Nguyễn Văn A" required />
                             </div>
                             <div>
-                                <label className="form-label">Email</label>
+                                <label className="form-label">{t('aboutUs.emailLabel')}</label>
                                 <input type="email" className="form-input" placeholder="a@example.com" required />
                             </div>
                         </div>
                         <div>
-                            <label className="form-label">Chủ đề</label>
+                            <label className="form-label">{t('aboutUs.topicLabel')}</label>
                             <select className="form-input appearance-none bg-slate-50">
-                                <option>Góp ý dịch vụ</option>
-                                <option>Hợp tác chuyên môn</option>
-                                <option>Hỗ trợ kỹ thuật</option>
-                                <option>Khác</option>
+                                <option>{t('aboutUs.topic1')}</option>
+                                <option>{t('aboutUs.topic2')}</option>
+                                <option>{t('aboutUs.topic3')}</option>
+                                <option>{t('aboutUs.topic4')}</option>
                             </select>
                         </div>
                         <div>
-                            <label className="form-label">Nội dung tin nhắn</label>
-                            <textarea className="form-input min-h-[150px] resize-none py-4" placeholder="Nhập nội dung bạn muốn chia sẻ..." required />
+                            <label className="form-label">{t('aboutUs.messageLabel')}</label>
+                            <textarea className="form-input min-h-[150px] resize-none py-4" placeholder={t('aboutUs.messagePlaceholder')} required />
                         </div>
                         <button
                             type="submit"
                             disabled={sending}
                             className="btn-primary w-full rounded-xl py-4 text-[10px] font-black uppercase tracking-widest disabled:cursor-not-allowed disabled:opacity-70"
                         >
-                            {sending ? 'Đang gửi...' : 'Gửi thông điệp ngay'}
+                            {sending ? t('aboutUs.sending') : t('aboutUs.sendBtn')}
                             <SparklesIcon className="h-4 w-4" />
                         </button>
                     </form>
@@ -191,15 +193,15 @@ const AboutUs = () => {
             <section className="mt-32 bg-[linear-gradient(135deg,#f7fafc_0%,#fff2f8_55%,#f3fbf8_100%)] py-20">
                 <div className="mx-auto max-w-7xl px-6 lg:px-8">
                 <div className="mb-12 text-center">
-                    <div className="accent-label mx-auto bg-white shadow-sm">Giá trị cốt lõi</div>
-                    <h2 className="mt-4 text-4xl font-black text-[#10233F]">Triết lý của CareMate</h2>
+                    <div className="accent-label mx-auto bg-white shadow-sm">{t('aboutUs.coreValuesLabel')}</div>
+                    <h2 className="mt-4 text-4xl font-black text-[#10233F]">{t('aboutUs.coreValuesTitle')}</h2>
                 </div>
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                     {[
-                        { title: 'Chuyên nghiệp', desc: 'Đội ngũ điều dưỡng được đào tạo bài bản và có chứng chỉ hành nghề.', icon: ShieldCheckIcon },
-                        { title: 'Tận tâm', desc: 'Lắng nghe và thấu hiểu từng nhu cầu nhỏ nhất của mẹ và bé.', icon: HeartIcon },
-                        { title: 'Minh bạch', desc: 'Giá cả và thông tin y tá luôn rõ ràng, công khai trên hệ thống.', icon: CheckBadgeIcon },
-                        { title: 'Đúng giờ', desc: 'Quản lý lịch làm việc để gia đình dễ chọn khung giờ phù hợp.', icon: ClockIcon },
+                        { title: t('aboutUs.values.professional'), desc: t('aboutUs.values.professionalDesc'), icon: ShieldCheckIcon },
+                        { title: t('aboutUs.values.dedicated'), desc: t('aboutUs.values.dedicatedDesc'), icon: HeartIcon },
+                        { title: t('aboutUs.values.transparent'), desc: t('aboutUs.values.transparentDesc'), icon: CheckBadgeIcon },
+                        { title: t('aboutUs.values.punctual'), desc: t('aboutUs.values.punctualDesc'), icon: ClockIcon },
                     ].map((value) => (
                         <div key={value.title} className="rounded-2xl border border-white bg-white/90 p-7 text-center shadow-xl shadow-slate-200/55 transition duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-200/80">
                             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#10233F] text-white shadow-lg shadow-[#10233F]/10">

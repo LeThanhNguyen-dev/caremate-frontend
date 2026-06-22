@@ -9,14 +9,12 @@
   --color-ink: #10233F;
 }
 
-/* Ép theme cho Y tá */
 .theme-nurse {
   --color-brand: #10B981 !important;
   --color-brand-soft: #ECFDF5 !important;
   --color-brand-deep: #059669 !important;
 }
 
-/* Ép theme cho Admin */
 .theme-admin {
   --color-brand: #3B82F6 !important;
   --color-brand-soft: #EFF6FF !important;
@@ -37,30 +35,43 @@
   }
 
   body {
-    @apply font-sans antialiased;
+    @apply font-sans antialiased bg-slate-50;
     color: var(--color-ink);
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-brand text-white px-6 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] hover:shadow-xl flex items-center justify-center;
+    @apply bg-gradient-to-r from-brand to-pink-500 text-white px-8 py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all duration-500 hover:scale-[1.03] active:scale-[0.98] shadow-lg flex items-center justify-center border border-white/20 relative overflow-hidden;
   }
-  
+
+  .btn-primary::after {
+    content: '';
+    @apply absolute inset-0 bg-white/20 opacity-0 transition-opacity duration-300;
+  }
+
+  .btn-primary:hover::after {
+    @apply opacity-100;
+  }
+
   .btn-secondary {
-    @apply bg-brand-soft text-brand px-6 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all duration-300 hover:bg-brand hover:text-white flex items-center justify-center;
+    @apply bg-white/80 backdrop-blur-md text-brand px-8 py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all duration-500 hover:bg-white hover:shadow-xl flex items-center justify-center border border-white/30;
   }
 
   .btn-outline {
-    @apply border-2 border-brand text-brand px-6 py-3 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all duration-300 hover:bg-brand hover:text-white flex items-center justify-center;
+    @apply border-2 border-white/40 text-brand px-8 py-3.5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all duration-500 hover:bg-brand hover:border-brand hover:text-white flex items-center justify-center;
   }
 
   .luxury-card {
-    @apply bg-white border border-slate-100 rounded-xl p-8 transition-all duration-500 hover:shadow-2xl hover:shadow-slate-200/50;
+    @apply bg-white/70 backdrop-blur-xl border border-white/50 rounded-[2rem] p-8 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl relative overflow-hidden;
+  }
+
+  .glass-panel {
+    @apply bg-white/60 backdrop-blur-2xl border border-white/60 shadow-xl shadow-slate-200/40;
   }
 
   .accent-label {
-    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-soft text-brand text-[9px] font-black uppercase tracking-[0.2em] mb-4;
+    @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-brand text-[9px] font-black uppercase tracking-[0.2em] mb-4 border border-white/30;
   }
 
   .form-label {
@@ -68,18 +79,24 @@
   }
 
   .form-input {
-    @apply w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold outline-none focus:ring-4 focus:ring-brand-soft focus:bg-white transition-all;
+    @apply w-full bg-slate-50/50 backdrop-blur-sm border border-slate-200/50 rounded-2xl py-4 px-6 text-sm font-bold outline-none transition-all duration-300;
     color: var(--color-ink);
+  }
+
+  .form-input:focus {
+    @apply ring-4 border-white/40 bg-white;
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-brand) 15%, transparent);
   }
 }
 
-/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   @apply bg-transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
 }

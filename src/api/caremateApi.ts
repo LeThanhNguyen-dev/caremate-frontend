@@ -42,7 +42,8 @@ import type {
   AiChatCreateResponse,
   AiChatMessageDto,
   AdminAiInsightRequest,
-  AdminAiInsightResponse
+  AdminAiInsightResponse,
+  NurseRatingDto
 } from './frontend-api-contract';
 
 type ApiRecord = Record<string, unknown>;
@@ -158,6 +159,8 @@ export const caremateApi = {
     await axiosInstance.patch(`/api/bookings/${id}/status`, payload);
   },
   cancelBooking: async (id: number, payload: { reason?: string }): Promise<MessageResponse> => (await axiosInstance.post(`/api/bookings/${id}/cancel`, payload)).data,
+
+  getMyNurseRating: async (nurseUserId: number): Promise<NurseRatingDto> => (await axiosInstance.get(`/api/reviews/nurse/${nurseUserId}/rating`)).data,
 
   getMyAvailability: async (): Promise<AvailabilitySlotDto[]> => (await axiosInstance.get('/api/availability/my-slots')).data,
   createAvailability: async (payload: { startTime: string; endTime: string }): Promise<AvailabilitySlotDto> =>
