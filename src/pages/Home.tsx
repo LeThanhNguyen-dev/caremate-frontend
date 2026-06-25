@@ -24,17 +24,10 @@ import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 const Home = () => {
     const { t } = useTranslation();
 
-    const stats = [
-        { value: '1,900+', label: t('home.stats.customers'), sub: t('home.stats.families') },
-        { value: '500+', label: t('home.stats.nurses'), sub: t('home.stats.verified') },
-        { value: '99%', label: t('home.stats.satisfied'), sub: t('home.stats.positiveReviews') },
-        { value: '4.9/5', label: t('home.stats.rating'), sub: t('home.stats.avgStars') },
-    ];
-
     const featuredServices = [
-        { title: t('home.services.postpartum'), price: t('home.services.atHome'), image: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=1200&auto=format&fit=crop' },
-        { title: t('home.services.quickConsult'), price: t('home.services.15min'), image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1200&auto=format&fit=crop' },
-        { title: t('home.services.monitoring'), price: t('home.services.aiCheckin'), image: 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1200&auto=format&fit=crop' },
+        { title: t('home.services.postpartum'), price: t('home.services.atHome'), image: '/assets/images/service-1.jpg' },
+        { title: t('home.services.quickConsult'), price: t('home.services.15min'), image: '/assets/images/service-3.jpg' },
+        { title: t('home.services.monitoring'), price: t('home.services.aiCheckin'), image: '/assets/images/service-2.jpg' },
     ];
 
     const steps = [
@@ -184,7 +177,7 @@ const Home = () => {
                             className="relative overflow-hidden rounded-2xl border-[10px] border-white bg-white shadow-2xl shadow-slate-200"
                         >
                             <img
-                                src="https://images.unsplash.com/photo-1609220136736-443140cffec6?q=80&w=1300&auto=format&fit=crop"
+                                src="/assets/images/hero.jpeg"
                                 alt={t('home.hero.subtitle')}
                                 className="h-[560px] w-full object-cover"
                             />
@@ -224,22 +217,6 @@ const Home = () => {
                             </motion.div>
                         ))}
                     </div>
-                </div>
-
-                <div className="relative mx-auto mt-12 grid max-w-7xl grid-cols-2 gap-4 lg:grid-cols-4">
-                    {stats.map((stat, index) => (
-                        <motion.div
-                            key={stat.label}
-                            initial={{ opacity: 0, y: 18 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.08 }}
-                            className="rounded-2xl border border-slate-100 bg-white/85 p-6 shadow-xl shadow-slate-200/50 backdrop-blur"
-                        >
-                            <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{stat.label}</div>
-                            <div className="mt-2 text-3xl font-black text-[#10233F]">{stat.value}</div>
-                            <div className="mt-1 text-[10px] font-bold uppercase tracking-tight text-slate-400">{stat.sub}</div>
-                        </motion.div>
-                    ))}
                 </div>
             </section>
 
@@ -326,23 +303,27 @@ const Home = () => {
             </section>
 
             <section ref={stepsRef} className="relative px-6 py-28 lg:px-8">
-                <motion.img
-                    style={{ y: stepsBgY }}
-                    src="https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?q=80&w=1400&auto=format&fit=crop"
-                    alt="Mẹ và bé"
-                    className="absolute left-0 top-16 hidden h-[420px] w-[35vw] rounded-r-3xl object-cover opacity-30 lg:block"
-                />
                 <div className="relative mx-auto grid max-w-7xl gap-14 lg:grid-cols-[0.9fr_1fr]">
                     <motion.div
                         initial={{ opacity: 0, x: -24 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true, margin: '-80px' }}
                         transition={{ duration: 0.6 }}
-                        className="pt-24"
+                        className="relative overflow-hidden rounded-3xl shadow-2xl flex flex-col justify-end p-10 min-h-[500px]"
                     >
-                        <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-brand">{t('home.stepsSection.label')}</div>
-                        <h2 className="max-w-sm text-4xl font-black leading-tight tracking-tight text-[#10233F]">{t('home.stepsSection.title')}</h2>
-                        <p className="mt-5 max-w-sm text-sm font-semibold leading-7 text-slate-500">{t('home.stepsSection.desc')}</p>
+                        <motion.img
+                            style={{ y: stepsBgY }}
+                            src="/assets/images/home-steps.jpg"
+                            alt="Quy trình dịch vụ CareMate"
+                            className="absolute left-0 -top-[100px] h-[calc(100%+200px)] w-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#0B1F3A]/95 via-[#0B1F3A]/30 to-transparent pointer-events-none" />
+                        
+                        <div className="relative z-10 pt-32">
+                            <div className="mb-4 text-[10px] font-black uppercase tracking-[0.35em] text-pink-400 drop-shadow-md">{t('home.stepsSection.label')}</div>
+                            <h2 className="max-w-sm text-4xl font-black leading-tight tracking-tight text-white drop-shadow-md">{t('home.stepsSection.title')}</h2>
+                            <p className="mt-5 max-w-sm text-sm font-semibold leading-7 text-white/80 drop-shadow-md">{t('home.stepsSection.desc')}</p>
+                        </div>
                     </motion.div>
                     <div className="space-y-8">
                         {steps.map((item, index) => (
@@ -438,7 +419,7 @@ const Home = () => {
                             className="absolute -inset-8 rounded-full bg-brand/10 blur-3xl"
                         />
                         <div className="relative overflow-hidden rounded-2xl border-[10px] border-white shadow-2xl shadow-slate-200">
-                            <img src="https://images.unsplash.com/photo-1555252333-9f8e92e65df9?q=80&w=1400&auto=format&fit=crop" alt="Expert Nurse" className="h-[560px] w-full object-cover" />
+                            <img src="/assets/images/service-4.jpg" alt="Expert Nurse" className="h-[560px] w-full object-cover" />
                         </div>
                     </motion.div>
                     <motion.div
@@ -502,71 +483,7 @@ const Home = () => {
                 </div>
             </section>
 
-            <section className="bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-6 py-24 lg:px-8">
-                <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-80px' }}
-                    transition={{ duration: 0.6 }}
-                    className="mx-auto max-w-7xl"
-                >
-                    <div className="relative overflow-hidden rounded-2xl bg-[#0B2341] p-10 text-white shadow-2xl shadow-slate-200 md:p-16 lg:p-20">
-                    <motion.div
-                        animate={{ scale: [1, 1.02, 1] }}
-                        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-                        className="absolute inset-0 bg-[radial-gradient(circle_at_52%_18%,rgba(236,72,153,0.18),transparent_28%)]"
-                    />
-                    <div className="relative">
-                    <div className="mx-auto max-w-3xl text-center">
-                        <h2 className="text-4xl font-black leading-tight tracking-tight md:text-5xl">{t('home.testimonialsSection.title')}</h2>
-                        <p className="mx-auto mt-5 max-w-xl text-sm font-semibold leading-7 text-white/55">{t('home.testimonialsSection.desc')}</p>
-                    </div>
-                    <div className="mt-12 grid gap-4 md:grid-cols-3">
-                        {assuranceStats.map((item, i) => (
-                            <motion.div
-                                key={item.label}
-                                initial={{ opacity: 0, y: 24, x: i === 1 ? 0 : (i === 0 ? -16 : 16) }}
-                                whileInView={{ opacity: 1, y: 0, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.5, delay: 0.15 + i * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-                                whileHover={{ scale: 1.04, y: -4, transition: { duration: 0.2 } }}
-                                className="rounded-2xl border border-white/10 bg-white/[0.04] p-6 text-center"
-                            >
-                                <div className="text-3xl font-black">{item.value}</div>
-                                <div className="mt-2 text-[10px] font-black uppercase tracking-widest text-white/35">{item.label}</div>
-                            </motion.div>
-                        ))}
-                    </div>
-                    <h3 className="mt-16 text-center text-4xl font-semibold italic text-white/80">{t('home.testimonialsSection.header')}</h3>
-                    <div className="mt-14 grid gap-5 md:grid-cols-3">
-                        {testimonials.map((item, index) => (
-                            <motion.div
-                                key={item.name}
-                                initial={{ opacity: 0, y: 24, x: index === 1 ? 0 : (index === 0 ? -20 : 20) }}
-                                whileInView={{ opacity: 1, y: 0, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ duration: 0.6, delay: index * 0.1, ease: [0.25, 0.1, 0.25, 1] }}
-                                whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                                className={`rounded-2xl border border-white/10 bg-white/[0.04] p-6 ${index === 1 ? 'md:mt-14' : index === 2 ? 'md:mt-28' : ''}`}
-                            >
-                                <div className="mb-5 flex text-yellow-300">
-                                    {Array.from({ length: 5 }).map((_, star) => <StarSolid key={star} className="h-4 w-4" />)}
-                                </div>
-                                <p className="min-h-32 text-sm font-semibold leading-7 text-white/70">"{item.quote}"</p>
-                                <div className="mt-8 flex items-center gap-4">
-                                    <img src={item.image} alt={item.name} className="h-12 w-12 rounded-2xl object-cover" />
-                                    <div>
-                                        <div className="text-sm font-black">{item.name}</div>
-                                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/35">{item.meta}</div>
-                                    </div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
-                    </div>
-                    </div>
-                </motion.div>
-            </section>
+
 
             <section className="bg-[linear-gradient(120deg,#effff8_0%,#fff_45%,#fff1f8_100%)] px-6 py-24 lg:px-8">
                 <motion.div

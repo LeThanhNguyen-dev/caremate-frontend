@@ -195,6 +195,33 @@ const ServicesPage = () => {
         <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filteredServices.map((service, index) => {
             const included = getIncludedServiceLabels(t, service).slice(0, 2);
+            const lowerName = service.name.toLowerCase();
+            const isComboMassageBathing = lowerName.includes('kết hợp') || lowerName.includes('combined');
+            const isBabyBath = (lowerName.includes('tắm bé') || lowerName.includes('bathing')) && !isComboMassageBathing;
+            const isMassage = lowerName.includes('massage giảm nhức mỏi') || lowerName.includes('pain relief massage');
+            const isFeedingSupport = lowerName.includes('bú kém') || lowerName.includes('poor feeding');
+            const isWoundCare = lowerName.includes('vết mổ') || lowerName.includes('c-section wound');
+            const isNightCare = lowerName.includes('ban đêm') || lowerName.includes('overnight');
+            const isTrial = lowerName.includes('dùng thử') || lowerName.includes('trial');
+            const isBodyRecovery = lowerName.includes('phục hồi vóc dáng') || lowerName.includes('body shaping');
+            const isMassageRecovery = lowerName.includes('massage phục hồi cơ thể') || lowerName.includes('recovery massage');
+            const isEmergencyConsult = lowerName.includes('tư vấn khẩn cấp') || lowerName.includes('emergency');
+            const isHealthMonitor = lowerName.includes('theo dõi phục hồi') || lowerName.includes('recovery monitoring');
+            const isHousework = lowerName.includes('việc nhà') || lowerName.includes('household');
+            const isMilkSupport = lowerName.includes('tuyến sữa') || lowerName.includes('milk duct');
+            const isBlockedDuct = lowerName.includes('hỗ trợ tắc tia sữa') || lowerName.includes('blocked duct relief');
+            const isLochiaMonitor = lowerName.includes('sản dịch') || lowerName.includes('lochia');
+            const isPhysicalDev = lowerName.includes('phát triển thể chất') || lowerName.includes('physical development');
+            const isBreastfeedingConsult = lowerName.includes('cho bú và xử lý') || lowerName.includes('breastfeeding support &');
+            const isVipPackage = lowerName.includes('vip');
+            const isIntensiveCare = lowerName.includes('chuyên sâu') || lowerName.includes('intensive');
+            const isMentalRecovery = lowerName.includes('tinh thần') || lowerName.includes('psychological');
+            const isSleepConsult = lowerName.includes('giấc ngủ') || lowerName.includes('sleep');
+            const isLactationConsult = lowerName.includes('lợi sữa') || lowerName.includes('lactation');
+            const isVideoConsult = lowerName.includes('video') || lowerName.includes('điện thoại') || lowerName.includes('phone');
+            const isNutritionConsult = lowerName.includes('dinh dưỡng') || lowerName.includes('nutrition');
+            const isComprehensiveCare = (lowerName.includes('toàn diện') || lowerName.includes('comprehensive')) && !isVipPackage && !isIntensiveCare && !isMentalRecovery;
+            const hasImage = isBabyBath || isMassage || isFeedingSupport || isWoundCare || isComprehensiveCare || isNightCare || isTrial || isBodyRecovery || isMassageRecovery || isEmergencyConsult || isHealthMonitor || isHousework || isMilkSupport || isBlockedDuct || isLochiaMonitor || isPhysicalDev || isBreastfeedingConsult || isVipPackage || isIntensiveCare || isMentalRecovery || isComboMassageBathing || isSleepConsult || isLactationConsult || isVideoConsult || isNutritionConsult;
 
             return (
               <motion.article
@@ -205,12 +232,97 @@ const ServicesPage = () => {
                 className="group overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.07)] transition hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(236,72,153,0.16)]"
               >
                 <Link to={`/services/${service.id}`} data-tour="service-card" className="block">
-                  <div className="relative h-40 overflow-hidden bg-[linear-gradient(135deg,#fdf2f8,#ffffff_55%,#ecfdf5)]">
-                    <div className="absolute inset-0 p-5">
-                      <div className="flex h-full items-end rounded-xl border border-white/80 bg-white/70 p-4">
-                        <div className="text-2xl font-black leading-tight text-[#10233F]">{service.packageDays ?? 1} {t('services.sessions')}</div>
+                  <div className={`relative h-56 overflow-hidden ${hasImage ? 'bg-slate-900' : 'bg-[linear-gradient(135deg,#fdf2f8,#ffffff_55%,#ecfdf5)]'}`}>
+                    {isBabyBath && (
+                        <img src="/assets/images/tambe.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isMassage && (
+                        <img src="/assets/images/massagesausinh.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isFeedingSupport && (
+                        <img src="/assets/images/hotrobukem.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isWoundCare && (
+                        <img src="/assets/images/chamsocvetmo.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isComprehensiveCare && (
+                        <img src="/assets/images/chamsocbe.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isNightCare && (
+                        <img src="/assets/images/chambebandem.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isTrial && (
+                        <img src="/assets/images/goidungthu.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isBodyRecovery && (
+                        <img src="/assets/images/phuchoivocdang.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isMassageRecovery && (
+                        <img src="/assets/images/massagetrilieu.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isEmergencyConsult && (
+                        <img src="/assets/images/tuvankhancap.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isHealthMonitor && (
+                        <img src="/assets/images/theodoiphuchoi.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isHousework && (
+                        <img src="/assets/images/viecnha.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isMilkSupport && (
+                        <img src="/assets/images/tactiasua.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isBlockedDuct && (
+                        <img src="/assets/images/hotrotactiasua.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isLochiaMonitor && (
+                        <img src="/assets/images/theodoisandich.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isPhysicalDev && (
+                        <img src="/assets/images/theodoiphattrien.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isBreastfeedingConsult && (
+                        <img src="/assets/images/tuvanbu.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isVipPackage && (
+                        <img src="/assets/images/goivip.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isIntensiveCare && (
+                        <img src="/assets/images/goichuyensau.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isMentalRecovery && (
+                        <img src="/assets/images/phuchoitinhthan.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isComboMassageBathing && (
+                        <img src="/assets/images/goikethop.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isSleepConsult && (
+                        <img src="/assets/images/tuvangiacngu.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isLactationConsult && (
+                        <img src="/assets/images/tuvanloisua.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isVideoConsult && (
+                        <img src="/assets/images/tuvanvideo.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    {isNutritionConsult && (
+                        <img src="/assets/images/tuvandinhduong.jpg" alt={service.name} className="absolute inset-0 h-full w-full object-cover opacity-90 transition duration-700 group-hover:scale-105" />
+                    )}
+                    
+                    {!hasImage && (
+                      <div className="absolute inset-0 p-5 pointer-events-none">
+                        <div className="flex h-full items-end rounded-xl border border-white/80 bg-white/70 p-4">
+                          <div className="text-2xl font-black leading-tight text-[#10233F]">{service.packageDays ?? 1} {t('services.sessions')}</div>
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    
+                    {hasImage && (
+                      <div className="absolute bottom-4 right-4 z-10 rounded-xl bg-white/90 px-3 py-1.5 backdrop-blur shadow-sm">
+                        <div className="text-sm font-black text-[#10233F]">{service.packageDays ?? 1} {t('services.sessions')}</div>
+                      </div>
+                    )}
+
                     <div className="absolute left-4 top-4 z-10 max-w-[calc(100%-2rem)] truncate whitespace-nowrap rounded-full bg-brand px-3 py-1.5 text-xs font-black text-white shadow-lg shadow-pink-200">
                       {service.serviceKind === 'package' ? t('services.carePackage') : getCategoryLabel(t, service.category)}
                     </div>
