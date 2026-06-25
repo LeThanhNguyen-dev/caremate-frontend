@@ -188,7 +188,7 @@
     "health": {
       "label": "Tính năng mới cho mẹ sau sinh",
       "title": "Một góc riêng để mẹ <span class=\"text-brand\">check-in sức khỏe mỗi ngày</span>",
-      "desc": "CareMate giúp mẹ ghi lại tình trạng của bản thân và em bé, sau đó AI tóm tắt rủi ro, đưa khuyến nghị và gợi ý dịch vụ hỗ trợ phù hợp."
+      "desc": "CareMate giúp mẹ ghi lại tình trạng của bản thân và em bé, sau đó AI tóm tắt rủi ro, đưa khuyến nghị và gợi ý dịch vụ dựa trên sức khỏe."
     },
     "stepsSection": {
       "label": "Quy trình dịch vụ",
