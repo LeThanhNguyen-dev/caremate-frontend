@@ -16,7 +16,7 @@ import {
     SparklesIcon,
     UserPlusIcon,
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
+
 import HealthCheckInsEntryPage from './HealthCheckInsEntryPage';
 
 
@@ -59,11 +59,7 @@ const Home = () => {
         { value: '500+', label: t('home.assurance.verifiedNurses') },
     ];
 
-    const testimonials = [
-        { name: t('home.testimonials.name1'), meta: t('home.testimonials.meta1'), image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=900&auto=format&fit=crop', quote: t('home.testimonials.quote1') },
-        { name: t('home.testimonials.name2'), meta: t('home.testimonials.meta2'), image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=900&auto=format&fit=crop', quote: t('home.testimonials.quote2') },
-        { name: t('home.testimonials.name3'), meta: t('home.testimonials.meta3'), image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=900&auto=format&fit=crop', quote: t('home.testimonials.quote3') },
-    ];
+
 
     const heroRef = useRef(null);
     const { scrollYProgress: heroProgress } = useScroll({
