@@ -6,12 +6,18 @@ import RenderErrorBoundary from './components/RenderErrorBoundary';
 import './index.css';
 import './i18n/i18n';
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <RenderErrorBoundary>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      {googleClientId ? (
+        <GoogleOAuthProvider clientId={googleClientId}>
+          <App />
+        </GoogleOAuthProvider>
+      ) : (
         <App />
-      </GoogleOAuthProvider>
+      )}
     </RenderErrorBoundary>
   </React.StrictMode>,
 );

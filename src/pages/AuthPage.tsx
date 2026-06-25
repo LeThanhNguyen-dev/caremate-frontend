@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 import {
     ArrowRightIcon, LockClosedIcon, EnvelopeIcon, SparklesIcon,
     UserGroupIcon, ShieldCheckIcon, UserIcon, BriefcaseIcon,
@@ -10,6 +11,7 @@ import { useToast } from '../hooks/useToast';
 import { getErrorMessage } from '../utils/apiError';
 
 const rememberedLoginKey = 'caremateRememberedLogin';
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const BrandPanel = ({ mode }: { mode: 'login' | 'register' }) => (
     <div className="hidden lg:flex flex-col justify-between p-12 lg:p-14 bg-[#111827] text-white relative h-full">
@@ -58,7 +60,7 @@ const BrandPanel = ({ mode }: { mode: 'login' | 'register' }) => (
 );
 
 const AuthPage = () => {
-    const { login, register } = useAuth();
+    const { login, loginExternal, register } = useAuth();
     const { showToast } = useToast();
     const navigate = useNavigate();
     const [mode, setMode] = useState<'login' | 'register'>(window.location.pathname.includes('/register') ? 'register' : 'login');
@@ -74,6 +76,12 @@ const AuthPage = () => {
     });
 
     const [loading, setLoading] = useState(false);
+
+    const redirectAfterLogin = (role: string) => {
+        if (role === 'admin') navigate('/admin/dashboard');
+        else if (role.startsWith('nurse')) navigate('/nurse/overview');
+        else navigate('/');
+    };
 
     useEffect(() => {
         if (mode === 'login') {
@@ -102,11 +110,31 @@ const AuthPage = () => {
                 localStorage.removeItem(rememberedLoginKey);
             }
             showToast(`Chào mừng ${user.username} quay trở lại!`, 'success');
-            if (user.role === 'admin') navigate('/admin/dashboard');
-            else if (user.role.startsWith('nurse')) navigate('/nurse/overview');
-            else navigate('/');
+            redirectAfterLogin(user.role);
         } catch (err) {
             showToast(getErrorMessage(err, 'Email hoặc mật khẩu không chính xác.'), 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleGoogleLogin = async (credentialResponse: CredentialResponse) => {
+        const credential = credentialResponse.credential;
+        if (!credential) {
+            showToast('Không lấy được thông tin đăng nhập Google.', 'error');
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const user = await loginExternal({
+                provider: 'google',
+                idToken: credential,
+            });
+            showToast(`Chào mừng ${user.username} quay trở lại!`, 'success');
+            redirectAfterLogin(user.role);
+        } catch (err) {
+            showToast(getErrorMessage(err, 'Đăng nhập Google thất bại.'), 'error');
         } finally {
             setLoading(false);
         }
@@ -197,6 +225,30 @@ const AuthPage = () => {
                                                 </span>
                                             ) : (<>Đăng nhập ngay<ArrowRightIcon className="h-4 w-4" /></>)}
                                         </button>
+                                        {googleClientId ? (
+                                            <>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="h-px flex-1 bg-slate-200"></div>
+                                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Hoặc</span>
+                                                    <div className="h-px flex-1 bg-slate-200"></div>
+                                                </div>
+                                                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+                                                    <GoogleLogin
+                                                        onSuccess={handleGoogleLogin}
+                                                        onError={() => showToast('Đăng nhập Google thất bại.', 'error')}
+                                                        text="signin_with"
+                                                        shape="pill"
+                                                        theme="outline"
+                                                        width="100%"
+                                                        useOneTap={false}
+                                                    />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700">
+                                                Chưa cấu hình `VITE_GOOGLE_CLIENT_ID`, tạm thời chưa bật được đăng nhập Google.
+                                            </p>
+                                        )}
                                     </form>
                                 </div>
                             </motion.div>
