@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { adminApi } from '../api/adminApi';
 import type { CccdOcrResultDto, DocumentDto, NurseDocumentOcrLogDto, NurseProfileDetailDto } from '../types/nurse';
 import { getErrorMessage } from '../utils/apiError';
@@ -43,6 +43,7 @@ const ocrFields: Array<{ key: keyof CccdOcrResultDto; label: string }> = [
 const AdminNurseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
 
   const [nurse, setNurse] = useState<NurseProfileDetailDto | null>(null);
@@ -56,6 +57,8 @@ const AdminNurseDetail = () => {
   const [ocrLogs, setOcrLogs] = useState<NurseDocumentOcrLogDto[]>([]);
   const [docActionId, setDocActionId] = useState<number | null>(null);
 
+  const backTo = typeof location.state?.backTo === 'string' ? location.state.backTo : '/admin/pending-nurses';
+
   const fetchNurseDetails = useCallback(async () => {
     try {
       setLoading(true);
@@ -65,26 +68,30 @@ const AdminNurseDetail = () => {
       ]);
       setNurse(data);
       setOcrLogs(logs);
-      setOcrResults(Object.fromEntries(
-        logs
-          .filter((log) => log.result)
-          .map((log) => [log.nurseDocumentId, log.result as CccdOcrResultDto])
-      ));
+      setOcrResults(
+        Object.fromEntries(
+          logs.filter((log) => log.result).map((log) => [log.nurseDocumentId, log.result as CccdOcrResultDto]),
+        ),
+      );
     } catch (err) {
       setError(t('adminNurseDetail.loadError'));
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, t]);
 
   useEffect(() => {
-    if (id) void fetchNurseDetails();
+    if (id) {
+      void fetchNurseDetails();
+    }
   }, [id, fetchNurseDetails]);
+
+  const isReadonlyReview = nurse?.verificationSubmissionStatus === 'approved' || nurse?.isVerified === 'verified';
 
   const handleReview = async (isApproved: boolean) => {
     if (!id) return;
-    if (!isApproved && !comment) {
+    if (!isApproved && !comment.trim()) {
       alert(t('adminNurseDetail.rejectReasonAlert'));
       return;
     }
@@ -93,7 +100,7 @@ const AdminNurseDetail = () => {
     try {
       await adminApi.reviewNurse(Number(id), { isApproved, comment });
       alert(isApproved ? t('adminNurseDetail.approvalSuccess') : t('adminNurseDetail.rejectionSuccess'));
-      navigate('/admin/pending-nurses');
+      navigate(backTo);
     } catch (err) {
       setError(t('adminNurseDetail.reviewError'));
       console.error(err);
@@ -122,9 +129,10 @@ const AdminNurseDetail = () => {
   const handleDocumentStatus = async (doc: DocumentDto, status: 'approved' | 'rejected') => {
     if (!id) return;
 
-    const reason = status === 'rejected'
-      ? window.prompt(t('adminNurseDetail.docRejectPrompt'), t('adminNurseDetail.docRejectDefault'))?.trim()
-      : '';
+    const reason =
+      status === 'rejected'
+        ? window.prompt(t('adminNurseDetail.docRejectPrompt'), t('adminNurseDetail.docRejectDefault'))?.trim()
+        : '';
 
     if (status === 'rejected' && !reason) return;
 
@@ -150,8 +158,8 @@ const AdminNurseDetail = () => {
 
   return (
     <div className="admin-detail-container">
-      <button className="back-btn" onClick={() => navigate('/admin/pending-nurses')}>
-        <ChevronLeftIcon /> Quay lại danh sách
+      <button className="back-btn" onClick={() => navigate(backTo)}>
+        <ChevronLeftIcon /> {backTo === '/admin/users' ? 'Quay lại danh sách tài khoản' : 'Quay lại danh sách'}
       </button>
 
       <header className="detail-header">
@@ -195,7 +203,7 @@ const AdminNurseDetail = () => {
                   <div className="doc-details">
                     <span className="doc-type">{doc.type.replace(/_/g, ' ').toUpperCase()}</span>
                     <div className="doc-actions-inline">
-                      <button className="view-btn" onClick={() => setPreviewDoc(doc)}>Xem chi tiết ảnh</button>
+                      <button className="view-btn" onClick={() => setPreviewDoc(doc)}>Xem ảnh</button>
                       {isIdCardDocument(doc.type) && (
                         <button
                           className="ocr-btn"
@@ -205,29 +213,31 @@ const AdminNurseDetail = () => {
                           {ocrLoadingId === doc.id ? 'Đang OCR...' : 'OCR CCCD'}
                         </button>
                       )}
-                      <button
-                        className="doc-approve-btn"
-                        onClick={() => void handleDocumentStatus(doc, 'approved')}
-                        disabled={docActionId === doc.id}
-                      >
-                        Duyệt tài liệu
-                      </button>
-                      <button
-                        className="doc-reject-btn"
-                        onClick={() => void handleDocumentStatus(doc, 'rejected')}
-                        disabled={docActionId === doc.id}
-                      >
-                        Từ chối
-                      </button>
+                      {!isReadonlyReview && (
+                        <>
+                          <button
+                            className="doc-approve-btn"
+                            onClick={() => void handleDocumentStatus(doc, 'approved')}
+                            disabled={docActionId === doc.id}
+                          >
+                            Duyệt tài liệu
+                          </button>
+                          <button
+                            className="doc-reject-btn"
+                            onClick={() => void handleDocumentStatus(doc, 'rejected')}
+                            disabled={docActionId === doc.id}
+                          >
+                            Từ chối
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                   <span className={`doc-status-tag ${doc.status}`}>{doc.status}</span>
                   {ocrLogs.find((log) => log.nurseDocumentId === doc.id) && (
                     <div className="ocr-log-chip">
                       OCR {ocrLogs.find((log) => log.nurseDocumentId === doc.id)?.ocrStatus}
-                      <span>
-                        Lần {ocrLogs.find((log) => log.nurseDocumentId === doc.id)?.attemptCount}
-                      </span>
+                      <span>Lần {ocrLogs.find((log) => log.nurseDocumentId === doc.id)?.attemptCount}</span>
                     </div>
                   )}
                   {ocrResults[doc.id] && (
@@ -258,20 +268,31 @@ const AdminNurseDetail = () => {
           </section>
 
           <section className="detail-section review-card">
-            <h2>Quyết định phê duyệt</h2>
+            <h2>{isReadonlyReview ? 'Trạng thái xác minh' : 'Quyết định phê duyệt'}</h2>
             {nurse.rejectionReason && (
               <div className="bio-box" style={{ marginBottom: '12px' }}>
                 <strong>Lý do từ chối gần nhất:</strong> {nurse.rejectionReason}
               </div>
             )}
-            <div className="review-form">
-              <label>Nhận xét / Lý do (nếu từ chối)</label>
-              <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Nhập nhận xét của bạn về hồ sơ này..." rows={4} />
-              <div className="review-actions">
-                <button className="btn-reject" onClick={() => handleReview(false)} disabled={reviewing}><XIcon /> Từ chối hồ sơ</button>
-                <button className="btn-approve" onClick={() => handleReview(true)} disabled={reviewing}><CheckIcon /> Phê duyệt ngay</button>
+            {isReadonlyReview ? (
+              <div className="bio-box">
+                Hồ sơ này đã được phê duyệt. Bạn vẫn có thể xem lại giấy tờ và kết quả OCR ở phía trên.
               </div>
-            </div>
+            ) : (
+              <div className="review-form">
+                <label>Nhận xét / Lý do (nếu từ chối)</label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Nhập nhận xét của bạn về hồ sơ này..."
+                  rows={4}
+                />
+                <div className="review-actions">
+                  <button className="btn-reject" onClick={() => handleReview(false)} disabled={reviewing}><XIcon /> Từ chối hồ sơ</button>
+                  <button className="btn-approve" onClick={() => handleReview(true)} disabled={reviewing}><CheckIcon /> Phê duyệt ngay</button>
+                </div>
+              </div>
+            )}
           </section>
         </div>
       </div>
