@@ -942,7 +942,9 @@
       "bookedSlotText": "Đã được đặt",
       "customerBookingText": "Lịch hẹn khách",
       "packagePrefix": "Gói",
-      "sessionPrefix": "Buổi"
+      "sessionPrefix": "Buổi",
+      "noEventsText": "Không có lịch",
+      "addSlotText": "Thêm khung giờ"
     },
     "modal": {
       "modalTitle": "Tạo slot rảnh mới",

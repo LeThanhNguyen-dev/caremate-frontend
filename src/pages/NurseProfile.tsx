@@ -246,8 +246,8 @@ const NurseProfile = () => {
             });
             showToast(t('nurseProfile.toast.updateSuccess'), 'success');
             await loadProfile();
-        } catch {
-            showToast(t('nurseProfile.toast.updateFail'), 'error');
+        } catch (err) {
+            showToast(getErrorMessage(err, t('nurseProfile.toast.updateFail')), 'error');
         } finally {
             setSaving(false);
         }

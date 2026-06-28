@@ -942,7 +942,9 @@
       "bookedSlotText": "Booked",
       "customerBookingText": "Customer Appointment",
       "packagePrefix": "Package",
-      "sessionPrefix": "Session"
+      "sessionPrefix": "Session",
+      "noEventsText": "No events",
+      "addSlotText": "Add time slot"
     },
     "modal": {
       "modalTitle": "Create New Available Slot",

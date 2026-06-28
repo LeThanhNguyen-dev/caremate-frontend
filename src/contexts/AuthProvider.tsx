@@ -128,13 +128,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const register = async (data: RegisterDto | RegisterNurseDto, role: string) => {
-        let response: TokenResponse;
         if (role === 'nurse') {
-            response = await authApi.registerNurse(data as RegisterNurseDto);
+            await authApi.registerNurse(data as RegisterNurseDto);
         } else {
-            response = await authApi.registerCustomer(data as RegisterDto);
+            await authApi.registerCustomer(data as RegisterDto);
         }
-        return await handleAuthResponse(response);
     };
 
     const logout = async () => {

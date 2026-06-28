@@ -4,7 +4,7 @@ import type { AuthState, User, LoginDto, RegisterDto, RegisterNurseDto, External
 export interface AuthContextType extends AuthState {
     login: (data: LoginDto) => Promise<User>;
     loginExternal: (data: ExternalLoginDto) => Promise<User>;
-    register: (data: RegisterDto | RegisterNurseDto, role: string) => Promise<User>;
+    register: (data: RegisterDto | RegisterNurseDto, role: string) => Promise<void>;
     logout: () => Promise<void>;
 }
 

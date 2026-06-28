@@ -287,7 +287,8 @@ const NurseSchedulePage = () => {
                 </div>
             </section>
 
-            <section data-tour="nurse-schedule-calendar" className="luxury-card overflow-hidden border-none p-0 shadow-lg">
+            {/* ===== DESKTOP WEEK GRID (lg+) ===== */}
+            <section data-tour="nurse-schedule-calendar" className="hidden lg:block luxury-card overflow-hidden border-none p-0 shadow-lg">
                 <div className="flex flex-col gap-4 border-b border-slate-50 p-5 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex items-center gap-4">
                         <div className="flex gap-1">
@@ -297,7 +298,6 @@ const NurseSchedulePage = () => {
                         <h3 className="text-lg font-black text-slate-900">{t('nurseSchedule.calendar.monthLabel')} {new Intl.DateTimeFormat('vi-VN', { month: 'numeric', year: 'numeric' }).format(anchorDate)}</h3>
                     </div>
                 </div>
-
                 <div className="custom-scrollbar relative max-h-[640px] overflow-auto bg-slate-100/60">
                     <div className="min-w-[860px]">
                         <div className="sticky top-0 z-10 flex bg-white border-b border-slate-200 shadow-sm">
@@ -390,6 +390,99 @@ const NurseSchedulePage = () => {
                         </div>
                     </div>
                 </div>
+            </section>
+
+            {/* ===== MOBILE DAY LIST (<lg) ===== */}
+            <section className="lg:hidden space-y-3">
+                <div className="flex items-center justify-between px-1">
+                    <div className="flex gap-1">
+                        <button onClick={() => setAnchorDate(addDays(anchorDate, -7))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-600 transition-all hover:bg-slate-100"><ChevronLeftIcon className="h-4 w-4" /></button>
+                        <button onClick={() => setAnchorDate(addDays(anchorDate, 7))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-600 transition-all hover:bg-slate-100"><ChevronRightIcon className="h-4 w-4" /></button>
+                    </div>
+                    <h3 className="text-lg font-black text-slate-900">{t('nurseSchedule.calendar.monthLabel')} {new Intl.DateTimeFormat('vi-VN', { month: 'numeric', year: 'numeric' }).format(anchorDate)}</h3>
+                </div>
+                {weekDays.map((day) => {
+                    const events = getEventsForDay(day);
+                    const hasEvents = events.slots.length > 0 || events.bookings.length > 0 || events.packageSessions.length > 0;
+                    const isToday = formatDateValue(day) === formatDateValue(new Date());
+                    return (
+                        <div key={day.toISOString()} className={`luxury-card border-none overflow-hidden shadow-md ${isToday ? 'ring-2 ring-emerald-200' : ''}`}>
+                            <div className={`flex items-center justify-between px-5 py-4 ${isToday ? 'bg-emerald-50' : 'bg-slate-50'}`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`inline-flex h-10 w-10 items-center justify-center rounded-xl text-base font-black ${
+                                        isToday ? 'bg-[#10B981] text-white shadow-lg shadow-emerald-600/20' : 'bg-white text-slate-900 shadow-sm'
+                                    }`}>{day.getDate()}</div>
+                                    <div>
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">{day.toLocaleDateString('vi-VN', { weekday: 'long' })}</div>
+                                        <div className="text-sm font-bold text-slate-600">{day.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}</div>
+                                    </div>
+                                </div>
+                                <button type="button" onClick={() => openSlotModal(day, 8)} className="flex h-8 items-center gap-1 rounded-lg bg-[#10B981] px-3 text-[9px] font-black uppercase tracking-widest text-white shadow-md shadow-emerald-600/15 transition hover:scale-[1.02] active:scale-95">
+                                    <PlusIcon className="h-3 w-3" /> {t('nurseSchedule.hero.btnCreateSlot')}
+                                </button>
+                            </div>
+                            {hasEvents ? (
+                                <div className="divide-y divide-slate-100 px-5 py-3">
+                                    {events.slots.map((slot) => (
+                                        <div key={slot.id} className="flex items-center justify-between py-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`h-2 w-2 rounded-full ${slot.isAvailable ? 'bg-emerald-400' : 'bg-slate-300'}`}></div>
+                                                <div>
+                                                    <div className={`text-xs font-black ${slot.isAvailable ? 'text-emerald-700' : 'text-slate-500'}`}>
+                                                        {slot.isAvailable ? t('nurseSchedule.calendar.freeSlotText') : t('nurseSchedule.calendar.bookedSlotText')}
+                                                    </div>
+                                                    <div className="text-xs font-bold text-slate-400">
+                                                        {new Date(slot.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                        {' - '}
+                                                        {new Date(slot.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {slot.isAvailable && (
+                                                <button type="button" onClick={() => void deleteSlot(slot.id)} className="text-slate-300 hover:text-red-500 transition-colors"><XMarkIcon className="h-4 w-4" /></button>
+                                            )}
+                                        </div>
+                                    ))}
+                                    {events.bookings.map((booking) => (
+                                        <div key={booking.id} className="flex items-center gap-3 py-3">
+                                            <div className="h-2 w-2 rounded-full bg-slate-900"></div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-[10px] font-black uppercase text-[#10B981]">{t('nurseSchedule.calendar.customerBookingText')}</div>
+                                                <div className="text-xs font-black text-slate-900 truncate">#{booking.id} - {booking.serviceName}</div>
+                                                <div className="text-xs font-bold text-slate-400">
+                                                    {new Date(booking.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                    {' - '}
+                                                    {new Date(booking.endTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {events.packageSessions.map((session) => (
+                                        <Link key={session.id} to={`/bookings/${session.bookingId}`} className="flex items-center gap-3 py-3 transition hover:opacity-80">
+                                            <div className={`h-2 w-2 rounded-full ${
+                                                session.status === 'completed' ? 'bg-emerald-400' : session.status === 'checked_in' ? 'bg-pink-400' : 'bg-violet-400'
+                                            }`}></div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="text-[10px] font-black uppercase text-white/70">
+                                                    {t('nurseSchedule.calendar.packagePrefix')} #{session.bookingId} - {t('nurseSchedule.calendar.sessionPrefix')} {session.sessionNumber}/{session.totalSessions}
+                                                </div>
+                                                <div className="text-xs font-black text-slate-900 truncate">{session.title || session.serviceName}</div>
+                                                <div className="text-xs font-bold text-slate-400">
+                                                    {new Date(session.sessionDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="px-5 py-6 text-center">
+                                    <div className="text-xs font-black text-slate-300">{t('nurseSchedule.calendar.noEventsText')}</div>
+                                    <button type="button" onClick={() => openSlotModal(day, 8)} className="mt-2 text-[9px] font-black uppercase tracking-widest text-[#10B981] hover:underline">{t('nurseSchedule.calendar.addSlotText')}</button>
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </section>
 
             {slotModalOpen && (
