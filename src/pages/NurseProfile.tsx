@@ -363,7 +363,7 @@ const NurseProfile = () => {
     const isSubmitted = profile?.verificationSubmissionStatus === 'submitted';
     const isApproved = profile?.verificationSubmissionStatus === 'approved' || profile?.isVerified === 'verified';
     const canChangeDocuments = !isSubmitted && !isApproved;
-    const canSubmit = canChangeDocuments;
+    const canSubmit = hasCertificate && canChangeDocuments;
     const reviews = profile?.reviews ?? [];
     const reviewCategories = useMemo(
         () => Array.from(new Set(reviews.map((review) => review.serviceCategory || review.serviceName).filter(Boolean))),
