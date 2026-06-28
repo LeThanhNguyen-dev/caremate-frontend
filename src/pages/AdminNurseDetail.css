@@ -254,7 +254,8 @@
 }
 
 .doc-approve-btn,
-.doc-reject-btn {
+.doc-reject-btn,
+.doc-delete-btn {
     padding: 0.35rem 0.65rem;
     border-radius: 0.3125rem;
     font-size: 0.68rem;
@@ -276,8 +277,15 @@
     color: #be123c;
 }
 
+.doc-delete-btn {
+    border: 1px solid #fecaca;
+    background: #ffffff;
+    color: #b91c1c;
+}
+
 .doc-approve-btn:disabled,
-.doc-reject-btn:disabled {
+.doc-reject-btn:disabled,
+.doc-delete-btn:disabled {
     cursor: wait;
     opacity: 0.65;
 }

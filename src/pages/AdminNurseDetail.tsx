@@ -153,6 +153,35 @@ const AdminNurseDetail = () => {
     }
   };
 
+  const handleDeleteDocument = async (doc: DocumentDto) => {
+    if (!id) return;
+
+    const confirmed = window.confirm(
+      `Xóa tài liệu ${doc.type.replace(/_/g, ' ').toUpperCase()} khỏi hồ sơ y tá? Ảnh và dữ liệu OCR liên quan sẽ biến mất khỏi hệ thống.`,
+    );
+
+    if (!confirmed) return;
+
+    setDocActionId(doc.id);
+    setError('');
+    try {
+      await adminApi.deleteNurseDocument(Number(id), doc.id);
+      setPreviewDoc((current) => (current?.id === doc.id ? null : current));
+      setOcrResults((current) => {
+        const next = { ...current };
+        delete next[doc.id];
+        return next;
+      });
+      setOcrLogs((current) => current.filter((log) => log.nurseDocumentId !== doc.id));
+      await fetchNurseDetails();
+    } catch (err) {
+      setError(getErrorMessage(err, 'Không thể xóa tài liệu. Vui lòng thử lại.'));
+      console.error(err);
+    } finally {
+      setDocActionId(null);
+    }
+  };
+
   if (loading) return <div className="admin-loading">{t('adminNurseDetail.loading')}</div>;
   if (!nurse) return <div className="admin-error">{t('adminNurseDetail.notFound')}</div>;
 
@@ -231,6 +260,13 @@ const AdminNurseDetail = () => {
                           </button>
                         </>
                       )}
+                      <button
+                        className="doc-delete-btn"
+                        onClick={() => void handleDeleteDocument(doc)}
+                        disabled={docActionId === doc.id}
+                      >
+                        Xóa
+                      </button>
                     </div>
                   </div>
                   <span className={`doc-status-tag ${doc.status}`}>{doc.status}</span>

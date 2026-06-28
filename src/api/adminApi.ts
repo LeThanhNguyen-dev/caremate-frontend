@@ -33,6 +33,10 @@ export const adminApi = {
     rejectNurseDocument: async (nurseUserId: number, documentId: number, data: ReviewNurseDocumentDto): Promise<void> => {
         await axiosInstance.put(`/api/admin/nurses/${nurseUserId}/documents/${documentId}/reject`, data);
     },
+
+    deleteNurseDocument: async (nurseUserId: number, documentId: number): Promise<void> => {
+        await axiosInstance.delete(`/api/admin/nurses/${nurseUserId}/documents/${documentId}`);
+    },
 };
 
 export default adminApi;
