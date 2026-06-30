@@ -98,9 +98,9 @@ const FloatingChatbot = () => {
           </form>
         </section>
       ) : (
-        <button onClick={open} className="flex h-14 items-center gap-3 rounded-full bg-slate-950 px-5 text-sm font-black text-white shadow-2xl shadow-slate-900/25 transition hover:bg-teal-700">
-          <ChatBubbleLeftRightIcon className="h-5 w-5" />
-          {t('common.chatbot.open')}
+        <button onClick={open} className="flex h-14 w-14 items-center justify-center gap-3 rounded-full bg-slate-950 text-sm font-black text-white shadow-2xl shadow-slate-900/25 transition hover:bg-teal-700 sm:w-auto sm:px-5">
+          <ChatBubbleLeftRightIcon className="h-6 w-6 sm:h-5 sm:w-5" />
+          <span className="hidden sm:inline">{t('common.chatbot.open')}</span>
         </button>
       )}
     </div>

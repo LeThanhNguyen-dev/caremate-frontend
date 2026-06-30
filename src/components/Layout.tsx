@@ -86,8 +86,8 @@ const Layout = () => {
             <header
                 className={`fixed left-1/2 -translate-x-1/2 z-[100] transition-all duration-700 w-full ${
                     scrolled 
-                        ? 'top-4 lg:w-[96%] max-w-[1760px] rounded-[2rem] bg-white/70 py-1.5 shadow-2xl shadow-brand/10 backdrop-blur-2xl border border-white/60' 
-                        : 'top-0 bg-white/40 py-3 shadow-none backdrop-blur-md lg:w-full border-b border-transparent'
+                        ? 'top-0 lg:top-4 lg:w-[96%] max-w-[1760px] lg:rounded-[2rem] bg-white/80 py-2 lg:py-1.5 shadow-xl shadow-brand/5 backdrop-blur-xl border-b lg:border border-white/60' 
+                        : 'top-0 bg-white/40 py-3 shadow-none backdrop-blur-md lg:w-full border-b border-white/20 lg:border-transparent'
                 }`}
             >
                 <nav className="mx-auto grid w-full max-w-[1760px] grid-cols-[auto_1fr] items-center gap-4 px-4 sm:px-6 lg:grid-cols-[360px_1fr_360px] lg:px-8 2xl:px-10 h-20">

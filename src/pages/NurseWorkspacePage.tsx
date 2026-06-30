@@ -182,7 +182,7 @@ const NurseWorkspacePage = () => {
             </section>
 
             <section className="grid gap-5 lg:grid-cols-3">
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)]">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] min-w-0">
                     <div className="mb-3 flex items-center justify-between">
                         <div className="text-[9px] font-black uppercase tracking-[0.13em] text-slate-400">{t('nurseWorkspace.statusStats')}</div>
                         <ChartPieIcon className="h-4 w-4 text-[#10B981]" />
@@ -212,7 +212,7 @@ const NurseWorkspacePage = () => {
                     </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)]">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] min-w-0">
                     <div className="mb-3 flex items-center justify-between">
                         <div className="text-[9px] font-black uppercase tracking-[0.13em] text-slate-400">{t('nurseWorkspace.serviceDistTitle')}</div>
                         <ChartPieIcon className="h-4 w-4 text-[#10B981]" />
@@ -247,7 +247,7 @@ const NurseWorkspacePage = () => {
                 </div>
 
                 {rating && (
-                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)]">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] min-w-0">
                         <div className="mb-3 flex items-center justify-between">
                             <div className="text-[9px] font-black uppercase tracking-[0.13em] text-slate-400">{t('nurseWorkspace.ratingTitle')}</div>
                             <div className="flex items-center gap-1 rounded-lg border border-amber-100 bg-amber-50 px-2.5 py-1">
@@ -256,7 +256,7 @@ const NurseWorkspacePage = () => {
                                 <span className="text-[9px] font-bold text-slate-400">({rating.totalReviews})</span>
                             </div>
                         </div>
-                        <div className="h-[170px]">
+                        <div className="relative h-[170px] w-full">
                             <Bar
                                 data={{
                                     labels: ['1', '2', '3', '4', '5'],
@@ -299,14 +299,14 @@ const NurseWorkspacePage = () => {
             </section>
 
             <section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] lg:p-6">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] lg:p-6 min-w-0">
                     <div className="mb-5 flex items-center justify-between">
                         <div>
                             <h3 className="text-lg font-black tracking-tight text-slate-950">{t('nurseWorkspace.monthlyRevenueTitle')}</h3>
                             <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400">{t('nurseWorkspace.monthlyRevenueSubtitle')}</p>
                         </div>
                     </div>
-                    <div className="h-[260px]">
+                    <div className="relative h-[260px] w-full">
                         {monthlyRevenue.length > 0 ? (
                             <Line
                                 data={{
@@ -353,7 +353,7 @@ const NurseWorkspacePage = () => {
                     </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] lg:p-6">
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.045)] lg:p-6 min-w-0">
                     <div className="mb-5 flex items-center justify-between gap-4">
                         <div>
                             <h3 className="text-lg font-black tracking-tight text-slate-950">{t('nurseWorkspace.upcomingBookings')}</h3>

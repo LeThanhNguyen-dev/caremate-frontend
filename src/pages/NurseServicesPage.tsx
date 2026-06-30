@@ -217,7 +217,7 @@ const NurseServicesPage = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <div>
                                 <label className="form-label">{t('nurseServices.form.suggestedPriceLabel')}</label>
                                 <input type="number" className="w-full bg-slate-50 border-none rounded-xl py-4 px-6 text-sm font-bold text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/5 focus:bg-white transition-all" placeholder={t('nurseServices.form.pricePlaceholder')} value={form.price} onChange={(event) => setForm((prev) => ({ ...prev, price: event.target.value }))} required />
@@ -259,7 +259,7 @@ const NurseServicesPage = () => {
                         ) : (
                             myServices.map((service) => (
                                 <div key={service.id} className="group p-6 rounded-xl bg-slate-50/50 hover:bg-white hover:shadow-xl hover:shadow-emerald-600/5 border border-transparent hover:border-emerald-500/10 transition-all duration-300">
-                                    <div className="flex items-start justify-between gap-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                         <div className="flex items-start gap-5">
                                             <div className="h-14 w-14 rounded-xl bg-white flex items-center justify-center text-[#10B981] shadow-sm transition-transform group-hover:scale-110">
                                                 <SparklesIcon className="h-7 w-7" />

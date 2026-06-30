@@ -463,7 +463,7 @@ const NurseSchedulePage = () => {
                                                 session.status === 'completed' ? 'bg-emerald-400' : session.status === 'checked_in' ? 'bg-pink-400' : 'bg-violet-400'
                                             }`}></div>
                                             <div className="flex-1 min-w-0">
-                                                <div className="text-[10px] font-black uppercase text-white/70">
+                                                <div className="text-[10px] font-black uppercase text-slate-400">
                                                     {t('nurseSchedule.calendar.packagePrefix')} #{session.bookingId} - {t('nurseSchedule.calendar.sessionPrefix')} {session.sessionNumber}/{session.totalSessions}
                                                 </div>
                                                 <div className="text-xs font-black text-slate-900 truncate">{session.title || session.serviceName}</div>

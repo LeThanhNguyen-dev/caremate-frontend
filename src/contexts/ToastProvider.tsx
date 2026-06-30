@@ -34,34 +34,21 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
             {children}
 
             {/* Toast Container */}
-            <div
-                style={{
-                    position: 'fixed',
-                    top: '24px',
-                    right: '24px',
-                    zIndex: 9999,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px',
-                    pointerEvents: 'none',
-                    maxWidth: '400px',
-                }}
-            >
+            <div className="fixed left-4 right-4 top-4 z-[9999] flex flex-col gap-2 pointer-events-none sm:left-auto sm:right-6 sm:top-6 sm:max-w-[400px]">
                 <AnimatePresence>
                     {toasts.map((toast) => (
                         <motion.div
                             key={toast.id}
-                            initial={{ opacity: 0, x: 80, scale: 0.95 }}
-                            animate={{ opacity: 1, x: 0, scale: 1 }}
-                            exit={{ opacity: 0, x: 80, scale: 0.95 }}
+                            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                            className={`${colorMap[toast.type]} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 pointer-events-auto`}
-                            style={{ minWidth: '300px' }}
+                            className={`${colorMap[toast.type]} pointer-events-auto flex w-full items-center gap-3 rounded-2xl px-5 py-4 text-white shadow-2xl sm:min-w-[300px] sm:px-6`}
                         >
-                            <div className="h-8 w-8 rounded-xl bg-white/20 flex items-center justify-center text-sm font-black shrink-0">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/20 text-sm font-black">
                                 {icons[toast.type]}
                             </div>
-                            <span className="text-sm font-bold leading-snug">{toast.message}</span>
+                            <span className="text-[13px] font-bold leading-snug sm:text-sm">{toast.message}</span>
                         </motion.div>
                     ))}
                 </AnimatePresence>

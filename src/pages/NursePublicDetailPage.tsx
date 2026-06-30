@@ -410,7 +410,7 @@ const NursePublicDetailPage = () => {
   if (!profile || !service || !nurseCard) return null;
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#fbfaf8_0%,#ffffff_44%,#fff7fb_100%)] pb-40 pt-32 selection:bg-[#EC4899]/10">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#fbfaf8_0%,#ffffff_44%,#fff7fb_100%)] pb-48 pt-32 selection:bg-[#EC4899]/10 sm:pb-40">
       <div className="mx-auto max-w-[1280px] px-5 lg:px-6">
         <button
           onClick={() => navigate(-1)}
@@ -459,9 +459,9 @@ const NursePublicDetailPage = () => {
                     {t('nurseDetail.reviews', { rating: nurseCard.averageRating.toFixed(1) })}
                   </div>
                   {(profile.address || profile.defaultAddress?.fullAddress || profile.district) && (
-                    <div className="flex min-w-0 items-center gap-2 rounded-xl border border-[#F3E8FF] bg-white px-4 py-2">
+                    <div className="flex items-center gap-2 rounded-xl border border-[#F3E8FF] bg-white px-4 py-2">
                       <MapPinIcon className="h-5 w-5 shrink-0 text-[#EC4899]" />
-                      <span className="truncate">
+                      <span className="break-words text-left text-[13px] leading-snug">
                         {profile.address || profile.defaultAddress?.fullAddress || t('nurseDetail.area', { district: profile.district })}
                       </span>
                     </div>
@@ -473,7 +473,7 @@ const NursePublicDetailPage = () => {
               </div>
             </motion.section>
 
-            <section data-tour="booking-schedule" className="luxury-card p-6 sm:p-8">
+            <section data-tour="booking-schedule" className="luxury-card p-6 pb-28 sm:p-8">
               <div className="mb-8 flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-black text-[#10233F] sm:text-[24px]">
@@ -831,10 +831,10 @@ const NursePublicDetailPage = () => {
       </div>
       {isAuthenticated && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/60 bg-white/90 backdrop-blur">
-          <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:py-4 lg:px-6">
-            <div className="min-w-0 text-center sm:text-left">
-              <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#9CA3AF] sm:text-[13px]">{t('nurseDetail.progressLabel')}</div>
-              <div className="mt-0.5 text-[14px] font-bold text-[#10233F] sm:mt-1 sm:text-[16px]">
+          <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-3 px-4 py-3 sm:gap-4 sm:px-5 sm:py-4 lg:px-6">
+            <div className="min-w-0 flex-1 text-left">
+              <div className="truncate text-[10px] font-bold uppercase tracking-[0.1em] text-[#9CA3AF] sm:text-[13px]">{t('nurseDetail.progressLabel')}</div>
+              <div className="mt-0.5 truncate text-[13px] font-bold text-[#10233F] sm:mt-1 sm:text-[16px]">
                 {canSubmit ? t('nurseDetail.readyToContinue') : t('nurseDetail.selectToContinue')}
               </div>
             </div>
@@ -843,7 +843,7 @@ const NursePublicDetailPage = () => {
               data-tour="booking-submit"
               disabled={!canSubmit || booking}
               onClick={() => document.querySelector('form')?.requestSubmit()}
-              className="w-full shrink-0 rounded-xl bg-[#EC4899] px-6 py-3.5 text-[14px] font-black text-white shadow-[0_18px_30px_rgba(236,72,153,0.22)] transition hover:bg-[#db2777] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none sm:w-auto sm:rounded-2xl sm:py-4"
+              className="shrink-0 rounded-xl bg-[#EC4899] px-5 py-3 text-[13px] font-black text-white shadow-[0_18px_30px_rgba(236,72,153,0.22)] transition hover:bg-[#db2777] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none sm:rounded-2xl sm:px-6 sm:py-4 sm:text-[14px]"
             >
               {booking ? t('nurseDetail.processing') : t('nurseDetail.continueBooking')}
             </button>
