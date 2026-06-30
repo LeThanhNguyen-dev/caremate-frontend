@@ -9,6 +9,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { getErrorMessage } from '../utils/apiError';
+import { trackEvent } from '../hooks/useAnalytics';
 
 const rememberedLoginKey = 'caremateRememberedLogin';
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -104,6 +105,7 @@ const AuthPage = () => {
         setLoading(true);
         try {
             const user = await login({ ...loginForm, username: loginForm.email });
+            trackEvent('conversion', 'login', `role:${user.role}`);
             if (rememberPassword) {
                 localStorage.setItem(rememberedLoginKey, JSON.stringify(loginForm));
             } else {
@@ -131,6 +133,7 @@ const AuthPage = () => {
                 provider: 'google',
                 idToken: credential,
             });
+            trackEvent('conversion', 'login', 'provider:google');
             showToast(`Chào mừng ${user.username} quay trở lại!`, 'success');
             redirectAfterLogin(user.role);
         } catch (err) {
@@ -152,6 +155,7 @@ const AuthPage = () => {
                 ? { fullName: registerForm.fullName, username: registerForm.email, email: registerForm.email, phone: registerForm.phone, password: registerForm.password, bio: '', yearsExperience: 0, serviceRadiusKm: 10 }
                 : { fullName: registerForm.fullName, username: registerForm.email, email: registerForm.email, phone: registerForm.phone, password: registerForm.password, role: 'customer' as const };
             await register(payload, registerForm.role);
+            trackEvent('conversion', 'sign_up', `role:${registerForm.role}`);
             showToast('Đăng ký thành công! Hãy đăng nhập.', 'success');
             navigate('/login');
         } catch (err) {

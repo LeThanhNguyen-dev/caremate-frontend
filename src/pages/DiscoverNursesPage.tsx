@@ -14,6 +14,7 @@ import { StarIcon as StarSolidIcon } from '@heroicons/react/24/solid';
 import caremateApi from '../api/caremateApi';
 import type { NurseDiscoveryDto, ServiceDetailDto } from '../api/frontend-api-contract';
 import { useToast } from '../hooks/useToast';
+import { trackEvent } from '../hooks/useAnalytics';
 
 const daNangDistrictsBase = [
     { value: 'all', key: 'all', latitude: 16.0544, longitude: 108.2022 },
@@ -126,6 +127,14 @@ const DiscoverNursesPage = () => {
 
         void load();
     }, [customerAddressLoaded, i18n.language, matchingLocation.district, matchingLocation.latitude, matchingLocation.longitude, serviceId, showToast, sortBy]);
+
+    useEffect(() => {
+        if (!search || search.length < 2) return;
+        const timer = setTimeout(() => {
+            trackEvent('engagement', 'search_nurses', `query:${search}`);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [search]);
 
     const selectedService = useMemo(
         () => services.find((item) => item.id === Number(serviceId)),

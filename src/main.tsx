@@ -3,8 +3,11 @@ import ReactDOM from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import App from './App';
 import RenderErrorBoundary from './components/RenderErrorBoundary';
+import { initGA } from './hooks/useAnalytics';
 import './index.css';
 import './i18n/i18n';
+
+initGA();
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 

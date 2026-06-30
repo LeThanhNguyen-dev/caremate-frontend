@@ -187,7 +187,7 @@
     },
     "health": {
       "label": "New Feature for Postpartum Moms",
-      "title": "A private corner for moms to <span class=\"text-brand\">check-in health daily</span>",
+      "title": "A private corner for moms to <span class=\"text-brand\">schedule care daily</span>",
       "desc": "CareMate helps you record yours and your baby's condition, then AI summarizes risks, gives recommendations, and suggests services based on health insights."
     },
     "stepsSection": {

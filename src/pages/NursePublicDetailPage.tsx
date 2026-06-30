@@ -27,6 +27,7 @@ import type {
 } from '../api/frontend-api-contract';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
+import { trackEvent } from '../hooks/useAnalytics';
 
 const toDateInputValue = (value: Date) => value.toLocaleDateString('en-CA');
 
@@ -127,6 +128,8 @@ const NursePublicDetailPage = () => {
         setService(serviceData);
         setNurseCard(match);
         setReviews(reviewData);
+        trackEvent('engagement', 'view_nurse_profile', `nurseId:${userId}`);
+        trackEvent('engagement', 'view_service', `serviceId:${serviceData.id}`);
 
         if (serviceData.serviceKind === 'package' || serviceData.packageDays) {
           setSelectedDate(toDateInputValue(new Date()));
@@ -358,6 +361,7 @@ const NursePublicDetailPage = () => {
         cancelUrl: `${window.location.origin}/payment/cancel`,
       };
 
+      trackEvent('conversion', 'start_booking', `serviceId:${bookingForm.serviceId}`);
       localStorage.setItem(pendingBookingStorageKey, JSON.stringify(payload));
       const paymentLink = await caremateApi.createPayOSBookingPaymentLink(paymentPayload);
       window.location.href = paymentLink.checkoutUrl;

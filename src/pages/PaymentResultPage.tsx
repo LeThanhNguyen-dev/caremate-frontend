@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import caremateApi from '../api/caremateApi';
 import { useTranslation } from 'react-i18next';
+import { trackEvent } from '../hooks/useAnalytics';
 
 const pendingBookingStorageKey = 'caremate_pending_booking';
 
@@ -69,9 +70,17 @@ const PaymentResultPage = () => {
     void finalizeBooking();
   }, [isCancelRoute, isSuccess, orderCode, t]);
 
+  useEffect(() => {
+    if (isSuccess) {
+      trackEvent('conversion', 'payment_success', `orderCode:${orderCode}`);
+    } else if (isCancelRoute) {
+      trackEvent('conversion', 'payment_cancel', `orderCode:${orderCode}`);
+    }
+  }, [isSuccess, isCancelRoute, orderCode]);
+
   return (
     <div className="min-h-screen bg-slate-50 px-6 py-24">
-      <div className="mx-auto max-w-2xl rounded-xl border border-slate-100 bg-white p-10 text-center shadow-xl shadow-slate-200/30">
+        <div className="mx-auto max-w-2xl rounded-xl border border-slate-100 bg-white p-10 text-center shadow-xl shadow-slate-200/30">
         <div
           className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full text-3xl font-black ${
             isSuccess ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'
