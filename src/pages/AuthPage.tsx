@@ -236,17 +236,18 @@ const AuthPage = () => {
                                                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Hoặc</span>
                                                     <div className="h-px flex-1 bg-slate-200"></div>
                                                 </div>
-                                                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
-                                                    <GoogleLogin
-                                                        onSuccess={handleGoogleLogin}
-                                                        onError={() => showToast('Đăng nhập Google thất bại.', 'error')}
-                                                        text="signin_with"
-                                                        shape="pill"
-                                                        theme="outline"
-                                                        width="100%"
-                                                        useOneTap={false}
-                                                    />
-                                                </div>
+                                                 <div className="overflow-hidden rounded-xl">
+                                                     <GoogleLogin
+                                                         onSuccess={handleGoogleLogin}
+                                                         onError={() => showToast('Đăng nhập Google thất bại.', 'error')}
+                                                         text="continue_with"
+                                                         shape="rectangular"
+                                                         theme="outline"
+                                                         size="large"
+                                                         width="400"
+                                                         useOneTap={false}
+                                                     />
+                                                 </div>
                                             </>
                                         ) : (
                                             <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-700">
